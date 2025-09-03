@@ -153,3 +153,90 @@
 2025-09-03 06:29:25,429 - TestFlowManager - INFO - Shutting down MainWindowController
 2025-09-03 06:29:25,429 - TestFlowManager - DEBUG - Application state saved
 2025-09-03 06:29:25,429 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-03 23:27:38,076 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-03 23:27:38,089 - TestFlowManager - INFO - Application initialized successfully
+2025-09-03 23:27:38,089 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-03 23:27:38,099 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-03 23:27:38,099 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-03 23:27:38,147 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-03 23:27:38,147 - TestFlowManager - DEBUG - Application state loaded
+2025-09-03 23:27:38,147 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-03 23:27:38,147 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-03 23:27:38,147 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-03 23:27:38,147 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-03 23:27:38,611 - TestFlowManager - INFO - Main window shown
+2025-09-03 23:27:41,094 - TestFlowManager - DEBUG - About action triggered
+2025-09-03 23:27:42,489 - TestFlowManager - INFO - MainWindow closing
+2025-09-03 23:27:42,489 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-03 23:27:42,489 - TestFlowManager - DEBUG - Application state saved
+2025-09-03 23:27:42,490 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-03 23:27:42,527 - TestFlowManager - INFO - Application exited
+2025-09-03 23:27:42,527 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-03 23:27:42,528 - TestFlowManager - INFO - Closing all windows
+2025-09-03 23:27:42,528 - TestFlowManager - INFO - MainWindow closing
+2025-09-03 23:27:42,528 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-03 23:27:42,528 - TestFlowManager - DEBUG - Application state saved
+2025-09-03 23:27:42,528 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-03 23:27:42,528 - TestFlowManager - INFO - MainWindow closing
+2025-09-03 23:27:42,528 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-03 23:27:42,528 - TestFlowManager - DEBUG - Application state saved
+2025-09-03 23:27:42,528 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-03 23:40:31,563 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-03 23:40:31,571 - TestFlowManager - INFO - Application initialized successfully
+2025-09-03 23:40:31,571 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-03 23:40:31,580 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-03 23:40:31,581 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-03 23:40:31,626 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-03 23:40:31,626 - TestFlowManager - DEBUG - Application state loaded
+2025-09-03 23:40:31,626 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-03 23:40:31,626 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-03 23:40:31,626 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-03 23:40:31,626 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-03 23:40:32,043 - TestFlowManager - INFO - Main window shown
+2025-09-03 23:40:34,850 - TestFlowManager - DEBUG - About action triggered
+2025-09-03 23:40:34,850 - TestFlowManager - ERROR - Failed to show about dialog: name 'QMessageBox' is not defined
+2025-09-03 23:40:39,453 - TestFlowManager - DEBUG - About action triggered
+2025-09-03 23:40:39,454 - TestFlowManager - ERROR - Failed to show about dialog: name 'QMessageBox' is not defined
+2025-09-03 23:40:40,399 - TestFlowManager - INFO - MainWindow closing
+2025-09-03 23:40:40,399 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-03 23:40:40,399 - TestFlowManager - DEBUG - Application state saved
+2025-09-03 23:40:40,399 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-03 23:40:40,436 - TestFlowManager - INFO - Application exited
+2025-09-03 23:40:40,436 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-03 23:40:40,436 - TestFlowManager - INFO - Closing all windows
+2025-09-03 23:40:40,436 - TestFlowManager - INFO - MainWindow closing
+2025-09-03 23:40:40,436 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-03 23:40:40,436 - TestFlowManager - DEBUG - Application state saved
+2025-09-03 23:40:40,436 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-03 23:40:40,436 - TestFlowManager - INFO - MainWindow closing
+2025-09-03 23:40:40,436 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-03 23:40:40,436 - TestFlowManager - DEBUG - Application state saved
+2025-09-03 23:40:40,436 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-03 23:41:00,622 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-03 23:41:00,643 - TestFlowManager - INFO - Application initialized successfully
+2025-09-03 23:41:00,643 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-03 23:41:00,648 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-03 23:41:00,648 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-03 23:41:00,661 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-03 23:41:00,663 - TestFlowManager - DEBUG - Application state loaded
+2025-09-03 23:41:00,663 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-03 23:41:00,663 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-03 23:41:00,663 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-03 23:41:00,663 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-03 23:41:01,092 - TestFlowManager - INFO - Main window shown
+2025-09-03 23:41:02,932 - TestFlowManager - DEBUG - About action triggered
+2025-09-03 23:41:05,808 - TestFlowManager - INFO - MainWindow closing
+2025-09-03 23:41:05,808 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-03 23:41:05,808 - TestFlowManager - DEBUG - Application state saved
+2025-09-03 23:41:05,808 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-03 23:41:05,855 - TestFlowManager - INFO - Application exited
+2025-09-03 23:41:05,855 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-03 23:41:05,856 - TestFlowManager - INFO - Closing all windows
+2025-09-03 23:41:05,856 - TestFlowManager - INFO - MainWindow closing
+2025-09-03 23:41:05,856 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-03 23:41:05,856 - TestFlowManager - DEBUG - Application state saved
+2025-09-03 23:41:05,856 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-03 23:41:05,856 - TestFlowManager - INFO - MainWindow closing
+2025-09-03 23:41:05,856 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-03 23:41:05,856 - TestFlowManager - DEBUG - Application state saved
+2025-09-03 23:41:05,856 - TestFlowManager - INFO - MainWindowController shut down successfully

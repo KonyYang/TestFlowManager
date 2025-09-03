@@ -4,7 +4,7 @@
 """
 
 from typing import List, Optional
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QMessageBox
 from src.core.logger import logger
 from src.features.main_window.model.main_window_data import MainWindowData
 from src.features.main_window.service.main_window_service import MainWindowService
@@ -125,6 +125,27 @@ class MainWindowController:
             self.service.update_status("创建新文件失败")
             return False
 
+    def handle_about(self) -> None:
+        """处理关于事件
+
+        Returns:
+            None
+        """
+        try:
+            # 从Service获取应用信息
+            app_info = self.service.get_application_info()
+
+            # 显示关于对话框
+            QMessageBox.about(
+                self.view,
+                f"关于 {app_info['name']}",
+                f"""<h2>{app_info['name']}</h2>
+            <p><b>版本:</b> {app_info['version']}</p>
+            <p><b>作者:</b> {app_info['author']}</p>
+            <p>这是一个用于管理测试流程的工具，专注于处理测试申请单、邮件通信和相关文档管理。</p>"""
+            )
+        except Exception as e:
+            logger.error(f"Failed to show about dialog: {e}")
     def get_recent_files(self) -> List[str]:
         """
         获取最近打开的文件列表

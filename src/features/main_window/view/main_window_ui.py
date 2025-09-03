@@ -151,7 +151,8 @@ class MainWindow(QMainWindow):
     def _on_about(self) -> None:
         """处理关于事件"""
         logger.debug("About action triggered")
-        # TODO: 显示关于对话框
+        # 将处理交给Controller
+        self.controller.handle_about()
 
     def _update_status(self) -> None:
         """更新状态栏"""

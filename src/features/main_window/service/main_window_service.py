@@ -85,6 +85,28 @@ class MainWindowService:
             logger.error(f"Failed to get status: {e}")
             return "未知"
 
+    def get_application_info(self) -> dict:
+        """获取应用程序信息
+
+        Returns:
+            包含应用程序信息的字典
+        """
+        try:
+            from src.core.config_manager import config_manager
+
+            return {
+                'name': config_manager.get("app.name", "TestFlowManager"),
+                'version': config_manager.get("app.version", "1.0.0"),
+                'author': config_manager.get("app.author", "Unknown")
+            }
+        except Exception as e:
+            logger.error(f"Failed to get application info: {e}")
+            return {
+                'name': "TestFlowManager",
+                'version': "1.0.0",
+                'author': "Unknown"
+            }
+
     def save_application_state(self) -> bool:
         """
         保存应用程序状态

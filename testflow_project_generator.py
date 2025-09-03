@@ -103,6 +103,25 @@ def create_project_structure(project_name=None, base_path="."):
                         "__init__.py",
                         "main_window_service.py"
                     ]
+                },
+                "ltr_manager": {
+                    "__init__.py": None,
+                    "model": [
+                        "__init__.py",
+                        "ltr_data.py"
+                    ],
+                    "view": [
+                        "__init__.py",
+                        "ltr_view.py"
+                    ],
+                    "controller": [
+                        "__init__.py",
+                        "ltr_controller.py"
+                    ],
+                    "service": [
+                        "__init__.py",
+                        "ltr_service.py"
+                    ]
                 }
             }
         },
@@ -136,21 +155,22 @@ def create_structure(base_path, structure):
         path = os.path.join(base_path, key) if key else base_path
 
         if value is None:
-            # 创建文件
+            # 创建文件（如果不存在）
             if not os.path.exists(path):
                 with open(path, 'w', encoding='utf-8') as f:
                     f.write("")
         elif isinstance(value, list):
-            # 创建目录和其中的文件
+            # 创建目录和其中的文件（如果不存在）
             os.makedirs(path, exist_ok=True)
             for item in value:
                 item_path = os.path.join(path, item)
                 if '.' in item or item == "__init__.py":
-                    # 创建文件
-                    with open(item_path, 'w', encoding='utf-8') as f:
-                        f.write("")
+                    # 创建文件（如果不存在）
+                    if not os.path.exists(item_path):
+                        with open(item_path, 'w', encoding='utf-8') as f:
+                            f.write("")
                 else:
-                    # 创建子目录
+                    # 创建子目录（如果不存在）
                     os.makedirs(item_path, exist_ok=True)
         elif isinstance(value, dict):
             # 递归创建子结构
@@ -161,7 +181,7 @@ def create_structure(base_path, structure):
 def create_core_files(project_root):
     """创建核心文件内容"""
 
-    # 创建 README.md
+    # 创建 README.md（如果不存在）
     readme_content = """# TestFlow Manager
 
 TestFlow Manager 是一个用于管理测试流程的工具，专注于处理测试申请单、邮件通信和相关文档管理。
@@ -184,7 +204,7 @@ TestFlow Manager 是一个用于管理测试流程的工具，专注于处理测
   - `common/`: 公共组件
     - `widgets/`: 自定义控件
     - `services/`: 公共服务
-    - `exceptions/`: 自定义异常
+    - `exceptions/`: 自自定义异常
   - `utils/`: 工具类
   - `features/`: 功能模块
 - `tests/`: 测试代码
@@ -193,21 +213,23 @@ TestFlow Manager 是一个用于管理测试流程的工具，专注于处理测
 """
 
     readme_path = os.path.join(project_root, "README.md")
-    # 总是写入 README.md 内容，不管文件是否已存在
-    with open(readme_path, 'w', encoding='utf-8') as f:
-        f.write(readme_content)
+    # 只有当 README.md 文件不存在时才创建
+    if not os.path.exists(readme_path):
+        with open(readme_path, 'w', encoding='utf-8') as f:
+            f.write(readme_content)
 
-    # 创建 requirements.txt
+    # 创建 requirements.txt（如果不存在）
     requirements_content = """PyQt5>=5.15.0
 requests>=2.25.0
 """
 
     requirements_path = os.path.join(project_root, "requirements.txt")
-    # 总是写入 requirements.txt 内容，不管文件是否已存在
-    with open(requirements_path, 'w', encoding='utf-8') as f:
-        f.write(requirements_content)
+    # 只有当 requirements.txt 文件不存在时才创建
+    if not os.path.exists(requirements_path):
+        with open(requirements_path, 'w', encoding='utf-8') as f:
+            f.write(requirements_content)
 
-    # 创建 setup.py
+    # 创建 setup.py（如果不存在）
     setup_content = """from setuptools import setup, find_packages
 
 setup(
@@ -240,22 +262,22 @@ setup(
 """
 
     setup_path = os.path.join(project_root, "setup.py")
-    # 总是写入 setup.py 内容，不管文件是否已存在
-    with open(setup_path, 'w', encoding='utf-8') as f:
-        f.write(setup_content)
+    # 只有当 setup.py 文件不存在时才创建
+    if not os.path.exists(setup_path):
+        with open(setup_path, 'w', encoding='utf-8') as f:
+            f.write(setup_content)
 
-    # 创建 __init__.py 文件
+    # 创建 __init__.py 文件（如果不存在）
     init_paths = [
         os.path.join(project_root, "__init__.py"),
         os.path.join(project_root, "src", "__init__.py")
     ]
 
     for init_path in init_paths:
-        # 只有当 __init__.py 文件不存在时才创建（避免覆盖可能存在的内容）
+        # 只有当 __init__.py 文件不存在时才创建
         if not os.path.exists(init_path):
             with open(init_path, 'w', encoding='utf-8') as f:
                 f.write("")
-
 
 
 def print_project_structure(root_path, prefix="", is_last=True):
