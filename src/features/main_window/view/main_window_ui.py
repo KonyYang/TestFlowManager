@@ -73,6 +73,12 @@ class MainWindow(QMainWindow):
 
         file_menu.addSeparator()
 
+        # 添加查看LTR菜单项
+        view_ltr_action = QAction("查看LTR", self)
+        view_ltr_action.triggered.connect(self._on_view_ltr)
+        file_menu.addAction(view_ltr_action)
+
+
         exit_action = QAction("退出", self)
         exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self._on_exit)
@@ -110,6 +116,10 @@ class MainWindow(QMainWindow):
         save_button.clicked.connect(self._on_save_file)
         toolbar.addWidget(save_button)
 
+        view_ltr_button = QPushButton("查看LTR")
+        view_ltr_button.clicked.connect(self._on_view_ltr)
+        toolbar.addWidget(view_ltr_button)
+
     def _setup_status_bar(self) -> None:
         """设置状态栏"""
         self.status_bar = QStatusBar()
@@ -118,6 +128,13 @@ class MainWindow(QMainWindow):
         # 状态标签
         self.status_label = QLabel("就绪")
         self.status_bar.addWidget(self.status_label)
+
+
+    def _on_view_ltr(self) -> None:
+        """处理查看LTR事件"""
+        logger.debug("View LTR action triggered")
+        if self.controller.handle_view_ltr():
+            self._update_status()
 
     def _on_new_file(self) -> None:
         """处理新建文件事件"""

@@ -240,3 +240,970 @@
 2025-09-03 23:41:05,856 - TestFlowManager - INFO - Shutting down MainWindowController
 2025-09-03 23:41:05,856 - TestFlowManager - DEBUG - Application state saved
 2025-09-03 23:41:05,856 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:03:15,915 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 07:03:15,955 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 07:03:15,955 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 07:03:15,975 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 07:03:15,975 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 07:03:15,975 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:03:16,049 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 07:03:16,049 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 07:03:16,049 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 07:03:16,050 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 07:03:16,050 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 07:03:16,050 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 07:03:16,801 - TestFlowManager - INFO - Main window shown
+2025-09-04 07:03:24,068 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 07:03:24,068 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 07:03:24,068 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 07:03:24,340 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:03:24,340 - TestFlowManager - INFO - LTR file opened successfully: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:03:24,340 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:03:24,340 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:03:24,341 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:03:45,890 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 07:03:45,890 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 07:03:45,890 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 07:03:45,934 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:03:45,934 - TestFlowManager - INFO - LTR file opened successfully: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:03:45,934 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:03:45,934 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:03:45,935 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:03:51,577 - TestFlowManager - DEBUG - Open file action triggered
+2025-09-04 07:03:51,577 - TestFlowManager - DEBUG - Handling open file request: example.txt
+2025-09-04 07:03:51,577 - TestFlowManager - DEBUG - Recent file added: example.txt
+2025-09-04 07:03:51,577 - TestFlowManager - DEBUG - Added recent file: example.txt
+2025-09-04 07:03:51,577 - TestFlowManager - DEBUG - Status updated: 已打开文件: example.txt
+2025-09-04 07:03:51,577 - TestFlowManager - DEBUG - Updated status: 已打开文件: example.txt
+2025-09-04 07:03:51,577 - TestFlowManager - INFO - File opened successfully: example.txt
+2025-09-04 07:03:53,886 - TestFlowManager - DEBUG - Open file action triggered
+2025-09-04 07:03:53,886 - TestFlowManager - DEBUG - Handling open file request: example.txt
+2025-09-04 07:03:53,887 - TestFlowManager - DEBUG - Recent file added: example.txt
+2025-09-04 07:03:53,887 - TestFlowManager - DEBUG - Added recent file: example.txt
+2025-09-04 07:03:53,887 - TestFlowManager - DEBUG - Status updated: 已打开文件: example.txt
+2025-09-04 07:03:53,887 - TestFlowManager - DEBUG - Updated status: 已打开文件: example.txt
+2025-09-04 07:03:53,887 - TestFlowManager - INFO - File opened successfully: example.txt
+2025-09-04 07:03:58,102 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:03:58,102 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:03:58,102 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:03:58,102 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:03:58,152 - TestFlowManager - INFO - Application exited
+2025-09-04 07:03:58,152 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 07:03:58,152 - TestFlowManager - INFO - Closing all windows
+2025-09-04 07:03:58,152 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:03:58,152 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:03:58,153 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:03:58,153 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:03:58,153 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:03:58,153 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:03:58,153 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:03:58,153 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:07:45,063 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 07:07:45,073 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 07:07:45,073 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 07:07:45,077 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 07:07:45,077 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 07:07:45,077 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:07:45,119 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 07:07:45,119 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 07:07:45,119 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 07:07:45,119 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 07:07:45,119 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 07:07:45,119 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 07:07:45,511 - TestFlowManager - INFO - Main window shown
+2025-09-04 07:07:48,625 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 07:07:48,625 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 07:07:48,625 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 07:07:48,757 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:07:48,757 - TestFlowManager - INFO - LTR file opened successfully: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:07:48,757 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:07:48,757 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:07:48,757 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:07:55,573 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:07:55,573 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:07:55,573 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:07:55,573 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:07:55,612 - TestFlowManager - INFO - Application exited
+2025-09-04 07:07:55,612 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 07:07:55,612 - TestFlowManager - INFO - Closing all windows
+2025-09-04 07:07:55,612 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:07:55,612 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:07:55,612 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:07:55,612 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:07:55,612 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:07:55,613 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:07:55,613 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:07:55,613 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:09:59,524 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 07:09:59,534 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 07:09:59,534 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 07:09:59,545 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 07:09:59,545 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 07:09:59,545 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:09:59,593 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 07:09:59,594 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 07:09:59,594 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 07:09:59,594 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 07:09:59,594 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 07:09:59,594 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 07:10:00,185 - TestFlowManager - INFO - Main window shown
+2025-09-04 07:10:02,516 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 07:10:02,516 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 07:10:02,516 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 07:10:02,652 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:10:02,652 - TestFlowManager - INFO - LTR file opened successfully: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:10:02,652 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:10:02,652 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:10:02,652 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:10:07,866 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:10:07,866 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:10:07,866 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:10:07,866 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:10:07,903 - TestFlowManager - INFO - Application exited
+2025-09-04 07:10:07,904 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 07:10:07,904 - TestFlowManager - INFO - Closing all windows
+2025-09-04 07:10:07,904 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:10:07,905 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:10:07,905 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:10:07,905 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:10:07,905 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:10:07,905 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:10:07,905 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:10:07,905 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:30:11,126 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 07:30:11,135 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 07:30:11,135 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 07:30:11,145 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 07:30:11,145 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 07:30:11,145 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:30:11,187 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 07:30:11,187 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 07:30:11,187 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 07:30:11,187 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 07:30:11,187 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 07:30:11,187 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 07:30:11,598 - TestFlowManager - INFO - Main window shown
+2025-09-04 07:30:15,761 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 07:30:15,761 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 07:30:15,761 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 07:30:15,905 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:30:15,905 - TestFlowManager - INFO - LTR file opened successfully: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:30:15,905 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:30:15,905 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:30:15,905 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:39:11,504 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 07:39:11,517 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 07:39:11,517 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 07:39:11,526 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 07:39:11,526 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 07:39:11,526 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:39:11,573 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 07:39:11,573 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 07:39:11,573 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 07:39:11,573 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 07:39:11,573 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 07:39:11,573 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 07:39:11,969 - TestFlowManager - INFO - Main window shown
+2025-09-04 07:39:14,344 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 07:39:14,344 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 07:39:14,344 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 07:39:14,602 - TestFlowManager - INFO - Successfully opened Excel file: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 07:39:14,602 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:39:14,602 - TestFlowManager - INFO - LTR file opened successfully: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:39:14,602 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:39:14,602 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:39:14,602 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:39:19,495 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:39:19,495 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:39:19,495 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:39:19,495 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:39:19,543 - TestFlowManager - INFO - Application exited
+2025-09-04 07:39:19,543 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 07:39:19,544 - TestFlowManager - INFO - Closing all windows
+2025-09-04 07:39:19,544 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:39:19,544 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:39:19,544 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:39:19,544 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:39:19,544 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:39:19,544 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:39:19,544 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:39:19,545 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:49:32,526 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 07:49:32,539 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 07:49:32,539 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 07:49:32,547 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 07:49:32,547 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 07:49:32,548 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:49:32,590 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 07:49:32,590 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 07:49:32,590 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 07:49:32,590 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 07:49:32,590 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 07:49:32,590 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 07:49:33,111 - TestFlowManager - INFO - Main window shown
+2025-09-04 07:49:35,584 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 07:49:35,584 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 07:49:35,584 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 07:49:35,585 - TestFlowManager - ERROR - openpyxl library is not installed. Please install it with: pip install openpyxl
+2025-09-04 07:49:35,585 - TestFlowManager - ERROR - Failed to open LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:49:35,585 - TestFlowManager - ERROR - Failed to open LTR file: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:49:35,585 - TestFlowManager - DEBUG - Status updated: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:49:35,585 - TestFlowManager - DEBUG - Updated status: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:49:35,585 - TestFlowManager - ERROR - Failed to open LTR file from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:49:56,403 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:49:56,403 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:49:56,403 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:49:56,403 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:49:56,450 - TestFlowManager - INFO - Application exited
+2025-09-04 07:49:56,450 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 07:49:56,451 - TestFlowManager - INFO - Closing all windows
+2025-09-04 07:49:56,451 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:49:56,451 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:49:56,451 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:49:56,451 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:49:56,451 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:49:56,451 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:49:56,451 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:49:56,451 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:51:57,597 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 07:51:57,606 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 07:51:57,606 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 07:51:57,612 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 07:51:57,612 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 07:51:57,612 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:51:57,627 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 07:51:57,627 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 07:51:57,627 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 07:51:57,627 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 07:51:57,627 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 07:51:57,627 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 07:51:58,277 - TestFlowManager - INFO - Main window shown
+2025-09-04 07:52:08,489 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:52:08,489 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:52:08,489 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:52:08,489 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:52:08,520 - TestFlowManager - INFO - Application exited
+2025-09-04 07:52:08,520 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 07:52:08,520 - TestFlowManager - INFO - Closing all windows
+2025-09-04 07:52:08,520 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:52:08,520 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:52:08,520 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:52:08,520 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:52:08,521 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:52:08,521 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:52:08,521 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:52:08,521 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:52:25,592 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 07:52:25,601 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 07:52:25,601 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 07:52:25,606 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 07:52:25,606 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 07:52:25,606 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:52:25,620 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 07:52:25,620 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 07:52:25,620 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 07:52:25,620 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 07:52:25,620 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 07:52:25,620 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 07:52:26,025 - TestFlowManager - INFO - Main window shown
+2025-09-04 07:52:30,095 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 07:52:30,096 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 07:52:30,096 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 07:52:30,211 - TestFlowManager - ERROR - Failed to open workbook 'D:\Source\Office Auto\TestDocument\LTR_number.xls': load_workbook() got an unexpected keyword argument 'password'
+2025-09-04 07:52:30,211 - TestFlowManager - ERROR - Failed to open LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:52:30,211 - TestFlowManager - ERROR - Failed to open LTR file: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:52:30,211 - TestFlowManager - DEBUG - Status updated: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:52:30,211 - TestFlowManager - DEBUG - Updated status: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:52:30,211 - TestFlowManager - ERROR - Failed to open LTR file from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:52:42,275 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:52:42,275 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:52:42,275 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:52:42,275 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:52:42,317 - TestFlowManager - INFO - Application exited
+2025-09-04 07:52:42,317 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 07:52:42,318 - TestFlowManager - INFO - Closing all windows
+2025-09-04 07:52:42,318 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:52:42,318 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:52:42,318 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:52:42,318 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:52:42,318 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:52:42,318 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:52:42,318 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:52:42,318 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:54:11,375 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 07:54:11,386 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 07:54:11,386 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 07:54:11,394 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 07:54:11,394 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 07:54:11,394 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:54:11,409 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 07:54:11,409 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 07:54:11,409 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 07:54:11,409 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 07:54:11,409 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 07:54:11,409 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 07:54:11,800 - TestFlowManager - INFO - Main window shown
+2025-09-04 07:54:14,836 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 07:54:14,836 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 07:54:14,836 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 07:54:14,959 - TestFlowManager - ERROR - Failed to open workbook 'D:\Source\Office Auto\TestDocument\LTR_number.xls': openpyxl does not support the old .xls file format, please use xlrd to read this file, or convert it to the more recent .xlsx file format.
+2025-09-04 07:54:14,959 - TestFlowManager - ERROR - Failed to open LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:54:14,960 - TestFlowManager - ERROR - Failed to open LTR file: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:54:14,960 - TestFlowManager - DEBUG - Status updated: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:54:14,960 - TestFlowManager - DEBUG - Updated status: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:54:14,960 - TestFlowManager - ERROR - Failed to open LTR file from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 07:54:18,159 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:54:18,159 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:54:18,159 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:54:18,159 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:54:18,194 - TestFlowManager - INFO - Application exited
+2025-09-04 07:54:18,194 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 07:54:18,194 - TestFlowManager - INFO - Closing all windows
+2025-09-04 07:54:18,194 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:54:18,194 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:54:18,194 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:54:18,194 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 07:54:18,194 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 07:54:18,194 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 07:54:18,194 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 07:54:18,194 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 20:48:36,157 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 20:48:36,201 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 20:48:36,201 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 20:48:36,219 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 20:48:36,220 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 20:48:36,220 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 20:48:36,298 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 20:48:36,299 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 20:48:36,299 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 20:48:36,299 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 20:48:36,299 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 20:48:36,299 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 20:48:36,880 - TestFlowManager - INFO - Main window shown
+2025-09-04 20:48:41,138 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 20:48:41,138 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 20:48:41,138 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 20:48:41,138 - TestFlowManager - ERROR - Failed to open workbook 'D:\Source\Office Auto\TestDocument\LTR_number.xls': name 'get_shared_excel_app' is not defined
+2025-09-04 20:48:41,138 - TestFlowManager - ERROR - Failed to open LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 20:48:41,139 - TestFlowManager - ERROR - Failed to open LTR file: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 20:48:41,139 - TestFlowManager - DEBUG - Status updated: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 20:48:41,139 - TestFlowManager - DEBUG - Updated status: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 20:48:41,139 - TestFlowManager - ERROR - Failed to open LTR file from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 20:48:47,200 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 20:48:47,200 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 20:48:47,200 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 20:48:47,200 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 20:48:47,227 - TestFlowManager - INFO - Application exited
+2025-09-04 20:48:47,227 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 20:48:47,227 - TestFlowManager - INFO - Closing all windows
+2025-09-04 20:48:47,227 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 20:48:47,227 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 20:48:47,227 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 20:48:47,227 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 20:48:47,227 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 20:48:47,227 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 20:48:47,227 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 20:48:47,227 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 21:47:12,140 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 21:47:12,150 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 21:47:12,150 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 21:47:12,160 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 21:47:12,160 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 21:47:12,160 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:47:12,207 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 21:47:12,207 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 21:47:12,207 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 21:47:12,207 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 21:47:12,207 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 21:47:12,207 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 21:47:12,600 - TestFlowManager - INFO - Main window shown
+2025-09-04 21:47:14,973 - TestFlowManager - DEBUG - Open file action triggered
+2025-09-04 21:47:14,973 - TestFlowManager - DEBUG - Handling open file request: example.txt
+2025-09-04 21:47:14,973 - TestFlowManager - DEBUG - Recent file added: example.txt
+2025-09-04 21:47:14,973 - TestFlowManager - DEBUG - Added recent file: example.txt
+2025-09-04 21:47:14,973 - TestFlowManager - DEBUG - Status updated: 已打开文件: example.txt
+2025-09-04 21:47:14,973 - TestFlowManager - DEBUG - Updated status: 已打开文件: example.txt
+2025-09-04 21:47:14,973 - TestFlowManager - INFO - File opened successfully: example.txt
+2025-09-04 21:47:18,802 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 21:47:18,803 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 21:47:18,803 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 21:47:18,805 - TestFlowManager - ERROR - Failed to initialize Excel application: No module named 'pythoncom'
+2025-09-04 21:47:18,806 - TestFlowManager - ERROR - Failed to get Excel application instance
+2025-09-04 21:47:18,806 - TestFlowManager - ERROR - Failed to open LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:47:18,806 - TestFlowManager - ERROR - Failed to open LTR file: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:47:18,806 - TestFlowManager - DEBUG - Status updated: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:47:18,806 - TestFlowManager - DEBUG - Updated status: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:47:18,806 - TestFlowManager - ERROR - Failed to open LTR file from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:47:38,330 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 21:47:38,330 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 21:47:38,331 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 21:47:38,331 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 21:47:38,375 - TestFlowManager - INFO - Application exited
+2025-09-04 21:47:38,375 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 21:47:38,376 - TestFlowManager - INFO - Closing all windows
+2025-09-04 21:47:38,376 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 21:47:38,376 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 21:47:38,376 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 21:47:38,376 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 21:47:38,377 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 21:47:38,377 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 21:47:38,377 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 21:47:38,377 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 21:49:21,806 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 21:49:21,815 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 21:49:21,815 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 21:49:21,821 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 21:49:21,821 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 21:49:21,821 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:49:21,835 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 21:49:21,835 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 21:49:21,835 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 21:49:21,835 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 21:49:21,835 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 21:49:21,835 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 21:49:22,272 - TestFlowManager - INFO - Main window shown
+2025-09-04 21:49:24,230 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 21:49:24,230 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 21:49:24,231 - TestFlowManager - DEBUG - Handling view LTR file request
+2025-09-04 21:49:25,611 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-04 21:49:25,612 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-04 21:49:26,875 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 21:49:26,875 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:49:26,875 - TestFlowManager - INFO - LTR file opened successfully: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:49:26,875 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:49:26,875 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:49:26,875 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 21:49:39,111 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 21:49:39,111 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 21:49:39,111 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 21:49:39,111 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 21:49:39,144 - TestFlowManager - INFO - Application exited
+2025-09-04 21:49:39,144 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 21:49:39,144 - TestFlowManager - INFO - Closing all windows
+2025-09-04 21:49:39,144 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 21:49:39,144 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 21:49:39,144 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 21:49:39,144 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 21:49:39,144 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 21:49:39,144 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 21:49:39,144 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 21:49:39,144 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 22:11:49,630 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 22:11:49,639 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 22:11:49,639 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 22:11:49,647 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 22:11:49,647 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 22:11:49,648 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:11:49,693 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 22:11:49,693 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 22:11:49,693 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 22:11:49,693 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 22:11:49,693 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 22:11:49,693 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 22:11:50,091 - TestFlowManager - INFO - Main window shown
+2025-09-04 22:11:53,092 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 22:11:53,092 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 22:11:53,092 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-04 22:11:53,745 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-04 22:11:53,745 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-04 22:11:54,665 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:11:54,665 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:11:54,665 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-09-04 22:11:54,691 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:11:54,871 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-04 22:11:54,873 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 22:11:54,903 - TestFlowManager - DEBUG - Workbook closed successfully (save_changes=False)
+2025-09-04 22:11:54,903 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 22:11:54,914 - TestFlowManager - DEBUG - Excel instance count increased to 3
+2025-09-04 22:11:55,411 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:11:55,440 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-04 22:11:55,440 - TestFlowManager - DEBUG - Excel instance count increased to 4
+2025-09-04 22:11:55,461 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:11:55,564 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-04 22:11:55,565 - TestFlowManager - DEBUG - Excel instance count increased to 5
+2025-09-04 22:11:55,590 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:11:55,621 - TestFlowManager - DEBUG - Last valid row set to: 17
+2025-09-04 22:11:55,621 - TestFlowManager - DEBUG - Found last valid row: 17
+2025-09-04 22:11:55,622 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-04 22:11:55,622 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:11:55,622 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:11:55,622 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:12:05,073 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 22:12:05,074 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 22:12:05,074 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 22:12:05,074 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 22:12:05,115 - TestFlowManager - INFO - Application exited
+2025-09-04 22:12:05,115 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 22:12:05,116 - TestFlowManager - INFO - Closing all windows
+2025-09-04 22:12:05,116 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 22:12:05,116 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 22:12:05,116 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 22:12:05,116 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 22:12:05,116 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 22:12:05,116 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 22:12:05,116 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 22:12:05,116 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 22:13:41,261 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 22:13:41,272 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 22:13:41,272 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 22:13:41,277 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 22:13:41,277 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 22:13:41,277 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:13:41,326 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 22:13:41,326 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 22:13:41,326 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 22:13:41,326 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 22:13:41,326 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 22:13:41,326 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 22:13:41,723 - TestFlowManager - INFO - Main window shown
+2025-09-04 22:13:45,496 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 22:13:45,496 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 22:13:45,496 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-04 22:13:46,069 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-04 22:13:46,069 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-04 22:13:47,007 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:13:47,007 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:13:47,012 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-09-04 22:13:47,262 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:13:47,408 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-04 22:13:47,409 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 22:13:47,442 - TestFlowManager - DEBUG - Workbook closed successfully (save_changes=False)
+2025-09-04 22:13:47,442 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 22:13:47,447 - TestFlowManager - DEBUG - Excel instance count increased to 3
+2025-09-04 22:13:47,796 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:13:47,884 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-04 22:13:47,885 - TestFlowManager - DEBUG - Excel instance count increased to 4
+2025-09-04 22:13:48,058 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:13:48,346 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-04 22:13:48,358 - TestFlowManager - DEBUG - Excel instance count increased to 5
+2025-09-04 22:13:48,383 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:13:48,424 - TestFlowManager - DEBUG - Last valid row set to: 17
+2025-09-04 22:13:48,424 - TestFlowManager - DEBUG - Found last valid row: 17
+2025-09-04 22:13:48,424 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-04 22:13:48,425 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:13:48,425 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:13:48,425 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:14:00,343 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 22:14:00,343 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 22:14:00,343 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 22:14:00,343 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 22:14:00,394 - TestFlowManager - INFO - Application exited
+2025-09-04 22:14:00,395 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 22:14:00,395 - TestFlowManager - INFO - Closing all windows
+2025-09-04 22:14:00,395 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 22:14:00,395 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 22:14:00,396 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 22:14:00,396 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 22:14:00,396 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 22:14:00,396 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 22:14:00,396 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 22:14:00,396 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 22:56:14,147 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 22:56:14,156 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 22:56:14,156 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 22:56:14,167 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 22:56:14,167 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 22:56:14,167 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:56:14,221 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 22:56:14,221 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 22:56:14,221 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 22:56:14,221 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 22:56:14,221 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 22:56:14,221 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 22:56:14,634 - TestFlowManager - INFO - Main window shown
+2025-09-04 22:56:16,740 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 22:56:16,740 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 22:56:16,740 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-04 22:56:17,326 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-04 22:56:17,326 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-04 22:56:18,277 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:56:18,277 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:56:18,458 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-04 22:56:18,459 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 22:56:18,459 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 22:56:18,459 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-04 22:56:18,461 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-04 22:56:18,829 - TestFlowManager - WARNING - Failed to clear filters and unhide rows/columns
+2025-09-04 22:56:18,829 - TestFlowManager - ERROR - Failed to handle advanced view LTR request: LTRService.find_first_blank_cell_from_top() got multiple values for argument 'col_index'
+2025-09-04 22:56:18,869 - TestFlowManager - DEBUG - Workbook closed successfully (save_changes=False)
+2025-09-04 22:56:18,869 - TestFlowManager - DEBUG - Closed LTR workbook
+2025-09-04 22:56:18,876 - TestFlowManager - DEBUG - Status updated: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:56:18,876 - TestFlowManager - DEBUG - Updated status: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:56:18,876 - TestFlowManager - ERROR - Failed to open LTR file from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:56:36,413 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 22:56:36,414 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 22:56:36,414 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-04 22:56:36,414 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-09-04 22:56:36,834 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 22:56:36,835 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:56:37,038 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-04 22:56:37,039 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 22:56:37,039 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 22:56:37,039 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-04 22:56:37,043 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-04 22:56:37,581 - TestFlowManager - WARNING - Failed to clear filters and unhide rows/columns
+2025-09-04 22:56:37,582 - TestFlowManager - ERROR - Failed to handle advanced view LTR request: LTRService.find_first_blank_cell_from_top() got multiple values for argument 'col_index'
+2025-09-04 22:56:37,612 - TestFlowManager - DEBUG - Workbook closed successfully (save_changes=False)
+2025-09-04 22:56:37,613 - TestFlowManager - DEBUG - Closed LTR workbook
+2025-09-04 22:56:37,621 - TestFlowManager - DEBUG - Status updated: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:56:37,621 - TestFlowManager - DEBUG - Updated status: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:56:37,621 - TestFlowManager - ERROR - Failed to open LTR file from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 22:56:41,618 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 22:56:41,619 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 22:56:41,619 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 22:56:41,619 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 22:56:41,665 - TestFlowManager - INFO - Application exited
+2025-09-04 22:56:41,665 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 22:56:41,665 - TestFlowManager - INFO - Closing all windows
+2025-09-04 22:56:41,665 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 22:56:41,665 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 22:56:41,665 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 22:56:41,665 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 22:56:41,665 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 22:56:41,665 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 22:56:41,665 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 22:56:41,665 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:00:44,698 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 23:00:44,706 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 23:00:44,706 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 23:00:44,713 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 23:00:44,713 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 23:00:44,713 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:00:44,752 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 23:00:44,752 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 23:00:44,752 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 23:00:44,752 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 23:00:44,752 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 23:00:44,752 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 23:00:45,115 - TestFlowManager - INFO - Main window shown
+2025-09-04 23:00:47,275 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 23:00:47,275 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 23:00:47,275 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-04 23:00:47,860 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-04 23:00:47,860 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-04 23:00:48,783 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 23:00:48,783 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:00:48,976 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-04 23:00:48,976 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:00:48,976 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:00:48,976 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-04 23:00:48,978 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-04 23:00:49,056 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-04 23:00:49,087 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-04 23:00:49,096 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-04 23:00:49,303 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-04 23:00:49,361 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-04 23:00:49,361 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-04 23:00:49,533 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-04 23:00:49,536 - TestFlowManager - ERROR - Failed to handle advanced view LTR request: '>' not supported between instances of 'CDispatch' and 'int'
+2025-09-04 23:00:49,557 - TestFlowManager - DEBUG - Workbook closed successfully (save_changes=False)
+2025-09-04 23:00:49,557 - TestFlowManager - DEBUG - Closed LTR workbook
+2025-09-04 23:00:49,567 - TestFlowManager - DEBUG - Status updated: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:00:49,567 - TestFlowManager - DEBUG - Updated status: 打开LTR文件失败: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:00:49,567 - TestFlowManager - ERROR - Failed to open LTR file from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:01:15,481 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:01:15,481 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:01:15,481 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:01:15,481 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:01:15,514 - TestFlowManager - INFO - Application exited
+2025-09-04 23:01:15,514 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 23:01:15,514 - TestFlowManager - INFO - Closing all windows
+2025-09-04 23:01:15,514 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:01:15,514 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:01:15,514 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:01:15,514 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:01:15,514 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:01:15,514 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:01:15,515 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:01:15,515 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:03:14,446 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 23:03:14,455 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 23:03:14,455 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 23:03:14,463 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 23:03:14,463 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 23:03:14,463 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:03:14,509 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 23:03:14,509 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 23:03:14,509 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 23:03:14,509 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 23:03:14,509 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 23:03:14,509 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 23:03:14,895 - TestFlowManager - INFO - Main window shown
+2025-09-04 23:03:16,715 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 23:03:16,715 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 23:03:16,715 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-04 23:03:17,271 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-04 23:03:17,271 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-04 23:03:18,239 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 23:03:18,239 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:03:18,426 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-04 23:03:18,426 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:03:18,426 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:03:18,426 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-04 23:03:18,431 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-04 23:03:18,521 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-04 23:03:18,551 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-04 23:03:18,559 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-04 23:03:18,751 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-04 23:03:18,810 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-04 23:03:18,811 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-04 23:03:18,966 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-04 23:03:18,966 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-04 23:03:18,966 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-04 23:03:18,990 - TestFlowManager - DEBUG - Workbook closed successfully (save_changes=False)
+2025-09-04 23:03:18,990 - TestFlowManager - DEBUG - Closed LTR workbook
+2025-09-04 23:03:18,995 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:03:18,995 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:03:18,995 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:03:41,845 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:03:41,845 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:03:41,845 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:03:41,845 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:03:41,889 - TestFlowManager - INFO - Application exited
+2025-09-04 23:03:41,889 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 23:03:41,889 - TestFlowManager - INFO - Closing all windows
+2025-09-04 23:03:41,889 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:03:41,889 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:03:41,889 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:03:41,890 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:03:41,890 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:03:41,890 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:03:41,890 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:03:41,890 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:10:30,245 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 23:10:30,260 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 23:10:30,260 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 23:10:30,268 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 23:10:30,268 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 23:10:30,268 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:10:30,317 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 23:10:30,317 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 23:10:30,317 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 23:10:30,317 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 23:10:30,317 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 23:10:30,317 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 23:10:30,745 - TestFlowManager - INFO - Main window shown
+2025-09-04 23:10:33,750 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 23:10:33,750 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 23:10:33,750 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-04 23:10:34,300 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-04 23:10:34,300 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-04 23:10:35,259 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 23:10:35,259 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:10:35,466 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-04 23:10:35,467 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:10:35,467 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:10:35,467 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-04 23:10:35,471 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-04 23:10:35,553 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-04 23:10:35,582 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-04 23:10:35,591 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-04 23:10:35,848 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-04 23:10:36,056 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-04 23:10:36,057 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-04 23:10:36,397 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-04 23:10:36,398 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-04 23:10:36,398 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-04 23:10:36,418 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:10:36,418 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:10:36,418 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:10:46,939 - TestFlowManager - DEBUG - Open file action triggered
+2025-09-04 23:10:46,939 - TestFlowManager - DEBUG - Handling open file request: example.txt
+2025-09-04 23:10:46,939 - TestFlowManager - DEBUG - Recent file added: example.txt
+2025-09-04 23:10:46,940 - TestFlowManager - DEBUG - Added recent file: example.txt
+2025-09-04 23:10:46,940 - TestFlowManager - DEBUG - Status updated: 已打开文件: example.txt
+2025-09-04 23:10:46,940 - TestFlowManager - DEBUG - Updated status: 已打开文件: example.txt
+2025-09-04 23:10:46,940 - TestFlowManager - INFO - File opened successfully: example.txt
+2025-09-04 23:10:49,514 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 23:10:49,514 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 23:10:49,514 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-04 23:10:49,514 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-09-04 23:10:49,932 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 23:10:49,932 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:10:50,114 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-04 23:10:50,115 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:10:50,115 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:10:50,115 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-04 23:10:50,118 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-04 23:10:50,160 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-04 23:10:50,192 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-04 23:10:50,202 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-04 23:10:50,441 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-04 23:10:50,599 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-04 23:10:50,599 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-04 23:10:50,764 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-04 23:10:50,764 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-04 23:10:50,765 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-04 23:10:50,765 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:10:50,765 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:10:50,765 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:10:57,312 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:10:57,312 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:10:57,312 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:10:57,312 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:10:57,363 - TestFlowManager - INFO - Application exited
+2025-09-04 23:10:57,363 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 23:10:57,364 - TestFlowManager - INFO - Closing all windows
+2025-09-04 23:10:57,364 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:10:57,364 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:10:57,364 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:10:57,364 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:10:57,364 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:10:57,364 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:10:57,364 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:10:57,364 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:12:10,515 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 23:12:10,523 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 23:12:10,523 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 23:12:10,528 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 23:12:10,528 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 23:12:10,528 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:12:10,568 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 23:12:10,568 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 23:12:10,568 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 23:12:10,568 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 23:12:10,568 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 23:12:10,568 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 23:12:10,954 - TestFlowManager - INFO - Main window shown
+2025-09-04 23:12:17,525 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 23:12:17,525 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 23:12:17,525 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-04 23:12:18,049 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-04 23:12:18,049 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-04 23:12:18,964 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 23:12:18,964 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:12:19,162 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-04 23:12:19,163 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:12:19,163 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:12:19,163 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-04 23:12:19,167 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-04 23:12:19,239 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-04 23:12:19,269 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-04 23:12:19,279 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-04 23:12:19,481 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-04 23:12:19,541 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-04 23:12:19,541 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-04 23:12:19,747 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-04 23:12:19,747 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-04 23:12:19,747 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-04 23:12:19,748 - TestFlowManager - DEBUG - Status updated: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:12:19,748 - TestFlowManager - DEBUG - Updated status: 已打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:12:19,748 - TestFlowManager - INFO - LTR file opened successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:12:26,635 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:12:26,635 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:12:26,635 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:12:26,635 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:12:26,687 - TestFlowManager - INFO - Application exited
+2025-09-04 23:12:26,687 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 23:12:26,688 - TestFlowManager - INFO - Closing all windows
+2025-09-04 23:12:26,688 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:12:26,688 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:12:26,688 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:12:26,688 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:12:26,688 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:12:26,688 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:12:26,688 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:12:26,689 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:13:28,342 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 23:13:28,350 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 23:13:28,350 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 23:13:28,355 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 23:13:28,355 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 23:13:28,355 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:13:28,396 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 23:13:28,396 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 23:13:28,396 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 23:13:28,396 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 23:13:28,396 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 23:13:28,396 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 23:13:28,939 - TestFlowManager - INFO - Main window shown
+2025-09-04 23:13:37,642 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:13:37,643 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:13:37,643 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:13:37,643 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:13:37,699 - TestFlowManager - INFO - Application exited
+2025-09-04 23:13:37,699 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 23:13:37,700 - TestFlowManager - INFO - Closing all windows
+2025-09-04 23:13:37,700 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:13:37,700 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:13:37,700 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:13:37,700 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:13:37,700 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:13:37,700 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:13:37,700 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:13:37,700 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:17:20,801 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-04 23:17:20,810 - TestFlowManager - INFO - Application initialized successfully
+2025-09-04 23:17:20,810 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-04 23:17:20,819 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-04 23:17:20,819 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-04 23:17:20,819 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:17:20,837 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-04 23:17:20,837 - TestFlowManager - DEBUG - Application state loaded
+2025-09-04 23:17:20,837 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-04 23:17:20,837 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-04 23:17:20,837 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-04 23:17:20,837 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-04 23:17:21,281 - TestFlowManager - INFO - Main window shown
+2025-09-04 23:17:23,182 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 23:17:23,182 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 23:17:23,182 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-04 23:17:23,719 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-04 23:17:23,719 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-04 23:17:24,714 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 23:17:24,714 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:17:24,927 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-04 23:17:24,928 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:17:24,928 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:17:24,928 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-04 23:17:24,932 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-04 23:17:24,996 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-04 23:17:25,026 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-04 23:17:25,036 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-04 23:17:25,215 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-04 23:17:25,274 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-04 23:17:25,274 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-04 23:17:25,453 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-04 23:17:25,453 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-04 23:17:25,453 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-04 23:17:25,454 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:17:25,454 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:17:25,454 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:17:29,849 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-04 23:17:29,849 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-04 23:17:29,849 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-04 23:17:29,849 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-09-04 23:17:30,312 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-04 23:17:30,312 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:17:30,515 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-04 23:17:30,515 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:17:30,515 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-04 23:17:30,515 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-04 23:17:30,522 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-04 23:17:30,562 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-04 23:17:30,591 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-04 23:17:30,600 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-04 23:17:30,825 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-04 23:17:30,987 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-04 23:17:30,987 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-04 23:17:31,166 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-04 23:17:31,167 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-04 23:17:31,167 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-04 23:17:31,167 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:17:31,167 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:17:31,167 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-04 23:17:39,367 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:17:39,367 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:17:39,367 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:17:39,367 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:17:39,409 - TestFlowManager - INFO - Application exited
+2025-09-04 23:17:39,410 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-04 23:17:39,410 - TestFlowManager - INFO - Closing all windows
+2025-09-04 23:17:39,410 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:17:39,410 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:17:39,410 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:17:39,410 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-04 23:17:39,410 - TestFlowManager - INFO - MainWindow closing
+2025-09-04 23:17:39,410 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-04 23:17:39,410 - TestFlowManager - DEBUG - Application state saved
+2025-09-04 23:17:39,410 - TestFlowManager - INFO - MainWindowController shut down successfully

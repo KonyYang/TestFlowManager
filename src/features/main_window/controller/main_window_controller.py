@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QWidget, QMessageBox
 from src.core.logger import logger
 from src.features.main_window.model.main_window_data import MainWindowData
 from src.features.main_window.service.main_window_service import MainWindowService
+from src.features.ltr_manager.controller.ltr_controller import LTRController
 
 
 class MainWindowController:
@@ -29,6 +30,7 @@ class MainWindowController:
 
         # 初始化状态
         self.service.update_status("就绪")
+        self.ltr_controller = LTRController()
 
     def initialize(self) -> bool:
         """
@@ -51,6 +53,34 @@ class MainWindowController:
             return True
         except Exception as e:
             logger.error(f"Failed to initialize MainWindowController: {e}")
+            return False
+
+    def handle_view_ltr(self) -> bool:
+        """
+        处理查看LTR文件事件
+
+        Returns:
+            是否成功打开LTR文件
+        """
+        try:
+            logger.debug("Handling view LTR file request from main window")
+
+            # 调用LTR控制器处理
+            success = self.ltr_controller.handle_view_ltr()
+
+            if success:
+                file_path = self.ltr_controller.get_ltr_file_path()
+                self.service.update_status(f"已处理LTR文件: {file_path}")
+                logger.info(f"LTR file processed successfully from main window: {file_path}")
+            else:
+                file_path = self.ltr_controller.get_ltr_file_path()
+                self.service.update_status(f"处理LTR文件失败: {file_path}")
+                logger.error(f"Failed to process LTR file from main window: {file_path}")
+
+            return success
+        except Exception as e:
+            logger.error(f"Failed to handle view LTR request from main window: {e}")
+            self.service.update_status("处理LTR文件时发生错误")
             return False
 
     def handle_open_file(self, file_path: str) -> bool:
