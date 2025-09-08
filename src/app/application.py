@@ -44,6 +44,9 @@ class TestFlowApplication:
             version = config_manager.get("app.version", "1.0.0")
             self.app.setApplicationVersion(version)
 
+            # 加载路径配置
+            config_manager.load_paths_config()
+
             logger.info("Application initialized successfully")
             self._initialized = True
             return True

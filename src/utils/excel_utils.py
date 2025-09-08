@@ -137,18 +137,18 @@ def open_excel_file(file_path: str, read_only: bool = True, password: Optional[s
         excel_app.DisplayAlerts = False
         excel_app.EnableEvents = False
 
-        # 以只读模式打开文件
+        # 以指定模式打开文件
         wb = excel_app.Workbooks.Open(
             file_path,
-            0,  # 更新链接选项（0表示不更新）
-            read_only,  # 只读模式
-            None,  # 格式参数
-            password or "",  # 密码（打开密码）
-            "",  # 写入密码
+            0,
+            read_only, # 只读模式或者读写模式
+            None,      # 格式参数
+            "", password,  # 这里使用了"DGLAB"密码
             False,  # 是否将文件添加到最近文件列表
-            None,  # 编码类型
-            2  # 忽略建议只读标志
+            None,   # 编码类型
+            2       # 忽略建议只读标志
         )
+
 
         logger.debug(f"Successfully opened workbook: {file_path} (read_only={read_only})")
         return wb
@@ -193,4 +193,31 @@ def get_sheet_by_name(workbook: Any, sheet_name: str) -> Any:
         return sheet
     except Exception as e:
         logger.error(f"Failed to get sheet '{sheet_name}': {e}")
+        return None
+
+def find_cell(sheet: Any, search_string: str) -> Optional[tuple]:
+    """
+    在工作表中查找指定字符串，返回匹配单元格的位置信息
+
+    Args:
+        sheet: Excel工作表对象
+        search_string: 要查找的字符串
+
+    Returns:
+        (行号, 列号, 单元格值)的元组，如果未找到则返回None
+    """
+    try:
+        # 使用Find方法查找字符串
+        found_cell = sheet.Cells.Find(What=search_string)
+
+        if found_cell is not None:
+            row = found_cell.Row
+            col = found_cell.Column
+            value = found_cell.Value
+            return (row, col, value)
+        else:
+            return None
+
+    except Exception as e:
+        logger.error(f"Failed to search string '{search_string}' in sheet: {e}")
         return None

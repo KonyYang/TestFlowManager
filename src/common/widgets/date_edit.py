@@ -8,7 +8,7 @@ from PyQt5.QtCore import QDate, pyqtSignal
 from src.core.logger import logger
 
 
-class DateEditWidget(QWidget):
+class DateEdit(QWidget):
     """
     日期编辑控件
     提供日期选择和编辑功能

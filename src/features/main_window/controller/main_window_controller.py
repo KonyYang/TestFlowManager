@@ -4,12 +4,12 @@
 """
 
 from typing import List, Optional
-from PyQt5.QtWidgets import QWidget, QMessageBox
+from PyQt5.QtWidgets import QWidget, QMessageBox, QDialog
 from src.core.logger import logger
 from src.features.main_window.model.main_window_data import MainWindowData
 from src.features.main_window.service.main_window_service import MainWindowService
 from src.features.ltr_manager.controller.ltr_controller import LTRController
-
+from src.features.main_window.view.dialogs.dl_input_dialog import DLInputDialog
 
 class MainWindowController:
     """
@@ -65,13 +65,69 @@ class MainWindowController:
         try:
             logger.debug("Handling view LTR file request from main window")
 
-            # 调用LTR控制器处理
-            success = self.ltr_controller.handle_view_ltr()
+            # 显示DL编号输入对话框
+            dialog = DLInputDialog(self.view)
+            result = dialog.exec_()
+
+            # 如果用户点击取消，则直接返回
+            if result != QDialog.Accepted:
+                return False
+
+            # 获取用户输入的DL编号
+            dl_number = dialog.get_dl_number()
+
+            # 如果用户输入了DL编号，则先验证并处理DL编号查询逻辑
+            if dl_number:
+                # 验证DL编号格式
+                from src.features.ltr_manager.service.ltr_service import LTRService
+                from src.features.ltr_manager.model.ltr_data import LTRData
+
+                # 创建临时服务实例用于验证
+                temp_data_model = LTRData()
+                temp_service = LTRService(temp_data_model)
+                parse_result = temp_service.validate_and_parse_dl_number(dl_number)
+
+                if not parse_result["valid"]:
+                    # DL编号格式不正确，显示错误信息
+                    from PyQt5.QtWidgets import QMessageBox
+                    QMessageBox.warning(
+                        self.view,
+                        "格式错误",
+                        parse_result["error_message"]
+                    )
+                    self.service.update_status(f"DL编号格式错误: {dl_number}")
+                    return False
+
+                # 调用LTR控制器处理DL编号查询
+                success = self.ltr_controller.handle_view_dl_number(dl_number)
+
+                if success:
+                    self.service.update_status(f"已定位到DL编号: {dl_number}")
+                    logger.info(f"Successfully found and positioned to DL number: {dl_number}")
+                else:
+                    # 关闭Excel应用程序，因为handle_view_dl_number已经打开了它
+                    from src.utils.excel_utils import release_excel_app
+                    release_excel_app()
+                    from PyQt5.QtWidgets import QMessageBox
+                    QMessageBox.warning(
+                        self.view,
+                        "查找结果",
+                        f"未找到DL编号: {dl_number}\n。"
+                    )
+                    self.service.update_status(f"未找到DL编号: {dl_number}")
+                    # # 继续执行默认的LTR查看逻辑
+                    # success = self.ltr_controller.handle_view_ltr()
+                    # 重新显示DL编号输入对话框
+                    return self.handle_view_ltr()
+            else:
+                # 用户选择跳过，执行默认的LTR查看逻辑
+                success = self.ltr_controller.handle_view_ltr()
 
             if success:
-                file_path = self.ltr_controller.get_ltr_file_path()
-                self.service.update_status(f"已处理LTR文件: {file_path}")
-                logger.info(f"LTR file processed successfully from main window: {file_path}")
+                if not dl_number:  # 只有在非DL编号查询时才更新状态
+                    file_path = self.ltr_controller.get_ltr_file_path()
+                    self.service.update_status(f"已处理LTR文件: {file_path}")
+                    logger.info(f"LTR file processed successfully from main window: {file_path}")
             else:
                 file_path = self.ltr_controller.get_ltr_file_path()
                 self.service.update_status(f"处理LTR文件失败: {file_path}")
@@ -82,6 +138,7 @@ class MainWindowController:
             logger.error(f"Failed to handle view LTR request from main window: {e}")
             self.service.update_status("处理LTR文件时发生错误")
             return False
+
 
     def handle_open_file(self, file_path: str) -> bool:
         """

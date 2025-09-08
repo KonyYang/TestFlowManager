@@ -28,7 +28,7 @@ class LTRService:
         """
         self.data_model = data_model
         # 从配置文件获取LTR文件路径
-        ltr_file_path = config_manager.get("ltr.file_path", "D:\\Source\\Office Auto\\TestDocument\\LTR_number.xls")
+        ltr_file_path = config_manager.get("paths.fileltr", "D:\\Source\\Office Auto\\TestDocument\\LTR_number.xls")
         self.data_model.set_file_path(ltr_file_path)
 
     def open_ltr_file_readonly(self) -> bool:
@@ -53,6 +53,37 @@ class LTRService:
         except Exception as e:
             logger.error(f"Failed to open LTR file in read-only mode: {e}")
             return False
+
+    def open_ltr_file_with_password(self) -> bool:
+        """
+        使用密码打开LTR文件
+
+        Returns:
+            是否成功打开文件
+        """
+        try:
+            file_path = self.data_model.get_file_path()
+            # 从配置中获取密码，默认为"DGLAB"
+            password = config_manager.get("paths.LTRPassword", "DGLAB")  # 使用原始大小写键名
+
+            # 检查文件是否存在
+            if not os.path.exists(file_path):
+                logger.error(f"LTR file not found: {file_path}")
+                return False
+
+            # 使用通用Excel文件打开函数，带密码参数，以读写模式打开
+            success = open_excel_file(file_path, read_only=False, password=password)
+
+            if success:
+                logger.info(f"Successfully opened LTR file with password: {file_path}")
+            else:
+                logger.error(f"Failed to open LTR file with password: {file_path}")
+
+            return success
+        except Exception as e:
+            logger.error(f"Failed to open LTR file with password: {e}")
+            return False
+
 
     def get_ltr_file_path(self) -> str:
         """
@@ -198,3 +229,147 @@ class LTRService:
         except Exception as e:
             logger.error(f"Failed to load available sheets: {e}")
             return []
+
+    def validate_and_parse_dl_number(self, dl_number: str) -> dict:
+        """
+        验证并解析DL编号
+
+        Args:
+            dl_number: 要验证和解析的DL编号
+
+        Returns:
+            包含解析结果的字典:
+            - valid: 是否有效
+            - year: 年份部分
+            - has_suffix: 是否有后缀
+            - error_message: 错误信息（如果无效）
+        """
+        import re
+        from datetime import datetime
+
+        # 验证基本格式 DL-XXXX-YY-ZZZ[后缀]
+        match = re.match(r"DL-(\d{4})-(\d{2})-(\d{3})(.*)", dl_number)
+        if not match:
+            return {
+                "valid": False,
+                "year": None,
+                "has_suffix": None,
+                "error_message": "DL编号格式不正确，应为 DL-XXXX-YY-ZZZ[后缀] 格式"
+            }
+
+        year = int(match.group(1))
+        suffix = match.group(4)
+
+        # 验证年份合理性
+        current_year = datetime.now().year
+        if year < 2000 or year > current_year + 1:
+            return {
+                "valid": False,
+                "year": year,
+                "has_suffix": bool(suffix),
+                "error_message": f"年份 {year} 不在合理范围内"
+            }
+
+        return {
+            "valid": True,
+            "year": year,
+            "has_suffix": bool(suffix),
+            "error_message": None
+        }
+
+    def determine_search_sheets(self, workbook, dl_year: int, has_suffix: bool) -> list:
+        """
+        根据DL编号的年份和后缀信息确定要搜索的工作表
+
+        Args:
+            workbook: Excel工作簿对象
+            dl_year: DL编号中的年份
+            has_suffix: 是否有后缀
+
+        Returns:
+            要搜索的工作表列表
+        """
+        from datetime import datetime
+
+        sheets_to_search = []
+        current_year = datetime.now().year
+        available_sheets = [ws.Name for ws in workbook.Sheets if ws.Name.isdigit()]
+
+        # 如果没有后缀，只查找对应年份的工作表
+        if not has_suffix:
+            sheet_name = str(dl_year)
+            if sheet_name in available_sheets:
+                sheets_to_search.append(workbook.Sheets(sheet_name))
+        else:
+            # 有后缀的情况下
+            sheet_name = str(dl_year)
+            if sheet_name in available_sheets:
+                sheets_to_search.append(workbook.Sheets(sheet_name))
+
+            # 如果年份不是当前年份，还要查找下一年的工作表
+            if dl_year != current_year:
+                next_year_sheet_name = str(dl_year + 1)
+                if next_year_sheet_name in available_sheets:
+                    sheets_to_search.append(workbook.Sheets(next_year_sheet_name))
+
+        # 如果没有找到特定年份的工作表，查找最近两年的工作表
+        if not sheets_to_search:
+            for year in [current_year, current_year - 1]:
+                sheet_name = str(year)
+                if sheet_name in available_sheets:
+                    sheets_to_search.append(workbook.Sheets(sheet_name))
+
+        return sheets_to_search
+
+
+
+    def find_dl_number(self, worksheet, dl_number: str) -> dict:
+        """
+        在指定工作表中查找DL编号
+
+        Args:
+            worksheet: 要查找的工作表
+            dl_number: 要查找的DL编号
+
+        Returns:
+            包含查找结果的字典:
+            - success: 是否成功找到
+            - row: 找到的行号
+            - column: 找到的列号（通常是4，即D列）
+        """
+        try:
+            # 查找DL编号
+            row = 2  # 从第2行开始（跳过标题行）
+            while row < 10000:  # 设置上限防止死循环
+                cell_value = worksheet.Cells(row, 4).Value  # D列
+                if cell_value is None:
+                    # 检查是否已经超出数据范围
+                    if worksheet.Cells(row + 5, 4).Value is None:  # 连续5行为空则认为到达末尾
+                        break
+                elif str(cell_value).strip() == dl_number:
+                    # 找到了DL编号
+                    self.data_model.set_found_row(row)
+                    self.data_model.set_found_worksheet(worksheet)
+                    self.data_model.set_dl_number(dl_number)
+
+                    return {
+                        "success": True,
+                        "row": row,
+                        "column": 4
+                    }
+                row += 1
+
+            # 未找到DL编号
+            return {
+                "success": False,
+                "row": None,
+                "column": None
+            }
+
+        except Exception as e:
+            logger.error(f"查找DL编号时发生错误: {e}")
+            return {
+                "success": False,
+                "row": None,
+                "column": None
+            }

@@ -18,6 +18,10 @@ class LTRData:
         self.current_sheet: str = ""
         self.last_valid_row: int = 0
         self.available_sheets: List[str] = []
+        # 新增属性用于DL编号查找功能
+        self.found_row: Optional[int] = None
+        self.found_worksheet = None
+        self.dl_number: Optional[str] = None
 
     def set_file_path(self, file_path: str) -> None:
         """
@@ -94,3 +98,61 @@ class LTRData:
             工作表名称列表
         """
         return self.available_sheets.copy()
+
+    # 新增方法用于DL编号查找功能
+    def set_found_row(self, row: Optional[int]) -> None:
+        """
+        设置找到的行号
+
+        Args:
+            row: 找到的行号
+        """
+        self.found_row = row
+        logger.debug(f"Found row set to: {row}")
+
+    def get_found_row(self) -> Optional[int]:
+        """
+        获取找到的行号
+
+        Returns:
+            找到的行号
+        """
+        return self.found_row
+
+    def set_found_worksheet(self, worksheet) -> None:
+        """
+        设置找到的工作表
+
+        Args:
+            worksheet: 找到的工作表对象
+        """
+        self.found_worksheet = worksheet
+        logger.debug("Found worksheet set")
+
+    def get_found_worksheet(self):
+        """
+        获取找到的工作表
+
+        Returns:
+            找到的工作表对象
+        """
+        return self.found_worksheet
+
+    def set_dl_number(self, dl_number: Optional[str]) -> None:
+        """
+        设置DL编号
+
+        Args:
+            dl_number: DL编号
+        """
+        self.dl_number = dl_number
+        logger.debug(f"DL number set to: {dl_number}")
+
+    def get_dl_number(self) -> Optional[str]:
+        """
+        获取DL编号
+
+        Returns:
+            DL编号
+        """
+        return self.dl_number
