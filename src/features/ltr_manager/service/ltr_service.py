@@ -398,3 +398,45 @@ class LTRService:
             "row": row,
             "column": column
         }
+
+
+    def extract_row_data(self, worksheet, row_number: int) -> dict:
+        """
+        提取指定行的E到Q列数据
+
+        Args:
+            worksheet: Excel工作表对象
+            row_number: 行号
+
+        Returns:
+            包含E到Q列数据的字典
+        """
+        try:
+            # E列到Q列对应索引为5到17
+            data = {}
+            field_names = [
+                'project_type',                # E列
+                'sample_information',          # F列
+                'tests_to_be_performed',       # G列
+                'test_type',                   # H列
+                'requested_by',                # I列
+                'location',                    # J列
+                'project_leader',              # K列
+                'test_result',                 # L列
+                'failed_item',                 # M列
+                'sample_deposition',           # N列
+                'sub_contract',                # O列
+                'test_fee',                    # P列
+                'remarks_po'                   # Q列
+            ]
+
+            for i, field_name in enumerate(field_names):
+                column_index = 5 + i  # E列索引为5
+                cell_value = worksheet.Cells(row_number, column_index).Value
+                data[field_name] = cell_value if cell_value is not None else ""
+
+            return data
+        except Exception as e:
+            logger.error(f"Failed to extract row data: {e}")
+            # 返回默认空数据
+            return {field: "" for field in field_names}

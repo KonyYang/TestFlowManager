@@ -4354,3 +4354,811 @@
 2025-09-10 07:59:15,245 - TestFlowManager - INFO - Shutting down MainWindowController
 2025-09-10 07:59:15,245 - TestFlowManager - DEBUG - Application state saved
 2025-09-10 07:59:15,245 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 22:35:26,208 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-10 22:35:26,244 - TestFlowManager - INFO - Application initialized successfully
+2025-09-10 22:35:26,244 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-10 22:35:26,266 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-10 22:35:26,266 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-10 22:35:26,266 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:35:26,375 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-10 22:35:26,375 - TestFlowManager - DEBUG - Application state loaded
+2025-09-10 22:35:26,375 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-10 22:35:26,375 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-10 22:35:26,375 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-10 22:35:26,375 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-10 22:35:27,231 - TestFlowManager - INFO - Main window shown
+2025-09-10 22:35:28,506 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 22:35:28,507 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:35:30,217 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-10 22:35:30,781 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-10 22:35:30,781 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-10 22:35:31,794 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:35:31,795 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:35:31,995 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:35:31,995 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:35:31,995 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:35:31,995 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:35:32,103 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-10 22:35:32,196 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:35:32,342 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:35:32,350 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:35:32,499 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:35:32,589 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:35:32,590 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-10 22:35:32,976 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-10 22:35:32,976 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-10 22:35:32,976 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-10 22:35:32,984 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:35:32,984 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:35:32,984 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:35:36,325 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 22:35:36,325 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:35:45,758 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-002
+2025-09-10 22:35:45,758 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-09-10 22:35:46,199 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:35:46,199 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:35:46,304 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:35:46,305 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:35:46,305 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:35:46,305 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:35:46,335 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:35:46,337 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:35:46,339 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:35:46,346 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:35:46,353 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:35:46,362 - TestFlowManager - DEBUG - Found row set to: 12
+2025-09-10 22:35:46,362 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:35:46,362 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-002
+2025-09-10 22:35:46,414 - TestFlowManager - DEBUG - Found row set to: 12
+2025-09-10 22:35:46,414 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:35:46,414 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-002
+2025-09-10 22:35:46,414 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-002
+2025-09-10 22:35:46,436 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 22:35:51,443 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-002
+2025-09-10 22:35:51,443 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-002
+2025-09-10 22:35:51,443 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-002
+2025-09-10 22:35:52,777 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 22:35:52,777 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:35:55,578 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-10 22:35:55,578 - TestFlowManager - DEBUG - Excel instance count increased to 3
+2025-09-10 22:35:55,989 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:35:55,989 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:35:56,159 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:35:56,159 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:35:56,160 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:35:56,160 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:35:56,165 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-10 22:35:56,209 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:35:56,241 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:35:56,251 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:35:56,431 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:35:56,601 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:35:56,601 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-10 22:35:56,752 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-10 22:35:56,752 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-10 22:35:56,752 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-10 22:35:56,752 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:35:56,752 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:35:56,752 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:36:04,453 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 22:36:04,454 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:36:07,798 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-09-10 22:36:07,798 - TestFlowManager - DEBUG - Excel instance count increased to 4
+2025-09-10 22:36:08,277 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:36:08,277 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:36:08,371 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:36:08,371 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:36:08,371 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:36:08,371 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:36:08,404 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:36:08,406 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:36:08,407 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:36:08,415 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:36:08,423 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:36:08,433 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 22:36:08,433 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:36:08,433 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 22:36:08,489 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 22:36:08,489 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:36:08,489 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 22:36:08,489 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-09-10 22:36:08,512 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 22:36:18,150 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-003
+2025-09-10 22:36:18,150 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-003
+2025-09-10 22:36:18,150 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-003
+2025-09-10 22:36:19,429 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 22:36:19,429 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:36:20,682 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-10 22:36:20,682 - TestFlowManager - DEBUG - Excel instance count increased to 5
+2025-09-10 22:36:21,127 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:36:21,127 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:36:21,262 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:36:21,263 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:36:21,263 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:36:21,263 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:36:21,271 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-10 22:36:21,311 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:36:21,341 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:36:21,350 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:36:21,537 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:36:21,678 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:36:21,678 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-10 22:36:21,838 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-10 22:36:21,838 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-10 22:36:21,838 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-10 22:36:21,838 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:36:21,838 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:36:21,838 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:37:20,480 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 22:37:20,480 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 22:37:20,480 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 22:37:20,480 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 22:37:20,518 - TestFlowManager - INFO - Application exited
+2025-09-10 22:37:20,518 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-10 22:37:20,519 - TestFlowManager - INFO - Closing all windows
+2025-09-10 22:37:20,519 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 22:37:20,519 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 22:37:20,519 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 22:37:20,519 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 22:37:20,519 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 22:37:20,519 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 22:37:20,519 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 22:37:20,519 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 22:44:00,154 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-10 22:44:00,165 - TestFlowManager - INFO - Application initialized successfully
+2025-09-10 22:44:00,165 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-10 22:44:00,172 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-10 22:44:00,172 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-10 22:44:00,172 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:44:00,217 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-10 22:44:00,217 - TestFlowManager - DEBUG - Application state loaded
+2025-09-10 22:44:00,217 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-10 22:44:00,217 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-10 22:44:00,217 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-10 22:44:00,217 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-10 22:44:00,615 - TestFlowManager - INFO - Main window shown
+2025-09-10 22:44:01,499 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 22:44:01,499 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:44:14,619 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-09-10 22:44:15,201 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-10 22:44:15,202 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-10 22:44:16,220 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:44:16,220 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:44:16,337 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:44:16,338 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:44:16,338 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:44:16,338 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:44:16,360 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:44:16,361 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:44:16,362 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:44:16,369 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:44:16,375 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:44:16,382 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 22:44:16,382 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:44:16,382 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 22:44:16,424 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 22:44:16,424 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:44:16,424 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 22:44:16,424 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-09-10 22:44:16,450 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 22:44:28,468 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-003
+2025-09-10 22:44:28,468 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-003
+2025-09-10 22:44:28,468 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-003
+2025-09-10 22:44:31,407 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 22:44:31,407 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:44:39,587 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-09-10 22:44:39,587 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-09-10 22:44:40,112 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:44:40,112 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:44:40,204 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:44:40,205 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:44:40,205 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:44:40,205 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:44:40,236 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:44:40,238 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:44:40,239 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:44:40,247 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:44:40,255 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:44:40,266 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 22:44:40,266 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:44:40,266 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 22:44:40,322 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 22:44:40,322 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:44:40,322 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 22:44:40,322 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-09-10 22:44:40,351 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 22:44:50,180 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-003
+2025-09-10 22:44:50,180 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-003
+2025-09-10 22:44:50,180 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-003
+2025-09-10 22:44:51,367 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 22:44:51,368 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 22:44:51,368 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 22:44:51,368 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 22:44:51,412 - TestFlowManager - INFO - Application exited
+2025-09-10 22:44:51,412 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-10 22:44:51,413 - TestFlowManager - INFO - Closing all windows
+2025-09-10 22:44:51,413 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 22:44:51,413 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 22:44:51,413 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 22:44:51,413 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 22:44:51,413 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 22:44:51,413 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 22:44:51,413 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 22:44:51,413 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 22:46:13,641 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-10 22:46:13,651 - TestFlowManager - INFO - Application initialized successfully
+2025-09-10 22:46:13,651 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-10 22:46:13,659 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-10 22:46:13,659 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-10 22:46:13,660 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:46:13,702 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-10 22:46:13,702 - TestFlowManager - DEBUG - Application state loaded
+2025-09-10 22:46:13,702 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-10 22:46:13,702 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-10 22:46:13,702 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-10 22:46:13,702 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-10 22:46:14,414 - TestFlowManager - INFO - Main window shown
+2025-09-10 22:46:15,679 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 22:46:15,679 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:46:27,445 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-09-10 22:46:27,995 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-10 22:46:27,995 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-10 22:46:28,984 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:46:28,984 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:46:29,088 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:46:29,089 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:46:29,089 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:46:29,089 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:46:29,113 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:46:29,115 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:46:29,116 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:46:29,123 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:46:29,130 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:46:29,139 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 22:46:29,139 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:46:29,139 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 22:46:29,185 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 22:46:29,185 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:46:29,185 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 22:46:29,185 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-09-10 22:46:29,207 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 22:46:46,132 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-003
+2025-09-10 22:46:46,132 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-003
+2025-09-10 22:46:46,132 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-003
+2025-09-10 22:46:46,914 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 22:46:46,914 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 22:46:46,914 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 22:46:46,914 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 22:46:46,953 - TestFlowManager - INFO - Application exited
+2025-09-10 22:46:46,953 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-10 22:46:46,954 - TestFlowManager - INFO - Closing all windows
+2025-09-10 22:46:46,954 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 22:46:46,954 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 22:46:46,954 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 22:46:46,954 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 22:46:46,954 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 22:46:46,954 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 22:46:46,954 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 22:46:46,954 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 22:49:41,236 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-10 22:49:41,249 - TestFlowManager - INFO - Application initialized successfully
+2025-09-10 22:49:41,249 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-10 22:49:41,260 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-10 22:49:41,260 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-10 22:49:41,260 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:49:41,304 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-10 22:49:41,304 - TestFlowManager - DEBUG - Application state loaded
+2025-09-10 22:49:41,304 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-10 22:49:41,304 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-10 22:49:41,304 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-10 22:49:41,305 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-10 22:49:41,816 - TestFlowManager - INFO - Main window shown
+2025-09-10 22:49:42,976 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 22:49:42,976 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:49:53,701 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-001
+2025-09-10 22:49:54,314 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-10 22:49:54,314 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-10 22:49:55,278 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:49:55,278 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:49:55,407 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:49:55,408 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:49:55,408 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:49:55,408 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:49:55,431 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:49:55,433 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:49:55,435 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:49:55,442 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:49:55,448 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:49:55,509 - TestFlowManager - WARNING - DL number DL-2025-10-001 not found in available sheets
+2025-09-10 22:49:55,533 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 22:49:55,580 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-09-10 22:49:55,584 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-09-10 22:49:55,622 - TestFlowManager - DEBUG - COM library uninitialized
+2025-09-10 22:49:58,834 - TestFlowManager - DEBUG - Status updated: 未找到DL编号: DL-2025-10-001
+2025-09-10 22:49:58,835 - TestFlowManager - DEBUG - Updated status: 未找到DL编号: DL-2025-10-001
+2025-09-10 22:49:58,835 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:50:07,798 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-09-10 22:50:08,347 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-10 22:50:08,347 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-10 22:50:09,305 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:50:09,305 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:50:09,408 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:50:09,408 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:50:09,408 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:50:09,408 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:50:09,430 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:50:09,431 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:50:09,432 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:50:09,438 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:50:09,444 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:50:09,452 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 22:50:09,452 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:50:09,452 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 22:50:09,489 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 22:50:09,489 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:50:09,489 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 22:50:09,489 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-09-10 22:50:09,512 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 22:51:54,170 - TestFlowManager - INFO - Modified data for DL-2025-06-003: {'sample_information': 'NPD', 'tests_to_be_performed': 'PwrBlade Ultra Pro Rec.R/A TYPE,WITH 2HP+20S:10175400-2504201LF\nPwrBlade Ultra Pro RAH WITH 2HP+20S+5LP:10172012-2504201LF\n5 LP CABLE:10132080', 'applicable_specifications': 'Qualifcaiton test', 'test_type': 'Partial Qualification', 'requested_by': 'Yi-Peng Wu', 'location': 'Dongguan', 'project_leader': 'Even Yang', 'test_result': 'OK', 'failed_item': '', 'sample_deposition': '', 'sub_contract': 'No', 'test_fee': '12350', 'remarks_po': 'NA'}
+2025-09-10 22:51:54,170 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-003
+2025-09-10 22:51:54,170 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-003
+2025-09-10 22:51:54,170 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-003
+2025-09-10 22:51:59,116 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 22:51:59,116 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:52:02,612 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-10 22:52:02,612 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-09-10 22:52:03,187 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:52:03,187 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:52:03,279 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:52:03,280 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:52:03,280 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:52:03,280 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:52:03,285 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-10 22:52:03,336 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:52:03,367 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:52:03,376 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:52:03,569 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:52:03,621 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:52:03,621 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-10 22:52:03,856 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-10 22:52:03,856 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-10 22:52:03,856 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-10 22:52:03,857 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:52:03,857 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:52:03,857 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:52:25,059 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 22:52:25,059 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 22:52:27,018 - TestFlowManager - DEBUG - Handling view DL number request: DL-2024-01-007W
+2025-09-10 22:52:27,018 - TestFlowManager - DEBUG - Excel instance count increased to 3
+2025-09-10 22:52:27,506 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 22:52:27,506 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 22:52:27,762 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 22:52:27,763 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:52:27,763 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 22:52:27,763 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 22:52:27,794 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:52:27,796 - TestFlowManager - DEBUG -   [INFO] 当前工作表无筛选器
+2025-09-10 22:52:27,796 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:52:27,806 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:52:27,816 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:52:30,968 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 22:52:30,969 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 22:52:30,970 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 22:52:30,977 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 22:52:30,984 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 22:52:30,992 - TestFlowManager - DEBUG - Found row set to: 10
+2025-09-10 22:52:30,993 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:52:30,993 - TestFlowManager - DEBUG - DL number set to: DL-2024-01-007W
+2025-09-10 22:52:31,037 - TestFlowManager - DEBUG - Found row set to: 10
+2025-09-10 22:52:31,037 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 22:52:31,037 - TestFlowManager - DEBUG - DL number set to: DL-2024-01-007W
+2025-09-10 22:52:31,037 - TestFlowManager - INFO - Successfully found DL number: DL-2024-01-007W
+2025-09-10 22:52:31,063 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 23:04:16,904 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2024-01-007W
+2025-09-10 23:04:16,904 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2024-01-007W
+2025-09-10 23:04:16,904 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2024-01-007W
+2025-09-10 23:04:18,423 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 23:04:18,423 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 23:04:28,461 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-002
+2025-09-10 23:04:28,461 - TestFlowManager - DEBUG - Excel instance count increased to 4
+2025-09-10 23:04:28,947 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 23:04:28,947 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:04:29,047 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 23:04:29,047 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:04:29,047 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:04:29,047 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 23:04:29,077 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 23:04:29,078 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 23:04:29,079 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 23:04:29,087 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 23:04:29,094 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 23:04:29,103 - TestFlowManager - DEBUG - Found row set to: 12
+2025-09-10 23:04:29,103 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:04:29,103 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-002
+2025-09-10 23:04:29,154 - TestFlowManager - DEBUG - Found row set to: 12
+2025-09-10 23:04:29,154 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:04:29,154 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-002
+2025-09-10 23:04:29,154 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-002
+2025-09-10 23:04:29,176 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 23:08:46,596 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-002
+2025-09-10 23:08:46,596 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-002
+2025-09-10 23:08:46,596 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-002
+2025-09-10 23:08:47,650 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:08:47,650 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:08:47,650 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:08:47,650 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:08:47,707 - TestFlowManager - INFO - Application exited
+2025-09-10 23:08:47,707 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-10 23:08:47,707 - TestFlowManager - INFO - Closing all windows
+2025-09-10 23:08:47,707 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:08:47,707 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:08:47,707 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:08:47,707 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:08:47,707 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:08:47,707 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:08:47,707 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:08:47,707 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:18:50,135 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-10 23:18:50,149 - TestFlowManager - INFO - Application initialized successfully
+2025-09-10 23:18:50,149 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-10 23:18:50,161 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-10 23:18:50,161 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-10 23:18:50,162 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:18:50,222 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-10 23:18:50,222 - TestFlowManager - DEBUG - Application state loaded
+2025-09-10 23:18:50,222 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-10 23:18:50,222 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-10 23:18:50,223 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-10 23:18:50,223 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-10 23:18:50,754 - TestFlowManager - INFO - Main window shown
+2025-09-10 23:18:51,592 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 23:18:51,592 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 23:19:01,149 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-09-10 23:19:01,434 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-10 23:19:01,434 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-10 23:19:02,395 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 23:19:02,395 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:19:02,844 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 23:19:02,846 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:19:02,846 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:19:02,846 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 23:19:02,910 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 23:19:02,911 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 23:19:02,913 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 23:19:02,922 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 23:19:02,933 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 23:19:02,944 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:19:02,944 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:19:02,944 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:19:02,999 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:19:02,999 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:19:02,999 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:19:02,999 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-09-10 23:19:03,478 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 23:19:31,881 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-003
+2025-09-10 23:19:31,881 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-003
+2025-09-10 23:19:31,881 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-003
+2025-09-10 23:19:39,191 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:19:39,191 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:19:39,191 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:19:39,191 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:19:39,233 - TestFlowManager - INFO - Application exited
+2025-09-10 23:19:39,233 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-10 23:19:39,234 - TestFlowManager - INFO - Closing all windows
+2025-09-10 23:19:39,234 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:19:39,234 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:19:39,234 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:19:39,234 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:19:39,234 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:19:39,234 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:19:39,234 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:19:39,234 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:20:30,759 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-10 23:20:30,771 - TestFlowManager - INFO - Application initialized successfully
+2025-09-10 23:20:30,771 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-10 23:20:30,779 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-10 23:20:30,779 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-10 23:20:30,779 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:20:30,819 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-10 23:20:30,819 - TestFlowManager - DEBUG - Application state loaded
+2025-09-10 23:20:30,819 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-10 23:20:30,819 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-10 23:20:30,819 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-10 23:20:30,819 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-10 23:20:31,243 - TestFlowManager - INFO - Main window shown
+2025-09-10 23:20:32,223 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 23:20:32,224 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 23:20:41,364 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-09-10 23:20:41,937 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-10 23:20:41,938 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-10 23:20:42,930 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 23:20:42,930 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:20:43,105 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 23:20:43,105 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:20:43,106 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:20:43,106 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 23:20:43,134 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 23:20:43,136 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 23:20:43,137 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 23:20:43,145 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 23:20:43,153 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 23:20:43,162 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:20:43,162 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:20:43,162 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:20:43,209 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:20:43,209 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:20:43,209 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:20:43,209 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-09-10 23:20:43,236 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 23:29:20,877 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-10 23:29:20,886 - TestFlowManager - INFO - Application initialized successfully
+2025-09-10 23:29:20,886 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-10 23:29:20,896 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-10 23:29:20,896 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-10 23:29:20,896 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:29:20,934 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-10 23:29:20,934 - TestFlowManager - DEBUG - Application state loaded
+2025-09-10 23:29:20,934 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-10 23:29:20,934 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-10 23:29:20,934 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-10 23:29:20,934 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-10 23:29:21,582 - TestFlowManager - INFO - Main window shown
+2025-09-10 23:29:23,014 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 23:29:23,014 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 23:29:31,086 - TestFlowManager - DEBUG - Handling view DL number request: DL-205-
+2025-09-10 23:29:31,086 - TestFlowManager - ERROR - Invalid DL number format: DL-205-
+2025-09-10 23:29:31,086 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-09-10 23:29:31,552 - TestFlowManager - DEBUG - Status updated: 未找到DL编号: DL-205-
+2025-09-10 23:29:31,552 - TestFlowManager - DEBUG - Updated status: 未找到DL编号: DL-205-
+2025-09-10 23:29:31,552 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 23:29:49,529 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-09-10 23:29:49,558 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-10 23:29:49,558 - TestFlowManager - DEBUG - Excel instance count increased to 0
+2025-09-10 23:29:50,036 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 23:29:50,036 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:29:50,128 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 23:29:50,129 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:29:50,129 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:29:50,129 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 23:29:50,164 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 23:29:50,165 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 23:29:50,166 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 23:29:50,175 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 23:29:50,184 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 23:29:50,195 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:29:50,195 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:29:50,195 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:29:50,252 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:29:50,253 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:29:50,253 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:29:50,253 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-09-10 23:29:50,278 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 23:30:40,575 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-003
+2025-09-10 23:30:40,575 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-003
+2025-09-10 23:30:40,575 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-003
+2025-09-10 23:30:42,466 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:30:42,466 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:30:42,466 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:30:42,466 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:30:42,512 - TestFlowManager - INFO - Application exited
+2025-09-10 23:30:42,512 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-10 23:30:42,512 - TestFlowManager - INFO - Closing all windows
+2025-09-10 23:30:42,512 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:30:42,512 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:30:42,512 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:30:42,512 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:30:42,512 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:30:42,512 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:30:42,512 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:30:42,512 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:32:47,662 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-10 23:32:47,673 - TestFlowManager - INFO - Application initialized successfully
+2025-09-10 23:32:47,673 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-10 23:32:47,681 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-10 23:32:47,681 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-10 23:32:47,681 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:32:47,735 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-10 23:32:47,735 - TestFlowManager - DEBUG - Application state loaded
+2025-09-10 23:32:47,735 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-10 23:32:47,735 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-10 23:32:47,735 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-10 23:32:47,735 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-10 23:32:48,142 - TestFlowManager - INFO - Main window shown
+2025-09-10 23:32:49,232 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 23:32:49,232 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 23:32:55,857 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-09-10 23:32:55,893 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-10 23:32:55,893 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-10 23:32:56,347 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 23:32:56,347 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:32:56,437 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 23:32:56,437 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:32:56,437 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:32:56,437 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 23:32:56,468 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 23:32:56,469 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 23:32:56,470 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 23:32:56,478 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 23:32:56,487 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 23:32:56,495 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:32:56,495 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:32:56,495 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:32:56,541 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:32:56,541 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:32:56,541 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:32:56,541 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-09-10 23:32:56,569 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 23:33:13,525 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-003
+2025-09-10 23:33:13,525 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-003
+2025-09-10 23:33:13,525 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-003
+2025-09-10 23:33:14,574 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 23:33:14,574 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 23:33:15,889 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-10 23:33:15,889 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-09-10 23:33:16,312 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 23:33:16,312 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:33:16,455 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 23:33:16,456 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:33:16,456 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:33:16,456 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 23:33:16,460 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-10 23:33:16,504 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 23:33:16,526 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 23:33:16,532 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 23:33:16,600 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 23:33:16,642 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 23:33:16,643 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-10 23:33:16,788 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-10 23:33:16,788 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-10 23:33:16,788 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-10 23:33:16,789 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:33:16,789 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:33:16,789 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:33:30,753 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:33:30,754 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:33:30,754 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:33:30,754 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:33:30,793 - TestFlowManager - INFO - Application exited
+2025-09-10 23:33:30,793 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-10 23:33:30,794 - TestFlowManager - INFO - Closing all windows
+2025-09-10 23:33:30,794 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:33:30,794 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:33:30,794 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:33:30,794 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:33:30,794 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:33:30,794 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:33:30,794 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:33:30,794 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:34:47,689 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-10 23:34:47,701 - TestFlowManager - INFO - Application initialized successfully
+2025-09-10 23:34:47,702 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-10 23:34:47,709 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-10 23:34:47,709 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-10 23:34:47,709 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:34:47,760 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-10 23:34:47,760 - TestFlowManager - DEBUG - Application state loaded
+2025-09-10 23:34:47,760 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-10 23:34:47,760 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-10 23:34:47,760 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-10 23:34:47,760 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-10 23:34:48,151 - TestFlowManager - INFO - Main window shown
+2025-09-10 23:34:49,021 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 23:34:49,021 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 23:34:56,619 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-09-10 23:34:56,690 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-10 23:34:56,690 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-10 23:34:57,150 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 23:34:57,150 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:34:57,244 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 23:34:57,244 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:34:57,244 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:34:57,244 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 23:34:57,272 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 23:34:57,274 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 23:34:57,275 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 23:34:57,283 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 23:34:57,290 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 23:34:57,299 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:34:57,299 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:34:57,299 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:34:57,349 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:34:57,350 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:34:57,350 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:34:57,350 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-09-10 23:34:57,375 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 23:35:21,863 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-003
+2025-09-10 23:35:21,863 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-003
+2025-09-10 23:35:21,863 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-003
+2025-09-10 23:35:23,133 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 23:35:23,133 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 23:35:24,057 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-09-10 23:35:24,057 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-09-10 23:35:24,468 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 23:35:24,468 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:35:24,553 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 23:35:24,553 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:35:24,553 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:35:24,553 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 23:35:24,557 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-09-10 23:35:24,594 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 23:35:24,615 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 23:35:24,621 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 23:35:24,682 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 23:35:24,719 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 23:35:24,719 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-09-10 23:35:24,862 - TestFlowManager - INFO - 在第 18 行发现连续 5 行为空
+2025-09-10 23:35:24,862 - TestFlowManager - INFO - Found last valid row at row 18
+2025-09-10 23:35:24,862 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-09-10 23:35:24,862 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:35:24,863 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:35:24,863 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:35:33,050 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:35:33,050 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:35:33,050 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:35:33,050 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:35:33,096 - TestFlowManager - INFO - Application exited
+2025-09-10 23:35:33,096 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-10 23:35:33,096 - TestFlowManager - INFO - Closing all windows
+2025-09-10 23:35:33,097 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:35:33,097 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:35:33,097 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:35:33,097 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:35:33,097 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:35:33,097 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:35:33,097 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:35:33,097 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:42:01,948 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-09-10 23:42:01,959 - TestFlowManager - INFO - Application initialized successfully
+2025-09-10 23:42:01,959 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-09-10 23:42:01,969 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-09-10 23:42:01,969 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-09-10 23:42:01,969 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:42:02,009 - TestFlowManager - INFO - Initializing MainWindowController
+2025-09-10 23:42:02,009 - TestFlowManager - DEBUG - Application state loaded
+2025-09-10 23:42:02,009 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-09-10 23:42:02,009 - TestFlowManager - INFO - Loaded 0 recent files
+2025-09-10 23:42:02,009 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-09-10 23:42:02,009 - TestFlowManager - DEBUG - Window 'main' registered
+2025-09-10 23:42:02,407 - TestFlowManager - INFO - Main window shown
+2025-09-10 23:42:03,490 - TestFlowManager - DEBUG - View LTR action triggered
+2025-09-10 23:42:03,491 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-09-10 23:42:11,943 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-09-10 23:42:12,011 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-10 23:42:12,011 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-10 23:42:12,470 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-09-10 23:42:12,470 - TestFlowManager - INFO - Successfully opened LTR file in read-only mode: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-10 23:42:12,563 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-09-10 23:42:12,564 - TestFlowManager - DEBUG - Available sheets set: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:42:12,564 - TestFlowManager - DEBUG - Loaded 9 available sheets: ['2020', '2021', '2022', '2023', '2024', '2025', 'Filling requirements', '2021 Whisker', '2022&2023 Whisker List']
+2025-09-10 23:42:12,564 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-09-10 23:42:12,596 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - 开始执行
+2025-09-10 23:42:12,597 - TestFlowManager - DEBUG -   [ACTION] 正在清除筛选器...
+2025-09-10 23:42:12,598 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有行...
+2025-09-10 23:42:12,606 - TestFlowManager - DEBUG -   [ACTION] 取消隐藏所有列...
+2025-09-10 23:42:12,614 - TestFlowManager - DEBUG - unhide_and_clear_filters(ws) - ✅ 成功完成
+2025-09-10 23:42:12,624 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:42:12,624 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:42:12,624 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:42:12,676 - TestFlowManager - DEBUG - Found row set to: 13
+2025-09-10 23:42:12,676 - TestFlowManager - DEBUG - Found worksheet set
+2025-09-10 23:42:12,676 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-09-10 23:42:12,676 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-09-10 23:42:12,700 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-09-10 23:42:20,967 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-06-003
+2025-09-10 23:42:20,967 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-06-003
+2025-09-10 23:42:20,967 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-06-003
+2025-09-10 23:42:22,123 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:42:22,123 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:42:22,123 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:42:22,123 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:42:22,172 - TestFlowManager - INFO - Application exited
+2025-09-10 23:42:22,172 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-09-10 23:42:22,174 - TestFlowManager - INFO - Closing all windows
+2025-09-10 23:42:22,174 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:42:22,174 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:42:22,174 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:42:22,174 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-09-10 23:42:22,174 - TestFlowManager - INFO - MainWindow closing
+2025-09-10 23:42:22,174 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-09-10 23:42:22,174 - TestFlowManager - DEBUG - Application state saved
+2025-09-10 23:42:22,174 - TestFlowManager - INFO - MainWindowController shut down successfully
