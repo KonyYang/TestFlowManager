@@ -1,11 +1,11 @@
-"""
-DL编号输入对话框模块
-提供一个对话框用于输入DL编号进行LTR查询
-"""
-
+# ... existing code ...
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit
 from PyQt5.QtCore import Qt
 from src.core.logger import logger
+# 新增导入
+from src.features.ltr_manager.service.ltr_service import LTRService
+from src.features.ltr_manager.model.ltr_data import LTRData
+from src.features.ltr_manager.view.ltr_editor_dialog import LTREditorDialog
 import re
 
 
@@ -38,7 +38,7 @@ class DLInputDialog(QDialog):
 
         # 输入框
         self.dl_input = QLineEdit()
-        self.dl_input.setPlaceholderText("请输入DL编号...")
+        self.dl_input.setPlaceholderText("请输入完整DL编号如：DL-2025-01-001")
         self.dl_input.returnPressed.connect(self._on_confirm)
 
         # 按钮布局
@@ -83,12 +83,19 @@ class DLInputDialog(QDialog):
         match = re.match(r"DL-(\d{4})-(\d{2})-(\d{3})(.*)", text.strip())
         if match:
             year = int(match.group(1))
+            month = match.group(2)
+            suffix = match.group(4)
+
             # 验证年份合理性（2000年到当前年份+1）
             from datetime import datetime
             current_year = datetime.now().year
             if 2000 <= year <= current_year + 1:
-                self.confirm_button.setEnabled(True)
-                return
+                # 验证月份合理性（01-12）
+                if month in ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']:
+                    # 验证后缀格式（如果存在）- 必须以字母开头，由字母和数字组成
+                    if not suffix or re.match(r"^[a-zA-Z][a-zA-Z0-9]*$", suffix):
+                        self.confirm_button.setEnabled(True)
+                        return
 
         self.confirm_button.setEnabled(False)
 
@@ -116,3 +123,4 @@ class DLInputDialog(QDialog):
             输入的DL编号，如果选择跳过则返回None
         """
         return self.dl_number
+# ... existing code ...

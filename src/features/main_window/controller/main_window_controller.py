@@ -78,32 +78,30 @@ class MainWindowController:
 
             # 如果用户输入了DL编号，则先验证并处理DL编号查询逻辑
             if dl_number:
-                # 验证DL编号格式
-                from src.features.ltr_manager.service.ltr_service import LTRService
-                from src.features.ltr_manager.model.ltr_data import LTRData
-
-                # 创建临时服务实例用于验证
-                temp_data_model = LTRData()
-                temp_service = LTRService(temp_data_model)
-                parse_result = temp_service.validate_and_parse_dl_number(dl_number)
-
-                if not parse_result["valid"]:
-                    # DL编号格式不正确，显示错误信息
-                    from PyQt5.QtWidgets import QMessageBox
-                    QMessageBox.warning(
-                        self.view,
-                        "格式错误",
-                        parse_result["error_message"]
-                    )
-                    self.service.update_status(f"DL编号格式错误: {dl_number}")
-                    return False
-
                 # 调用LTR控制器处理DL编号查询
-                success = self.ltr_controller.handle_view_dl_number(dl_number)
+                result = self.ltr_controller.handle_view_dl_number(dl_number)
 
-                if success:
+                if result["success"]:
+                    # 成功找到DL编号，显示编辑对话框
+                    from src.features.ltr_manager.view.ltr_editor_dialog import LTREditorDialog
+
+                    # 准备数据
+                    ltr_data = {
+                        'dl_number': dl_number,
+                        'data': result['data']
+                    }
+
+                    # 显示编辑对话框
+                    editor_dialog = LTREditorDialog(ltr_data, self.view)
+                    if editor_dialog.exec_() == QDialog.Accepted:
+                        # 用户点击了更新按钮，获取修改后的数据
+                        modified_data = editor_dialog.get_modified_data()
+                        # 这里应该调用服务来更新数据
+                        logger.info(f"Modified data for {dl_number}: {modified_data}")
+
                     self.service.update_status(f"已定位到DL编号: {dl_number}")
                     logger.info(f"Successfully found and positioned to DL number: {dl_number}")
+                    success = True  # 设置成功标志
                 else:
                     # 关闭Excel应用程序，因为handle_view_dl_number已经打开了它
                     from src.utils.excel_utils import release_excel_app
@@ -112,11 +110,9 @@ class MainWindowController:
                     QMessageBox.warning(
                         self.view,
                         "查找结果",
-                        f"未找到DL编号: {dl_number}\n。"
+                        f"未找到DL编号: {dl_number}\n错误信息: {result.get('error', '未知错误')}"
                     )
                     self.service.update_status(f"未找到DL编号: {dl_number}")
-                    # # 继续执行默认的LTR查看逻辑
-                    # success = self.ltr_controller.handle_view_ltr()
                     # 重新显示DL编号输入对话框
                     return self.handle_view_ltr()
             else:

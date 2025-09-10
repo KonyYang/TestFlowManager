@@ -76,8 +76,7 @@ class LTRController:
             # 在这种情况下，我们不应该自动关闭工作簿
             pass
 
-
-    def handle_view_dl_number(self, dl_number: str) -> bool:
+    def handle_view_dl_number(self, dl_number: str) -> dict:
         """
         处理查看指定DL编号事件
 
@@ -85,9 +84,12 @@ class LTRController:
             dl_number: 要查找的DL编号
 
         Returns:
-            是否成功找到并定位到DL编号
+            包含查找结果和数据的字典:
+            - success: 是否成功找到并定位到DL编号
+            - data: E到Q列的数据（如果找到）
         """
         workbook = None
+        excel_app = None
         try:
             logger.debug(f"Handling view DL number request: {dl_number}")
 
@@ -95,13 +97,19 @@ class LTRController:
             parse_result = self.service.validate_and_parse_dl_number(dl_number)
             if not parse_result["valid"]:
                 logger.error(f"Invalid DL number format: {dl_number}")
-                return False
+                return {"success": False, "data": None, "error": parse_result["error_message"]}
 
             # 2. 打开LTR文件（只打开一次）
             workbook = self.service.open_ltr_file_readonly()
             if workbook is None:
                 logger.error("Failed to open LTR file")
-                return False
+                return {"success": False, "data": None, "error": "无法打开LTR文件"}
+
+            # 获取Excel应用程序对象用于后续操作
+            excel_app = workbook.Application
+            # 设置为后台操作，不显示Excel界面
+            excel_app.Visible = False
+            excel_app.ScreenUpdating = False  # 暂时关闭屏幕更新
 
             # 3. 加载可用工作表
             sheets = self.service.load_available_sheets(workbook)
@@ -115,7 +123,7 @@ class LTRController:
 
             # 5. 在确定的工作表中查找DL编号
             found = False
-            found_position = None
+            row_data = None
 
             for sheet in sheets_to_search:
                 if sheet is not None:
@@ -125,16 +133,9 @@ class LTRController:
                     # 查找DL编号
                     search_result = self.service.find_dl_number(sheet, dl_number)
                     if search_result["success"]:
-                        # 找到了DL编号，定位到该单元格
-                        sheet.Activate()
-                        target_cell = sheet.Cells(search_result["row"], search_result["column"])
-                        target_cell.Select()
                         found = True
-                        found_position = {
-                            "worksheet": sheet,
-                            "row": search_result["row"],
-                            "column": search_result["column"]
-                        }
+                        # 提取E到Q列的数据
+                        row_data = self._extract_row_data(sheet, search_result["row"])
                         # 保存找到的位置信息到数据模型
                         self.data_model.set_found_row(search_result["row"])
                         self.data_model.set_found_worksheet(sheet)
@@ -142,21 +143,80 @@ class LTRController:
                         break
 
             if found:
-                logger.info(f"Successfully found and positioned to DL number: {dl_number} at row {found_position['row']}")
+                logger.info(f"Successfully found DL number: {dl_number}")
+                return {"success": True, "data": row_data}
             else:
                 logger.warning(f"DL number {dl_number} not found in available sheets")
-
-            return found
+                return {"success": False, "data": None, "error": "未找到指定的DL编号"}
 
         except Exception as e:
             logger.error(f"Failed to handle view DL number request: {e}")
-            return False
+            return {"success": False, "data": None, "error": str(e)}
         finally:
-            # 注意：如果Excel应用程序是可见的，用户可能还需要访问它
-            # 在这种情况下，我们不应该自动关闭工作簿
-            pass
+            # 确保Excel资源被正确关闭，因为我们不需要显示它
+            if excel_app:
+                excel_app.ScreenUpdating = True  # 恢复屏幕更新
 
+            # 关闭工作簿和Excel应用程序
+            if workbook:
+                try:
+                    workbook.Close(SaveChanges=False)
+                except Exception as e:
+                    logger.error(f"Failed to close workbook: {e}")
 
+            if excel_app:
+                try:
+                    excel_app.Quit()
+                except Exception as e:
+                    logger.error(f"Failed to quit Excel application: {e}")
+
+                # 释放COM对象
+                try:
+                    from src.utils.excel_utils import release_excel_app
+                    release_excel_app(excel_app)
+                except Exception as e:
+                    logger.error(f"Failed to release Excel application: {e}")
+
+    def _extract_row_data(self, worksheet, row_number: int) -> dict:
+        """
+        提取指定行的E到Q列数据
+
+        Args:
+            worksheet: Excel工作表对象
+            row_number: 行号
+
+        Returns:
+            包含E到Q列数据的字典
+        """
+        try:
+            # E列到Q列对应索引为5到17
+            data = {}
+            field_names = [
+                'sample_information',           # E列
+                'tests_to_be_performed',       # F列
+                'applicable_specifications',   # G列
+                'test_type',                   # H列
+                'requested_by',                # I列
+                'location',                    # J列
+                'project_leader',              # K列
+                'test_result',                 # L列
+                'failed_item',                 # M列
+                'sample_deposition',           # N列
+                'sub_contract',                # O列
+                'test_fee',                    # P列
+                'remarks_po'                   # Q列
+            ]
+
+            for i, field_name in enumerate(field_names):
+                column_index = 5 + i  # E列索引为5
+                cell_value = worksheet.Cells(row_number, column_index).Value
+                data[field_name] = cell_value if cell_value is not None else ""
+
+            return data
+        except Exception as e:
+            logger.error(f"Failed to extract row data: {e}")
+            # 返回默认空数据
+            return {field: "" for field in field_names}
 
     def get_ltr_file_path(self) -> str:
         """

@@ -27,6 +27,9 @@ class LTRNumberCheckerView:
         self.setup_ui()
         self.setup_styles()
         self.sample_data = self._get_sample_data()
+        # 存储当前显示的数据，用于编辑功能
+        self.current_data = {}
+        self.editable_items = {}
 
     def set_controller(self, controller) -> None:
         """
@@ -72,7 +75,7 @@ class LTRNumberCheckerView:
         self.search_button.pack(side=tk.RIGHT)
 
         # 结果显示区域
-        result_frame = ttk.LabelFrame(self.main_frame, text="已有编号内容", padding="10")
+        result_frame = ttk.LabelFrame(self.main_frame, text="LTR信息编辑", padding="10")
         result_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
 
         # 创建Treeview显示结果
@@ -90,8 +93,10 @@ class LTRNumberCheckerView:
         self.result_tree.heading("申请编号或更新内容", text="申请编号或更新内容")
         self.result_tree.heading("已有编号内容", text="已有编号内容")
 
-        for col in columns:
-            self.result_tree.column(col, width=200, anchor=tk.W)
+        # 设置列宽
+        self.result_tree.column("标签", width=200, anchor=tk.W)
+        self.result_tree.column("申请编号或更新内容", width=200, anchor=tk.W)
+        self.result_tree.column("已有编号内容", width=200, anchor=tk.W)
         self.result_tree.column("#0", width=50, anchor=tk.W)
 
         # 添加滚动条
@@ -118,9 +123,30 @@ class LTRNumberCheckerView:
         result_frame.columnconfigure(0, weight=1)
         result_frame.rowconfigure(0, weight=1)
 
+        # 操作按钮区域
+        button_frame = ttk.Frame(self.main_frame)
+        button_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
+
+        self.save_button = ttk.Button(
+            button_frame,
+            text="保存修改",
+            command=self._on_save_clicked
+        )
+        self.save_button.pack(side=tk.RIGHT, padx=(5, 0))
+
+        self.reset_button = ttk.Button(
+            button_frame,
+            text="重置",
+            command=self._on_reset_clicked
+        )
+        self.reset_button.pack(side=tk.RIGHT)
+
         # 配置主框架网格
         self.main_frame.columnconfigure(0, weight=1)
         self.main_frame.rowconfigure(2, weight=1)
+
+        # 绑定双击事件用于编辑
+        self.result_tree.bind("<Double-1>", self._on_item_double_click)
 
     def setup_styles(self) -> None:
         """设置界面样式和颜色"""
@@ -152,6 +178,87 @@ class LTRNumberCheckerView:
             messagebox.showerror("系统错误", "控制器未设置")
             self.set_search_button_state(True)
 
+    def _on_item_double_click(self, event):
+        """处理双击项目事件，允许编辑"""
+        item = self.result_tree.identify('item', event.x, event.y)
+        column = self.result_tree.identify('column', event.x, event.y)
+
+        # 只允许编辑第2列（申请编号或更新内容）
+        if column == "#2" and item:
+            self._edit_item(item)
+
+    def _edit_item(self, item_id):
+        """编辑指定项目"""
+        # 获取项目数据
+        values = self.result_tree.item(item_id, 'values')
+        label = values[0]
+        current_value = values[1]
+
+        # 创建一个顶层窗口用于编辑
+        edit_window = tk.Toplevel(self.main_frame)
+        edit_window.title(f"编辑 {label}")
+        edit_window.geometry("400x150")
+        edit_window.transient(self.main_frame)
+        edit_window.grab_set()
+
+        # 居中显示
+        edit_window.geometry("+%d+%d" % (edit_window.winfo_screenwidth()/2 - 200,
+                                         edit_window.winfo_screenheight()/2 - 75))
+
+        # 创建编辑控件
+        ttk.Label(edit_window, text=f"编辑 {label}:").pack(pady=10)
+
+        entry = ttk.Entry(edit_window, width=50)
+        entry.insert(0, current_value)
+        entry.pack(pady=5)
+        entry.select_range(0, tk.END)
+        entry.focus()
+
+        # 保存按钮
+        def save_edit():
+            new_value = entry.get()
+            # 更新Treeview中的值
+            values = list(self.result_tree.item(item_id, 'values'))
+            values[1] = new_value
+            self.result_tree.item(item_id, values=values)
+            edit_window.destroy()
+
+        # 按钮框架
+        button_frame = ttk.Frame(edit_window)
+        button_frame.pack(pady=10)
+
+        ttk.Button(button_frame, text="保存", command=save_edit).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="取消", command=edit_window.destroy).pack(side=tk.LEFT, padx=5)
+
+        # 绑定回车键保存
+        entry.bind('<Return>', lambda e: save_edit())
+        entry.bind('<Escape>', lambda e: edit_window.destroy())
+
+    def _on_save_clicked(self):
+        """处理保存按钮点击事件"""
+        # 收集所有编辑后的数据
+        updated_data = {}
+        for item_id in self.result_tree.get_children():
+            values = self.result_tree.item(item_id, 'values')
+            label = values[0]
+            new_value = values[1]
+            updated_data[label] = new_value
+
+        # 调用控制器保存数据
+        if self.controller:
+            success = self.controller.save_ltr_data(updated_data)
+            if success:
+                messagebox.showinfo("保存成功", "LTR信息已保存")
+            else:
+                messagebox.showerror("保存失败", "保存LTR信息时发生错误")
+        else:
+            messagebox.showerror("系统错误", "控制器未设置")
+
+    def _on_reset_clicked(self):
+        """处理重置按钮点击事件"""
+        # 重置为原始数据
+        self.display_ltr_info(self.current_data)
+
     def display_ltr_info(self, info: Dict[str, Any]) -> None:
         """
         显示LTR信息
@@ -159,6 +266,9 @@ class LTRNumberCheckerView:
         Args:
             info: LTR信息字典
         """
+        # 保存当前数据
+        self.current_data = info.copy()
+
         # 清空现有数据
         for item in self.result_tree.get_children():
             self.result_tree.delete(item)
@@ -188,6 +298,7 @@ class LTRNumberCheckerView:
         # 添加数据
         for key, value in info.items():
             tag = tag_mapping.get(key, "")
+            # 第二列默认为空，用户可以编辑
             self.result_tree.insert(
                 "",
                 tk.END,
@@ -256,5 +367,53 @@ class LTRNumberCheckerView:
         self.dl_entry.delete(0, tk.END)
         self.dl_entry.insert(0, dl_number)
 
+    def update_comparison_data(self, new_data: Dict[str, Any], existing_data: Dict[str, Any]) -> None:
+        """
+        更新比较数据，在第三列显示已有信息，并用颜色区分不同类型
 
+        Args:
+            new_data: 新的数据（申请编号或更新内容）
+            existing_data: 已有数据（已有编号内容）
+        """
+        # 保存当前数据
+        self.current_data = existing_data.copy()
 
+        # 清空现有数据
+        for item in self.result_tree.get_children():
+            self.result_tree.delete(item)
+
+        # 根据标签分类显示不同颜色
+        color_categories = {
+            "red": ["DL", "Project Type", "Description P/N", "Test Item", "Test Type",
+                    "Requested by", "Location", "Project Leader", "Test Result",
+                    "Failed item", "Sample deposition", "Sub-contract", "Test Fee",
+                    "Remarks (PO)"],
+            "blue": ["Phone", "E-mail of Requestor", "Product Description",
+                     "Applicable Specifications", "Date Lab Received Samples",
+                     "Estimated Completion Date"],
+            "green": ["Start Test Date", "Finish Test Date", "Report Date"],
+            "orange": ["Customer", "Department", "Priority"],
+            "purple": ["Reference Documents", "Test Standards"],
+            "cyan": ["Equipment Used", "Test Conditions"],
+            "pink": ["Special Requirements", "Notes"]
+        }
+
+        # 创建标签到颜色的映射
+        tag_mapping = {}
+        for color, labels in color_categories.items():
+            for label in labels:
+                tag_mapping[label] = color
+
+        # 添加数据
+        all_keys = set(new_data.keys()) | set(existing_data.keys())
+        for key in sorted(all_keys):
+            tag = tag_mapping.get(key, "")
+            new_value = new_data.get(key, "")
+            existing_value = existing_data.get(key, "")
+
+            self.result_tree.insert(
+                "",
+                tk.END,
+                values=(key, new_value, existing_value),
+                tags=(tag,)
+            )

@@ -195,20 +195,32 @@ def get_sheet_by_name(workbook: Any, sheet_name: str) -> Any:
         logger.error(f"Failed to get sheet '{sheet_name}': {e}")
         return None
 
-def find_cell(sheet: Any, search_string: str) -> Optional[tuple]:
+def find_cell(sheet: Any, search_string: str, column: Optional[int] = None,
+              look_in: int = -4163, look_at: int = 2) -> Optional[tuple]:
     """
     在工作表中查找指定字符串，返回匹配单元格的位置信息
 
     Args:
         sheet: Excel工作表对象
         search_string: 要查找的字符串
+        column: 限定查找的列号（可选），默认在整个工作表中查找
+        look_in: 查找范围 (-4163: xlValues, -4144: xlFormulas)
+        look_at: 匹配方式 (1: xlPart部分匹配, 2: xlWhole完全匹配)
 
     Returns:
         (行号, 列号, 单元格值)的元组，如果未找到则返回None
     """
     try:
+        # 确定在哪个范围内查找
+        search_range = sheet.Columns(column) if column else sheet.Cells
+
         # 使用Find方法查找字符串
-        found_cell = sheet.Cells.Find(What=search_string)
+        found_cell = search_range.Find(
+            What=search_string,
+            LookIn=look_in,
+            LookAt=look_at,
+            SearchDirection=1  # xlNext
+        )
 
         if found_cell is not None:
             row = found_cell.Row

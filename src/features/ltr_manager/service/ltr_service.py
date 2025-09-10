@@ -84,7 +84,6 @@ class LTRService:
             logger.error(f"Failed to open LTR file with password: {e}")
             return False
 
-
     def get_ltr_file_path(self) -> str:
         """
         获取LTR文件路径
@@ -205,8 +204,6 @@ class LTRService:
             logger.error(f"查找空白单元格失败: {e}")
             return -1
 
-
-
     def load_available_sheets(self, workbook: Any) -> List[str]:
         """
         加载Excel文件中所有工作表名称
@@ -321,8 +318,6 @@ class LTRService:
 
         return sheets_to_search
 
-
-
     def find_dl_number(self, worksheet, dl_number: str) -> dict:
         """
         在指定工作表中查找DL编号
@@ -338,7 +333,21 @@ class LTRService:
             - column: 找到的列号（通常是4，即D列）
         """
         try:
-            # 查找DL编号
+            # 使用更高效的方式查找DL编号
+            # 先尝试使用Excel内置的查找功能
+            from src.utils.excel_utils import find_cell
+
+            try:
+                # 使用通用的find_cell函数在D列(第4列)中查找DL编号
+                result = find_cell(worksheet, dl_number, column=4)
+
+                if result:
+                    row, column, value = result
+                    return self._set_found_result(worksheet, dl_number, row, column)
+            except Exception as e:
+                logger.debug(f"Excel Find method failed, falling back to manual search: {e}")
+
+            # 如果内置查找失败，则使用原来的逐行查找方法
             row = 2  # 从第2行开始（跳过标题行）
             while row < 10000:  # 设置上限防止死循环
                 cell_value = worksheet.Cells(row, 4).Value  # D列
@@ -348,15 +357,7 @@ class LTRService:
                         break
                 elif str(cell_value).strip() == dl_number:
                     # 找到了DL编号
-                    self.data_model.set_found_row(row)
-                    self.data_model.set_found_worksheet(worksheet)
-                    self.data_model.set_dl_number(dl_number)
-
-                    return {
-                        "success": True,
-                        "row": row,
-                        "column": 4
-                    }
+                    return self._set_found_result(worksheet, dl_number, row, 4)
                 row += 1
 
             # 未找到DL编号
@@ -373,3 +374,27 @@ class LTRService:
                 "row": None,
                 "column": None
             }
+
+    def _set_found_result(self, worksheet, dl_number: str, row: int, column: int) -> dict:
+        """
+        设置查找成功的结果
+
+        Args:
+            worksheet: 工作表对象
+            dl_number: 找到的DL编号
+            row: 行号
+            column: 列号
+
+        Returns:
+            包含查找结果的字典
+        """
+        # 保存找到的位置信息到数据模型
+        self.data_model.set_found_row(row)
+        self.data_model.set_found_worksheet(worksheet)
+        self.data_model.set_dl_number(dl_number)
+
+        return {
+            "success": True,
+            "row": row,
+            "column": column
+        }
