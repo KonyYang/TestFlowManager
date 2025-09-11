@@ -6,6 +6,7 @@
 from typing import List, Optional
 from PyQt5.QtWidgets import QWidget, QMessageBox, QDialog
 from src.core.logger import logger
+from src.features.ltr_manager.controller.ltr_editor_controller import LTREditorController
 from src.features.main_window.model.main_window_data import MainWindowData
 from src.features.main_window.service.main_window_service import MainWindowService
 from src.features.ltr_manager.controller.ltr_controller import LTRController
@@ -31,6 +32,11 @@ class MainWindowController:
         # 初始化状态
         self.service.update_status("就绪")
         self.ltr_controller = LTRController()
+        # 使用LTR控制器的服务实例初始化LTR编辑器控制器
+        self.ltr_editor_controller = LTREditorController(
+            self.ltr_controller.data_model,
+            self.ltr_controller.service
+        )
 
     def initialize(self) -> bool:
         """
@@ -82,22 +88,20 @@ class MainWindowController:
                 result = self.ltr_controller.handle_view_dl_number(dl_number)
 
                 if result["success"]:
-                    # 成功找到DL编号，显示编辑对话框
-                    from src.features.ltr_manager.view.ltr_editor_dialog import LTREditorDialog
-
+                    # 成功找到DL编号，使用LTR编辑器控制器显示编辑对话框并处理更新
                     # 准备数据
                     ltr_data = {
                         'dl_number': dl_number,
                         'data': result['data']
                     }
 
-                    # 显示编辑对话框
-                    editor_dialog = LTREditorDialog(ltr_data, self.view)
-                    if editor_dialog.exec_() == QDialog.Accepted:
-                        # 用户点击了更新按钮，获取修改后的数据
-                        modified_data = editor_dialog.get_modified_data()
-                        # 这里应该调用服务来更新数据
-                        logger.info(f"Modified data for {dl_number}: {modified_data}")
+                    # 使用LTR编辑器控制器打开编辑对话框并处理更新
+                    update_success = self.ltr_editor_controller.open_editor_and_update(ltr_data, self.view)
+
+                    if update_success:
+                        logger.info(f"成功更新DL编号 {dl_number} 的数据")
+                    elif update_success is False:
+                        logger.info(f"用户取消了DL编号 {dl_number} 的更新操作")
 
                     self.service.update_status(f"已定位到DL编号: {dl_number}")
                     logger.info(f"Successfully found and positioned to DL number: {dl_number}")
@@ -229,6 +233,7 @@ class MainWindowController:
             )
         except Exception as e:
             logger.error(f"Failed to show about dialog: {e}")
+
     def get_recent_files(self) -> List[str]:
         """
         获取最近打开的文件列表

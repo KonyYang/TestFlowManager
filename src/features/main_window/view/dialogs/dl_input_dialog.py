@@ -1,4 +1,3 @@
-# ... existing code ...
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit
 from PyQt5.QtCore import Qt
 from src.core.logger import logger
@@ -23,13 +22,14 @@ class DLInputDialog(QDialog):
             parent: 父窗口
         """
         super().__init__(parent)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.dl_number = None
         self._setup_ui()
         self._setup_validation()
 
     def _setup_ui(self) -> None:
         """设置用户界面"""
-        self.setWindowTitle("查询指定DL编号信息")
+        self.setWindowTitle("可以查询指定DL编号信息")
         self.setModal(True)
         self.resize(400, 150)
 
@@ -123,4 +123,3 @@ class DLInputDialog(QDialog):
             输入的DL编号，如果选择跳过则返回None
         """
         return self.dl_number
-# ... existing code ...

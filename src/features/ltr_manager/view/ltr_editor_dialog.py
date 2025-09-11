@@ -4,11 +4,12 @@ LTR编辑对话框模块
 """
 
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
-                             QTableWidget, QTableWidgetItem, QLabel, QHeaderView,
+                             QTableWidget, QTableWidgetItem, QHeaderView,
                              QTextEdit, QWidget, QScrollArea, QComboBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDesktopWidget
 from src.core.logger import logger
+from src.features.ltr_manager.model.ltr_editor_data import LTREditorData
 
 
 class LTREditorDialog(QDialog):
@@ -26,38 +27,27 @@ class LTREditorDialog(QDialog):
             parent: 父窗口
         """
         super().__init__(parent)
+        self.parent_window = parent
         self.dl_data = dl_data
+        self.data_model = LTREditorData()
+
         self.dl_number = dl_data.get('dl_number', '')
         self.original_data = dl_data.get('data', {})  # E到Q列的数据
         self.modified_data = self.original_data.copy()
 
-        # 字段映射关系，定义字段类型和下拉选项
-        self.field_mapping = [
-            {'key': 'project_type', 'label': 'Project Type', 'editor_type': 'dropdown',
-             'options': ["NPD", "PEX", "OPS", "CR", "ADM"]},
-            {'key': 'sample_information', 'label': 'Description P/N', 'editor_type': 'multiline'},
-            {'key': 'tests_to_be_performed', 'label': 'Test Item', 'editor_type': 'multiline'},
-            {'key': 'test_type', 'label': 'Test Type', 'editor_type': 'dropdown',
-             'options': ["Partial Qualification", "Qualification", "Failure Analysis", "Other", "Analysis",
-                         "Chemical", "Electrical", "Environmental", "Whisker", "Mechanical", "ORT", "Solderability"]},
-            {'key': 'requested_by', 'label': 'Requested by', 'editor_type': 'text'},
-            {'key': 'location', 'label': 'Location', 'editor_type': 'text'},
-            {'key': 'project_leader', 'label': 'Project Leader', 'editor_type': 'text'},
-            {'key': 'test_result', 'label': 'Test Result', 'editor_type': 'dropdown',
-             'options': ["In progress", "OK", "Ref", "NG", "In-waiting"]},
-            {'key': 'failed_item', 'label': 'Failed item', 'editor_type': 'text'},
-            {'key': 'sample_deposition', 'label': 'Sample deposition', 'editor_type': 'text'},
-            {'key': 'sub_contract', 'label': 'Sub-contract', 'editor_type': 'dropdown', 'options': ["Yes", "No"]},
-            {'key': 'test_fee', 'label': 'Test Fee', 'editor_type': 'text'},
-            {'key': 'remarks_po', 'label': 'Remarks (PO)', 'editor_type': 'text'}
-        ]
+        # 初始化数据模型
+        self.data_model.set_dl_number(self.dl_number)
+        self.data_model.set_original_data(self.original_data)
+
+        # 获取字段映射关系
+        self.field_mapping = self.data_model.get_field_mapping()
 
         self._setup_ui()
         self._populate_data()
 
     def _setup_ui(self):
         """设置用户界面"""
-        self.setWindowTitle(f"编辑DL编号: {self.dl_number}")
+        self.setWindowTitle(f"编辑 LTR 信息: {self.dl_number}")
         self.setModal(True)
 
         # 获取屏幕尺寸并设置窗口大小为屏幕的60%
@@ -67,11 +57,6 @@ class LTREditorDialog(QDialog):
         self.move((desktop.width() - width) // 2, (desktop.height() - height) // 2)
 
         layout = QVBoxLayout()
-
-        # 标题
-        title_label = QLabel(f"DL编号: {self.dl_number}")
-        title_label.setStyleSheet("font-weight: bold; font-size: 14px;")
-        layout.addWidget(title_label)
 
         # 创建滚动区域以容纳表格
         scroll_area = QScrollArea()
@@ -175,10 +160,9 @@ class LTREditorDialog(QDialog):
 
                 # 查找字段键名
                 field_key = None
-                for field_info in self.field_mapping:
-                    if field_info['label'] == field_label:
-                        field_key = field_info['key']
-                        break
+                field_info = self.data_model.get_field_by_label(field_label)
+                if field_info:
+                    field_key = field_info['key']
 
                 if field_key:
                     # 获取修改后的值
@@ -198,7 +182,46 @@ class LTREditorDialog(QDialog):
 
                     self.modified_data[field_key] = modified_value
 
-        self.accept()
+        # 更新数据模型中的修改数据
+        self.data_model.set_modified_data(self.modified_data)
+
+        # 调用父控制器执行更新操作
+        from src.features.ltr_manager.controller.ltr_editor_controller import LTREditorController
+        from src.features.ltr_manager.controller.ltr_controller import LTRController
+
+        # 创建LTR控制器和服务实例（在实际应用中，这些应该通过依赖注入传递）
+        ltr_controller = LTRController()
+        ltr_editor_controller = LTREditorController(ltr_controller.data_model, ltr_controller.service)
+
+        # 执行更新操作
+        success = ltr_editor_controller.update_ltr_data(self.dl_number, self.modified_data, self.parent_window)
+
+        if success:
+            # 更新成功，刷新"当前值"列
+            self._refresh_current_values()
+            # 更新原始数据为修改后的数据
+            self.original_data = self.modified_data.copy()
+            self.data_model.set_original_data(self.original_data)
+
+    def _refresh_current_values(self):
+        """刷新当前值列"""
+        for row in range(self.data_table.rowCount()):
+            field_item = self.data_table.item(row, 0)
+            if field_item:
+                field_label = field_item.text()
+
+                # 查找字段键名
+                field_key = None
+                field_info = self.data_model.get_field_by_label(field_label)
+                if field_info:
+                    field_key = field_info['key']
+
+                if field_key:
+                    # 更新当前值
+                    current_value = self.modified_data.get(field_key, '')
+                    current_item = self.data_table.item(row, 1)
+                    if current_item:
+                        current_item.setText(str(current_value))
 
     def get_modified_data(self):
         """
