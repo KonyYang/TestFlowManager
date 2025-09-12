@@ -5,6 +5,7 @@ LTR编辑器数据模型模块
 
 from typing import Optional, Dict, Any, List
 from src.core.logger import logger
+from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
 
 
 class LTREditorData:
@@ -18,26 +19,9 @@ class LTREditorData:
         self.original_data: Dict[str, Any] = {}
         self.modified_data: Dict[str, Any] = {}
 
-        # 字段映射关系，定义字段类型和下拉选项
-        self.field_mapping: List[Dict[str, Any]] = [
-            {'key': 'project_type', 'label': 'Project Type', 'editor_type': 'dropdown',
-             'options': ["NPD", "PEX", "OPS", "CR", "ADM"]},
-            {'key': 'sample_information', 'label': 'Description P/N', 'editor_type': 'multiline'},
-            {'key': 'tests_to_be_performed', 'label': 'Test Item', 'editor_type': 'multiline'},
-            {'key': 'test_type', 'label': 'Test Type', 'editor_type': 'dropdown',
-             'options': ["Partial Qualification", "Qualification", "Failure Analysis", "Other", "Analysis",
-                         "Chemical", "Electrical", "Environmental", "Whisker", "Mechanical", "ORT", "Solderability"]},
-            {'key': 'requested_by', 'label': 'Requested by', 'editor_type': 'text'},
-            {'key': 'location', 'label': 'Location', 'editor_type': 'text'},
-            {'key': 'project_leader', 'label': 'Project Leader', 'editor_type': 'text'},
-            {'key': 'test_result', 'label': 'Test Result', 'editor_type': 'dropdown',
-             'options': ["In progress", "OK", "Ref", "NG", "In-waiting"]},
-            {'key': 'failed_item', 'label': 'Failed item', 'editor_type': 'text'},
-            {'key': 'sample_deposition', 'label': 'Sample deposition', 'editor_type': 'text'},
-            {'key': 'sub_contract', 'label': 'Sub-contract', 'editor_type': 'dropdown', 'options': ["Yes", "No"]},
-            {'key': 'test_fee', 'label': 'Test Fee', 'editor_type': 'text'},
-            {'key': 'remarks_po', 'label': 'Remarks (PO)', 'editor_type': 'text'}
-        ]
+        # 使用配置加载器加载字段映射关系
+        field_config_loader = LTRFieldConfigLoader()
+        self.field_mapping: List[Dict[str, Any]] = field_config_loader.load_field_mapping()
 
     def set_dl_number(self, dl_number: str) -> None:
         """

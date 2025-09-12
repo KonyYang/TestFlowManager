@@ -5,11 +5,12 @@ LTR编辑对话框模块
 
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
                              QTableWidget, QTableWidgetItem, QHeaderView,
-                             QTextEdit, QWidget, QScrollArea, QComboBox)
+                             QWidget, QScrollArea)
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDesktopWidget
 from src.core.logger import logger
 from src.features.ltr_manager.model.ltr_editor_data import LTREditorData
+from src.features.ltr_manager.view.components.ltr_field_widgets import LTRTextEdit, LTRComboBox, LTRTableWidgetItem
 
 
 class LTREditorDialog(QDialog):
@@ -114,35 +115,26 @@ class LTREditorDialog(QDialog):
             original_value = self.original_data.get(key, '')
 
             # 字段名
-            field_item = QTableWidgetItem(label)
-            field_item.setFlags(Qt.ItemIsEnabled)
+            field_item = LTRTableWidgetItem(label, editable=False)
 
             # 当前值
-            current_item = QTableWidgetItem(str(original_value))
-            current_item.setFlags(Qt.ItemIsEnabled)
+            current_item = LTRTableWidgetItem(str(original_value), editable=False)
 
             # 修改值（根据字段类型创建不同的编辑控件）
             self.data_table.setItem(row, 0, field_item)
             self.data_table.setItem(row, 1, current_item)
 
             if editor_type == 'multiline':
-                # 对于多行文本，使用QTextEdit
-                text_edit = QTextEdit()
-                text_edit.setText(str(original_value))
-                text_edit.setMaximumHeight(100)
+                # 对于多行文本，使用LTRTextEdit
+                text_edit = LTRTextEdit(str(original_value))
                 self.data_table.setCellWidget(row, 2, text_edit)
             elif editor_type == 'dropdown':
-                # 对于下拉框字段
-                combo_box = QComboBox()
-                combo_box.addItems(field_info['options'])
-                index = combo_box.findText(str(original_value), Qt.MatchFixedString)
-                if index >= 0:
-                    combo_box.setCurrentIndex(index)
+                # 对于下拉框字段，使用LTRComboBox
+                combo_box = LTRComboBox(field_info['options'], str(original_value))
                 self.data_table.setCellWidget(row, 2, combo_box)
             else:
                 # 默认使用普通文本编辑
-                modified_item = QTableWidgetItem(str(original_value))
-                modified_item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsEditable)
+                modified_item = LTRTableWidgetItem(str(original_value), editable=True)
                 self.data_table.setItem(row, 2, modified_item)
 
             row += 1
@@ -169,9 +161,9 @@ class LTREditorDialog(QDialog):
                     cell_widget = self.data_table.cellWidget(row, 2)
                     if cell_widget:
                         # 对于特殊控件，需要特殊处理
-                        if isinstance(cell_widget, QTextEdit):
+                        if isinstance(cell_widget, LTRTextEdit):
                             modified_value = cell_widget.toPlainText()
-                        elif isinstance(cell_widget, QComboBox):
+                        elif isinstance(cell_widget, LTRComboBox):
                             modified_value = cell_widget.currentText()
                         else:
                             modified_value = cell_widget.text()
