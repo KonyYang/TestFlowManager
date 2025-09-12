@@ -3,7 +3,7 @@
 负责管理应用程序的状态
 """
 
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, Optional, Callable, List
 import json
 import threading
 

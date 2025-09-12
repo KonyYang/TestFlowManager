@@ -106,6 +106,53 @@ class ConfigManager:
         # 设置最后一层的值
         config[keys[-1]] = value
 
+    def set(self, key: str, value: Any) -> None:
+        """
+        设置配置项的值
+
+        Args:
+            key: 配置项键名（支持点号分隔的嵌套键名，如 "app.name"）
+            value: 配置项的值
+        """
+        keys = key.split('.')
+        config = self._config
+
+        # 导航到倒数第二层
+        for k in keys[:-1]:
+            if k not in config:
+                config[k] = {}
+            config = config[k]
+
+        # 设置最后一层的值
+        config[keys[-1]] = value
+
+    def load_paths_config(self, paths_file: str = "config/paths.ini") -> None:
+        """
+        从INI格式的路径配置文件加载路径配置
+
+        Args:
+            paths_file: 路径配置文件路径
+        """
+        try:
+            import configparser
+            if os.path.exists(paths_file):
+                paths_config = configparser.ConfigParser()
+                paths_config.read(paths_file, encoding='utf-8')
+
+                # 将INI配置转换为内部配置格式
+                if 'Paths' in paths_config:
+                    for key, value in paths_config['Paths'].items():
+                        self.set(f"paths.{key.lower()}", value)
+
+                # 加载密码配置（保持原始键名大小写）
+                if 'Passwords' in paths_config:
+                    for key, value in paths_config['Passwords'].items():
+                        self.set(f"paths.{key}", value)  # 保持原始大小写
+        except Exception as e:
+            print(f"Failed to load paths config from {paths_file}: {e}")
+
+
+
     def get_all(self) -> Dict[str, Any]:
         """
         获取所有配置
