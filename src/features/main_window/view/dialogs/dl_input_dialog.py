@@ -2,9 +2,10 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLab
 from PyQt5.QtCore import Qt
 from src.core.logger import logger
 # 新增导入
-from src.features.ltr_manager.service.ltr_service import LTRService
-from src.features.ltr_manager.model.ltr_data import LTRData
+from src.features.ltr_manager.service.ltr_viewer_service import LTRViewerService
+from src.features.ltr_manager.model.ltr_viewer_data import LTRViewerData
 from src.features.ltr_manager.view.ltr_editor_dialog import LTREditorDialog
+from src.core.font_utils import FontUtils
 import re
 
 
@@ -33,12 +34,17 @@ class DLInputDialog(QDialog):
         self.setModal(True)
         self.resize(400, 150)
 
+        # 设置全局字体
+        global_font = FontUtils.get_scaled_font(9)
+        self.setFont(global_font)
+
         layout = QVBoxLayout()
         layout.setSpacing(15)
 
         # 输入框
         self.dl_input = QLineEdit()
         self.dl_input.setPlaceholderText("请输入完整DL编号如：DL-2025-01-001")
+        self.dl_input.setFont(FontUtils.get_scaled_font(10))
         self.dl_input.returnPressed.connect(self._on_confirm)
 
         # 按钮布局
@@ -48,12 +54,16 @@ class DLInputDialog(QDialog):
         self.confirm_button = QPushButton("确认")
         self.confirm_button.clicked.connect(self._on_confirm)
         self.confirm_button.setDefault(True)
+        self.confirm_button.setFont(FontUtils.get_scaled_font(9))
+        self.confirm_button.setEnabled(False)
 
         self.skip_button = QPushButton("跳过")
         self.skip_button.clicked.connect(self._on_skip)
+        self.skip_button.setFont(FontUtils.get_scaled_font(9))
 
         self.cancel_button = QPushButton("取消")
         self.cancel_button.clicked.connect(self.reject)
+        self.cancel_button.setFont(FontUtils.get_scaled_font(9))
 
         button_layout.addWidget(self.confirm_button)
         button_layout.addWidget(self.skip_button)
@@ -66,9 +76,6 @@ class DLInputDialog(QDialog):
 
     def _setup_validation(self) -> None:
         """设置输入验证"""
-        # 初始状态下禁用确认按钮
-        self.confirm_button.setEnabled(False)
-
         # 连接输入框的文本变化信号
         self.dl_input.textChanged.connect(self._validate_input)
 

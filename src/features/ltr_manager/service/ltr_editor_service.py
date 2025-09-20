@@ -7,8 +7,8 @@ from typing import Dict, Any, Optional
 from PyQt5.QtWidgets import QMessageBox
 from src.core.logger import logger
 from src.features.ltr_manager.model.ltr_editor_data import LTREditorData
-from src.features.ltr_manager.model.ltr_data import LTRData
-from src.features.ltr_manager.service.ltr_service import LTRService
+from src.features.ltr_manager.model.ltr_viewer_data import LTRViewerData
+from src.features.ltr_manager.service.ltr_viewer_service import LTRViewerService
 
 
 class LTREditorService:
@@ -17,7 +17,7 @@ class LTREditorService:
     提供LTR编辑器相关的服务功能
     """
 
-    def __init__(self, editor_data_model: LTREditorData, ltr_data_model: LTRData, ltr_service: LTRService):
+    def __init__(self, editor_data_model: LTREditorData, ltr_data_model: LTRViewerData, ltr_service: LTRViewerService):
         """
         初始化LTR编辑器服务
 

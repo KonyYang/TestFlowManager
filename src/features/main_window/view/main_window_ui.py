@@ -7,7 +7,8 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLab
 from PyQt5.QtCore import Qt
 from src.core.logger import logger
 from src.features.main_window.controller.main_window_controller import MainWindowController
-
+from PyQt5.QtGui import QFont
+from src.core.font_utils import FontUtils
 
 class MainWindow(QMainWindow):
     """
@@ -48,27 +49,59 @@ class MainWindow(QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
+    def _setup_ui(self) -> None:
+        """设置用户界面"""
+        # 设置窗口属性
+        self.setWindowTitle("TestFlow Manager")
+        self.resize(1200, 800)
+
+        # 应用全局字体
+        global_font = FontUtils.get_scaled_font(10)
+        self.setFont(global_font)
+
+        # 创建中央部件
+        central_widget = QWidget()
+        layout = QVBoxLayout()
+
+        # 欢迎标签
+        welcome_label = QLabel("欢迎使用 TestFlow Manager")
+        welcome_label.setAlignment(Qt.AlignCenter)
+        welcome_label.setStyleSheet("font-weight: bold; margin: 20px;")
+        welcome_label.setFont(FontUtils.get_scaled_font(16))  # 特定大小的字体
+
+        layout.addWidget(welcome_label)
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
+
     def _setup_menu(self) -> None:
         """设置菜单栏"""
+        # 应用全局字体
+        global_font = FontUtils.get_scaled_font(9)
+
         # 创建菜单栏
         menubar = self.menuBar()
+        menubar.setFont(global_font)
 
         # 文件菜单
         file_menu = menubar.addMenu("文件")
+        file_menu.setFont(global_font)
 
         new_action = QAction("新建", self)
         new_action.setShortcut("Ctrl+N")
         new_action.triggered.connect(self._on_new_file)
+        new_action.setFont(global_font)
         file_menu.addAction(new_action)
 
         open_action = QAction("打开", self)
         open_action.setShortcut("Ctrl+O")
         open_action.triggered.connect(self._on_open_file)
+        open_action.setFont(global_font)
         file_menu.addAction(open_action)
 
         save_action = QAction("保存", self)
         save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self._on_save_file)
+        save_action.setFont(global_font)
         file_menu.addAction(save_action)
 
         file_menu.addSeparator()
@@ -76,59 +109,74 @@ class MainWindow(QMainWindow):
         # 添加查看LTR菜单项
         view_ltr_action = QAction("查看LTR", self)
         view_ltr_action.triggered.connect(self._on_view_ltr)
+        view_ltr_action.setFont(global_font)
         file_menu.addAction(view_ltr_action)
-
 
         exit_action = QAction("退出", self)
         exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self._on_exit)
+        exit_action.setFont(global_font)
         file_menu.addAction(exit_action)
 
         # 编辑菜单
         edit_menu = menubar.addMenu("编辑")
+        edit_menu.setFont(global_font)
 
         # 视图菜单
         view_menu = menubar.addMenu("视图")
+        view_menu.setFont(global_font)
 
         # 工具菜单
         tools_menu = menubar.addMenu("工具")
+        tools_menu.setFont(global_font)
 
         # 帮助菜单
         help_menu = menubar.addMenu("帮助")
+        help_menu.setFont(global_font)
 
         about_action = QAction("关于", self)
         about_action.triggered.connect(self._on_about)
+        about_action.setFont(global_font)
         help_menu.addAction(about_action)
 
     def _setup_toolbar(self) -> None:
         """设置工具栏"""
         toolbar = self.addToolBar("主工具栏")
 
+        # 获取缩放字体
+        button_font = FontUtils.get_scaled_font(10)
+
         new_button = QPushButton("新建")
         new_button.clicked.connect(self._on_new_file)
+        new_button.setFont(button_font)
         toolbar.addWidget(new_button)
 
         open_button = QPushButton("打开")
         open_button.clicked.connect(self._on_open_file)
+        open_button.setFont(button_font)
         toolbar.addWidget(open_button)
 
         save_button = QPushButton("保存")
         save_button.clicked.connect(self._on_save_file)
+        save_button.setFont(button_font)
         toolbar.addWidget(save_button)
 
         view_ltr_button = QPushButton("查看LTR")
         view_ltr_button.clicked.connect(self._on_view_ltr)
+        view_ltr_button.setFont(button_font)
         toolbar.addWidget(view_ltr_button)
 
     def _setup_status_bar(self) -> None:
         """设置状态栏"""
         self.status_bar = QStatusBar()
+        status_font = FontUtils.get_scaled_font(9)
+        self.status_bar.setFont(status_font)
         self.setStatusBar(self.status_bar)
 
         # 状态标签
         self.status_label = QLabel("就绪")
+        self.status_label.setFont(status_font)
         self.status_bar.addWidget(self.status_label)
-
 
     def _on_view_ltr(self) -> None:
         """处理查看LTR事件"""

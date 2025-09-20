@@ -9,8 +9,8 @@ import os
 # 添加src目录到路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from src.features.ltr_manager.service.ltr_service import LTRService
-from src.features.ltr_manager.model.ltr_data import LTRData
+from src.features.ltr_manager.service.ltr_viewer_service import LTRViewerService
+from src.features.ltr_manager.model.ltr_viewer_data import LTRViewerData
 from src.core.config_manager import config_manager
 from src.utils.excel_utils import open_excel_file
 
@@ -24,8 +24,8 @@ def test_ltr_password_functionality():
     config_manager.load_paths_config()
 
     # 创建LTR服务实例
-    ltr_data = LTRData()
-    ltr_service = LTRService(ltr_data)
+    ltr_data = LTRViewerData()
+    ltr_service = LTRViewerService(ltr_data)
 
     # 获取当前配置的文件路径
     file_path = ltr_service.get_ltr_file_path()

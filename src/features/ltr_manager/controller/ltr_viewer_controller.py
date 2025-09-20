@@ -6,11 +6,11 @@ LTR控制器模块
 from typing import List, Optional
 from PyQt5.QtWidgets import QWidget
 from src.core.logger import logger
-from src.features.ltr_manager.model.ltr_data import LTRData
-from src.features.ltr_manager.service.ltr_service import LTRService
+from src.features.ltr_manager.model.ltr_viewer_data import LTRViewerData
+from src.features.ltr_manager.service.ltr_viewer_service import LTRViewerService
 
 
-class LTRController:
+class LTRViewerController:
     """
     LTR控制器类
     处理LTR文件的业务逻辑和事件
@@ -20,8 +20,8 @@ class LTRController:
         """
         初始化LTR控制器
         """
-        self.data_model = LTRData()
-        self.service = LTRService(self.data_model)
+        self.data_model = LTRViewerData()
+        self.service = LTRViewerService(self.data_model)
 
     def handle_view_ltr(self) -> bool:
         """

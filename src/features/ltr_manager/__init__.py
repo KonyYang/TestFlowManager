@@ -1,41 +1,33 @@
 """
-LTR管理器模块
-处理LTR文件相关的功能
+LTR管理模块
+负责处理LTR文件的查看、编辑和申请单处理功能
 """
 
-# 导入主要的模块
-from . import controller
-from . import model
-from . import service
-from . import view
-from . import utils
-
-# 从controller模块导入具体的类
-from .controller.ltr_controller import LTRController
+from .controller.ltr_viewer_controller import LTRViewerController
 from .controller.ltr_editor_controller import LTREditorController
+from .controller.ltr_application_controller import LTRApplicationController
 
-# 从model模块导入具体的类
-from .model.ltr_data import LTRData
-from .model.ltr_editor_data import LTREditorData
-
-# 从service模块导入具体的类
-from .service.ltr_service import LTRService
+from .service.ltr_viewer_service import LTRViewerService
 from .service.ltr_editor_service import LTREditorService
+from .service.ltr_application_service import LTRApplicationService
 
-# 从view模块导入具体的类
-from .view.ltr_editor_dialog import LTREditorDialog
+from .model.ltr_viewer_data import LTRViewerData
+from .model.ltr_editor_data import LTREditorData
+from .model.ltr_application_data import LTRApplicationData
 
 __all__ = [
-    'LTRController',
+    # 控制器
+    'LTRViewerController',
     'LTREditorController',
-    'LTRData',
-    'LTREditorData',
-    'LTRService',
+    'LTRApplicationController',
+
+    # 服务
+    'LTRViewerService',
     'LTREditorService',
-    'LTREditorDialog',
-    'controller',
-    'model',
-    'service',
-    'view',
-    'utils'
+    'LTRApplicationService',
+
+    # 数据模型
+    'LTRViewerData',
+    'LTREditorData',
+    'LTRApplicationData'
 ]

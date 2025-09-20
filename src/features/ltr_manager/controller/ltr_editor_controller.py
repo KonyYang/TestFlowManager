@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QDialog
 from src.core.logger import logger
 from src.features.ltr_manager.model.ltr_editor_data import LTREditorData
 from src.features.ltr_manager.service.ltr_editor_service import LTREditorService
-from src.features.ltr_manager.model.ltr_data import LTRData
+from src.features.ltr_manager.model.ltr_viewer_data import LTRViewerData
 from src.features.ltr_manager.view.ltr_editor_dialog import LTREditorDialog
 
 
@@ -18,7 +18,7 @@ class LTREditorController:
     处理LTR编辑器的业务逻辑和事件
     """
 
-    def __init__(self, ltr_data_model: LTRData, ltr_service):
+    def __init__(self, ltr_data_model: LTRViewerData, ltr_service):
         """
         初始化LTR编辑器控制器
 
@@ -132,3 +132,13 @@ class LTREditorController:
         else:
             # 用户取消操作
             return False
+
+    def get_attachments(self):
+        """
+        获取附件列表
+
+        Returns:
+            附件列表
+        """
+        email_data = self.data_model.get_email_data()
+        return email_data.get("attachments", [])

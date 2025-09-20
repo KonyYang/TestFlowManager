@@ -9,8 +9,10 @@ from src.core.logger import logger
 from src.features.ltr_manager.controller.ltr_editor_controller import LTREditorController
 from src.features.main_window.model.main_window_data import MainWindowData
 from src.features.main_window.service.main_window_service import MainWindowService
-from src.features.ltr_manager.controller.ltr_controller import LTRController
+from src.features.ltr_manager.controller.ltr_viewer_controller import LTRViewerController
 from src.features.main_window.view.dialogs.dl_input_dialog import DLInputDialog
+from src.features.project_creator.controller import ProjectCreatorController
+
 
 class MainWindowController:
     """
@@ -31,7 +33,7 @@ class MainWindowController:
 
         # 初始化状态
         self.service.update_status("就绪")
-        self.ltr_controller = LTRController()
+        self.ltr_controller = LTRViewerController()
         # 使用LTR控制器的服务实例初始化LTR编辑器控制器
         self.ltr_editor_controller = LTREditorController(
             self.ltr_controller.data_model,
@@ -201,15 +203,21 @@ class MainWindowController:
         try:
             logger.debug("Handling new file request")
 
-            # TODO: 实际的新建文件逻辑
-            logger.info("New file created successfully")
+            # 创建项目创建控制器并处理新建项目请求
+            project_creator = ProjectCreatorController(self.view)
+            success = project_creator.handle_create_new_project()
 
-            # 更新状态
-            self.service.update_status("已创建新文件")
-            return True
+            if success:
+                self.service.update_status("已创建新项目")
+                logger.info("New project created successfully")
+            else:
+                self.service.update_status("创建新项目失败")
+                logger.error("Failed to create new project")
+
+            return success
         except Exception as e:
-            logger.error(f"Failed to create new file: {e}")
-            self.service.update_status("创建新文件失败")
+            logger.error(f"Failed to create new project: {e}")
+            self.service.update_status("创建新项目失败")
             return False
 
     def handle_about(self) -> None:

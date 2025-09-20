@@ -7,7 +7,7 @@ from typing import Optional, List
 from src.core.logger import logger
 
 
-class LTRData:
+class LTRViewerData:
     """
     LTR数据模型类
     管理LTR文件相关的数据

@@ -8,18 +8,18 @@ import platform
 from typing import Optional, List, Any
 from src.core.logger import logger
 from src.core.config_manager import config_manager
-from src.features.ltr_manager.model.ltr_data import LTRData
+from src.features.ltr_manager.model.ltr_viewer_data import LTRViewerData
 # 导入Excel工具函数
 from src.utils.excel_utils import get_sheet_by_name, open_excel_file, get_worksheet_names, is_excel_closed
 
 
-class LTRService:
+class LTRViewerService:
     """
     LTR服务类
     提供LTR文件操作相关的服务功能
     """
 
-    def __init__(self, data_model: LTRData):
+    def __init__(self, data_model: LTRViewerData):
         """
         初始化LTR服务
 

@@ -11,10 +11,10 @@ from tkinter import ttk, messagebox
 # 添加项目根目录到Python路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.features.ltr_manager.view.ltr_view import LTRNumberCheckerView
+from src.features.ltr_manager.view.ltr_viewer_dialog import LTRNumberCheckerView
 
 
-class MockLTRController:
+class MockLTRViewerController:
     """
     模拟LTR控制器
     用于测试界面功能
@@ -63,7 +63,7 @@ def create_test_window():
     ltr_view = LTRNumberCheckerView(root)
 
     # 创建模拟控制器
-    mock_controller = MockLTRController()
+    mock_controller = MockLTRViewerController()
     ltr_view.set_controller(mock_controller)
 
     # 将视图添加到主窗口

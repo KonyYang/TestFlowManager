@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QApplication
 from src.core.logger import logger
 from src.core.config_manager import config_manager
 from src.managers.window_manager import WindowManager
-
+from PyQt5.QtCore import Qt
 
 class TestFlowApplication:
     """
@@ -31,6 +31,9 @@ class TestFlowApplication:
         try:
             logger.info("Initializing TestFlow Manager application")
 
+            # 👇 关键：启用高 DPI 支持（必须在 QApplication 前设置）
+            QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+            QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
             # 创建Qt应用程序实例
             self.app = QApplication(sys.argv)
 

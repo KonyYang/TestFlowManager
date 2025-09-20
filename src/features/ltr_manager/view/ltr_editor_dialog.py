@@ -179,10 +179,10 @@ class LTREditorDialog(QDialog):
 
         # 调用父控制器执行更新操作
         from src.features.ltr_manager.controller.ltr_editor_controller import LTREditorController
-        from src.features.ltr_manager.controller.ltr_controller import LTRController
+        from src.features.ltr_manager.controller.ltr_viewer_controller import LTRViewerController
 
         # 创建LTR控制器和服务实例（在实际应用中，这些应该通过依赖注入传递）
-        ltr_controller = LTRController()
+        ltr_controller = LTRViewerController()
         ltr_editor_controller = LTREditorController(ltr_controller.data_model, ltr_controller.service)
 
         # 执行更新操作
