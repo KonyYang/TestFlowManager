@@ -1,0 +1,14 @@
+2025-09-05 07:18:37,064 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-05 07:18:37,064 - TestFlowManager - DEBUG - LTR file path set to: test_data/file.xlsx
+2025-09-05 07:18:37,065 - TestFlowManager - INFO - Successfully opened LTR file with password: test_data/file.xlsx
+2025-09-05 07:18:37,065 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-05 07:18:37,066 - TestFlowManager - DEBUG - LTR file path set to: test_data/file.xlsx
+2025-09-05 07:18:37,066 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-05 07:18:37,066 - TestFlowManager - DEBUG - LTR file path set to: test_data/nonexistent_file.xlsx
+2025-09-05 07:18:37,067 - TestFlowManager - ERROR - Failed to open LTR file with password: test_data/nonexistent_file.xlsx
+2025-09-05 07:18:37,067 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-05 07:18:37,067 - TestFlowManager - DEBUG - LTR file path set to: test_data/protected_file.xlsx
+2025-09-05 07:18:37,068 - TestFlowManager - INFO - Successfully opened LTR file with password: test_data/protected_file.xlsx
+2025-09-05 07:18:37,068 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-05 07:18:37,068 - TestFlowManager - DEBUG - LTR file path set to: test_data/protected_file.xlsx
+2025-09-05 07:18:37,068 - TestFlowManager - ERROR - Failed to open LTR file with password: test_data/protected_file.xlsx
