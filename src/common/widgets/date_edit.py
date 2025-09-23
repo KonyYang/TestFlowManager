@@ -3,9 +3,54 @@
 提供日期选择和编辑功能
 """
 
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDateEdit, QPushButton
-from PyQt5.QtCore import QDate, pyqtSignal
+import re
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QDateEdit, QPushButton, QCalendarWidget
+from PyQt5.QtCore import QDate, pyqtSignal, QLocale, Qt
 from src.core.logger import logger
+
+# 月份名称英文缩写映射
+MONTH_ABBREVIATIONS = {
+    1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
+    7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"
+}
+
+
+class EnglishDateEdit(QDateEdit):
+    """自定义日期编辑控件，强制显示英文月份缩写"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        # 设置使用英文的本地化
+        self.setLocale(QLocale(QLocale.English))
+        self.setDisplayFormat("dd MMM yyyy")
+        self.setCalendarPopup(True)
+
+        # 创建自定义日历控件
+        cal = QCalendarWidget()
+        cal.setGridVisible(True)
+        cal.setFirstDayOfWeek(Qt.Monday)
+        cal.setLocale(QLocale(QLocale.English))  # 确保日历也显示英文
+        self.setCalendarWidget(cal)
+
+
+def convert_to_english_format(date_str):
+    """将各种日期格式转换为标准的 DD Mon YYYY 英文格式"""
+    match = re.match(r"(\d{1,2})\s+([a-zA-Z]{3})\s+(\d{4})", date_str, re.IGNORECASE)
+    if match:
+        day, month_abbr, year = match.groups()
+        return f"{day.zfill(2)} {month_abbr.capitalize()} {year}"
+
+    match = re.match(r"(\d{1,2})/(\d{1,2})/(\d{4})", date_str)
+    if match:
+        month, day, year = match.groups()
+        return f"{day.zfill(2)} {MONTH_ABBREVIATIONS.get(int(month), '')} {year}"
+
+    match = re.match(r"(\d{4})-(\d{1,2})-(\d{1,2})", date_str)
+    if match:
+        year, month, day = match.groups()
+        return f"{day.zfill(2)} {MONTH_ABBREVIATIONS.get(int(month), '')} {year}"
+
+    return ""
 
 
 class DateEdit(QWidget):
@@ -33,8 +78,7 @@ class DateEdit(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         # 日期选择器
-        self.date_edit = QDateEdit()
-        self.date_edit.setCalendarPopup(True)
+        self.date_edit = EnglishDateEdit()
         self.date_edit.setDate(QDate.currentDate())
         self.date_edit.dateChanged.connect(self._on_date_changed)
 
