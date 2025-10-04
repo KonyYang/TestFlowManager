@@ -14,6 +14,35 @@ class NotificationService:
     提供各种类型的通知功能
     """
 
+    def __init__(self):
+        from src.core.event_dispatcher import event_dispatcher
+        self.event_dispatcher = event_dispatcher
+
+        # 订阅事件
+        self.event_dispatcher.subscribe("project.creation.failed", self._on_project_creation_failed)
+        self.event_dispatcher.subscribe("ltr.processing.failed", self._on_ltr_processing_failed)
+        self.event_dispatcher.subscribe("error.notification", self._on_error_notification)
+
+    def _on_project_creation_failed(self, data):
+        """处理项目创建失败事件"""
+        error = data.get("error", "未知错误")
+        # 显示错误通知
+        # 注意：需要确保有parent窗口引用
+        pass
+
+    def _on_ltr_processing_failed(self, data):
+        """处理LTR处理失败事件"""
+        error = data.get("error", "未知错误")
+        # 显示错误通知
+        pass
+
+    def _on_error_notification(self, data):
+        """处理通用错误通知事件"""
+        title = data.get("title", "错误")
+        message = data.get("message", "发生未知错误")
+        # 显示错误通知
+        pass
+    
     @staticmethod
     def show_info(parent, title: str, message: str) -> None:
         """

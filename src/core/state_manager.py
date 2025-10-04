@@ -4,6 +4,7 @@
 """
 
 from typing import Dict, Any, Optional, Callable, List
+from src.core.event_dispatcher import event_dispatcher
 import json
 import threading
 
@@ -19,6 +20,7 @@ class StateManager:
         self._listeners: Dict[str, List[Callable]] = {}
         self._lock = threading.RLock()
 
+
     def set_state(self, key: str, value: Any) -> None:
         """
         设置状态值
@@ -30,6 +32,13 @@ class StateManager:
         with self._lock:
             old_value = self._state.get(key)
             self._state[key] = value
+
+            # 发送状态变更事件
+            event_dispatcher.dispatch("state.changed", {
+                "key": key,
+                "old_value": old_value,
+                "new_value": value
+            })
 
             # 通知监听器
             if key in self._listeners:
@@ -62,7 +71,14 @@ class StateManager:
         """
         with self._lock:
             if key in self._state:
+                old_value = self._state[key]
                 del self._state[key]
+
+                # 发送状态移除事件
+                event_dispatcher.dispatch("state.removed", {
+                    "key": key,
+                    "value": old_value
+                })
 
     def add_listener(self, key: str, listener: Callable) -> None:
         """

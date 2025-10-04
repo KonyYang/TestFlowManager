@@ -7,6 +7,7 @@ import logging
 import os
 from typing import Dict, Any, Optional, Tuple
 from src.core.logger import logger
+from src.core.event_dispatcher import event_dispatcher
 from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
 from src.features.ltr_manager.service.application_processing.document_validator import LTRApplicationFormValidator
 from src.features.ltr_manager.service.application_processing.data_extractor import LTRApplicationDataExtractor
@@ -25,9 +26,31 @@ class LTRApplicationService:
         """
         初始化LTR申请单服务
         """
-        self.data_model = LTRApplicationData()
         self.validator = LTRApplicationFormValidator()
         self.extractor = LTRApplicationDataExtractor()
+
+        self.event_dispatcher = event_dispatcher
+        # 订阅LTR申请单确认事件
+        event_dispatcher.subscribe("ltr.application.confirmed", self._on_ltr_application_confirmed)
+
+    # 添加事件处理方法
+    def _on_ltr_application_confirmed(self, data):
+        """处理LTR申请单确认事件"""
+        dl_number = data.get("dl_number")
+        form_data = data.get("data")
+
+        logger.info(f"LTR application confirmed for DL: {dl_number}")
+
+        # 这里可以添加处理逻辑，如保存数据到数据库或文件
+        # 例如：
+        # self.save_application_data(dl_number, form_data)
+
+        # 发布处理完成事件
+        event_dispatcher.dispatch("ltr.application.processed", {
+            "dl_number": dl_number,
+            "data": form_data,
+            "status": "success"
+        })
 
     def process_word_application(self, doc_filepath: str) -> LTRApplicationData:
         """
@@ -154,33 +177,70 @@ class LTRApplicationService:
         """
         logger.info(f"Processing application file: {doc_filepath}")
 
+        # 发送处理开始事件
+        self.event_dispatcher.dispatch("ltr.processing.started", {
+            "file_path": doc_filepath
+        })
+
         # 获取共享的Word应用实例
         word_app = get_shared_word_app()
         if not word_app:
-            logger.error("无法获取Word应用实例")
-            return {"error": "无法初始化Word应用程序"}
+            error_msg = "无法获取Word应用实例"
+            logger.error(error_msg)
+            # 发送处理失败事件
+            self.event_dispatcher.dispatch("ltr.processing.failed", {
+                "file_path": doc_filepath,
+                "error": error_msg
+            })
+            return {"error": error_msg}
 
         try:
             # 首先验证文档是否为申请单（仅对.docx文件）
             if doc_filepath.lower().endswith('.docx'):
                 validation_result = self.validate_application_form(doc_filepath)
                 if not validation_result.get("is_valid"):
+                    error_msg = validation_result.get("error", "文档不是有效的申请单")
                     logger.warning(f"Document {doc_filepath} is not a valid application form")
-                    return {"error": validation_result.get("error", "文档不是有效的申请单")}
+                    # 发送处理失败事件
+                    self.event_dispatcher.dispatch("ltr.processing.failed", {
+                        "file_path": doc_filepath,
+                        "error": error_msg
+                    })
+                    return {"error": error_msg}
             elif doc_filepath.lower().endswith('.doc'):
                 # 对于.doc文件，继续使用原来的处理方式
                 logger.info("Processing .doc file")
             else:
+                error_msg = "不支持的文件类型"
                 logger.warning(f"Unsupported file type: {doc_filepath}")
-                return {"error": "不支持的文件类型"}
+                # 发送处理失败事件
+                self.event_dispatcher.dispatch("ltr.processing.failed", {
+                    "file_path": doc_filepath,
+                    "error": error_msg
+                })
+                return {"error": error_msg}
 
             # 提取数据
-            return self.extractor.extract_application_data(doc_filepath)
+            result = self.extractor.extract_application_data(doc_filepath)
+
+            # 发送处理完成事件
+            self.event_dispatcher.dispatch("ltr.processing.completed", {
+                "file_path": doc_filepath,
+                "data": result
+            })
+
+            return result
 
         except Exception as e:
+            error_msg = f"处理申请单文件时出错: {str(e)}"
             logger.error(f"Error processing application file: {e}", exc_info=True)
+            # 发送处理失败事件
+            self.event_dispatcher.dispatch("ltr.processing.failed", {
+                "file_path": doc_filepath,
+                "error": error_msg
+            })
             return {
-                "error": f"处理申请单文件时出错: {str(e)}",
+                "error": error_msg,
             }
         finally:
             # 释放Word应用实例

@@ -2,10 +2,11 @@
 主窗口控制器模块
 处理主窗口的业务逻辑和事件
 """
-
+import os
 from typing import List, Optional
 from PyQt5.QtWidgets import QWidget, QMessageBox, QDialog
 from src.core.logger import logger
+from src.core.event_dispatcher import event_dispatcher
 from src.features.ltr_manager.controller.ltr_editor_controller import LTREditorController
 from src.features.main_window.model.main_window_data import MainWindowData
 from src.features.main_window.service.main_window_service import MainWindowService
@@ -39,6 +40,58 @@ class MainWindowController:
             self.ltr_controller.data_model,
             self.ltr_controller.service
         )
+
+        # 订阅事件
+        event_dispatcher.subscribe("ltr.processing.started", self._on_ltr_processing_started)
+        event_dispatcher.subscribe("ltr.processing.completed", self._on_ltr_processing_completed)
+        event_dispatcher.subscribe("ltr.processing.failed", self._on_ltr_processing_failed)
+        event_dispatcher.subscribe("state.changed", self._on_state_changed)
+        event_dispatcher.subscribe("ltr.application.confirmed", self._on_ltr_application_confirmed)
+        event_dispatcher.subscribe("ltr.application.processed", self._on_ltr_application_processed)
+
+    # 添加事件处理方法
+    def _on_ltr_processing_started(self, data):
+        """处理LTR处理开始事件"""
+        file_path = data.get("file_path", "未知文件")
+        self.service.update_status(f"正在处理LTR申请单: {os.path.basename(file_path)}")
+
+    def _on_ltr_processing_completed(self, data):
+        """处理LTR处理完成事件"""
+        file_path = data.get("file_path", "未知文件")
+        self.service.update_status(f"LTR申请单处理完成: {os.path.basename(file_path)}")
+
+    def _on_ltr_processing_failed(self, data):
+        """处理LTR处理失败事件"""
+        file_path = data.get("file_path", "未知文件")
+        error = data.get("error", "未知错误")
+        self.service.update_status(f"LTR申请单处理失败: {os.path.basename(file_path)}")
+
+    def _on_ltr_application_confirmed(self, data):
+        """处理LTR申请单确认事件"""
+        dl_number = data.get("dl_number")
+        self.service.update_status(f"确认LTR申请单: {dl_number}")
+
+    def _on_ltr_application_processed(self, data):
+        """处理LTR申请单处理完成事件"""
+        dl_number = data.get("dl_number")
+        status = data.get("status")
+
+        if status == "success":
+            self.service.update_status(f"LTR申请单处理完成: {dl_number}")
+        else:
+            self.service.update_status(f"LTR申请单处理失败: {dl_number}")
+
+
+    def _on_state_changed(self, data):
+        """处理状态变更事件"""
+        key = data.get("key")
+        new_value = data.get("new_value")
+
+        # 根据不同的状态键进行相应处理
+        if key == "current_project":
+            self.service.update_status(f"当前项目: {new_value}")
+        elif key == "application_status":
+            self.service.update_status(new_value)
 
     def initialize(self) -> bool:
         """

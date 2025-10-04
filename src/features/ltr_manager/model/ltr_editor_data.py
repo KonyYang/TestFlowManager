@@ -1,29 +1,31 @@
 """
 LTR编辑器数据模型模块
-定义LTR编辑器相关的数据结构
+定义LTR编辑器处理过程中使用的数据结构和字段映射
 """
 
-from typing import Optional, Dict, Any, List
-from src.core.logger import logger
+from typing import List, Dict, Any, Optional
 from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
 
 
 class LTREditorData:
     """
     LTR编辑器数据模型类
-    管理LTR编辑器中的数据
+    用于存储和管理LTR编辑器的数据
     """
 
     def __init__(self):
+        """
+        初始化LTR编辑器数据模型
+        """
         self.dl_number: str = ""
         self.original_data: Dict[str, Any] = {}
         self.modified_data: Dict[str, Any] = {}
 
-        # 使用配置加载器加载字段映射关系
-        field_config_loader = LTRFieldConfigLoader()
-        self.field_mapping: List[Dict[str, Any]] = field_config_loader.load_field_mapping()
+        # 从配置文件加载字段映射关系
+        config_loader = LTRFieldConfigLoader()
+        self.field_mapping: List[Dict[str, Any]] = config_loader.load_editor_field_mapping()
 
-    def set_dl_number(self, dl_number: str) -> None:
+    def set_dl_number(self, dl_number: str):
         """
         设置DL编号
 
@@ -31,7 +33,24 @@ class LTREditorData:
             dl_number: DL编号
         """
         self.dl_number = dl_number
-        logger.debug(f"DL number set to: {dl_number}")
+
+    def set_original_data(self, data: Dict[str, Any]):
+        """
+        设置原始数据
+
+        Args:
+            data: 原始数据字典
+        """
+        self.original_data = data.copy()
+
+    def set_modified_data(self, data: Dict[str, Any]):
+        """
+        设置修改后的数据
+
+        Args:
+            data: 修改后的数据字典
+        """
+        self.modified_data = data.copy()
 
     def get_dl_number(self) -> str:
         """
@@ -42,17 +61,6 @@ class LTREditorData:
         """
         return self.dl_number
 
-    def set_original_data(self, data: Dict[str, Any]) -> None:
-        """
-        设置原始数据
-
-        Args:
-            data: 原始数据字典
-        """
-        self.original_data = data
-        self.modified_data = data.copy()
-        logger.debug("Original data set")
-
     def get_original_data(self) -> Dict[str, Any]:
         """
         获取原始数据
@@ -61,16 +69,6 @@ class LTREditorData:
             原始数据字典
         """
         return self.original_data.copy()
-
-    def set_modified_data(self, data: Dict[str, Any]) -> None:
-        """
-        设置修改后的数据
-
-        Args:
-            data: 修改后的数据字典
-        """
-        self.modified_data = data
-        logger.debug("Modified data set")
 
     def get_modified_data(self) -> Dict[str, Any]:
         """
@@ -88,26 +86,11 @@ class LTREditorData:
         Returns:
             字段映射关系列表
         """
-        return self.field_mapping.copy()
-
-    def get_field_by_key(self, key: str) -> Optional[Dict[str, Any]]:
-        """
-        根据键名获取字段信息
-
-        Args:
-            key: 字段键名
-
-        Returns:
-            字段信息字典，如果未找到则返回None
-        """
-        for field in self.field_mapping:
-            if field['key'] == key:
-                return field
-        return None
+        return self.field_mapping
 
     def get_field_by_label(self, label: str) -> Optional[Dict[str, Any]]:
         """
-        根据标签获取字段信息
+        根据字段标签获取字段信息
 
         Args:
             label: 字段标签
@@ -115,7 +98,22 @@ class LTREditorData:
         Returns:
             字段信息字典，如果未找到则返回None
         """
-        for field in self.field_mapping:
-            if field['label'] == label:
-                return field
+        for field_info in self.field_mapping:
+            if field_info.get('label') == label:
+                return field_info
+        return None
+
+    def get_field_by_key(self, key: str) -> Optional[Dict[str, Any]]:
+        """
+        根据字段键获取字段信息
+
+        Args:
+            key: 字段键
+
+        Returns:
+            字段信息字典，如果未找到则返回None
+        """
+        for field_info in self.field_mapping:
+            if field_info.get('key') == key:
+                return field_info
         return None

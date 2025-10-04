@@ -14,7 +14,9 @@ from PyQt5.QtWidgets import QDesktopWidget
 
 from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
 from src.features.ltr_manager.service.ltr_application_service import LTRApplicationService
+from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
 from src.common.widgets import EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
+from src.core.event_dispatcher import event_dispatcher
 
 # Configure logging for this module
 logger = logging.getLogger(__name__)
@@ -50,47 +52,9 @@ class LTRApplicationDialog(QDialog):
         self.service = LTRApplicationService()
         self.controller = parent_controller
 
-        # 字段映射关系
-        self._default_items_structure = [
-            {'key': 'DL', 'label': 'DL', 'value': '', 'feedback': ''},
-            {'key': 'project_type', 'label': 'Project Type', 'value': '', 'feedback': '', 'editor_type': 'dropdown'},
-            {'key': 'sample_information', 'label': 'Description P/N', 'value': '', 'feedback': '',
-             'editor_type': 'multiline'},
-            {'key': 'tests_to_be_performed', 'label': 'Test Item', 'value': '', 'feedback': '',
-             'editor_type': 'multiline'},
-            {'key': 'applicable_specifications', 'label': 'Applicable Specifications', 'value': '', 'feedback': '',
-             'editor_type': 'multiline'},
-            {'key': 'test_type', 'label': 'Test Type', 'value': '', 'feedback': '', 'editor_type': 'dropdown'},
-            {'key': 'requested_by', 'label': 'Requested by', 'value': '', 'feedback': ''},
-            {'key': 'location', 'label': 'Location', 'value': '', 'feedback': ''},
-            {'key': 'project_leader', 'label': 'Project Leader', 'value': '', 'feedback': ''},
-            {'key': 'test_result', 'label': 'Test Result', 'value': '', 'feedback': '', 'editor_type': 'dropdown'},
-            {'key': 'failed_item', 'label': 'Failed item', 'value': '', 'feedback': ''},
-            {'key': 'sample_deposition', 'label': 'Sample deposition', 'value': '', 'feedback': ''},
-            {'key': 'sub_contract', 'label': 'Sub-contract', 'value': '', 'feedback': '', 'editor_type': 'dropdown'},
-            {'key': 'test_fee', 'label': 'Test Fee', 'value': '', 'feedback': ''},
-            {'key': 'remarks_po', 'label': 'Remarks (PO)', 'value': '', 'feedback': ''},
-            {'key': 'phone', 'label': 'Phone', 'value': '', 'feedback': ''},
-            {'key': 'email_requestor', 'label': 'E-mail of Requestor', 'value': '', 'feedback': ''},
-            {'key': 'product_description', 'label': 'Product Description', 'value': '', 'feedback': '',
-             'editor_type': 'multiline'},
-            {'key': 'lab_performing_the_tests', 'label': 'Lab Performing the Tests', 'value': '', 'feedback': '',
-             'editor_type': 'dropdown'},
-            {'key': 'condition_of_samples_when_received', 'label': 'Condition of Samples when Received', 'value': '',
-             'feedback': '', 'editor_type': 'dropdown'},
-
-            # ====== 日期字段 ======
-            {'key': 'date_lab_received_samples', 'label': 'Date Lab Received Samples', 'value': '', 'feedback': '',
-             'editor_type': 'calendar'},
-            {'key': 'estimated_completion_date', 'label': 'Estimated Completion Date', 'value': '', 'feedback': '',
-             'editor_type': 'calendar'},
-            {'key': 'start_test_date', 'label': 'Start Test Date', 'value': '', 'feedback': '',
-             'editor_type': 'calendar'},
-            {'key': 'finish_test_date', 'label': 'Finish Test Date', 'value': '', 'feedback': '',
-             'editor_type': 'calendar'},
-            {'key': 'report_date', 'label': 'Report Date', 'value': '', 'feedback': '',
-             'editor_type': 'calendar'},
-        ]
+        # 从配置文件加载字段映射关系
+        config_loader = LTRFieldConfigLoader()
+        self._default_items_structure = config_loader.load_application_field_mapping()
 
         self.table_items_data: List[Dict[str, Any]] = []
         self.date_fields: Dict[int, EnglishDateEdit] = {}  # 存储日期字段的引用
@@ -149,35 +113,26 @@ class LTRApplicationDialog(QDialog):
         scroll_area.setWidget(self.info_table)
         main_layout.addWidget(scroll_area)
 
-        # 创建按钮
+        # 创建按钮 - 只保留确认和取消按钮
         self._create_buttons(main_layout)
 
         self.setLayout(main_layout)
 
     def _create_buttons(self, main_layout):
-        """创建按钮"""
+        """创建按钮 - 只保留确认和取消按钮"""
         # 创建按钮布局
         button_layout = QHBoxLayout()
 
-        # 创建按钮
-        self.open_ltr_button = QPushButton("查看LTR")
-        self.apply_ltr_button = QPushButton("申请LTR")
-        self.update_ltr_button = QPushButton("更新LTR")
-        self.ok_button = QPushButton("确定")
+        # 只创建确认和取消按钮
+        self.ok_button = QPushButton("确认")
         self.cancel_button = QPushButton("取消")
 
         # 连接信号
-        self.open_ltr_button.clicked.connect(self._open_ltr)
-        self.apply_ltr_button.clicked.connect(self._apply_ltr)
-        self.update_ltr_button.clicked.connect(self._update_ltr)
         self.ok_button.clicked.connect(self.accept)
         self.cancel_button.clicked.connect(self.reject)
 
         # 添加按钮到布局
         button_layout.addStretch()
-        button_layout.addWidget(self.open_ltr_button)
-        button_layout.addWidget(self.apply_ltr_button)
-        button_layout.addWidget(self.update_ltr_button)
         button_layout.addWidget(self.ok_button)
         button_layout.addWidget(self.cancel_button)
 
@@ -254,56 +209,32 @@ class LTRApplicationDialog(QDialog):
             elif item_data.get('editor_type') == 'dropdown':
                 combo_box = QComboBox()
 
-                if item_data['key'] == 'test_result':
-                    options = ["In progress", "OK", "Ref", "NG", "In-waiting"]
-                elif item_data['key'] == 'test_type':
-                    options = ["Partial Qualification", "Qualification", "Failure Analysis", "Other", "Analysis",
-                               "Chemical", "Electrical", "Environmental", "Whisker", "Mechanical", "ORT",
-                               "Solderability"]
-                elif item_data['key'] == 'project_type':
-                    options = ["NPD", "PEX", "OPS", "CR", "ADM"]
-                elif item_data['key'] == 'sub_contract':
-                    options = ["Yes", "No"]
-                elif item_data['key'] == 'lab_performing_the_tests':
-                    options = ["Dongguan", "Valley Green"]
-                elif item_data['key'] == 'condition_of_samples_when_received':
-                    options = ["Acceptable", "Not Acceptable"]
+                if 'options' in item_data:
+                    options = item_data['options']
                 else:
-                    logger.warning(f"未知的dropdown字段: {item_data['key']}")
-                    continue
+                    # 为向后兼容，保留原有选项定义
+                    if item_data['key'] == 'test_result':
+                        options = ["In progress", "OK", "Ref", "NG", "In-waiting"]
+                    elif item_data['key'] == 'test_type':
+                        options = ["Partial Qualification", "Qualification", "Failure Analysis", "Other", "Analysis",
+                                   "Chemical", "Electrical", "Environmental", "Whisker", "Mechanical", "ORT",
+                                   "Solderability"]
+                    elif item_data['key'] == 'project_type':
+                        options = ["NPD", "PEX", "OPS", "CR", "ADM"]
+                    elif item_data['key'] == 'sub_contract':
+                        options = ["Yes", "No"]
+                    elif item_data['key'] == 'lab_performing_the_tests':
+                        options = ["Dongguan", "Valley Green"]
+                    elif item_data['key'] == 'condition_of_samples_when_received':
+                        options = ["Acceptable", "Not Acceptable"]
+                    else:
+                        logger.warning(f"未知的dropdown字段: {item_data['key']}")
+                        continue
 
                 combo_box.addItems(options)
 
                 # 获取当前字段值
                 current_value = item_data.get('value', '')
-
-                # 如果是project_type，则进行映射转换
-                if item_data['key'] == 'project_type':
-                    mapped_value = ""
-                    if current_value == "New Product Development":
-                        mapped_value = "NPD"
-                    elif current_value == "Product Extension":
-                        mapped_value = "PEX"
-                    elif current_value == "Operational Support":
-                        mapped_value = "OPS"
-                    elif current_value == "Cost Reduction":
-                        mapped_value = "CR"
-                    elif current_value in ["Lab Activities (Lab Use Only)", "Innovation"]:
-                        mapped_value = "ADM"
-                    current_value = mapped_value  # 替换为映射后的值用于查找
-
-                # 如果是test_type，则进行映射转换
-                elif item_data['key'] == 'test_type':
-                    mapped_value = ""
-                    if current_value == "Product/Process Development":
-                        mapped_value = "Partial Qualification"
-                    elif current_value == "Product/Process Qualification":
-                        mapped_value = "Qualification"
-                    elif current_value == "Lab/Failure Analysis":
-                        mapped_value = "Failure Analysis"
-                    elif current_value == "Customer Specific Testing":
-                        mapped_value = "Other"
-                    current_value = mapped_value  # 替换为映射后的值用于查找
 
                 # 设置下拉框选中项
                 index = combo_box.findText(current_value, Qt.MatchFixedString)
@@ -347,38 +278,7 @@ class LTRApplicationDialog(QDialog):
 
             # 处理各种控件类型
             if isinstance(cell_widget, QComboBox):
-                current_text = cell_widget.currentText()
-                # 对project_type做逆向映射
-                if key == 'project_type':
-                    reverse_map = {
-                        "NPD": "New Product Development",
-                        "PEX": "Product Extension",
-                        "OPS": "Operational Support",
-                        "CR": "Cost Reduction",
-                        "ADM": "Lab Activities (Lab Use Only)"
-                    }
-                    saved_data[key] = reverse_map.get(current_text, current_text)
-
-                # 对test_type做逆向映射
-                elif key == 'test_type':
-                    reverse_map = {
-                        "Partial Qualification": "Product/Process Development",
-                        "Qualification": "Product/Process Qualification",
-                        "Failure Analysis": "Lab/Failure Analysis",
-                        "Other": "Customer Specific Testing",
-                        "Analysis": "Customer Specific Testing",
-                        "Chemical": "Customer Specific Testing",
-                        "Electrical": "Customer Specific Testing",
-                        "Environmental": "Customer Specific Testing",
-                        "Whisker": "Customer Specific Testing",
-                        "Mechanical": "Customer Specific Testing",
-                        "ORT": "Customer Specific Testing",
-                        "Solderability": "Customer Specific Testing",
-                    }
-                    saved_data[key] = reverse_map.get(current_text, current_text)
-
-                else:
-                    saved_data[key] = current_text
+                saved_data[key] = cell_widget.currentText()
             elif isinstance(cell_widget, EnglishDateEdit):
                 saved_data[key] = cell_widget.text()
             elif isinstance(cell_widget, QTextEdit):
@@ -398,40 +298,17 @@ class LTRApplicationDialog(QDialog):
         """
         return self._collect_form_data()
 
-    def _open_ltr(self):
-        """查看LTR"""
-        # 后续实现
-        pass
-
-    def _apply_ltr(self):
-        """申请LTR"""
-        if not self.controller and self.parent_window:
-            # 如果有父窗口且父窗口有controller属性，则使用父窗口的controller
-            self.controller = getattr(self.parent_window, 'controller', None)
-
-        # 如果仍然没有controller，则在方法内部创建或处理
-        if not self.controller:
-            # 延迟导入以避免循环依赖
-            from src.features.ltr_manager.controller.ltr_application_controller import LTRApplicationController
-            self.controller = LTRApplicationController(self.parent_window)
-
-        # 后续实现
-
-    def _update_ltr(self):
-        """更新LTR"""
-        if not self.controller and self.parent_window:
-            # 如果有父窗口且父窗口有controller属性，则使用父窗口的controller
-            self.controller = getattr(self.parent_window, 'controller', None)
-
-        # 如果仍然没有controller，则在方法内部创建或处理
-        if not self.controller:
-            # 延迟导入以避免循环依赖
-            from src.features.ltr_manager.controller.ltr_application_controller import LTRApplicationController
-            self.controller = LTRApplicationController(self.parent_window)
-
-        # 后续实现
-
     def accept(self):
-        """重写accept方法，添加数据验证"""
-        # 这里可以添加数据验证逻辑
+        """重写accept方法，添加数据验证和事件发布"""
+        # 收集表单数据
+        form_data = self._collect_form_data()
+
+        # 发布LTR申请单确认事件
+        event_dispatcher.dispatch("ltr.application.confirmed", {
+            "dl_number": self.dl_number,
+            "data": form_data,
+            "dialog": self
+        })
+
+        # 调用父类方法关闭对话框
         super().accept()

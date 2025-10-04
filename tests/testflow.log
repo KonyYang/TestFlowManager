@@ -81,3 +81,10 @@
 2025-09-05 08:02:46,283 - TestFlowManager - DEBUG - Excel instance count increased to 2
 2025-09-05 08:02:46,622 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
 2025-09-05 08:02:46,622 - TestFlowManager - INFO - Successfully opened LTR file with password: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-26 07:05:33,299 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-09-26 07:05:33,814 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-09-26 07:05:33,814 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-09-26 07:05:34,705 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-09-26 07:05:34,947 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-09-26 07:05:35,286 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-09-26 07:05:35,286 - TestFlowManager - INFO - Successfully opened LTR file with password: D:\Source\Office Auto\TestDocument\LTR_number.xls
