@@ -2,7 +2,6 @@
 项目创建控制器模块
 处理项目创建流程，包括邮件提取、文档解析等
 """
-import os
 from PyQt5.QtWidgets import QDialog, QMessageBox
 from src.core.logger import logger
 from src.features.project_creator.service.project_creator_service import ProjectCreatorService
@@ -204,7 +203,6 @@ class ProjectCreatorController:
     def _show_ltr_application_dialog(self, application_data):
         """显示LTR申请窗口"""
         try:
-            from src.features.ltr_manager.view.ltr_application_dialog import LTRApplicationDialog
 
             # 准备LTR数据
             dl_data = {
@@ -212,8 +210,6 @@ class ProjectCreatorController:
                 'data': application_data if application_data else {}
             }
 
-            # 创建LTR申请对话框
-            dialog = LTRApplicationDialog(dl_data, self.parent_view)
 
             # 显示对话框
             dialog.exec_()
@@ -272,7 +268,6 @@ class ProjectCreatorController:
             self._reselect_attachment()
         # 如果点击取消，则不执行任何操作
 
-
     def _reselect_attachment(self):
         """
         重新选择附件，但保持邮件信息不变
@@ -284,9 +279,6 @@ class ProjectCreatorController:
             from src.features.email_extractor.view.email_selector_dialog import EmailSelectorDialog
             dialog = EmailSelectorDialog(self.parent_view)
 
-            # 禁用邮件选择功能，只允许重新选择附件
-            dialog.disable_email_selection()
-
             # 设置邮件上下文信息
             if self.context.email_data:
                 # 准备邮件信息
@@ -295,23 +287,12 @@ class ProjectCreatorController:
                 received_time = self.context.email_data.received_time
                 email_info = f"主题: {subject}\n发件人: {sender}  时间: {received_time}"
 
-                # 转换附件格式，并添加文件路径信息
                 attachments = []
                 for att in self.context.email_data.attachments:
-                    attachment_dict = {
                         'filename': att.filename,
                         'content': att.content,
                         'content_type': att.content_type,
                         'size': att.size
-                    }
-
-                    # 如果有临时文件夹信息，添加文件路径
-                    if self.context.temp_folder:
-                        file_path = os.path.join(self.context.temp_folder, att.filename)
-                        if os.path.exists(file_path):
-                            attachment_dict['file_path'] = file_path
-
-                    attachments.append(attachment_dict)
 
                 # 设置邮件上下文
                 dialog.set_email_context(email_info, attachments, self.context.selected_file_path)
@@ -333,16 +314,11 @@ class ProjectCreatorController:
                     self._continue_project_creation()
                 else:
                     logger.warning("No attachment selected during reselection")
-                    # 不再自动再次询问用户，让用户主动选择
-                    return
             else:
                 logger.info("User cancelled attachment reselection")
-                # 用户取消，不再自动再次询问
-                return
 
         except Exception as e:
             logger.error(f"Error during attachment reselection: {e}")
             if self.parent_view:
                 QMessageBox.critical(self.parent_view, "错误", f"重新选择附件失败: {str(e)}")
-
 

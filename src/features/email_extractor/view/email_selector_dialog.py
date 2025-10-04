@@ -191,9 +191,6 @@ class EmailSelectorDialog(QDialog):
             if len(urls) == 1:
                 file_path = urls[0].toLocalFile()
                 if file_path.lower().endswith('.msg'):
-                    # 设置选中的文件并启用按钮
-                    self.selected_msg_file = file_path
-                    self.select_button.setEnabled(True)
                     # 发射信号让控制器处理文件选择
                     self.msg_file_selected.emit(file_path)
                     event.acceptProposedAction()
@@ -365,12 +362,3 @@ class EmailSelectorDialog(QDialog):
         self.email_info_label.setText("未选择邮件")
         self.attachment_table.setRowCount(0)
         self.select_button.setEnabled(False)
-
-    def disable_email_selection(self):
-        """禁用邮件选择功能，只允许重新选择附件"""
-        self.select_msg_file_button.setEnabled(False)
-        self.select_msg_file_button.setStyleSheet("color: gray;")
-        self.drop_info_label.setEnabled(False)
-        self.drop_info_label.setStyleSheet("color: gray; font-weight: normal;")
-        # 禁用拖拽功能
-        self.setAcceptDrops(False)

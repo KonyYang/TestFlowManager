@@ -9,7 +9,6 @@ import shutil
 from typing import Dict, Any, Optional, List
 
 from src.core.logger import logger
-from src.core.event_dispatcher import event_dispatcher
 from src.utils.date_utils import get_current_datetime
 from src.core.config_manager import config_manager
 from src.features.ltr_manager.service.ltr_application_service import LTRApplicationService
@@ -23,9 +22,6 @@ class ProjectCreatorService:
 
     def __init__(self):
         self.temp_folder = None
-        # 添加事件分发器引用
-        self.event_dispatcher = event_dispatcher
-
 
     def create_temp_folder_and_save_attachments(self, msg_file_path: str, attachments: List[Dict]) -> str:
         """
@@ -39,8 +35,6 @@ class ProjectCreatorService:
             临时文件夹路径
         """
         try:
-            # 发生项目创建开始事件
-            self.event_dispatcher.dispatch("project_creator.started")
             # 获取配置的临时目录路径
             temp_dir_config = config_manager.get("paths.temp_dir", "data/temp")
 
@@ -69,7 +63,6 @@ class ProjectCreatorService:
                 logger.info(f"已保存邮件文件到: {dest_path}")
 
             # 保存附件
-            saved_attachments = []
             for attachment in attachments:
                 filename = attachment.get('filename', '')
                 content = attachment.get('content', b'')
@@ -77,27 +70,13 @@ class ProjectCreatorService:
                     attachment_path = os.path.join(temp_folder, filename)
                     with open(attachment_path, 'wb') as f:
                         f.write(content)
-                    saved_attachments.append({
-                        "filename": filename,
-                        "path": attachment_path
-                    })
                     logger.info(f"已保存附件到: {attachment_path}")
 
             self.temp_folder = temp_folder
             logger.info(f"已创建临时文件夹: {temp_folder}")
-
-            # 发生项目创建完成事件
-            self.event_dispatcher.dispatch("project.creation.completed", {
-                "temp_folder": temp_folder,
-                "attachments": saved_attachments
-            })
             return temp_folder
 
         except Exception as e:
-            # 发送项目创建失败事件
-            self.event_dispatcher.dispatch("project.creation.failed", {
-                "error": str(e)
-            })
             logger.error(f"创建临时文件夹和保存附件时出错: {e}")
             raise
 
@@ -112,19 +91,6 @@ class ProjectCreatorService:
             提取的数据或错误信息
         """
         try:
-            # 检查附件中是否包含已保存的文件路径
-            saved_file_path = word_attachment.get('file_path')
-
-            if saved_file_path and os.path.exists(saved_file_path):
-                # 使用已保存的文件而不是创建临时文件
-                logger.info(f"Using saved attachment file: {saved_file_path}")
-
-                # 使用LTRApplicationService处理Word文档
-                ltr_service = LTRApplicationService()
-                result = ltr_service.process_application_file(saved_file_path)
-                return result
-            else:
-                # 原有逻辑：创建临时文件
                 temp_dir = tempfile.gettempdir()
                 filename = word_attachment.get('filename', 'temp.doc')
                 temp_file_path = os.path.join(temp_dir, filename)
@@ -146,4 +112,3 @@ class ProjectCreatorService:
         except Exception as e:
             logger.error(f"处理Word附件时出错: {e}")
             return {"error": f"处理Word附件失败: {str(e)}"}
-
