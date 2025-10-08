@@ -85,7 +85,7 @@ class LTRFieldConfigLoader:
             配置文件路径
         """
         # 从配置管理器获取配置文件相对路径
-        config_file_relative_path = config_manager.get("ltr.fields_config", "src/app/config/ltr_fields.json")
+        config_file_relative_path = config_manager.get("ltr.fields_config", "app/config/ltr_fields.json")
 
         # 根据运行环境确定基础路径
         if getattr(sys, 'frozen', False):

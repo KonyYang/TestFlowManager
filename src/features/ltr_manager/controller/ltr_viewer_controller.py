@@ -7,7 +7,8 @@ from typing import List, Optional
 from PyQt5.QtWidgets import QWidget
 from src.core.logger import logger
 from src.features.ltr_manager.model.ltr_viewer_data import LTRViewerData
-from src.features.ltr_manager.service.ltr_viewer_service import LTRViewerService
+from src.features.ltr_manager.service.ltr_base_service import LTRBaseService
+
 
 
 class LTRViewerController:
@@ -21,7 +22,7 @@ class LTRViewerController:
         初始化LTR控制器
         """
         self.data_model = LTRViewerData()
-        self.service = LTRViewerService(self.data_model)
+        self.service = LTRBaseService(self.data_model)
 
     def handle_view_ltr(self) -> bool:
         """
@@ -35,7 +36,7 @@ class LTRViewerController:
             logger.debug("Handling advanced view LTR file request")
 
             # 1. 打开LTR文件（只打开一次）
-            workbook = self.service.open_ltr_file_readonly()
+            workbook = self.service.open_ltr_file(with_password=False)
             if workbook is None:
                 logger.error("Failed to open LTR file")
                 return False
@@ -100,7 +101,7 @@ class LTRViewerController:
                 return {"success": False, "data": None, "error": parse_result["error_message"]}
 
             # 2. 打开LTR文件（只打开一次）
-            workbook = self.service.open_ltr_file_readonly()
+            workbook = self.service.open_ltr_file(with_password=False)
             if workbook is None:
                 logger.error("Failed to open LTR file")
                 return {"success": False, "data": None, "error": "无法打开LTR文件"}

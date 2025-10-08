@@ -28,8 +28,7 @@ class LTREditorController:
         """
         self.editor_data_model = LTREditorData()
         self.ltr_data_model = ltr_data_model
-        self.ltr_service = ltr_service
-        self.service = LTREditorService(self.editor_data_model, self.ltr_data_model, self.ltr_service)
+        self.service = LTREditorService(self.editor_data_model, self.ltr_data_model)
 
     def open_editor_dialog(self, dl_data: Dict[str, Any], parent=None) -> Dict[str, Any]:
         """

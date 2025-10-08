@@ -7,7 +7,7 @@ from .controller.ltr_viewer_controller import LTRViewerController
 from .controller.ltr_editor_controller import LTREditorController
 from .controller.ltr_application_controller import LTRApplicationController
 
-from .service.ltr_viewer_service import LTRViewerService
+from .service.ltr_base_service import LTRBaseService
 from .service.ltr_editor_service import LTREditorService
 from .service.ltr_application_service import LTRApplicationService
 
@@ -22,7 +22,7 @@ __all__ = [
     'LTRApplicationController',
 
     # 服务
-    'LTRViewerService',
+    'LTRBaseService',
     'LTREditorService',
     'LTRApplicationService',
 

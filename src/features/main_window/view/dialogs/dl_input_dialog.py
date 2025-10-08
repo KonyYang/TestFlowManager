@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLab
 from PyQt5.QtCore import Qt
 from src.core.logger import logger
 # 新增导入
-from src.features.ltr_manager.service.ltr_viewer_service import LTRViewerService
+from src.features.ltr_manager.service.ltr_base_service import LTRBaseService
 from src.features.ltr_manager.model.ltr_viewer_data import LTRViewerData
 from src.features.ltr_manager.view.ltr_editor_dialog import LTREditorDialog
 from src.core.font_utils import FontUtils

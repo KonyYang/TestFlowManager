@@ -11,6 +11,7 @@ from src.core.event_dispatcher import event_dispatcher
 from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
 from src.features.ltr_manager.service.application_processing.document_validator import LTRApplicationFormValidator
 from src.features.ltr_manager.service.application_processing.data_extractor import LTRApplicationDataExtractor
+from src.features.ltr_manager.service.application_processing.ltr_number_generator import create_and_write_ltr_number
 from src.utils.word_utils import get_shared_word_app, release_word_app
 
 # 配置日志
@@ -51,6 +52,150 @@ class LTRApplicationService:
             "data": form_data,
             "status": "success"
         })
+
+    def apply_ltr(self, application_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        执行LTR编号申请
+
+        Args:
+            application_data: 申请数据
+
+        Returns:
+            包含申请结果的字典
+        """
+        print("[DEBUG] LTRApplicationService.apply_ltr() called")
+        logger.info("开始执行LTR编号申请")
+
+        try:
+            # 验证必要参数
+            if not application_data:
+                return {"success": False, "error": "申请数据为空"}
+
+            # 准备写入Excel的数据列
+            data_columns = self._prepare_data_columns(application_data)
+
+            # 获取DL编号（如果有的话）
+            dl_number = application_data.get('DL', '')
+
+            # 调用LTR编号生成器
+            try:
+                result = create_and_write_ltr_number(
+                    DL=dl_number,
+                    data_columns=data_columns,
+                    parent=None,
+                    is_update=False
+                )
+
+                if result and result.get('executed_write'):
+                    ltr_number = result.get('ltr_number')
+                    logger.info(f"LTR编号申请成功: {ltr_number}")
+
+                    return {
+                        "success": True,
+                        "ltr_number": ltr_number,
+                        "message": "LTR编号申请成功"
+                    }
+                else:
+                    logger.warning("LTR编号申请未执行写入操作")
+                    return {
+                        "success": False,
+                        "error": "LTR编号申请未执行写入操作"
+                    }
+            except Exception as e:
+                logger.error(f"调用LTR编号生成器时发生错误: {e}")
+                return {"success": False, "error": f"申请LTR编号时发生错误: {str(e)}"}
+
+        except Exception as e:
+            logger.error(f"调用LTR编号生成器时发生错误: {e}")
+            return {"success": False, "error": f"申请LTR编号时发生错误: {str(e)}"}
+
+
+    def update_ltr(self, application_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        执行LTR编号更新
+
+        Args:
+            application_data: 申请数据
+
+        Returns:
+            包含更新结果的字典
+        """
+        logger.info("开始执行LTR编号更新")
+
+        try:
+            # 验证必要参数
+            if not application_data:
+                return {"success": False, "error": "申请数据为空"}
+
+            # 准备写入Excel的数据列
+            data_columns = self._prepare_data_columns(application_data)
+
+            # 获取DL编号
+            dl_number = application_data.get('DL', '')
+            if not dl_number:
+                return {"success": False, "error": "更新操作必须提供LTR编号"}
+
+            # 调用LTR编号生成器进行更新
+            try:
+                result = create_and_write_ltr_number(
+                    DL=dl_number,
+                    data_columns=data_columns,
+                    parent=None,
+                    is_update=True
+                )
+
+                if result and result.get('executed_write'):
+                    ltr_number = result.get('ltr_number')
+                    logger.info(f"LTR编号更新成功: {ltr_number}")
+
+                    return {
+                        "success": True,
+                        "ltr_number": ltr_number,
+                        "message": "LTR编号更新成功"
+                    }
+                else:
+                    logger.warning("LTR编号更新未执行写入操作")
+                    return {
+                        "success": False,
+                        "error": "LTR编号更新未执行写入操作"
+                    }
+            except Exception as e:
+                logger.error(f"调用LTR编号生成器时发生错误: {e}")
+                return {"success": False, "error": f"更新LTR编号时发生错误: {str(e)}"}
+
+        except Exception as e:
+            logger.error(f"更新LTR编号时发生错误: {e}", exc_info=True)
+            return {"success": False, "error": f"更新LTR编号时发生错误: {str(e)}"}
+
+
+    def _prepare_data_columns(self, application_data: Dict[str, Any]) -> list:
+        """
+        准备要写入Excel的数据列
+
+        Args:
+            application_data: 申请数据
+
+        Returns:
+            数据列列表
+        """
+        # 根据实际需求映射数据到Excel列
+        data_columns = [
+            application_data.get('project_type', ''),
+            application_data.get('sample_information', ''),
+            application_data.get('tests_to_be_performed', ''),
+            application_data.get('test_type', ''),
+            application_data.get('requested_by', ''),
+            application_data.get('location', ''),
+            application_data.get('project_leader', ''),
+            application_data.get('test_result', ''),
+            application_data.get('failed_item', ''),
+            application_data.get('sample_deposition', ''),
+            application_data.get('sub_contract', ''),
+            application_data.get('test_fee', ''),
+            application_data.get('remarks_po', '')
+        ]
+
+        return data_columns
 
     def process_word_application(self, doc_filepath: str) -> LTRApplicationData:
         """

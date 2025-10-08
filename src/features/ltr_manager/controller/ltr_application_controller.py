@@ -137,7 +137,35 @@ class LTRApplicationController:
             if self.parent_view:
                 QMessageBox.critical(self.parent_view, "错误", f"显示申请单对话框时出错: {str(e)}")
             return None
+            return None
 
+    def apply_ltr_number(self, form_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        处理LTR编号申请请求
+        """
+        print("[DEBUG] LTRApplicationController.apply_ltr_number() called")
+        logger.info("开始处理LTR编号申请请求")
+
+        try:
+            # 验证表单数据
+            print("[DEBUG] Validating form data...")
+            if not form_data:
+                print("[DEBUG] Form data is empty")
+                return {"success": False, "error": "表单数据为空"}
+
+            print("[DEBUG] Calling service.apply_ltr with form data")
+            # 直接调用服务层处理申请
+            result = self.service.apply_ltr(form_data)
+            print(f"[DEBUG] Service apply_ltr result: {result}")
+
+            return result
+
+        except Exception as e:
+            print(f"[ERROR] Exception in apply_ltr_number: {e}")
+            import traceback
+            print(f"[ERROR] Traceback: {traceback.format_exc()}")
+            logger.error(f"处理LTR编号申请时发生错误: {e}", exc_info=True)
+            return {"success": False, "error": f"处理申请时发生错误: {str(e)}"}
 
     def _process_application_data(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -210,42 +238,6 @@ class LTRApplicationController:
             data: LTRApplicationData对象
         """
         self.application_data = data
-
-    # 可以暂时保留这些方法，但添加注释说明
-    def open_ltr(self, dl_number: str):
-        """
-        查看LTR申请单 - 已弃用，按钮已移除
-
-        Args:
-            dl_number: DL编号
-        """
-        # 实现查看LTR的逻辑
-        logger.info(f"Opening LTR: {dl_number}")
-        # 后续实现
-
-    def apply_ltr(self, application_data: Dict[str, Any]):
-        """
-        申请LTR - 已弃用，按钮已移除
-
-        Args:
-            application_data: 申请单数据
-        """
-        # 实现申请LTR的逻辑
-        logger.info("Applying LTR")
-        # 后续实现
-
-    def update_ltr(self, dl_number: str, application_data: Dict[str, Any]):
-        """
-        更新LTR - 已弃用，按钮已移除
-
-        Args:
-            dl_number: DL编号
-            application_data: 申请单数据
-        """
-        # 实现更新LTR的逻辑
-        logger.info(f"Updating LTR: {dl_number}")
-        # 后续实现
-
 
     def _on_ltr_application_processed(self, data):
         """

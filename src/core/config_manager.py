@@ -18,6 +18,8 @@ class ConfigManager:
         self.config_file = config_file
         self._config: Dict[str, Any] = {}
         self.load_config()
+        # 自动加载路径配置
+        self.load_paths_config("config/paths.ini")
 
     def load_config(self) -> None:
         """从配置文件加载配置"""

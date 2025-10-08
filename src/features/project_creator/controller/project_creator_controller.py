@@ -203,13 +203,19 @@ class ProjectCreatorController:
     def _show_ltr_application_dialog(self, application_data):
         """显示LTR申请窗口"""
         try:
-
             # 准备LTR数据
             dl_data = {
                 'dl_number': '',  # 新申请，没有DL编号
                 'data': application_data if application_data else {}
             }
 
+            # 使用正确的LTR控制器
+            from src.features.ltr_manager.controller.ltr_application_controller import LTRApplicationController
+            ltr_controller = LTRApplicationController(self.parent_view)
+
+            # 创建LTR申请对话框实例
+            from src.features.ltr_manager.view.ltr_application_dialog import LTRApplicationDialog
+            dialog = LTRApplicationDialog(dl_data, self.parent_view, ltr_controller)
 
             # 显示对话框
             dialog.exec_()
@@ -218,6 +224,7 @@ class ProjectCreatorController:
             logger.error(f"显示LTR申请窗口时出错: {e}")
             if self.parent_view:
                 QMessageBox.warning(self.parent_view, "警告", f"无法打开LTR申请窗口: {str(e)}")
+
 
     def _get_selected_attachment(self):
         """
@@ -289,11 +296,12 @@ class ProjectCreatorController:
 
                 attachments = []
                 for att in self.context.email_data.attachments:
+                    attachments.append({
                         'filename': att.filename,
                         'content': att.content,
                         'content_type': att.content_type,
                         'size': att.size
-
+                    })
                 # 设置邮件上下文
                 dialog.set_email_context(email_info, attachments, self.context.selected_file_path)
 

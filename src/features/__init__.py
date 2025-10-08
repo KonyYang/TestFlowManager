@@ -7,9 +7,9 @@ from . import ltr_manager
 from . import main_window
 
 # 从各功能模块导入主要的类
-from .ltr_manager import LTRViewerController, LTRViewerData, LTRViewerService
+from .ltr_manager import LTRViewerController, LTRViewerData, LTRBaseService
 from .main_window import MainWindowController, MainWindow
 
 __all__ = ['ltr_manager', 'main_window',
-           'LTRViewerController', 'LTRViewerData', 'LTRViewerService',
+           'LTRViewerController', 'LTRViewerData', 'LTRBaseService',
            'MainWindowController', 'MainWindow']
