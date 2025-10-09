@@ -152,7 +152,7 @@ class LTREditorService(LTRBaseService):
                 # 释放Excel应用程序
                 try:
                     from src.utils.excel_utils import release_excel_app
-                    release_excel_app(excel_app)
+                    release_excel_app()
                 except Exception as e:
                     logger.error(f"释放Excel应用程序时发生错误: {e}")
 

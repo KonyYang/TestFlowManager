@@ -13306,3 +13306,1440 @@
 2025-10-08 19:47:50,351 - TestFlowManager - INFO - Shutting down MainWindowController
 2025-10-08 19:47:50,351 - TestFlowManager - DEBUG - Application state saved
 2025-10-08 19:47:50,351 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:09:35,633 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-08 23:09:35,644 - TestFlowManager - INFO - Application initialized successfully
+2025-10-08 23:09:35,645 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-08 23:09:35,831 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-08 23:09:35,831 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-08 23:09:35,831 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-08 23:09:35,876 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-08 23:09:35,876 - TestFlowManager - DEBUG - Application state loaded
+2025-10-08 23:09:35,876 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-08 23:09:35,876 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-08 23:09:35,876 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-08 23:09:35,876 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-08 23:09:36,269 - TestFlowManager - INFO - Main window shown
+2025-10-08 23:09:37,614 - TestFlowManager - DEBUG - New file action triggered
+2025-10-08 23:09:37,614 - TestFlowManager - DEBUG - Handling new file request
+2025-10-08 23:09:37,614 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-08 23:09:37,619 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-08 23:09:37,619 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-08 23:09:42,441 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:09:42,441 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:09:42,441 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:09:42,447 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:09:42,447 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:09:42,447 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:09:42,447 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:09:42,447 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:09:44,496 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:09:44,496 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:09:44,497 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:09:44,504 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:09:44,504 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:09:44,504 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:09:44,504 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:09:44,504 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:09:44,512 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-08 23:09:44,512 - TestFlowManager - INFO - Successfully processed email data
+2025-10-08 23:09:44,512 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-08 23:09:44,513 - TestFlowManager - INFO - 已保存邮件文件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_230944\转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:09:44,515 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_230944\78C3E92B@8F7F2C17.0970AE67.jpg
+2025-10-08 23:09:44,515 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_230944\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:09:44,516 - TestFlowManager - INFO - 已创建临时文件夹: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_230944
+2025-10-08 23:09:44,516 - TestFlowManager - DEBUG - Using saved selected attachment: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:09:44,516 - TestFlowManager - INFO - Using selected attachment: e-3718_h_laboratory_test_request_cphd 10mm(.docx
+2025-10-08 23:09:44,517 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:09:44,517 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:09:44,517 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:09:44,526 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-08 23:09:44,526 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-08 23:09:44,527 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-08 23:09:44,695 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:09:44,757 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-08 23:09:44,798 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-08 23:09:44,803 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-08 23:09:44,803 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-08 23:09:44,805 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-08 23:09:44,831 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-08 23:09:44,837 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev H		GS-03-008'
+2025-10-08 23:09:44,837 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Rev' and extracted version 'H' from footer PARAGRAPH.
+2025-10-08 23:09:44,838 - TestFlowManager - INFO - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-08 23:09:44,855 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:09:44,856 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-08 23:09:44,964 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:09:44,964 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-08 23:09:45,075 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-08 23:09:45,201 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-08 23:09:45,266 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-08 23:09:45,354 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-08 23:09:46,454 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-08 23:09:47,404 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-08 23:09:48,221 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-08 23:09:48,438 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-08 23:09:48,677 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-08 23:09:49,102 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-08 23:09:49,984 - TestFlowManager - INFO - Successfully processed application file
+2025-10-08 23:09:50,024 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:09:50,024 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:09:50,024 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-08 23:09:50,026 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-08 23:09:52,693 - TestFlowManager - INFO - 开始处理LTR编号申请请求
+2025-10-08 23:09:52,693 - TestFlowManager - INFO - 开始执行LTR编号申请
+2025-10-08 23:09:52,712 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-08 23:09:52,712 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-08 23:09:52,716 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-10-08 23:09:53,210 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-08 23:09:53,210 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-08 23:09:53,397 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-08 23:09:58,664 - TestFlowManager - DEBUG - Excel instance count decreased to 1
+2025-10-08 23:09:58,670 - TestFlowManager - INFO - LTR编号申请成功: DL-2025-10-002
+2025-10-08 23:10:11,747 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-08 23:10:11,747 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-08 23:10:11,747 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-08 23:10:11,747 - TestFlowManager - INFO - New project created successfully
+2025-10-08 23:10:13,714 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:10:13,714 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:10:13,714 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:10:13,714 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:10:13,748 - TestFlowManager - INFO - Application exited
+2025-10-08 23:10:13,749 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-08 23:10:13,749 - TestFlowManager - INFO - Closing all windows
+2025-10-08 23:10:13,749 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:10:13,749 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:10:13,749 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:10:13,749 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:10:13,749 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:10:13,749 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:10:13,749 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:10:13,749 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:11:43,633 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-08 23:11:43,643 - TestFlowManager - INFO - Application initialized successfully
+2025-10-08 23:11:43,643 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-08 23:11:43,824 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-08 23:11:43,824 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-08 23:11:43,824 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-08 23:11:43,864 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-08 23:11:43,864 - TestFlowManager - DEBUG - Application state loaded
+2025-10-08 23:11:43,864 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-08 23:11:43,864 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-08 23:11:43,864 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-08 23:11:43,864 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-08 23:11:44,270 - TestFlowManager - INFO - Main window shown
+2025-10-08 23:11:45,249 - TestFlowManager - DEBUG - New file action triggered
+2025-10-08 23:11:45,249 - TestFlowManager - DEBUG - Handling new file request
+2025-10-08 23:11:45,249 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-08 23:11:45,254 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-08 23:11:45,254 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-08 23:11:49,778 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:11:49,778 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:11:49,778 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:11:49,785 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:11:49,785 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:11:49,785 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:11:49,785 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:11:49,785 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:11:51,449 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:11:51,449 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:11:51,449 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:11:51,454 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:11:51,454 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:11:51,454 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:11:51,454 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:11:51,454 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:11:51,462 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-08 23:11:51,462 - TestFlowManager - INFO - Successfully processed email data
+2025-10-08 23:11:51,462 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-08 23:11:51,464 - TestFlowManager - INFO - 已保存邮件文件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231151\转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:11:51,465 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231151\78C3E92B@8F7F2C17.0970AE67.jpg
+2025-10-08 23:11:51,465 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231151\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:11:51,466 - TestFlowManager - INFO - 已创建临时文件夹: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231151
+2025-10-08 23:11:51,466 - TestFlowManager - DEBUG - Using saved selected attachment: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:11:51,466 - TestFlowManager - INFO - Using selected attachment: e-3718_h_laboratory_test_request_cphd 10mm(.docx
+2025-10-08 23:11:51,467 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:11:51,467 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:11:51,467 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:11:51,476 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-08 23:11:51,476 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-08 23:11:51,476 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-08 23:11:51,614 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:11:51,668 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-08 23:11:51,707 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-08 23:11:51,718 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-08 23:11:51,718 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-08 23:11:51,720 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-08 23:11:51,747 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-08 23:11:51,753 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev H		GS-03-008'
+2025-10-08 23:11:51,753 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Rev' and extracted version 'H' from footer PARAGRAPH.
+2025-10-08 23:11:51,754 - TestFlowManager - INFO - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-08 23:11:51,771 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:11:51,771 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-08 23:11:51,882 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:11:51,882 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-08 23:11:52,019 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-08 23:11:52,147 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-08 23:11:52,213 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-08 23:11:52,305 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-08 23:11:53,274 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-08 23:11:54,217 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-08 23:11:55,061 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-08 23:11:55,284 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-08 23:11:55,517 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-08 23:11:55,943 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-08 23:11:56,768 - TestFlowManager - INFO - Successfully processed application file
+2025-10-08 23:11:56,784 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:11:56,784 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:11:56,784 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-08 23:11:56,785 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-08 23:11:58,843 - TestFlowManager - INFO - 开始处理LTR编号申请请求
+2025-10-08 23:11:58,843 - TestFlowManager - INFO - 开始执行LTR编号申请
+2025-10-08 23:11:58,897 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-08 23:11:58,897 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-08 23:11:58,904 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-10-08 23:11:59,335 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-08 23:11:59,335 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-08 23:11:59,408 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-08 23:12:04,359 - TestFlowManager - DEBUG - Excel instance count decreased to 1
+2025-10-08 23:12:04,365 - TestFlowManager - INFO - LTR编号申请成功: DL-2025-10-001
+2025-10-08 23:12:21,361 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-08 23:12:21,361 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-08 23:12:21,361 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-08 23:12:21,361 - TestFlowManager - INFO - New project created successfully
+2025-10-08 23:12:23,154 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:12:23,154 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:12:23,154 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:12:23,154 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:12:23,188 - TestFlowManager - INFO - Application exited
+2025-10-08 23:12:23,188 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-08 23:12:23,189 - TestFlowManager - INFO - Closing all windows
+2025-10-08 23:12:23,189 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:12:23,189 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:12:23,189 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:12:23,189 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:12:23,189 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:12:23,189 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:12:23,189 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:12:23,189 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:12:36,285 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-08 23:12:36,295 - TestFlowManager - INFO - Application initialized successfully
+2025-10-08 23:12:36,295 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-08 23:12:36,467 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-08 23:12:36,467 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-08 23:12:36,467 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-08 23:12:36,506 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-08 23:12:36,506 - TestFlowManager - DEBUG - Application state loaded
+2025-10-08 23:12:36,506 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-08 23:12:36,506 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-08 23:12:36,506 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-08 23:12:36,506 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-08 23:12:36,888 - TestFlowManager - INFO - Main window shown
+2025-10-08 23:12:38,352 - TestFlowManager - DEBUG - New file action triggered
+2025-10-08 23:12:38,352 - TestFlowManager - DEBUG - Handling new file request
+2025-10-08 23:12:38,352 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-08 23:12:38,359 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-08 23:12:38,359 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-08 23:12:42,707 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:12:42,707 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:12:42,707 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:12:42,714 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:12:42,714 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:12:42,714 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:12:42,714 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:12:42,714 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:12:44,760 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:12:44,761 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:12:44,761 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:12:44,767 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:12:44,767 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:12:44,767 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:12:44,767 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:12:44,767 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:12:44,773 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-08 23:12:44,773 - TestFlowManager - INFO - Successfully processed email data
+2025-10-08 23:12:44,773 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-08 23:12:44,774 - TestFlowManager - INFO - 已保存邮件文件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231244\转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:12:44,776 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231244\78C3E92B@8F7F2C17.0970AE67.jpg
+2025-10-08 23:12:44,776 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231244\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:12:44,776 - TestFlowManager - INFO - 已创建临时文件夹: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231244
+2025-10-08 23:12:44,776 - TestFlowManager - DEBUG - Using saved selected attachment: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:12:44,776 - TestFlowManager - INFO - Using selected attachment: e-3718_h_laboratory_test_request_cphd 10mm(.docx
+2025-10-08 23:12:44,777 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:12:44,777 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:12:44,777 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:12:44,787 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-08 23:12:44,787 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-08 23:12:44,787 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-08 23:12:44,934 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:12:45,003 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-08 23:12:45,040 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-08 23:12:45,049 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-08 23:12:45,049 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-08 23:12:45,050 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-08 23:12:45,078 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-08 23:12:45,083 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev H		GS-03-008'
+2025-10-08 23:12:45,083 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Rev' and extracted version 'H' from footer PARAGRAPH.
+2025-10-08 23:12:45,085 - TestFlowManager - INFO - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-08 23:12:45,100 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:12:45,100 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-08 23:12:45,205 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:12:45,205 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-08 23:12:45,317 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-08 23:12:45,427 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-08 23:12:45,491 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-08 23:12:45,579 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-08 23:12:46,533 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-08 23:12:47,466 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-08 23:12:48,251 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-08 23:12:48,468 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-08 23:12:48,695 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-08 23:12:49,108 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-08 23:12:49,981 - TestFlowManager - INFO - Successfully processed application file
+2025-10-08 23:12:50,003 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:12:50,003 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:12:50,003 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-08 23:12:50,003 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-08 23:12:51,953 - TestFlowManager - INFO - 开始处理LTR编号申请请求
+2025-10-08 23:12:51,953 - TestFlowManager - INFO - 开始执行LTR编号申请
+2025-10-08 23:12:51,965 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-08 23:12:51,966 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-08 23:12:51,969 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-10-08 23:12:52,361 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-08 23:12:52,361 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-08 23:12:52,426 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-08 23:12:57,079 - TestFlowManager - DEBUG - Excel instance count decreased to 1
+2025-10-08 23:12:57,086 - TestFlowManager - INFO - LTR编号申请成功: DL-2025-10-002
+2025-10-08 23:13:08,602 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-08 23:13:08,602 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-08 23:13:08,602 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-08 23:13:08,602 - TestFlowManager - INFO - New project created successfully
+2025-10-08 23:13:10,129 - TestFlowManager - DEBUG - New file action triggered
+2025-10-08 23:13:10,129 - TestFlowManager - DEBUG - Handling new file request
+2025-10-08 23:13:10,129 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-08 23:13:10,131 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-08 23:13:10,131 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-08 23:13:13,568 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:13,568 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:13,568 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:13,571 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:13:13,571 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:13:13,571 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:13:13,571 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:13,571 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:13:15,938 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:15,938 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:15,938 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:15,944 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:13:15,944 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:13:15,944 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:13:15,944 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:15,944 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:13:15,952 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-08 23:13:15,952 - TestFlowManager - INFO - Successfully processed email data
+2025-10-08 23:13:15,952 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-08 23:13:15,953 - TestFlowManager - INFO - 已保存邮件文件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231315\转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:15,955 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231315\78C3E92B@8F7F2C17.0970AE67.jpg
+2025-10-08 23:13:15,956 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231315\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:15,956 - TestFlowManager - INFO - 已创建临时文件夹: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231315
+2025-10-08 23:13:15,956 - TestFlowManager - DEBUG - Using saved selected attachment: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:15,956 - TestFlowManager - INFO - Using selected attachment: e-3718_h_laboratory_test_request_cphd 10mm(.docx
+2025-10-08 23:13:15,956 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:15,956 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:15,956 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:15,956 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-08 23:13:15,956 - TestFlowManager - DEBUG - Word instance count increased to 4
+2025-10-08 23:13:16,094 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:13:16,164 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-08 23:13:16,202 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-08 23:13:16,209 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-08 23:13:16,209 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-08 23:13:16,210 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-08 23:13:16,236 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-08 23:13:16,242 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev H		GS-03-008'
+2025-10-08 23:13:16,242 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Rev' and extracted version 'H' from footer PARAGRAPH.
+2025-10-08 23:13:16,243 - TestFlowManager - INFO - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-08 23:13:16,261 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:16,261 - TestFlowManager - DEBUG - Word instance count increased to 5
+2025-10-08 23:13:16,370 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:13:16,370 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-08 23:13:16,465 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-08 23:13:16,571 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-08 23:13:16,631 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-08 23:13:16,718 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-08 23:13:17,615 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-08 23:13:18,537 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-08 23:13:19,362 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-08 23:13:19,575 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-08 23:13:19,798 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-08 23:13:20,200 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-08 23:13:21,039 - TestFlowManager - INFO - Successfully processed application file
+2025-10-08 23:13:21,051 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:21,051 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:21,051 - TestFlowManager - DEBUG - Word instance count decreased to 4
+2025-10-08 23:13:21,052 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-08 23:13:22,766 - TestFlowManager - INFO - 开始处理LTR编号申请请求
+2025-10-08 23:13:22,766 - TestFlowManager - INFO - 开始执行LTR编号申请
+2025-10-08 23:13:22,766 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-10-08 23:13:22,784 - TestFlowManager - DEBUG - Excel instance count increased to 3
+2025-10-08 23:13:23,087 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-08 23:13:23,087 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-08 23:13:23,122 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-08 23:13:27,597 - TestFlowManager - DEBUG - Excel instance count decreased to 2
+2025-10-08 23:13:27,598 - TestFlowManager - INFO - LTR编号申请成功: DL-2025-10-001
+2025-10-08 23:13:29,324 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-08 23:13:29,325 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-08 23:13:29,325 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-08 23:13:29,325 - TestFlowManager - INFO - New project created successfully
+2025-10-08 23:13:33,644 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:13:33,644 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:13:33,645 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:13:33,645 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:13:33,684 - TestFlowManager - INFO - Application exited
+2025-10-08 23:13:33,684 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-08 23:13:33,685 - TestFlowManager - INFO - Closing all windows
+2025-10-08 23:13:33,685 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:13:33,685 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:13:33,685 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:13:33,685 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:13:33,685 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:13:33,685 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:13:33,685 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:13:33,685 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:13:38,546 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-08 23:13:38,556 - TestFlowManager - INFO - Application initialized successfully
+2025-10-08 23:13:38,556 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-08 23:13:38,721 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-08 23:13:38,721 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-08 23:13:38,721 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-08 23:13:38,759 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-08 23:13:38,759 - TestFlowManager - DEBUG - Application state loaded
+2025-10-08 23:13:38,759 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-08 23:13:38,759 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-08 23:13:38,759 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-08 23:13:38,759 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-08 23:13:39,136 - TestFlowManager - INFO - Main window shown
+2025-10-08 23:13:40,381 - TestFlowManager - DEBUG - New file action triggered
+2025-10-08 23:13:40,381 - TestFlowManager - DEBUG - Handling new file request
+2025-10-08 23:13:40,381 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-08 23:13:40,384 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-08 23:13:40,384 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-08 23:13:44,627 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:44,627 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:44,627 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:44,634 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:13:44,634 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:13:44,634 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:13:44,634 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:44,634 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:13:46,555 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:46,555 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:46,555 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:46,563 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:13:46,563 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:13:46,563 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:13:46,564 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:46,564 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:13:46,573 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-08 23:13:46,573 - TestFlowManager - INFO - Successfully processed email data
+2025-10-08 23:13:46,573 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-08 23:13:46,575 - TestFlowManager - INFO - 已保存邮件文件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231346\转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:13:46,577 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231346\78C3E92B@8F7F2C17.0970AE67.jpg
+2025-10-08 23:13:46,577 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231346\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:46,577 - TestFlowManager - INFO - 已创建临时文件夹: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231346
+2025-10-08 23:13:46,577 - TestFlowManager - DEBUG - Using saved selected attachment: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:46,577 - TestFlowManager - INFO - Using selected attachment: e-3718_h_laboratory_test_request_cphd 10mm(.docx
+2025-10-08 23:13:46,578 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:46,578 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:46,578 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:46,586 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-08 23:13:46,586 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-08 23:13:46,586 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-08 23:13:46,713 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:13:46,767 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-08 23:13:46,803 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-08 23:13:46,809 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-08 23:13:46,809 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-08 23:13:46,810 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-08 23:13:46,835 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-08 23:13:46,841 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev H		GS-03-008'
+2025-10-08 23:13:46,841 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Rev' and extracted version 'H' from footer PARAGRAPH.
+2025-10-08 23:13:46,841 - TestFlowManager - INFO - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-08 23:13:46,858 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:46,858 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-08 23:13:46,967 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:13:46,967 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-08 23:13:47,068 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-08 23:13:47,181 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-08 23:13:47,246 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-08 23:13:47,334 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-08 23:13:48,258 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-08 23:13:49,185 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-08 23:13:50,037 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-08 23:13:50,251 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-08 23:13:50,477 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-08 23:13:50,881 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-08 23:13:51,710 - TestFlowManager - INFO - Successfully processed application file
+2025-10-08 23:13:51,726 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:51,726 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:13:51,726 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-08 23:13:51,727 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-08 23:13:53,150 - TestFlowManager - INFO - 开始处理LTR编号申请请求
+2025-10-08 23:13:53,150 - TestFlowManager - INFO - 开始执行LTR编号申请
+2025-10-08 23:13:53,168 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-08 23:13:53,168 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-08 23:13:53,171 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-10-08 23:13:53,547 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-08 23:13:53,547 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-08 23:13:53,604 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-08 23:13:58,187 - TestFlowManager - DEBUG - Excel instance count decreased to 1
+2025-10-08 23:13:58,192 - TestFlowManager - INFO - LTR编号申请成功: DL-2025-10-002
+2025-10-08 23:14:03,726 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-08 23:14:03,726 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-08 23:14:03,726 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-08 23:14:03,726 - TestFlowManager - INFO - New project created successfully
+2025-10-08 23:14:13,305 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:14:13,305 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:14:13,305 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:14:13,305 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:14:13,354 - TestFlowManager - INFO - Application exited
+2025-10-08 23:14:13,355 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-08 23:14:13,355 - TestFlowManager - INFO - Closing all windows
+2025-10-08 23:14:13,355 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:14:13,355 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:14:13,355 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:14:13,355 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:14:13,355 - TestFlowManager - INFO - MainWindow closing
+2025-10-08 23:14:13,355 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-08 23:14:13,355 - TestFlowManager - DEBUG - Application state saved
+2025-10-08 23:14:13,355 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-08 23:14:15,068 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-08 23:14:15,077 - TestFlowManager - INFO - Application initialized successfully
+2025-10-08 23:14:15,077 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-08 23:14:15,249 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-08 23:14:15,249 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-08 23:14:15,249 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-08 23:14:15,282 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-08 23:14:15,282 - TestFlowManager - DEBUG - Application state loaded
+2025-10-08 23:14:15,282 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-08 23:14:15,282 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-08 23:14:15,282 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-08 23:14:15,282 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-08 23:14:15,690 - TestFlowManager - INFO - Main window shown
+2025-10-08 23:14:17,017 - TestFlowManager - DEBUG - New file action triggered
+2025-10-08 23:14:17,017 - TestFlowManager - DEBUG - Handling new file request
+2025-10-08 23:14:17,017 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-08 23:14:17,021 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-08 23:14:17,021 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-08 23:14:25,597 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:14:25,597 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:14:25,597 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:14:25,604 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:14:25,604 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:14:25,604 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:14:25,604 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:14:25,604 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:14:27,968 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:14:27,968 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:14:27,968 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:14:27,974 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-08 23:14:27,974 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-08 23:14:27,974 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-08 23:14:27,974 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:14:27,974 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-08 23:14:27,982 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-08 23:14:27,982 - TestFlowManager - INFO - Successfully processed email data
+2025-10-08 23:14:27,982 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-08 23:14:27,983 - TestFlowManager - INFO - 已保存邮件文件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231427\转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-08 23:14:27,985 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231427\78C3E92B@8F7F2C17.0970AE67.jpg
+2025-10-08 23:14:27,985 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231427\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:14:27,985 - TestFlowManager - INFO - 已创建临时文件夹: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251008_231427
+2025-10-08 23:14:27,985 - TestFlowManager - DEBUG - Using saved selected attachment: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:14:27,985 - TestFlowManager - INFO - Using selected attachment: e-3718_h_laboratory_test_request_cphd 10mm(.docx
+2025-10-08 23:14:27,986 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:14:27,986 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:14:27,986 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:14:27,994 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-08 23:14:27,994 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-08 23:14:27,994 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-08 23:14:28,136 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:14:28,189 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-08 23:14:28,227 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-08 23:14:28,234 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-08 23:14:28,234 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-08 23:14:28,236 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-08 23:14:28,259 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-08 23:14:28,266 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev H		GS-03-008'
+2025-10-08 23:14:28,266 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Rev' and extracted version 'H' from footer PARAGRAPH.
+2025-10-08 23:14:28,267 - TestFlowManager - INFO - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-08 23:14:28,283 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:14:28,283 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-08 23:14:28,392 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-08 23:14:28,392 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-08 23:14:28,504 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-08 23:14:28,613 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-08 23:14:28,677 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-08 23:14:28,764 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-08 23:14:29,744 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-08 23:14:30,700 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-08 23:14:31,529 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-08 23:14:31,737 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-08 23:14:31,972 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-08 23:14:32,378 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-08 23:14:33,195 - TestFlowManager - INFO - Successfully processed application file
+2025-10-08 23:14:33,210 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:14:33,210 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-08 23:14:33,210 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-08 23:14:33,210 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-08 23:14:34,904 - TestFlowManager - INFO - 开始处理LTR编号申请请求
+2025-10-08 23:14:34,904 - TestFlowManager - INFO - 开始执行LTR编号申请
+2025-10-08 23:14:34,919 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-08 23:14:34,919 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-08 23:14:34,920 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-10-08 23:14:35,305 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-08 23:14:35,306 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-08 23:14:35,367 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-08 23:14:40,014 - TestFlowManager - DEBUG - Excel instance count decreased to 1
+2025-10-08 23:14:40,015 - TestFlowManager - INFO - LTR编号申请成功: DL-2025-10-001
+2025-10-09 06:37:51,950 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-09 06:37:51,986 - TestFlowManager - INFO - Application initialized successfully
+2025-10-09 06:37:51,986 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-09 06:37:52,428 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-09 06:37:52,428 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-09 06:37:52,429 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 06:37:52,490 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-09 06:37:52,490 - TestFlowManager - DEBUG - Application state loaded
+2025-10-09 06:37:52,490 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-09 06:37:52,490 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-09 06:37:52,490 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-09 06:37:52,490 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-09 06:37:52,885 - TestFlowManager - INFO - Main window shown
+2025-10-09 06:37:54,452 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-09 06:37:54,452 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 06:38:07,899 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-001
+2025-10-09 06:38:07,899 - TestFlowManager - ERROR - Invalid DL number format: DL-2025-06-001
+2025-10-09 06:38:07,899 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-09 06:38:09,590 - TestFlowManager - DEBUG - Status updated: 未找到DL编号: DL-2025-06-001
+2025-10-09 06:38:09,590 - TestFlowManager - DEBUG - Updated status: 未找到DL编号: DL-2025-06-001
+2025-10-09 06:38:09,590 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 06:38:20,754 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-001
+2025-10-09 06:38:20,754 - TestFlowManager - ERROR - Invalid DL number format: DL-2025-10-001
+2025-10-09 06:38:20,754 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-09 06:38:21,597 - TestFlowManager - DEBUG - Status updated: 未找到DL编号: DL-2025-10-001
+2025-10-09 06:38:21,597 - TestFlowManager - DEBUG - Updated status: 未找到DL编号: DL-2025-10-001
+2025-10-09 06:38:21,597 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 06:38:25,133 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-10-09 06:38:25,992 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-09 06:38:25,992 - TestFlowManager - DEBUG - Excel instance count increased to -1
+2025-10-09 06:38:27,286 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-09 06:38:27,286 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 06:38:27,502 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-09 06:38:27,503 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-09 06:38:27,503 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-09 06:38:27,507 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-10-09 06:38:27,692 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 06:38:27,692 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-10-09 06:38:32,577 - TestFlowManager - ERROR - Failed to find first blank cell from top: (-2147418111, '被呼叫方拒绝接收呼叫。', None, None)
+2025-10-09 06:38:32,579 - TestFlowManager - WARNING - Failed to find last valid row
+2025-10-09 06:38:32,580 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-10-09 06:38:32,581 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 06:38:32,581 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 06:38:32,582 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 06:38:40,342 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-09 06:38:40,342 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 06:38:45,209 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-001
+2025-10-09 06:38:45,209 - TestFlowManager - ERROR - Invalid DL number format: DL-2025-10-001
+2025-10-09 06:38:45,209 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-09 06:38:45,221 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-09 06:38:45,267 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-09 06:39:13,226 - TestFlowManager - DEBUG - Status updated: 未找到DL编号: DL-2025-10-001
+2025-10-09 06:39:13,226 - TestFlowManager - DEBUG - Updated status: 未找到DL编号: DL-2025-10-001
+2025-10-09 06:39:13,226 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 06:39:29,487 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-001
+2025-10-09 06:39:29,487 - TestFlowManager - ERROR - Invalid DL number format: DL-2025-10-001
+2025-10-09 06:39:29,487 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-09 06:39:40,559 - TestFlowManager - DEBUG - Status updated: 未找到DL编号: DL-2025-10-001
+2025-10-09 06:39:40,559 - TestFlowManager - DEBUG - Updated status: 未找到DL编号: DL-2025-10-001
+2025-10-09 06:39:40,559 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 06:50:27,049 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-09 06:50:27,060 - TestFlowManager - INFO - Application initialized successfully
+2025-10-09 06:50:27,060 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-09 06:50:27,237 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-09 06:50:27,238 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-09 06:50:27,238 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 06:50:27,283 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-09 06:50:27,284 - TestFlowManager - DEBUG - Application state loaded
+2025-10-09 06:50:27,284 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-09 06:50:27,284 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-09 06:50:27,284 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-09 06:50:27,284 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-09 06:50:27,765 - TestFlowManager - INFO - Main window shown
+2025-10-09 06:50:29,790 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-09 06:50:29,790 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 06:50:38,030 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-001
+2025-10-09 06:50:38,625 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-09 06:50:38,625 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-09 06:50:39,662 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-09 06:50:39,662 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 06:50:39,786 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-09 06:50:39,786 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-09 06:50:39,786 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-09 06:50:39,787 - TestFlowManager - ERROR - Failed to get sheet '202025': (-2147352567, '发生意外。', (0, None, None, None, 0, -2147352565), None)
+2025-10-09 06:50:39,788 - TestFlowManager - WARNING - 未找到年份工作表: 202025
+2025-10-09 06:50:39,805 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-09 06:50:39,820 - TestFlowManager - INFO - 未找到特定工作表，将搜索所有工作表
+2025-10-09 06:50:39,830 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 06:57:22,608 - TestFlowManager - INFO - 在工作表 2020 中未找到DL编号: DL-2025-10-001
+2025-10-09 06:57:22,670 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 06:57:29,094 - TestFlowManager - INFO - 在工作表 2021 中未找到DL编号: DL-2025-10-001
+2025-10-09 06:57:29,146 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 06:57:37,952 - TestFlowManager - INFO - 在工作表 2022 中未找到DL编号: DL-2025-10-001
+2025-10-09 06:57:38,044 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 06:57:46,682 - TestFlowManager - INFO - 在工作表 2023 中未找到DL编号: DL-2025-10-001
+2025-10-09 06:57:46,701 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 06:57:56,209 - TestFlowManager - INFO - 在工作表 2024 中未找到DL编号: DL-2025-10-001
+2025-10-09 06:57:56,239 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 06:57:56,373 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-001
+2025-10-09 06:57:56,468 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-09 06:57:56,468 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-09 06:57:56,468 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-001
+2025-10-09 06:57:56,469 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-001
+2025-10-09 06:57:56,623 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-10-09 06:57:56,727 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:03:33,117 - TestFlowManager - INFO - 用户取消了DL编号 DL-2025-10-001 的更新操作
+2025-10-09 07:03:33,117 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:03:33,117 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:03:33,117 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-10-001
+2025-10-09 07:03:33,862 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:03:33,863 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:03:33,863 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:03:33,863 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:03:33,915 - TestFlowManager - INFO - Application exited
+2025-10-09 07:03:33,915 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-09 07:03:33,915 - TestFlowManager - INFO - Closing all windows
+2025-10-09 07:03:33,916 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:03:33,916 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:03:33,916 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:03:33,916 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:03:33,916 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:03:33,916 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:03:33,916 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:03:33,916 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:03:36,334 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-09 07:03:36,344 - TestFlowManager - INFO - Application initialized successfully
+2025-10-09 07:03:36,344 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-09 07:03:36,525 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-09 07:03:36,525 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-09 07:03:36,525 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:03:36,562 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-09 07:03:36,563 - TestFlowManager - DEBUG - Application state loaded
+2025-10-09 07:03:36,563 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-09 07:03:36,563 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-09 07:03:36,563 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-09 07:03:36,563 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-09 07:03:36,979 - TestFlowManager - INFO - Main window shown
+2025-10-09 07:03:38,891 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-09 07:03:38,891 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 07:03:47,224 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-001
+2025-10-09 07:03:47,756 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-09 07:03:47,756 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-09 07:03:48,672 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-09 07:03:48,672 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 07:03:48,758 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-09 07:03:48,759 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-09 07:03:48,759 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-09 07:03:48,778 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 07:03:48,825 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-001
+2025-10-09 07:03:48,861 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-09 07:03:48,861 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-09 07:03:48,861 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-001
+2025-10-09 07:03:48,861 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-001
+2025-10-09 07:03:48,885 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-10-09 07:03:48,937 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:04:35,555 - TestFlowManager - INFO - 用户取消了DL编号 DL-2025-10-001 的更新操作
+2025-10-09 07:04:35,556 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:04:35,556 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:04:35,556 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-10-001
+2025-10-09 07:05:24,056 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-09 07:05:24,056 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 07:05:34,592 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-001
+2025-10-09 07:05:34,592 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-10-09 07:05:35,137 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-09 07:05:35,137 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 07:05:35,222 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-09 07:05:35,222 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-09 07:05:35,222 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-09 07:05:35,237 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 07:05:35,302 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-001
+2025-10-09 07:05:35,351 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-09 07:05:35,351 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-09 07:05:35,351 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-001
+2025-10-09 07:05:35,351 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-001
+2025-10-09 07:05:35,374 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-10-09 07:05:35,378 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:08:07,727 - TestFlowManager - INFO - 用户取消了DL编号 DL-2025-10-001 的更新操作
+2025-10-09 07:08:07,727 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:08:07,727 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:08:07,727 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-10-001
+2025-10-09 07:08:08,441 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:08:08,441 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:08:08,441 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:08:08,442 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:08:08,490 - TestFlowManager - INFO - Application exited
+2025-10-09 07:08:08,491 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-09 07:08:08,492 - TestFlowManager - INFO - Closing all windows
+2025-10-09 07:08:08,492 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:08:08,492 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:08:08,492 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:08:08,492 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:08:08,492 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:08:08,492 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:08:08,493 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:08:08,493 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:08:10,202 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-09 07:08:10,212 - TestFlowManager - INFO - Application initialized successfully
+2025-10-09 07:08:10,212 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-09 07:08:10,382 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-09 07:08:10,382 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-09 07:08:10,382 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:08:10,427 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-09 07:08:10,427 - TestFlowManager - DEBUG - Application state loaded
+2025-10-09 07:08:10,427 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-09 07:08:10,427 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-09 07:08:10,427 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-09 07:08:10,427 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-09 07:08:10,811 - TestFlowManager - INFO - Main window shown
+2025-10-09 07:08:12,226 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-09 07:08:12,226 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 07:08:21,035 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-001
+2025-10-09 07:08:21,541 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-09 07:08:21,541 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-09 07:08:22,500 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-09 07:08:22,500 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 07:08:22,613 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-09 07:08:22,614 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-09 07:08:22,614 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-09 07:08:22,624 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 07:08:22,673 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-001
+2025-10-09 07:08:22,711 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-09 07:08:22,711 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-09 07:08:22,711 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-001
+2025-10-09 07:08:22,711 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-001
+2025-10-09 07:08:22,739 - TestFlowManager - ERROR - Failed to release Excel application: release_excel_app() takes 0 positional arguments but 1 was given
+2025-10-09 07:08:22,795 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:09:18,379 - TestFlowManager - INFO - 用户取消了DL编号 DL-2025-10-001 的更新操作
+2025-10-09 07:09:18,379 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:09:18,379 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:09:18,379 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-10-001
+2025-10-09 07:09:19,393 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:09:19,393 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:09:19,394 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:09:19,394 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:09:19,472 - TestFlowManager - INFO - Application exited
+2025-10-09 07:09:19,472 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-09 07:09:19,473 - TestFlowManager - INFO - Closing all windows
+2025-10-09 07:09:19,473 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:09:19,473 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:09:19,474 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:09:19,474 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:09:19,474 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:09:19,474 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:09:19,474 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:09:19,474 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:09:21,311 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-09 07:09:21,320 - TestFlowManager - INFO - Application initialized successfully
+2025-10-09 07:09:21,321 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-09 07:09:21,488 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-09 07:09:21,488 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-09 07:09:21,488 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:09:21,538 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-09 07:09:21,538 - TestFlowManager - DEBUG - Application state loaded
+2025-10-09 07:09:21,538 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-09 07:09:21,538 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-09 07:09:21,538 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-09 07:09:21,538 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-09 07:09:21,920 - TestFlowManager - INFO - Main window shown
+2025-10-09 07:09:23,265 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-09 07:09:23,265 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 07:09:30,236 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-001
+2025-10-09 07:09:30,733 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-09 07:09:30,733 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-09 07:09:31,660 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-09 07:09:31,660 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 07:09:31,779 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-09 07:09:31,780 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-09 07:09:31,780 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-09 07:09:31,790 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 07:09:31,835 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-001
+2025-10-09 07:09:31,874 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-09 07:09:31,874 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-09 07:09:31,874 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-001
+2025-10-09 07:09:31,874 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-001
+2025-10-09 07:09:31,899 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-09 07:09:31,956 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-09 07:09:31,956 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-09 07:09:31,958 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:11:25,189 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:11:25,241 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-09 07:11:25,242 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-09 07:11:25,786 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-09 07:11:25,786 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 07:11:25,871 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-09 07:11:25,871 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-09 07:11:25,871 - TestFlowManager - INFO - 加载了 9 个工作表
+2025-10-09 07:11:25,885 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 07:11:25,955 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-001
+2025-10-09 07:11:26,252 - TestFlowManager - INFO - 成功更新DL编号 DL-2025-10-001 的数据
+2025-10-09 07:11:30,037 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-09 07:11:30,043 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-09 07:11:30,043 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-09 07:11:30,073 - TestFlowManager - INFO - 成功更新DL编号 DL-2025-10-001 的数据
+2025-10-09 07:11:41,365 - TestFlowManager - INFO - 用户取消了DL编号 DL-2025-10-001 的更新操作
+2025-10-09 07:11:41,365 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:11:41,365 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:11:41,365 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-10-001
+2025-10-09 07:11:42,504 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:11:42,504 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:11:42,505 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:11:42,505 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:11:42,546 - TestFlowManager - INFO - Application exited
+2025-10-09 07:11:42,546 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-09 07:11:42,547 - TestFlowManager - INFO - Closing all windows
+2025-10-09 07:11:42,547 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:11:42,547 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:11:42,547 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:11:42,547 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:11:42,547 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:11:42,547 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:11:42,547 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:11:42,547 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:16:11,160 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-09 07:16:11,171 - TestFlowManager - INFO - Application initialized successfully
+2025-10-09 07:16:11,171 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-09 07:16:11,348 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-09 07:16:11,348 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-09 07:16:11,349 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:16:11,391 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-09 07:16:11,392 - TestFlowManager - DEBUG - Application state loaded
+2025-10-09 07:16:11,392 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-09 07:16:11,392 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-09 07:16:11,392 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-09 07:16:11,392 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-09 07:16:11,792 - TestFlowManager - INFO - Main window shown
+2025-10-09 07:16:12,882 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-09 07:16:12,882 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 07:16:26,211 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-001
+2025-10-09 07:16:26,717 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-09 07:16:26,717 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-09 07:16:27,701 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-09 07:16:27,701 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 07:16:27,832 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-09 07:16:27,832 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-09 07:16:27,832 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-09 07:16:27,843 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 07:16:27,890 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-001
+2025-10-09 07:16:27,926 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-09 07:16:27,926 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-09 07:16:27,926 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-001
+2025-10-09 07:16:27,926 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-001
+2025-10-09 07:16:27,952 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-09 07:16:27,998 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-09 07:16:27,998 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-09 07:16:28,000 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:16:32,096 - TestFlowManager - INFO - 用户取消了DL编号 DL-2025-10-001 的更新操作
+2025-10-09 07:16:32,096 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:16:32,096 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:16:32,096 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-10-001
+2025-10-09 07:16:32,892 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:16:32,892 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:16:32,892 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:16:32,892 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:16:32,948 - TestFlowManager - INFO - Application exited
+2025-10-09 07:16:32,948 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-09 07:16:32,949 - TestFlowManager - INFO - Closing all windows
+2025-10-09 07:16:32,949 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:16:32,949 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:16:32,949 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:16:32,949 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:16:32,949 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:16:32,949 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:16:32,949 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:16:32,949 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:19:14,838 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-09 07:19:14,849 - TestFlowManager - INFO - Application initialized successfully
+2025-10-09 07:19:14,849 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-09 07:19:15,022 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-09 07:19:15,022 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-09 07:19:15,022 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:19:15,088 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-09 07:19:15,088 - TestFlowManager - DEBUG - Application state loaded
+2025-10-09 07:19:15,088 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-09 07:19:15,088 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-09 07:19:15,088 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-09 07:19:15,088 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-09 07:19:15,499 - TestFlowManager - INFO - Main window shown
+2025-10-09 07:19:16,305 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-09 07:19:16,305 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 07:19:19,475 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:19:19,475 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:19:19,475 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:19:19,475 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:19:19,525 - TestFlowManager - INFO - Application exited
+2025-10-09 07:19:19,525 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-09 07:19:19,526 - TestFlowManager - INFO - Closing all windows
+2025-10-09 07:19:19,526 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:19:19,526 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:19:19,526 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:19:19,526 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:19:19,526 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:19:19,526 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:19:19,526 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:19:19,526 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:24:58,276 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-09 07:24:58,286 - TestFlowManager - INFO - Application initialized successfully
+2025-10-09 07:24:58,286 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-09 07:24:58,454 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-09 07:24:58,454 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-09 07:24:58,454 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:24:58,466 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-09 07:24:58,466 - TestFlowManager - DEBUG - Application state loaded
+2025-10-09 07:24:58,466 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-09 07:24:58,466 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-09 07:24:58,466 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-09 07:24:58,466 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-09 07:24:58,852 - TestFlowManager - INFO - Main window shown
+2025-10-09 07:25:00,029 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-09 07:25:00,029 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 07:25:07,585 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-001
+2025-10-09 07:25:08,078 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-09 07:25:08,078 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-09 07:25:09,019 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-09 07:25:09,019 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 07:25:09,130 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-09 07:25:09,130 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-09 07:25:09,131 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-09 07:25:09,141 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 07:25:09,185 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-001
+2025-10-09 07:25:09,222 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-09 07:25:09,222 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-09 07:25:09,222 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-001
+2025-10-09 07:25:09,222 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-001
+2025-10-09 07:25:09,245 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-09 07:25:09,291 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-09 07:25:09,291 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-09 07:25:09,294 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 07:25:15,364 - TestFlowManager - INFO - 用户取消了DL编号 DL-2025-10-001 的更新操作
+2025-10-09 07:25:15,364 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:25:15,364 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-10-001
+2025-10-09 07:25:15,364 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-10-001
+2025-10-09 07:25:16,488 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:25:16,488 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:25:16,488 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:25:16,488 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:25:16,534 - TestFlowManager - INFO - Application exited
+2025-10-09 07:25:16,534 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-09 07:25:16,534 - TestFlowManager - INFO - Closing all windows
+2025-10-09 07:25:16,534 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:25:16,534 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:25:16,535 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:25:16,535 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 07:25:16,535 - TestFlowManager - INFO - MainWindow closing
+2025-10-09 07:25:16,535 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-09 07:25:16,535 - TestFlowManager - DEBUG - Application state saved
+2025-10-09 07:25:16,535 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-09 08:05:36,569 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-09 08:05:36,579 - TestFlowManager - INFO - Application initialized successfully
+2025-10-09 08:05:36,579 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-09 08:05:36,767 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-09 08:05:36,767 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-09 08:05:36,767 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-09 08:05:36,811 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-09 08:05:36,811 - TestFlowManager - DEBUG - Application state loaded
+2025-10-09 08:05:36,811 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-09 08:05:36,811 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-09 08:05:36,811 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-09 08:05:36,811 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-09 08:05:37,380 - TestFlowManager - INFO - Main window shown
+2025-10-09 08:05:38,355 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-09 08:05:38,355 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-09 08:05:41,912 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-06-003
+2025-10-09 08:05:42,434 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-09 08:05:42,434 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-09 08:05:43,335 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-09 08:05:43,335 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-09 08:05:43,424 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-09 08:05:43,424 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-09 08:05:43,425 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-09 08:05:43,438 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-09 08:05:43,474 - TestFlowManager - INFO - 在工作表 2025 的第 13 行找到DL编号: DL-2025-06-003
+2025-10-09 08:05:43,509 - TestFlowManager - DEBUG - Found row set to: 13
+2025-10-09 08:05:43,509 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-09 08:05:43,509 - TestFlowManager - DEBUG - DL number set to: DL-2025-06-003
+2025-10-09 08:05:43,509 - TestFlowManager - INFO - Successfully found DL number: DL-2025-06-003
+2025-10-09 08:05:43,530 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-09 08:05:43,579 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-09 08:05:43,579 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-09 08:05:43,582 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 06:34:21,078 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-10 06:34:21,116 - TestFlowManager - INFO - Application initialized successfully
+2025-10-10 06:34:21,116 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-10 06:34:21,402 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-10 06:34:21,402 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-10 06:34:21,402 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 06:34:21,453 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-10 06:34:21,453 - TestFlowManager - DEBUG - Application state loaded
+2025-10-10 06:34:21,453 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-10 06:34:21,453 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-10 06:34:21,453 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-10 06:34:21,453 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-10 06:34:22,120 - TestFlowManager - INFO - Main window shown
+2025-10-10 06:34:23,703 - TestFlowManager - DEBUG - New file action triggered
+2025-10-10 06:34:23,703 - TestFlowManager - DEBUG - Handling new file request
+2025-10-10 06:34:23,703 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-10 06:34:23,713 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-10 06:34:23,713 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-10 06:34:29,536 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-10 06:34:29,536 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-10 06:34:29,536 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-10 06:34:29,546 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-10 06:34:29,546 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-10 06:34:29,546 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-10 06:34:29,546 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-10 06:34:29,546 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-10 06:34:32,128 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-10 06:34:32,128 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-10 06:34:32,128 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-10 06:34:32,134 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-10 06:34:32,134 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-10 06:34:32,134 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-10 06:34:32,134 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-10 06:34:32,134 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-10 06:34:32,143 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-10 06:34:32,143 - TestFlowManager - INFO - Successfully processed email data
+2025-10-10 06:34:32,143 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-10 06:34:32,145 - TestFlowManager - INFO - 已保存邮件文件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251010_063432\转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-10 06:34:32,146 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251010_063432\78C3E92B@8F7F2C17.0970AE67.jpg
+2025-10-10 06:34:32,146 - TestFlowManager - INFO - 已保存附件到: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251010_063432\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-10 06:34:32,146 - TestFlowManager - INFO - 已创建临时文件夹: D:\PythonProject\TestFlowManager\src\data/temp\ltr_application_20251010_063432
+2025-10-10 06:34:32,146 - TestFlowManager - DEBUG - Using saved selected attachment: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-10 06:34:32,146 - TestFlowManager - INFO - Using selected attachment: e-3718_h_laboratory_test_request_cphd 10mm(.docx
+2025-10-10 06:34:32,147 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-10 06:34:32,147 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-10 06:34:32,147 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-10 06:34:34,401 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-10 06:34:34,401 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-10 06:34:34,401 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-10 06:34:34,807 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-10 06:34:34,891 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-10 06:34:34,927 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-10 06:34:34,932 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-10 06:34:34,932 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-10 06:34:34,933 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-10 06:34:34,955 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-10 06:34:34,960 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev H		GS-03-008'
+2025-10-10 06:34:34,961 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Rev' and extracted version 'H' from footer PARAGRAPH.
+2025-10-10 06:34:34,961 - TestFlowManager - INFO - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-10 06:34:34,991 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-10 06:34:34,991 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-10 06:34:35,103 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-10 06:34:35,103 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-10 06:34:35,184 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-10 06:34:35,297 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-10 06:34:35,357 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-10 06:34:35,441 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-10 06:34:36,376 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-10 06:34:37,435 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-10 06:34:38,306 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-10 06:34:38,539 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-10 06:34:38,763 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-10 06:34:39,180 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-10 06:34:39,999 - TestFlowManager - INFO - Successfully processed application file
+2025-10-10 06:34:40,013 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-10 06:34:40,013 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-10 06:34:40,013 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-10 06:34:40,014 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-10 06:34:47,186 - TestFlowManager - INFO - 开始处理LTR编号申请请求
+2025-10-10 06:34:47,186 - TestFlowManager - INFO - 开始执行LTR编号申请
+2025-10-10 06:34:47,832 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-10 06:34:47,832 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-10 06:34:47,844 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-10-10 06:34:49,144 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-10 06:34:49,144 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 06:34:49,359 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-10 06:34:54,920 - TestFlowManager - DEBUG - Excel instance count decreased to 1
+2025-10-10 06:34:54,924 - TestFlowManager - INFO - LTR编号申请成功: DL-2025-10-002
+2025-10-10 06:35:02,892 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-10 06:35:02,892 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-10 06:35:02,892 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-10 06:35:02,892 - TestFlowManager - INFO - New project created successfully
+2025-10-10 06:35:07,737 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-10 06:35:07,737 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-10 06:35:20,963 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-10 06:35:20,963 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-10 06:35:22,238 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-10-10 06:35:22,238 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-10-10 06:35:22,705 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-10 06:35:22,705 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 06:35:22,853 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-10 06:35:22,854 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-10 06:35:22,854 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-10 06:35:22,857 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-10-10 06:35:22,956 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-10 06:35:22,956 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-10-10 06:35:27,304 - TestFlowManager - INFO - Found last valid row at row 17
+2025-10-10 06:35:27,304 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-10-10 06:35:27,304 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 06:35:27,304 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 06:35:27,304 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 06:35:35,069 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-10 06:35:35,070 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-10 06:35:39,199 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-002
+2025-10-10 06:35:39,200 - TestFlowManager - DEBUG - Excel instance count increased to 3
+2025-10-10 06:35:39,602 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-10 06:35:39,602 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 06:35:39,680 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-10 06:35:39,681 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-10 06:35:39,681 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-10 06:35:39,694 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-10 06:35:39,750 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-002
+2025-10-10 06:35:39,795 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-10 06:35:39,795 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-10 06:35:39,795 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-002
+2025-10-10 06:35:39,795 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-002
+2025-10-10 06:35:39,829 - TestFlowManager - DEBUG - Excel instance count decreased to 2
+2025-10-10 06:35:39,834 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 06:40:30,743 - TestFlowManager - INFO - 用户取消了DL编号 DL-2025-10-002 的更新操作
+2025-10-10 06:40:30,743 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-10-002
+2025-10-10 06:40:30,743 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-10-002
+2025-10-10 06:40:30,743 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-10-002
+2025-10-10 06:40:31,782 - TestFlowManager - INFO - MainWindow closing
+2025-10-10 06:40:31,782 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-10 06:40:31,782 - TestFlowManager - DEBUG - Application state saved
+2025-10-10 06:40:31,782 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-10 06:40:31,819 - TestFlowManager - INFO - Application exited
+2025-10-10 06:40:31,820 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-10 06:40:31,820 - TestFlowManager - INFO - Closing all windows
+2025-10-10 06:40:31,820 - TestFlowManager - INFO - MainWindow closing
+2025-10-10 06:40:31,820 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-10 06:40:31,820 - TestFlowManager - DEBUG - Application state saved
+2025-10-10 06:40:31,820 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-10 06:40:31,820 - TestFlowManager - INFO - MainWindow closing
+2025-10-10 06:40:31,821 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-10 06:40:31,821 - TestFlowManager - DEBUG - Application state saved
+2025-10-10 06:40:31,821 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-10 06:49:28,874 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-10 06:49:28,885 - TestFlowManager - INFO - Application initialized successfully
+2025-10-10 06:49:28,885 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-10 06:49:29,058 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-10 06:49:29,059 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-10 06:49:29,059 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 06:49:29,101 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-10 06:49:29,101 - TestFlowManager - DEBUG - Application state loaded
+2025-10-10 06:49:29,101 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-10 06:49:29,101 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-10 06:49:29,101 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-10 06:49:29,101 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-10 06:49:29,723 - TestFlowManager - INFO - Main window shown
+2025-10-10 06:49:32,846 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-10 06:49:32,846 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-10 06:49:43,519 - TestFlowManager - DEBUG - Handling view DL number request: DL-2005-10-002
+2025-10-10 06:49:44,008 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-10 06:49:44,008 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-10 06:49:44,938 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-10 06:49:44,938 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 06:49:45,032 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-10 06:49:45,032 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-10 06:49:45,032 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-10 06:49:45,033 - TestFlowManager - ERROR - Failed to get sheet '2005': (-2147352567, '发生意外。', (0, None, None, None, 0, -2147352565), None)
+2025-10-10 06:49:45,033 - TestFlowManager - WARNING - 未找到年份工作表: 2005
+2025-10-10 06:49:45,049 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-10 06:49:45,063 - TestFlowManager - INFO - 未找到特定工作表，将搜索所有工作表
+2025-10-10 06:49:45,072 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-10 06:50:07,687 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-10 06:50:07,813 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-10 06:50:07,813 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-10 06:50:19,909 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-10 06:50:19,919 - TestFlowManager - INFO - Application initialized successfully
+2025-10-10 06:50:19,919 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-10 06:50:20,090 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-10 06:50:20,090 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-10 06:50:20,090 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 06:50:20,128 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-10 06:50:20,128 - TestFlowManager - DEBUG - Application state loaded
+2025-10-10 06:50:20,128 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-10 06:50:20,128 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-10 06:50:20,128 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-10 06:50:20,128 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-10 06:50:20,511 - TestFlowManager - INFO - Main window shown
+2025-10-10 06:50:22,042 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-10 06:50:22,042 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-10 06:50:31,910 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-002
+2025-10-10 06:50:31,926 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-10 06:50:31,926 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-10 06:50:32,446 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-10 06:50:32,447 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 06:50:32,533 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-10 06:50:32,534 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-10 06:50:32,534 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-10 06:50:32,547 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-10 06:50:32,611 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-002
+2025-10-10 06:50:32,656 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-10 06:50:32,656 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-10 06:50:32,656 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-002
+2025-10-10 06:50:32,656 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-002
+2025-10-10 06:50:32,682 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-10 06:50:32,689 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-10 06:50:32,689 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-10 06:50:32,691 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 07:15:22,453 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-10 07:15:22,462 - TestFlowManager - INFO - Application initialized successfully
+2025-10-10 07:15:22,462 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-10 07:15:22,631 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-10 07:15:22,631 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-10 07:15:22,631 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 07:15:22,670 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-10 07:15:22,670 - TestFlowManager - DEBUG - Application state loaded
+2025-10-10 07:15:22,670 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-10 07:15:22,670 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-10 07:15:22,670 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-10 07:15:22,670 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-10 07:15:23,076 - TestFlowManager - INFO - Main window shown
+2025-10-10 07:15:24,038 - TestFlowManager - DEBUG - New file action triggered
+2025-10-10 07:15:24,038 - TestFlowManager - DEBUG - Handling new file request
+2025-10-10 07:15:24,038 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-10 07:15:24,042 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-10 07:15:24,042 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-10 07:15:25,490 - TestFlowManager - INFO - User cancelled email selection
+2025-10-10 07:15:25,491 - TestFlowManager - DEBUG - Status updated: 创建新项目失败
+2025-10-10 07:15:25,491 - TestFlowManager - DEBUG - Updated status: 创建新项目失败
+2025-10-10 07:15:25,491 - TestFlowManager - ERROR - Failed to create new project
+2025-10-10 07:15:26,894 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-10 07:15:26,894 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-10 07:15:34,914 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-002
+2025-10-10 07:15:34,971 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-10 07:15:34,971 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-10 07:15:35,445 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-10 07:15:35,445 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 07:15:35,530 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-10 07:15:35,530 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-10 07:15:35,530 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-10 07:15:35,544 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-10 07:15:35,606 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-002
+2025-10-10 07:15:35,653 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-10 07:15:35,653 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-10 07:15:35,653 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-002
+2025-10-10 07:15:35,653 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-002
+2025-10-10 07:15:35,678 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-10 07:15:35,685 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-10 07:15:35,685 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-10 07:15:35,687 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 07:16:10,076 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 07:16:10,086 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-10 07:16:10,086 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-10 07:16:10,484 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-10 07:16:10,484 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 07:16:10,575 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-10 07:16:10,575 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-10 07:16:10,575 - TestFlowManager - INFO - 加载了 9 个工作表
+2025-10-10 07:16:10,590 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-10 07:16:10,655 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-002
+2025-10-10 07:16:10,945 - TestFlowManager - INFO - 成功更新DL编号 DL-2025-10-002 的数据
+2025-10-10 07:16:12,363 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-10 07:16:12,368 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-10 07:16:12,368 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-10 07:16:12,372 - TestFlowManager - INFO - 成功更新DL编号 DL-2025-10-002 的数据
+2025-10-10 07:16:13,426 - TestFlowManager - INFO - 用户取消了DL编号 DL-2025-10-002 的更新操作
+2025-10-10 07:16:13,426 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-10-002
+2025-10-10 07:16:13,426 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-10-002
+2025-10-10 07:16:13,426 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-10-002
+2025-10-10 07:16:14,636 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-10 07:16:14,637 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-10 07:16:26,842 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-002
+2025-10-10 07:16:26,858 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-10 07:16:26,858 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-10 07:16:27,264 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-10 07:16:27,264 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 07:16:27,350 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-10 07:16:27,350 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-10 07:16:27,351 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-10 07:16:27,365 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-10 07:16:27,429 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-002
+2025-10-10 07:16:27,478 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-10 07:16:27,478 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-10 07:16:27,478 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-002
+2025-10-10 07:16:27,478 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-002
+2025-10-10 07:16:27,501 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-10 07:16:27,507 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-10 07:16:27,507 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-10 07:16:27,509 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 07:16:42,126 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 07:16:42,142 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-10 07:16:42,142 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-10 07:16:42,561 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-10 07:16:42,561 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 07:16:42,738 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-10 07:16:42,739 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-10 07:16:42,739 - TestFlowManager - INFO - 加载了 9 个工作表
+2025-10-10 07:16:42,755 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-10 07:16:42,824 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-002
+2025-10-10 07:16:43,118 - TestFlowManager - INFO - 成功更新DL编号 DL-2025-10-002 的数据
+2025-10-10 07:16:44,247 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-10 07:16:44,253 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-10 07:16:44,253 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-10 07:16:44,255 - TestFlowManager - INFO - 成功更新DL编号 DL-2025-10-002 的数据
+2025-10-10 07:16:45,661 - TestFlowManager - INFO - 用户取消了DL编号 DL-2025-10-002 的更新操作
+2025-10-10 07:16:45,661 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-10-002
+2025-10-10 07:16:45,661 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-10-002
+2025-10-10 07:16:45,661 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-10-002
+2025-10-10 07:16:46,836 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-10 07:16:46,836 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-10 07:17:03,533 - TestFlowManager - DEBUG - Handling view DL number request: DL-2025-10-002
+2025-10-10 07:17:03,544 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-10 07:17:03,544 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-10 07:17:03,951 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-10 07:17:03,951 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 07:17:04,041 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-10 07:17:04,042 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-10 07:17:04,042 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-10 07:17:04,057 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-10 07:17:04,127 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-002
+2025-10-10 07:17:04,180 - TestFlowManager - DEBUG - Found row set to: 17
+2025-10-10 07:17:04,181 - TestFlowManager - DEBUG - Found worksheet set
+2025-10-10 07:17:04,181 - TestFlowManager - DEBUG - DL number set to: DL-2025-10-002
+2025-10-10 07:17:04,181 - TestFlowManager - INFO - Successfully found DL number: DL-2025-10-002
+2025-10-10 07:17:04,205 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-10 07:17:04,211 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-10 07:17:04,211 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-10 07:17:04,213 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 07:17:10,289 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-10 07:17:10,296 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-10 07:17:10,296 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-10 07:17:10,696 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-10 07:17:10,696 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-10 07:17:10,791 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-10 07:17:10,791 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-10 07:17:10,791 - TestFlowManager - INFO - 加载了 9 个工作表
+2025-10-10 07:17:10,811 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-10 07:17:10,897 - TestFlowManager - INFO - 在工作表 2025 的第 17 行找到DL编号: DL-2025-10-002
+2025-10-10 07:17:11,161 - TestFlowManager - INFO - 成功更新DL编号 DL-2025-10-002 的数据
+2025-10-10 07:17:12,593 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-10 07:17:12,597 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-10 07:17:12,598 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-10 07:17:12,600 - TestFlowManager - INFO - 成功更新DL编号 DL-2025-10-002 的数据
+2025-10-10 07:17:13,366 - TestFlowManager - INFO - 用户取消了DL编号 DL-2025-10-002 的更新操作
+2025-10-10 07:17:13,366 - TestFlowManager - DEBUG - Status updated: 已定位到DL编号: DL-2025-10-002
+2025-10-10 07:17:13,366 - TestFlowManager - DEBUG - Updated status: 已定位到DL编号: DL-2025-10-002
+2025-10-10 07:17:13,366 - TestFlowManager - INFO - Successfully found and positioned to DL number: DL-2025-10-002
+2025-10-10 07:17:14,417 - TestFlowManager - INFO - MainWindow closing
+2025-10-10 07:17:14,417 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-10 07:17:14,418 - TestFlowManager - DEBUG - Application state saved
+2025-10-10 07:17:14,418 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-10 07:17:14,469 - TestFlowManager - INFO - Application exited
+2025-10-10 07:17:14,470 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-10 07:17:14,470 - TestFlowManager - INFO - Closing all windows
+2025-10-10 07:17:14,470 - TestFlowManager - INFO - MainWindow closing
+2025-10-10 07:17:14,470 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-10 07:17:14,470 - TestFlowManager - DEBUG - Application state saved
+2025-10-10 07:17:14,470 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-10 07:17:14,470 - TestFlowManager - INFO - MainWindow closing
+2025-10-10 07:17:14,470 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-10 07:17:14,470 - TestFlowManager - DEBUG - Application state saved
+2025-10-10 07:17:14,470 - TestFlowManager - INFO - MainWindowController shut down successfully

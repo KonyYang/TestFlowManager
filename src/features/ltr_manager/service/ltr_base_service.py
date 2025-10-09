@@ -84,25 +84,34 @@ class LTRBaseService:
             # 移除可能的空格
             dl_number = dl_number.strip()
 
-            # 检查基本格式 (DL-YY-NNNN 或 DL-YY-NNNN-X)
-            pattern = r'^DL-(\d{2})-(\d{4,})(?:-([A-Z]))?$'
+            # 检查基本格式 (DL-YYYY-MM-NNN 或 DL-YYYY-MM-NNN-SUFFIX)
+            # 支持后缀为字母和数字的任意组合
+            pattern = r'^DL-(\d{4})-(\d{2})-(\d{3})(?:([A-Za-z][A-Za-z0-9]*))?$'
             match = re.match(pattern, dl_number)
 
             if not match:
                 return {
                     "valid": False,
-                    "error_message": "DL编号格式不正确，应为 DL-YY-NNNN 或 DL-YY-NNNN-X"
+                    "error_message": "DL编号格式不正确，应为 DL-YYYY-MM-NNN 或 DL-YYYY-MM-NNNSUFFIX"
                 }
 
             year = int(match.group(1))
-            number = int(match.group(2))
-            suffix = match.group(3)
+            month = int(match.group(2))
+            number = int(match.group(3))
+            suffix = match.group(4)
 
             # 验证年份范围 (假设为2000-2099)
-            if year < 0 or year > 99:
+            if year < 2000 or year > 2099:
                 return {
                     "valid": False,
-                    "error_message": "DL编号中的年份部分无效"
+                    "error_message": "DL编号中的年份部分无效，应在2000-2099范围内"
+                }
+
+            # 验证月份范围
+            if month < 1 or month > 12:
+                return {
+                    "valid": False,
+                    "error_message": "DL编号中的月份部分无效，应在01-12范围内"
                 }
 
             # 验证序号范围
@@ -115,6 +124,7 @@ class LTRBaseService:
             return {
                 "valid": True,
                 "year": year,
+                "month": month,
                 "number": number,
                 "suffix": suffix,
                 "has_suffix": bool(suffix)
@@ -160,8 +170,8 @@ class LTRBaseService:
         try:
             sheets_to_search = []
 
-            # 构造年份工作表名称
-            year_sheet_name = f"20{dl_year:02d}"
+            # 构造年份工作表名称（直接使用完整年份）
+            year_sheet_name = str(dl_year)
 
             # 查找年份工作表
             year_sheet = get_sheet_by_name(workbook, year_sheet_name)

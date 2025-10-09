@@ -174,7 +174,7 @@ class LTRViewerController:
                 # 释放COM对象
                 try:
                     from src.utils.excel_utils import release_excel_app
-                    release_excel_app(excel_app)
+                    release_excel_app()
                 except Exception as e:
                     logger.error(f"Failed to release Excel application: {e}")
 

@@ -33,7 +33,8 @@ class LTREditorDialog(QDialog):
         self.data_model = LTREditorData()
 
         self.dl_number = dl_data.get('dl_number', '')
-        self.original_data = dl_data.get('data', {})  # E到Q列的数据
+        # 转换数据格式
+        self._convert_data_format(dl_data.get('data', {}))
         self.modified_data = self.original_data.copy()
 
         # 初始化数据模型
@@ -45,6 +46,7 @@ class LTREditorDialog(QDialog):
 
         self._setup_ui()
         self._populate_data()
+        print("[DEBUG] Data population completed")
 
     def _setup_ui(self):
         """设置用户界面"""
@@ -101,8 +103,25 @@ class LTREditorDialog(QDialog):
         layout.addLayout(button_layout)
         self.setLayout(layout)
 
+    def _convert_data_format(self, raw_data):
+        """转换原始数据格式"""
+        column_to_field_map = {
+            'E': 'project_type', 'F': 'sample_information', 'G': 'tests_to_be_performed',
+            'H': 'test_type', 'I': 'requested_by', 'J': 'location',
+            'K': 'project_leader', 'L': 'test_result', 'M': 'failed_item',
+            'N': 'sample_deposition', 'O': 'sub_contract', 'P': 'test_fee', 'Q': 'remarks_po'
+        }
+
+        self.original_data = {}
+        for column, value in raw_data.items():
+            field_name = column_to_field_map.get(column)
+            if field_name:
+                self.original_data[field_name] = value
+
+
     def _populate_data(self):
         """填充数据到表格"""
+        print(f"[DEBUG] _populate_data called, field_mapping length: {len(self.field_mapping)}")
         self.data_table.setRowCount(len(self.field_mapping))
 
         row = 0
@@ -110,19 +129,23 @@ class LTREditorDialog(QDialog):
             key = field_info['key']
             label = field_info['label']
             editor_type = field_info['editor_type']
+            print(f"[DEBUG] Processing field - key: {key}, label: {label}, editor_type: {editor_type}")
 
             # 获取原始值
             original_value = self.original_data.get(key, '')
+            print(f"[DEBUG] Original value for {key}: {original_value}")
 
             # 字段名
             field_item = LTRTableWidgetItem(label, editable=False)
 
             # 当前值
             current_item = LTRTableWidgetItem(str(original_value), editable=False)
+            print(f"[DEBUG] Created current_item with value: {str(original_value)}")
 
             # 修改值（根据字段类型创建不同的编辑控件）
             self.data_table.setItem(row, 0, field_item)
             self.data_table.setItem(row, 1, current_item)
+            print(f"[DEBUG] Set items at row {row}, column 0 and 1")
 
             if editor_type == 'multiline':
                 # 对于多行文本，使用LTRTextEdit

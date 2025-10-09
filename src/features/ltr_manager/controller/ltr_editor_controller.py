@@ -50,28 +50,37 @@ class LTREditorController:
 
         # 创建并显示对话框
         dialog = LTREditorDialog(dl_data, parent)
+        print("[DEBUG] Showing dialog with exec_()...")
         result = dialog.exec_()
+        print(f"[DEBUG] Dialog result: {result}")
 
         if result == QDialog.Accepted:
+            print("[DEBUG] User accepted the dialog")
             # 获取修改后的数据
             modified_data = dialog.get_modified_data()
+            print(f"[DEBUG] Modified data from dialog: {modified_data}")
 
             # 更新数据模型
             self.editor_data_model.set_modified_data(modified_data)
 
             # 返回成功结果和修改后的数据
-            return {
+            return_value = {
                 "success": True,
                 "dl_number": dl_number,
                 "modified_data": modified_data
             }
+            print(f"[DEBUG] Returning success result: {return_value}")
+            return return_value
         else:
+            print("[DEBUG] User cancelled the dialog or dialog was rejected")
             # 用户取消操作
-            return {
+            return_value = {
                 "success": False,
                 "dl_number": None,
                 "modified_data": None
             }
+            print(f"[DEBUG] Returning cancel result: {return_value}")
+            return return_value
 
     def update_ltr_data(self, dl_number: str, modified_data: Dict[str, Any] = None, parent=None) -> bool:
         """
