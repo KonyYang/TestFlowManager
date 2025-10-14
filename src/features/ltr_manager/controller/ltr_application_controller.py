@@ -143,27 +143,20 @@ class LTRApplicationController:
         """
         处理LTR编号申请请求
         """
-        print("[DEBUG] LTRApplicationController.apply_ltr_number() called")
         logger.info("开始处理LTR编号申请请求")
 
         try:
             # 验证表单数据
-            print("[DEBUG] Validating form data...")
             if not form_data:
-                print("[DEBUG] Form data is empty")
                 return {"success": False, "error": "表单数据为空"}
 
-            print("[DEBUG] Calling service.apply_ltr with form data")
             # 直接调用服务层处理申请
             result = self.service.apply_ltr(form_data)
-            print(f"[DEBUG] Service apply_ltr result: {result}")
 
             return result
 
         except Exception as e:
-            print(f"[ERROR] Exception in apply_ltr_number: {e}")
             import traceback
-            print(f"[ERROR] Traceback: {traceback.format_exc()}")
             logger.error(f"处理LTR编号申请时发生错误: {e}", exc_info=True)
             return {"success": False, "error": f"处理申请时发生错误: {str(e)}"}
 

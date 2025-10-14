@@ -45,7 +45,15 @@ class LTREditorService(LTRBaseService):
         workbook = None
         excel_app = None
         try:
-            # 1. 使用密码打开LTR文件（读写模式）
+            # 1. 验证并解析DL编号
+            parse_result = self.validate_and_parse_dl_number(dl_number)
+            if not parse_result["valid"]:
+                logger.error(f"无效的DL编号格式: {dl_number}")
+                if parent:
+                    QMessageBox.warning(parent, "更新失败", f"DL编号格式无效: {dl_number}")
+                return False
+
+            # 2. 使用密码打开LTR文件（读写模式）
             workbook = self.open_ltr_file(with_password=True)
             if workbook is None:
                 logger.error("无法以读写模式打开LTR文件")
@@ -59,48 +67,22 @@ class LTREditorService(LTRBaseService):
             excel_app.Visible = False
             excel_app.ScreenUpdating = False  # 暂时关闭屏幕更新
 
-            # 2. 验证并解析DL编号
-            parse_result = self.validate_and_parse_dl_number(dl_number)
-            if not parse_result["valid"]:
-                logger.error(f"无效的DL编号格式: {dl_number}")
-                if parent:
-                    QMessageBox.warning(parent, "更新失败", f"DL编号格式无效: {dl_number}")
-                return False
-
-            # 3. 加载可用工作表
-            sheets = self.load_available_sheets(workbook)
-            logger.info(f"加载了 {len(sheets)} 个工作表")
-
-            # 4. 根据DL编号确定要搜索的工作表
+            # 3. 直接使用已解析的年份和后缀信息查找DL编号
             dl_year = parse_result["year"]
             has_suffix = parse_result["has_suffix"]
-            sheets_to_search = self.determine_search_sheets(workbook, dl_year, has_suffix)
 
-            # 5. 在确定的工作表中查找DL编号
-            found = False
-            target_worksheet = None
-            target_row = None
+            find_result = self.find_dl_number_in_workbook(workbook, dl_year, has_suffix, dl_number)
 
-            for sheet in sheets_to_search:
-                if sheet is not None:
-                    # 清除筛选和取消隐藏
-                    self.clear_filters_and_unhide(sheet)
-
-                    # 查找DL编号
-                    search_result = self.find_dl_number(sheet, dl_number)
-                    if search_result["success"]:
-                        found = True
-                        target_worksheet = sheet
-                        target_row = search_result["row"]
-                        break
-
-            if not found:
+            if not find_result["success"]:
                 logger.error(f"在工作表中未找到DL编号: {dl_number}")
                 if parent:
                     QMessageBox.warning(parent, "更新失败", f"未找到DL编号: {dl_number}")
                 return False
 
-            # 6. 更新每个字段的值 (E列到Q列对应索引为5到17)
+            target_worksheet = find_result["worksheet"]
+            target_row = find_result["row"]
+
+            # 4. 更新每个字段的值 (E列到Q列对应索引为5到17)
             field_names = [
                 'project_type',                # E列
                 'sample_information',          # F列
@@ -123,11 +105,11 @@ class LTREditorService(LTRBaseService):
                 value = modified_data.get(field_name, "")
                 target_worksheet.Cells(target_row, column_index).Value = value
 
-            # 7. 保存工作簿
+            # 5. 保存工作簿
             workbook.Save()
             logger.info(f"成功更新DL编号 {dl_number} 的数据")
 
-            # 8. 显示成功消息
+            # 6. 显示成功消息
             if parent:
                 QMessageBox.information(parent, "更新成功", f"DL编号 {dl_number} 的数据已成功更新。")
             return True

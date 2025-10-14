@@ -300,54 +300,38 @@ class LTRApplicationDialog(QDialog):
 
     def accept(self):
         """重写accept方法，添加数据验证和处理"""
-        print("[DEBUG] LTRApplicationDialog.accept() method called")
-
         # 收集表单数据
-        print("[DEBUG] Starting to collect form data...")
         form_data = self._collect_form_data()
-        print(f"[DEBUG] Collected form data: {form_data}")
-        print("[DEBUG] Finished collecting form data")
 
         # 如果有控制器，调用控制器处理LTR申请
-        print(f"[DEBUG] Checking if controller exists: {self.controller is not None}")
-        if self.controller:
-            print(f"[DEBUG] Controller type: {type(self.controller)}")
-            print(f"[DEBUG] Controller has apply_ltr_number method: {hasattr(self.controller, 'apply_ltr_number')}")
+        if self.controller and hasattr(self.controller, 'apply_ltr_number'):
+            try:
+                result = self.controller.apply_ltr_number(form_data)
 
-            if hasattr(self.controller, 'apply_ltr_number'):
-                print(f"[DEBUG] Calling controller.apply_ltr_number with data: {form_data}")
-                try:
-                    result = self.controller.apply_ltr_number(form_data)
-                    print(f"[DEBUG] Controller apply_ltr_number result: {result}")
-
-                    if result.get("success"):
-                        # 显示成功消息
-                        print(f"[DEBUG] LTR application successful, LTR number: {result.get('ltr_number')}")
-                        from PyQt5.QtWidgets import QMessageBox
-                        print("[DEBUG] Showing success message box...")
-                        QMessageBox.information(self, "成功", f"LTR编号申请成功: {result.get('ltr_number')}")
-                        print("[DEBUG] Success message box shown, calling super().accept()...")
-                        # 调用父类方法关闭对话框
-                        super().accept()
-                        print("[DEBUG] Dialog closed successfully")
-                    else:
-                        # 显示错误消息
-                        print(f"[DEBUG] LTR application failed, error: {result.get('error')}")
-                        from PyQt5.QtWidgets import QMessageBox
-                        print("[DEBUG] Showing error message box...")
-                        QMessageBox.critical(self, "错误", f"LTR编号申请失败: {result.get('error')}")
-                        print("[DEBUG] Error message box shown")
-                except Exception as e:
-                    print(f"[ERROR] Exception occurred in controller.apply_ltr_number: {e}")
-                    import traceback
-                    print(f"[ERROR] Traceback: {traceback.format_exc()}")
+                if result.get("success"):
+                    # 显示成功消息
                     from PyQt5.QtWidgets import QMessageBox
-                    QMessageBox.critical(self, "错误", f"处理申请时发生异常: {str(e)}")
-            else:
-                print("[DEBUG] Controller does not have apply_ltr_number method, closing dialog directly")
-                super().accept()
+                    QMessageBox.information(self, "成功", f"LTR编号申请成功: {result.get('ltr_number')}")
+                    # 调用父类方法关闭对话框
+                    super().accept()
+                else:
+                    # 显示错误消息
+                    from PyQt5.QtWidgets import QMessageBox
+                    error_msg = result.get('error', '未知错误')
+                    QMessageBox.critical(self, "错误", f"LTR编号申请失败: {error_msg}")
+
+                    # 如果是需要重新输入的错误（如DL编号格式错误），保持对话框打开
+                    if result.get('retry', False):
+                        # 不调用super().accept()，保持对话框打开
+                        return
+                    else:
+                        # 其他错误关闭对话框
+                        self.reject()
+            except Exception as e:
+                import traceback
+                from PyQt5.QtWidgets import QMessageBox
+                QMessageBox.critical(self, "错误", f"处理申请时发生异常: {str(e)}")
+                self.reject()
         else:
             print("[DEBUG] No controller found, closing dialog directly")
-            # 调用父类方法关闭对话框
             super().accept()
-            print("[DEBUG] Dialog closed directly")

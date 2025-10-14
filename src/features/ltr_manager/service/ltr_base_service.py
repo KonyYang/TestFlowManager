@@ -92,7 +92,7 @@ class LTRBaseService:
             if not match:
                 return {
                     "valid": False,
-                    "error_message": "DL编号格式不正确，应为 DL-YYYY-MM-NNN 或 DL-YYYY-MM-NNNSUFFIX"
+                    "error_message": "输入DL-YYYY-MM-NNN 或 DL-YYYY-MM-NNNX"
                 }
 
             year = int(match.group(1))
@@ -155,53 +155,64 @@ class LTRBaseService:
             logger.error(f"加载工作表时出错: {e}")
             return []
 
-    def determine_search_sheets(self, workbook, dl_year: int, has_suffix: bool) -> List:
+    def find_dl_number_in_workbook(self, workbook, dl_year: int, has_suffix: bool, dl_number: str) -> Dict[str, Any]:
         """
-        根据DL编号确定要搜索的工作表
+        在工作簿中查找指定的DL编号并返回位置信息
 
         Args:
             workbook: Excel工作簿对象
             dl_year: DL编号中的年份
             has_suffix: 是否有后缀
+            dl_number: 要查找的DL编号
 
         Returns:
-            需要搜索的工作表列表
+            包含查找结果、工作表和行号的字典
         """
         try:
-            sheets_to_search = []
-
-            # 构造年份工作表名称（直接使用完整年份）
+            # 1. 先搜索dl_year工作表是否存在
             year_sheet_name = str(dl_year)
+            target_worksheet = get_sheet_by_name(workbook, year_sheet_name)
 
-            # 查找年份工作表
-            year_sheet = get_sheet_by_name(workbook, year_sheet_name)
-            if year_sheet:
-                sheets_to_search.append(year_sheet)
-            else:
-                logger.warning(f"未找到年份工作表: {year_sheet_name}")
+            if target_worksheet:
+                # 如果年份工作表存在，清除筛选和取消隐藏
+                self.clear_filters_and_unhide(target_worksheet)
 
-            # 如果有后缀，还需要搜索"Special"工作表
-            if has_suffix:
-                special_sheet = get_sheet_by_name(workbook, "Special")
-                if special_sheet:
-                    sheets_to_search.append(special_sheet)
-                else:
-                    logger.warning("未找到Special工作表")
+                # 在年份工作表中查找DL编号
+                search_result = self.find_dl_number(target_worksheet, dl_number)
+                if search_result["success"]:
+                    # 找到了直接返回
+                    return {
+                        "success": True,
+                        "worksheet": target_worksheet,
+                        "row": search_result["row"]
+                    }
 
-            # 如果没有找到特定工作表，则搜索所有工作表
-            if not sheets_to_search:
-                sheet_names = get_worksheet_names(workbook)
-                for name in sheet_names:
-                    sheet = get_sheet_by_name(workbook, name)
-                    if sheet:
-                        sheets_to_search.append(sheet)
-                logger.info("未找到特定工作表，将搜索所有工作表")
+            # 2. 如果没找到，且has_suffix为真，再搜索dl_year+1工作表
+            if has_suffix and not target_worksheet:
+                next_year = str(dl_year + 1)
+                target_worksheet = get_sheet_by_name(workbook, next_year)
 
-            return sheets_to_search
+                if target_worksheet:
+                    # 如果下一年工作表存在，清除筛选和取消隐藏
+                    self.clear_filters_and_unhide(target_worksheet)
+
+                    # 在下一年工作表中查找DL编号
+                    search_result = self.find_dl_number(target_worksheet, dl_number)
+                    if search_result["success"]:
+                        # 找到了直接返回
+                        return {
+                            "success": True,
+                            "worksheet": target_worksheet,
+                            "row": search_result["row"]
+                        }
+
+            # 3. 如果都没找到，返回错误
+            logger.warning(f"未找到DL编号 {dl_number}")
+            return {"success": False, "error": "未找到指定的DL编号"}
 
         except Exception as e:
-            logger.error(f"确定搜索工作表时出错: {e}")
-            return []
+            logger.error(f"查找DL编号时出错: {e}")
+            return {"success": False, "error": str(e)}
 
     def clear_filters_and_unhide(self, worksheet) -> bool:
         """
@@ -291,20 +302,23 @@ class LTRBaseService:
 
             # 先尝试定位当前年份
             sheet = get_sheet_by_name(workbook, year)
-            if sheet is not None and self.data_model:
-                self.data_model.set_current_sheet(year)
-                sheet.Activate()
+
+            if sheet is not None:
+                # 更新data_model（如果存在）
+                if self.data_model:
+                    self.data_model.set_current_sheet(year)
+                    sheet.Activate()
+                # 无论是否有data_model都返回找到的工作表
                 return sheet
 
             # 如果当前年份不存在，尝试定位上一年
             prev_year = str(int(year) - 1)
             sheet = get_sheet_by_name(workbook, prev_year)
-            if sheet is not None and self.data_model:
-                self.data_model.set_current_sheet(prev_year)
-                sheet.Activate()
+            if sheet is not None:
+                if self.data_model:
+                    self.data_model.set_current_sheet(prev_year)
+                    sheet.Activate()
                 return sheet
-
-            logger.warning(f"Neither {year} nor {prev_year} sheet found in LTR file")
             return None
         except Exception as e:
             logger.error(f"Failed to navigate to year sheet: {e}")

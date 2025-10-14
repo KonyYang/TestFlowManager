@@ -112,38 +112,24 @@ class LTRViewerController:
             excel_app.Visible = False
             excel_app.ScreenUpdating = False  # 暂时关闭屏幕更新
 
-            # 3. 加载可用工作表
-            sheets = self.service.load_available_sheets(workbook)
-            logger.info(f"Loaded {len(sheets)} available sheets")
-
-            # 4. 根据DL编号确定要查找的工作表
+            # 3. 直接使用已解析的年份和后缀信息查找DL编号
             dl_year = parse_result["year"]
             has_suffix = parse_result["has_suffix"]
 
-            sheets_to_search = self.service.determine_search_sheets(workbook, dl_year, has_suffix)
+            find_result = self.service.find_dl_number_in_workbook(workbook, dl_year, has_suffix, dl_number)
 
-            # 5. 在确定的工作表中查找DL编号
-            found = False
-            row_data = None
+            if find_result["success"]:
+                target_worksheet = find_result["worksheet"]
+                target_row = find_result["row"]
 
-            for sheet in sheets_to_search:
-                if sheet is not None:
-                    # 清除筛选和取消隐藏
-                    self.service.clear_filters_and_unhide(sheet)
+                # 提取E到Q列的数据
+                row_data = self.service.extract_row_data(target_worksheet, target_row)
 
-                    # 查找DL编号
-                    search_result = self.service.find_dl_number(sheet, dl_number)
-                    if search_result["success"]:
-                        found = True
-                        # 提取E到Q列的数据
-                        row_data = self.service.extract_row_data(sheet, search_result["row"])
-                        # 保存找到的位置信息到数据模型
-                        self.data_model.set_found_row(search_result["row"])
-                        self.data_model.set_found_worksheet(sheet)
-                        self.data_model.set_dl_number(dl_number)
-                        break
+                # 保存找到的位置信息到数据模型
+                self.data_model.set_found_row(target_row)
+                self.data_model.set_found_worksheet(target_worksheet)
+                self.data_model.set_dl_number(dl_number)
 
-            if found:
                 logger.info(f"Successfully found DL number: {dl_number}")
                 return {"success": True, "data": row_data}
             else:

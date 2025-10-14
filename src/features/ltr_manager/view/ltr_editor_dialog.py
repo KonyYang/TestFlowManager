@@ -121,7 +121,6 @@ class LTREditorDialog(QDialog):
 
     def _populate_data(self):
         """填充数据到表格"""
-        print(f"[DEBUG] _populate_data called, field_mapping length: {len(self.field_mapping)}")
         self.data_table.setRowCount(len(self.field_mapping))
 
         row = 0
@@ -129,23 +128,18 @@ class LTREditorDialog(QDialog):
             key = field_info['key']
             label = field_info['label']
             editor_type = field_info['editor_type']
-            print(f"[DEBUG] Processing field - key: {key}, label: {label}, editor_type: {editor_type}")
-
             # 获取原始值
             original_value = self.original_data.get(key, '')
-            print(f"[DEBUG] Original value for {key}: {original_value}")
 
             # 字段名
             field_item = LTRTableWidgetItem(label, editable=False)
 
             # 当前值
             current_item = LTRTableWidgetItem(str(original_value), editable=False)
-            print(f"[DEBUG] Created current_item with value: {str(original_value)}")
 
             # 修改值（根据字段类型创建不同的编辑控件）
             self.data_table.setItem(row, 0, field_item)
             self.data_table.setItem(row, 1, current_item)
-            print(f"[DEBUG] Set items at row {row}, column 0 and 1")
 
             if editor_type == 'multiline':
                 # 对于多行文本，使用LTRTextEdit
