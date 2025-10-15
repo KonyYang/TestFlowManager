@@ -139,7 +139,7 @@ class LTRApplicationController:
             return None
             return None
 
-    def apply_ltr_number(self, form_data: Dict[str, Any]) -> Dict[str, Any]:
+    def apply_ltr_number(self, form_data: Dict[str, Any], parent=None) -> Dict[str, Any]:
         """
         处理LTR编号申请请求
         """
@@ -151,7 +151,7 @@ class LTRApplicationController:
                 return {"success": False, "error": "表单数据为空"}
 
             # 直接调用服务层处理申请
-            result = self.service.apply_ltr(form_data)
+            result = self.service.apply_ltr(form_data, parent)
 
             return result
 

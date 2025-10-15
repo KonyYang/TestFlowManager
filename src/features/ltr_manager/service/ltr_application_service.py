@@ -53,7 +53,7 @@ class LTRApplicationService:
             "status": "success"
         })
 
-    def apply_ltr(self, application_data: Dict[str, Any]) -> Dict[str, Any]:
+    def apply_ltr(self, application_data: Dict[str, Any], parent=None) -> Dict[str, Any]:
         """
         执行LTR编号申请
         """
@@ -73,7 +73,7 @@ class LTRApplicationService:
 
             # 直接调用LTR编号生成器，让其内部处理不同类型的DL编号
             try:
-                generator = LTRNumberGenerator()
+                generator = LTRNumberGenerator(parent)
                 print(f"[DEBUG] 调用create_and_write_ltr_number，DL编号: '{dl_number}'")
                 result = generator.create_and_write_ltr_number(
                     DL=dl_number,

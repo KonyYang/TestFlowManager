@@ -306,7 +306,7 @@ class LTRApplicationDialog(QDialog):
         # 如果有控制器，调用控制器处理LTR申请
         if self.controller and hasattr(self.controller, 'apply_ltr_number'):
             try:
-                result = self.controller.apply_ltr_number(form_data)
+                result = self.controller.apply_ltr_number(form_data, self)
 
                 if result.get("success"):
                     # 显示成功消息

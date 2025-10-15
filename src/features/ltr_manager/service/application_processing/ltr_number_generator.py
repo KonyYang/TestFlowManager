@@ -151,7 +151,6 @@ class LTRNumberGenerator:
             pattern = r'^[Ww][A-Za-z0-9]*$'
             is_valid = re.match(pattern, dl)
             print(f"[DEBUG] 正则表达式 {pattern} 匹配结果: {is_valid}")
-
             if not is_valid:
                 print(f"[DEBUG] W前缀编号格式验证失败: {dl}")
                 if self.parent:
@@ -177,10 +176,8 @@ class LTRNumberGenerator:
             # 写入数据
             self._write_data_to_excel(ltr_number, target_row, data_columns)
             self._save_and_close()
-
             if self.parent:
                 QMessageBox.information(self.parent, "成功", f"成功创建新编号: {ltr_number}")
-
             return {
                 'executed_write': True,
                 'ltr_number': ltr_number
@@ -222,21 +219,16 @@ class LTRNumberGenerator:
                         'executed_write': False,
                         'ltr_number': None
                     }
-
                 # 用户确认替换，使用LTREditorService更新数据
                 return self._update_existing_data(dl, data_columns, target_worksheet, target_row)
             else:
-                # 编号不存在，在当前年份工作表中创建
-                target_row = self._find_target_row()
-                self._write_data_to_excel(dl, target_row, data_columns)
-                self._save_and_close()
-
+                # 编号不存在，仅提示用户
                 if self.parent:
-                    QMessageBox.information(self.parent, "成功", f"成功创建新编号: {dl}")
+                    QMessageBox.information(self.parent, "提示", f"编号 {dl} 不存在")
 
                 return {
-                    'executed_write': True,
-                    'ltr_number': dl
+                    'executed_write': False,
+                    'ltr_number': None
                 }
         except Exception as e:
             if self.parent:
