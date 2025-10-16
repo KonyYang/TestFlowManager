@@ -14,15 +14,14 @@ class ConfigManager:
     管理应用程序的配置信息，支持从文件加载和保存配置
     """
 
-    def __init__(self, config_file: str = "config/settings.ini"):
+    def __init__(self, config_file: str = "config/settings.json"):
         self.config_file = config_file
         self._config: Dict[str, Any] = {}
-        self.load_config()
-        # 自动加载路径配置
+        self.load_main_config()
         self.load_paths_config("config/paths.ini")
 
-    def load_config(self) -> None:
-        """从配置文件加载配置"""
+    def load_main_config(self) -> None:
+        """从主配置文件加载配置"""
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r', encoding='utf-8') as f:
@@ -33,6 +32,31 @@ class ConfigManager:
         else:
             # 如果配置文件不存在，使用默认配置
             self._config = self._get_default_config()
+
+    def load_paths_config(self, paths_file: str = "config/paths.ini") -> None:
+        """
+        从INI格式的路径配置文件加载路径配置
+
+        Args:
+            paths_file: 路径配置文件路径
+        """
+        try:
+            import configparser
+            if os.path.exists(paths_file):
+                paths_config = configparser.ConfigParser()
+                paths_config.read(paths_file, encoding='utf-8')
+
+                # 将INI配置转换为内部配置格式
+                if 'Paths' in paths_config:
+                    for key, value in paths_config['Paths'].items():
+                        self.set(f"paths.{key.lower()}", value)
+
+                # 加载密码配置
+                if 'Passwords' in paths_config:
+                    for key, value in paths_config['Passwords'].items():
+                        self.set(f"passwords.{key.lower()}", value)
+        except Exception as e:
+            print(f"Failed to load paths config from {paths_file}: {e}")
 
     def save_config(self) -> None:
         """保存配置到文件"""
@@ -56,8 +80,8 @@ class ConfigManager:
                 "debug": False
             },
             "window": {
-                "width": 1200,
-                "height": 800,
+                "width": 600,
+                "height": 400,
                 "position_x": 100,
                 "position_y": 100
             },
@@ -79,6 +103,7 @@ class ConfigManager:
             配置项的值或默认值
         """
         keys = key.split('.')
+        # 获取配置对象的引用
         value = self._config
 
         try:
@@ -107,53 +132,6 @@ class ConfigManager:
 
         # 设置最后一层的值
         config[keys[-1]] = value
-
-    def set(self, key: str, value: Any) -> None:
-        """
-        设置配置项的值
-
-        Args:
-            key: 配置项键名（支持点号分隔的嵌套键名，如 "app.name"）
-            value: 配置项的值
-        """
-        keys = key.split('.')
-        config = self._config
-
-        # 导航到倒数第二层
-        for k in keys[:-1]:
-            if k not in config:
-                config[k] = {}
-            config = config[k]
-
-        # 设置最后一层的值
-        config[keys[-1]] = value
-
-    def load_paths_config(self, paths_file: str = "config/paths.ini") -> None:
-        """
-        从INI格式的路径配置文件加载路径配置
-
-        Args:
-            paths_file: 路径配置文件路径
-        """
-        try:
-            import configparser
-            if os.path.exists(paths_file):
-                paths_config = configparser.ConfigParser()
-                paths_config.read(paths_file, encoding='utf-8')
-
-                # 将INI配置转换为内部配置格式
-                if 'Paths' in paths_config:
-                    for key, value in paths_config['Paths'].items():
-                        self.set(f"paths.{key.lower()}", value)
-
-                # 加载密码配置（保持原始键名大小写）
-                if 'Passwords' in paths_config:
-                    for key, value in paths_config['Passwords'].items():
-                        self.set(f"paths.{key}", value)  # 保持原始大小写
-        except Exception as e:
-            print(f"Failed to load paths config from {paths_file}: {e}")
-
-
 
     def get_all(self) -> Dict[str, Any]:
         """

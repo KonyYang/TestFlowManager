@@ -82,34 +82,32 @@ class LTREditorService(LTRBaseService):
             target_worksheet = find_result["worksheet"]
             target_row = find_result["row"]
 
-            # 4. 更新每个字段的值 (E列到Q列对应索引为5到17)
-            field_names = [
-                'project_type',                # E列
-                'sample_information',          # F列
-                'tests_to_be_performed',       # G列
-                'test_type',                   # H列
-                'requested_by',                # I列
-                'location',                    # J列
-                'project_leader',              # K列
-                'test_result',                 # L列
-                'failed_item',                 # M列
-                'sample_deposition',           # N列
-                'sub_contract',                # O列
-                'test_fee',                    # P列
-                'remarks_po'                   # Q列
+            # 4. 准备数据列用于更新
+            data_columns = [
+                modified_data.get('project_type', ''),
+                modified_data.get('sample_information', ''),
+                modified_data.get('tests_to_be_performed', ''),
+                modified_data.get('test_type', ''),
+                modified_data.get('requested_by', ''),
+                modified_data.get('location', ''),
+                modified_data.get('project_leader', ''),
+                modified_data.get('test_result', ''),
+                modified_data.get('failed_item', ''),
+                modified_data.get('sample_deposition', ''),
+                modified_data.get('sub_contract', ''),
+                modified_data.get('test_fee', ''),
+                modified_data.get('remarks_po', '')
             ]
 
-            # 更新每个字段的值
-            for i, field_name in enumerate(field_names):
-                column_index = 5 + i  # E列索引为5
-                value = modified_data.get(field_name, "")
-                target_worksheet.Cells(target_row, column_index).Value = value
+            # 5. 使用基类的通用更新方法更新数据
+            if not self.update_worksheet_data(target_worksheet, target_row, data_columns, parent):
+                return False
 
-            # 5. 保存工作簿
+            # 6. 保存工作簿
             workbook.Save()
             logger.info(f"成功更新DL编号 {dl_number} 的数据")
 
-            # 6. 显示成功消息
+            # 7. 显示成功消息
             if parent:
                 QMessageBox.information(parent, "更新成功", f"DL编号 {dl_number} 的数据已成功更新。")
             return True

@@ -308,25 +308,16 @@ class LTRApplicationDialog(QDialog):
             try:
                 result = self.controller.apply_ltr_number(form_data, self)
 
+                # 根据结果决定是否关闭对话框
                 if result.get("success"):
-                    # 显示成功消息
-                    from PyQt5.QtWidgets import QMessageBox
-                    QMessageBox.information(self, "成功", f"LTR编号申请成功: {result.get('ltr_number')}")
-                    # 调用父类方法关闭对话框
                     super().accept()
+                elif result.get('retry', False):
+                    # 需要重新输入，保持对话框打开
+                    return
                 else:
-                    # 显示错误消息
-                    from PyQt5.QtWidgets import QMessageBox
-                    error_msg = result.get('error', '未知错误')
-                    QMessageBox.critical(self, "错误", f"LTR编号申请失败: {error_msg}")
+                    # 其他情况关闭对话框
+                    self.reject()
 
-                    # 如果是需要重新输入的错误（如DL编号格式错误），保持对话框打开
-                    if result.get('retry', False):
-                        # 不调用super().accept()，保持对话框打开
-                        return
-                    else:
-                        # 其他错误关闭对话框
-                        self.reject()
             except Exception as e:
                 import traceback
                 from PyQt5.QtWidgets import QMessageBox
@@ -335,3 +326,4 @@ class LTRApplicationDialog(QDialog):
         else:
             print("[DEBUG] No controller found, closing dialog directly")
             super().accept()
+

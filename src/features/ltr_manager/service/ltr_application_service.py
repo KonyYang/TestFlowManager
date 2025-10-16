@@ -108,11 +108,18 @@ class LTRApplicationService:
                 "message": "LTR编号申请成功"
             }
         else:
-            logger.warning("LTR编号申请未执行写入操作")
-            return {
+            # 检查是否有 retry 标志并传递
+            response = {
                 "success": False,
-                "error": "LTR编号申请未执行写入操作"
+                "error": result.get('error', "LTR编号申请未执行写入操作")
             }
+
+            # 如果有 retry 标志，传递给上层
+            if 'retry' in result:
+                response['retry'] = result['retry']
+
+            logger.warning("LTR编号申请未执行写入操作")
+            return response
 
     def _prepare_data_columns(self, application_data: Dict[str, Any]) -> list:
         """

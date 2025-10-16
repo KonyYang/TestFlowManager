@@ -35,17 +35,8 @@ class ProjectCreatorService:
             临时文件夹路径
         """
         try:
-            # 获取配置的临时目录路径
-            temp_dir_config = config_manager.get("paths.temp_dir", "data/temp")
-
-            # 确定基础路径
-            base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
-            # 确保临时目录是绝对路径
-            if not os.path.isabs(temp_dir_config):
-                temp_dir = os.path.join(base_path, temp_dir_config)
-            else:
-                temp_dir = temp_dir_config
+            # 使用系统临时目录作为基础路径，创建应用专属临时目录
+            temp_dir = os.path.join(tempfile.gettempdir(), "TestFlowManager")
 
             # 确保目录存在
             os.makedirs(temp_dir, exist_ok=True)
@@ -79,6 +70,7 @@ class ProjectCreatorService:
         except Exception as e:
             logger.error(f"创建临时文件夹和保存附件时出错: {e}")
             raise
+
 
     def process_word_attachment(self, word_attachment: Dict) -> Dict[str, Any]:
         """

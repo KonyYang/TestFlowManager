@@ -130,12 +130,15 @@ class LTREditorDialog(QDialog):
             editor_type = field_info['editor_type']
             # 获取原始值
             original_value = self.original_data.get(key, '')
+            if original_value is None:
+                original_value = ''
 
             # 字段名
             field_item = LTRTableWidgetItem(label, editable=False)
 
             # 当前值
-            current_item = LTRTableWidgetItem(str(original_value), editable=False)
+            display_value = str(original_value) if original_value is not None else ""
+            current_item = LTRTableWidgetItem(display_value, editable=False)
 
             # 修改值（根据字段类型创建不同的编辑控件）
             self.data_table.setItem(row, 0, field_item)
@@ -188,7 +191,8 @@ class LTREditorDialog(QDialog):
                         # 普通文本项
                         modified_item = self.data_table.item(row, 2)
                         modified_value = modified_item.text() if modified_item else ""
-
+                        if modified_value == "None":
+                            modified_value = ""
                     self.modified_data[field_key] = modified_value
 
         # 更新数据模型中的修改数据

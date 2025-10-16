@@ -31,7 +31,7 @@ def create_project_structure(project_name=None, base_path="."):
         ],
         "config": [
             "__init__.py",
-            "settings.ini"
+            "settings.json"
         ],
         "src": {
             "__init__.py": None,
@@ -312,7 +312,7 @@ def create_project_structure(project_name=None, base_path="."):
         ],
         "config": [
             "__init__.py",
-            "settings.ini"
+            "settings.json"
         ],
         "src": {
             "__init__.py": None,

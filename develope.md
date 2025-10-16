@@ -230,9 +230,9 @@ class ConfigManager:
     def __init__(self, config_file: str = "config/settings.ini"):
         self.config_file = config_file
         self.config = configparser.ConfigParser()
-        self.load_config()
+        self.load_main_config()
     
-    def load_config(self) -> None:
+    def load_main_config(self) -> None:
         \"\"\"加载配置文件\"\"\"
         if os.path.exists(self.config_file):
             self.config.read(self.config_file, encoding='utf-8')

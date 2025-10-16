@@ -5,6 +5,8 @@
 
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMenuBar, QMenu, QAction, QStatusBar, QToolBar
 from PyQt5.QtCore import Qt
+
+from src.core import config_manager
 from src.core.logger import logger
 from src.features.main_window.controller.main_window_controller import MainWindowController
 from PyQt5.QtGui import QFont
@@ -53,7 +55,9 @@ class MainWindow(QMainWindow):
         """设置用户界面"""
         # 设置窗口属性
         self.setWindowTitle("TestFlow Manager")
-        self.resize(1200, 800)
+        width = config_manager.get("window.width", 800)
+        height = config_manager.get("window.height", 600)
+        self.resize(width, height)
 
         # 应用全局字体
         global_font = FontUtils.get_scaled_font(10)

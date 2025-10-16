@@ -65,7 +65,8 @@ class LTRNumberGenerator:
                     QMessageBox.warning(self.parent, "格式错误", f"不支持的DL编号格式: {DL}")
                 return {
                     'executed_write': False,
-                    'ltr_number': None
+                    'ltr_number': None,
+                    'retry': True
                 }
 
         except Exception as e:
@@ -217,7 +218,8 @@ class LTRNumberGenerator:
                 if not self._confirm_overwrite(dl, row_data):
                     return {
                         'executed_write': False,
-                        'ltr_number': None
+                        'ltr_number': None,
+                        'retry': True
                     }
                 # 用户确认替换，使用LTREditorService更新数据
                 return self._update_existing_data(dl, data_columns, target_worksheet, target_row)
@@ -228,7 +230,8 @@ class LTRNumberGenerator:
 
                 return {
                     'executed_write': False,
-                    'ltr_number': None
+                    'ltr_number': None,
+                    'retry': True
                 }
         except Exception as e:
             if self.parent:
@@ -292,7 +295,7 @@ class LTRNumberGenerator:
                 )
 
                 if base_find_result["success"]:
-                    # 基础编号存在，显示摘要信息，提示是否创建新的而不是覆盖
+                    # 基础编号存在，显示摘要信息，提示是否创建新的关联编号而不是覆盖
                     target_worksheet = base_find_result["worksheet"]
                     target_row = base_find_result["row"]
                     row_data = self.ltr_service.extract_row_data(target_worksheet, target_row)
@@ -308,7 +311,7 @@ class LTRNumberGenerator:
                     self._save_and_close()
 
                     if self.parent:
-                        QMessageBox.information(self.parent, "成功", f"成功创建新编号: {dl}")
+                        QMessageBox.information(self.parent, "成功", f"成功创建关联编号: {dl}")
 
                     return {
                         'executed_write': True,
@@ -317,10 +320,11 @@ class LTRNumberGenerator:
                 else:
                     # 基础编号也不存在，提醒用户
                     if self.parent:
-                        QMessageBox.warning(self.parent, "警告", f"基础编号{base_dl}不存在，请先创建基础编号")
+                        QMessageBox.warning(self.parent, "警告", f"基础编号{base_dl}不存在，无法生成关联编号")
                     return {
                         'executed_write': False,
-                        'ltr_number': None
+                        'ltr_number': None,
+                        'retry': True
                     }
         except Exception as e:
             if self.parent:
@@ -333,46 +337,23 @@ class LTRNumberGenerator:
     def _update_existing_data(self, dl_number, data_columns, worksheet, row):
         """使用LTREditorService更新现有数据"""
         try:
-            # 构造修改后的数据
-            modified_data = {
-                'project_type': data_columns[0] if len(data_columns) > 0 else "",
-                'sample_information': data_columns[1] if len(data_columns) > 1 else "",
-                'tests_to_be_performed': data_columns[2] if len(data_columns) > 2 else "",
-                'test_type': data_columns[3] if len(data_columns) > 3 else "",
-                'requested_by': data_columns[4] if len(data_columns) > 4 else "",
-                'location': data_columns[5] if len(data_columns) > 5 else "",
-                'project_leader': data_columns[6] if len(data_columns) > 6 else "",
-                'test_result': data_columns[7] if len(data_columns) > 7 else "",
-                'failed_item': data_columns[8] if len(data_columns) > 8 else "",
-                'sample_deposition': data_columns[9] if len(data_columns) > 9 else "",
-                'sub_contract': data_columns[10] if len(data_columns) > 10 else "",
-                'test_fee': data_columns[11] if len(data_columns) > 11 else "",
-                'remarks_po': data_columns[12] if len(data_columns) > 12 else ""
-            }
+            # 使用基类的通用更新方法
+            if self.ltr_service.update_worksheet_data(worksheet, row, data_columns, self.parent):
+                # 保存工作簿
+                self.workbook.Save()
 
-            # 使用LTREditorService更新数据
-            # 注意：这里简化处理，直接调用写入逻辑而不是完整的update_ltr_data方法
-            field_names = [
-                'project_type', 'sample_information', 'tests_to_be_performed', 'test_type',
-                'requested_by', 'location', 'project_leader', 'test_result', 'failed_item',
-                'sample_deposition', 'sub_contract', 'test_fee', 'remarks_po'
-            ]
+                if self.parent:
+                    QMessageBox.information(self.parent, "更新成功", f"DL编号 {dl_number} 的数据已成功更新。")
 
-            for i, field_name in enumerate(field_names):
-                column_index = 5 + i  # E列索引为5
-                value = modified_data.get(field_name, "")
-                worksheet.Cells(row, column_index).Value = value
-
-            # 保存工作簿
-            self.workbook.Save()
-
-            if self.parent:
-                QMessageBox.information(self.parent, "更新成功", f"DL编号 {dl_number} 的数据已成功更新。")
-
-            return {
-                'executed_write': True,
-                'ltr_number': dl_number
-            }
+                return {
+                    'executed_write': True,
+                    'ltr_number': dl_number
+                }
+            else:
+                return {
+                    'executed_write': False,
+                    'ltr_number': None
+                }
         except Exception as e:
             if self.parent:
                 QMessageBox.critical(self.parent, "更新失败", f"更新数据时发生错误: {str(e)}")
@@ -452,7 +433,7 @@ class LTRNumberGenerator:
         msg = f"基础编号 {base_dl} 已存在。\n\n当前数据:\n"
         for col, value in row_data.items():
             msg += f"{col}: {value}\n"
-        msg += f"\n是否基于此信息创建新编号 {new_dl}？"
+        msg += f"\n是否基于此信息创建关联编号 {new_dl}？"
 
         reply = QMessageBox.question(
             self.parent,
