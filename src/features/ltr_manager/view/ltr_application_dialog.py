@@ -5,11 +5,11 @@ LTR申请单对话框模块
 
 import logging
 import re
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
                              QTableWidget, QTableWidgetItem, QHeaderView,
                              QWidget, QScrollArea, QLabel, QComboBox, QTextEdit)
-from PyQt5.QtCore import Qt, QDate
+from PyQt5.QtCore import Qt, QDate, QTimer
 from PyQt5.QtWidgets import QDesktopWidget
 
 from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
@@ -28,7 +28,7 @@ class LTRApplicationDialog(QDialog):
     用于显示和编辑LTR申请单信息
     """
 
-    def __init__(self, application_data, parent=None, parent_controller=None):
+    def __init__(self, application_data, parent=None, parent_controller=None, temp_folder_path: Optional[str] = None):
         """
         初始化LTR申请单对话框
 
@@ -310,7 +310,9 @@ class LTRApplicationDialog(QDialog):
 
                 # 根据结果决定是否关闭对话框
                 if result.get("success"):
-                    super().accept()
+                    # 使用QTimer延迟关闭对话框，确保所有事件处理完成
+                    from PyQt5.QtCore import QTimer
+                    QTimer.singleShot(100, self._delayed_accept)
                 elif result.get('retry', False):
                     # 需要重新输入，保持对话框打开
                     return
@@ -326,4 +328,25 @@ class LTRApplicationDialog(QDialog):
         else:
             print("[DEBUG] No controller found, closing dialog directly")
             super().accept()
-
+            
+    def _delayed_accept(self):
+        """延迟接受对话框，确保所有操作完成"""
+        try:
+            # 确保所有COM对象被释放
+            try:
+                from src.utils import word_utils, excel_utils
+                word_utils.release_word_app()
+                excel_utils.release_excel_app()
+            except:
+                pass
+                
+            # 调用父类的accept方法
+            super().accept()
+        except Exception as e:
+            print(f"[DEBUG] Error in _delayed_accept: {e}")
+            import traceback
+            traceback.print_exc()
+            try:
+                super().accept()
+            except:
+                self.reject()

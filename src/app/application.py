@@ -78,6 +78,18 @@ class TestFlowApplication:
             # 运行应用程序主循环
             exit_code = self.app.exec_()
 
+            # 确保所有COM对象被正确释放
+            try:
+                from src.utils import word_utils, excel_utils
+                word_utils.release_word_app()
+                excel_utils.release_excel_app()
+                
+                # 强制进行垃圾回收
+                import gc
+                gc.collect()
+            except Exception as e:
+                print(f"[DEBUG] 释放COM对象时出错: {e}")
+
             logger.info("Application exited")
             return exit_code
 
@@ -87,14 +99,16 @@ class TestFlowApplication:
 
     def shutdown(self) -> None:
         """关闭应用程序"""
-        logger.info("Shutting down TestFlow Manager application")
+        try:
+            logger.info("Shutting down TestFlow Manager application")
 
-        # 保存配置
-        config_manager.save_config()
+            # 关闭所有窗口
+            if self.window_manager:
+                self.window_manager.close_all_windows()
 
-        # 关闭所有窗口
-        if self.window_manager:
-            self.window_manager.close_all_windows()
+            logger.info("Application shut down successfully")
+        except Exception as e:
+            logger.error(f"Error during application shutdown: {e}")
 
 
 def main():

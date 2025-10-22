@@ -37,27 +37,35 @@ class LTRApplicationService:
     # 添加事件处理方法
     def _on_ltr_application_confirmed(self, data):
         """处理LTR申请单确认事件"""
-        dl_number = data.get("dl_number")
-        form_data = data.get("data")
+        try:
+            dl_number = data.get("dl_number")
+            form_data = data.get("data")
 
-        logger.info(f"LTR application confirmed for DL: {dl_number}")
+            logger.info(f"LTR application confirmed for DL: {dl_number}")
 
-        # 这里可以添加处理逻辑，如保存数据到数据库或文件
-        # 例如：
-        # self.save_application_data(dl_number, form_data)
+            # 这里可以添加处理逻辑，如保存数据到数据库或文件
+            # 例如：
+            # self.save_application_data(dl_number, form_data)
 
-        # 发布处理完成事件
-        event_dispatcher.dispatch("ltr.application.processed", {
-            "dl_number": dl_number,
-            "data": form_data,
-            "status": "success"
-        })
+            # 发布处理完成事件
+            from src.core.event_dispatcher import event_dispatcher
+            from PyQt5.QtCore import QTimer
+            
+            # 使用QTimer确保事件处理在事件循环中进行
+            QTimer.singleShot(0, lambda: event_dispatcher.dispatch("ltr.application.processed", {
+                "dl_number": dl_number,
+                "data": form_data,
+                "status": "success"
+            }))
+        except Exception as e:
+            logger.error(f"Error in _on_ltr_application_confirmed: {e}")
+            import traceback
+            traceback.print_exc()
 
     def apply_ltr(self, application_data: Dict[str, Any], parent=None) -> Dict[str, Any]:
         """
         执行LTR编号申请
         """
-        print("[DEBUG] LTRApplicationService.apply_ltr() called")
         logger.info("开始执行LTR编号申请")
 
         try:
@@ -74,7 +82,6 @@ class LTRApplicationService:
             # 直接调用LTR编号生成器，让其内部处理不同类型的DL编号
             try:
                 generator = LTRNumberGenerator(parent)
-                print(f"[DEBUG] 调用create_and_write_ltr_number，DL编号: '{dl_number}'")
                 result = generator.create_and_write_ltr_number(
                     DL=dl_number,
                     data_columns=data_columns

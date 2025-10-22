@@ -318,14 +318,58 @@ class LTRNumberGenerator:
                         'ltr_number': dl
                     }
                 else:
-                    # 基础编号也不存在，提醒用户
-                    if self.parent:
-                        QMessageBox.warning(self.parent, "警告", f"基础编号{base_dl}不存在，无法生成关联编号")
-                    return {
-                        'executed_write': False,
-                        'ltr_number': None,
-                        'retry': True
-                    }
+                    # 基础编号也不存在，检查是否是W开头的特殊后缀
+                    suffix = dl[len(base_dl):]  # 获取后缀部分
+                    # 检查后缀是否是W开头的字符串
+                    if re.fullmatch(r'^[Ww][A-Za-z0-9]*$', suffix):
+                        # 构造基础编号+W的组合进行查找
+                        base_with_w = base_dl + "W"
+                        base_w_parse_result = self.ltr_service.validate_and_parse_dl_number(base_with_w)
+                        if base_w_parse_result["valid"]:
+                            base_w_find_result = self.ltr_service.find_dl_number_in_workbook(
+                                self.workbook,
+                                base_w_parse_result["year"],
+                                base_w_parse_result["has_suffix"],
+                                base_with_w
+                            )
+                            
+                            # 如果找到基础编号+W的记录
+                            if base_w_find_result["success"]:
+                                # 显示摘要信息，提示是否创建新的关联编号
+                                target_worksheet = base_w_find_result["worksheet"]
+                                target_row = base_w_find_result["row"]
+                                row_data = self.ltr_service.extract_row_data(target_worksheet, target_row)
+                                if self._confirm_create_new(dl, base_with_w, row_data):
+                                    # 用户确认创建新编号
+                                    target_row = self._find_target_row()
+                                    self._write_data_to_excel(dl, target_row, data_columns)
+                                    self._save_and_close()
+
+                                    if self.parent:
+                                        QMessageBox.information(self.parent, "成功", f"成功创建关联编号: {dl}")
+
+                                    return {
+                                        'executed_write': True,
+                                        'ltr_number': dl
+                                    }
+                        
+                        # 如果没有找到基础编号+W的记录或者用户未确认创建
+                        if self.parent:
+                            QMessageBox.warning(self.parent, "警告", f"未找到可关联的基础编号，无法生成关联编号{dl}")
+                        return {
+                            'executed_write': False,
+                            'ltr_number': None,
+                            'retry': True
+                        }
+                    else:
+                        # 基础编号也不存在，提醒用户
+                        if self.parent:
+                            QMessageBox.warning(self.parent, "警告", f"基础编号{base_dl}不存在，无法生成关联编号")
+                        return {
+                            'executed_write': False,
+                            'ltr_number': None,
+                            'retry': True
+                        }
         except Exception as e:
             if self.parent:
                 QMessageBox.critical(self.parent, "错误", f"处理带后缀编号时发生错误: {str(e)}")

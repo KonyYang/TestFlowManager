@@ -81,7 +81,6 @@ class MainWindowController:
         else:
             self.service.update_status(f"LTR申请单处理失败: {dl_number}")
 
-
     def _on_state_changed(self, data):
         """处理状态变更事件"""
         key = data.get("key")
@@ -324,6 +323,14 @@ class MainWindowController:
 
             # 保存应用程序状态
             self.service.save_application_state()
+            
+            # 确保所有COM对象被释放
+            try:
+                from src.utils import word_utils, excel_utils
+                word_utils.release_word_app()
+                excel_utils.release_excel_app()
+            except:
+                pass
 
             logger.info("MainWindowController shut down successfully")
         except Exception as e:

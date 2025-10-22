@@ -9,6 +9,8 @@ from src.core.logger import logger
 from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
 from src.features.ltr_manager.service.ltr_application_service import LTRApplicationService
 from src.features.ltr_manager.view.ltr_application_dialog import LTRApplicationDialog
+from src.features.folder_manager.controller.folder_manager_controller import FolderManagerController
+from src.utils.ltr_data_manager import LTRDataManager
 
 
 class LTRApplicationController:
@@ -27,6 +29,10 @@ class LTRApplicationController:
         self.parent_view = parent_view
         self.service = LTRApplicationService()
         self.application_data = LTRApplicationData()
+        # 添加文件夹管理控制器
+        self.folder_manager = FolderManagerController(parent_view)
+        # 添加LTR数据管理器
+        self.ltr_data_manager = LTRDataManager()
         # 添加事件订阅
         from src.core.event_dispatcher import event_dispatcher
         event_dispatcher.subscribe("ltr.application.processed", self._on_ltr_application_processed)
@@ -89,15 +95,19 @@ class LTRApplicationController:
                 QMessageBox.critical(self.parent_view, "错误", f"创建新申请单时出错: {str(e)}")
             return False
 
-    def show_application_dialog(self) -> Optional[Dict[str, Any]]:
+    def show_application_dialog(self, temp_folder_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
         显示LTR申请单对话框
+
+        Args:
+            temp_folder_path: 临时文件夹路径（可选）
 
         Returns:
             用户操作结果和修改后的数据，如果用户取消则返回None
         """
         try:
             logger.debug("Showing LTR application dialog")
+            logger.debug(f"传递给对话框的临时文件夹路径: {temp_folder_path}")
 
             # 准备传递给对话框的数据
             dialog_data = {
@@ -105,11 +115,16 @@ class LTRApplicationController:
                 'data': self.application_data.to_dict()
             }
 
-            # 创建并显示对话框
-            dialog = LTRApplicationDialog(dialog_data, self.parent_view, self)
+            # 创建并显示对话框，传递临时文件夹路径
+            dialog = LTRApplicationDialog(dialog_data, self.parent_view, self, temp_folder_path)
             result = dialog.exec_()
+            
+            # 注意：由于我们在LTRApplicationDialog.accept()中使用了QTimer，
+            # 这里的result可能不会立即反映对话框的真实状态。
+            # 我们需要通过其他方式获取数据
 
-            if result == LTRApplicationDialog.Accepted:
+            # 检查对话框是否接受了用户输入
+            if dialog.result() == LTRApplicationDialog.Accepted:
                 # 获取用户修改后的数据
                 modified_data = dialog.get_modified_data()
                 # 处理数据转换
@@ -137,13 +152,21 @@ class LTRApplicationController:
             if self.parent_view:
                 QMessageBox.critical(self.parent_view, "错误", f"显示申请单对话框时出错: {str(e)}")
             return None
-            return None
 
-    def apply_ltr_number(self, form_data: Dict[str, Any], parent=None) -> Dict[str, Any]:
+    def apply_ltr_number(self, form_data: Dict[str, Any], parent=None, temp_folder_path: Optional[str] = None) -> Dict[str, Any]:
         """
         处理LTR编号申请请求
+
+        Args:
+            form_data: 表单数据
+            parent: 父窗口
+            temp_folder_path: 临时文件夹路径（可选）
+
+        Returns:
+            处理结果
         """
         logger.info("开始处理LTR编号申请请求")
+        logger.debug(f"apply_ltr_number接收到的临时文件夹路径: {temp_folder_path}")
 
         try:
             # 验证表单数据
@@ -152,6 +175,39 @@ class LTRApplicationController:
 
             # 直接调用服务层处理申请
             result = self.service.apply_ltr(form_data, parent)
+
+            # 如果申请成功，询问是否创建项目文件夹
+            if result.get("success") and result.get("ltr_number"):
+                from PyQt5.QtWidgets import QMessageBox
+                reply = QMessageBox.question(
+                    parent,
+                    "创建项目文件夹",
+                    f"LTR编号 {result['ltr_number']} 申请成功。\n\n是否创建以此编号为名的项目文件夹并保存申请数据？",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.Yes
+                )
+
+                if reply == QMessageBox.Yes:
+                    # 收集完整的申请数据，包括DL编号
+                    application_data = self.ltr_data_manager.collect_application_data(form_data, result['ltr_number'])
+                    logger.debug(f"收集到的申请数据: {application_data}")
+                    
+                    # 如果提供了临时文件夹路径，添加到申请数据中
+                    if temp_folder_path:
+                        application_data['file_path'] = temp_folder_path
+                        logger.debug(f"已将临时文件夹路径添加到申请数据中: {temp_folder_path}")
+                    else:
+                        logger.warning("未提供临时文件夹路径")
+                    
+                    # 使用完整项目结构创建方法
+                    project_result = self.folder_manager.create_complete_project_structure(application_data)
+                    if project_result:
+                        # 保存申请数据
+                        self.ltr_data_manager.save_to_project_file(result['ltr_number'], application_data)
+                        logger.info(f"完整项目结构创建成功: {project_result}")
+                    else:
+                        logger.error("完整项目结构创建失败")
+                        QMessageBox.warning(parent, "警告", "项目文件夹创建失败")
 
             return result
 

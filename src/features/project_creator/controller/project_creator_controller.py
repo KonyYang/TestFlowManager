@@ -212,13 +212,22 @@ class ProjectCreatorController:
             # 使用正确的LTR控制器
             from src.features.ltr_manager.controller.ltr_application_controller import LTRApplicationController
             ltr_controller = LTRApplicationController(self.parent_view)
+            
+            # 获取临时文件夹路径（如果有的话）
+            temp_folder_path = None
+            if hasattr(self, 'email_extractor_controller') and self.email_extractor_controller:
+                temp_folder_path = self.email_extractor_controller.get_temp_folder_path()
+                logger.debug(f"从email_extractor_controller获取到的临时文件夹路径: {temp_folder_path}")
 
-            # 创建LTR申请对话框实例
-            from src.features.ltr_manager.view.ltr_application_dialog import LTRApplicationDialog
-            dialog = LTRApplicationDialog(dl_data, self.parent_view, ltr_controller)
-
-            # 显示对话框
-            dialog.exec_()
+            # 通过控制器显示对话框并传递临时文件夹路径
+            # 将application_data传递给控制器，以便正确初始化申请单数据
+            if application_data:
+                # 创建一个新的申请单数据对象
+                from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
+                ltr_controller.set_application_data(LTRApplicationData.from_dict(application_data))
+            
+            result = ltr_controller.show_application_dialog(temp_folder_path)
+            # 注意：这里不需要处理result，因为LTRApplicationController会通过事件系统处理后续操作
 
         except Exception as e:
             logger.error(f"显示LTR申请窗口时出错: {e}")

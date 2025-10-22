@@ -118,6 +118,17 @@ class EmailExtractorController(BaseController):
         """
         return self.data_model.selected_msg_file
 
+    def get_temp_folder_path(self):
+        """
+        获取临时文件夹路径
+
+        Returns:
+            临时文件夹路径
+        """
+        temp_folder_path = self.service.get_temp_folder()
+        logger.debug(f"EmailExtractorController返回的临时文件夹路径: {temp_folder_path}")
+        return temp_folder_path
+
     def connect_to_email_server(self) -> bool:
         """
         连接到邮件服务器
