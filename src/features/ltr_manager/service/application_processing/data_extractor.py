@@ -77,10 +77,14 @@ class LTRApplicationDataExtractor:
             extracted_data['applicable_specifications'] = testing_info.get('applicable_specifications', '')
 
             # 填充其他字段
-            for field in ['project_leader', 'failed_item', 'sample_deposition',
+            for field in ['failed_item', 'sample_deposition',
                           'test_fee', 'remarks_po', 'start_test_date', 'finish_test_date',
                           'report_date']:
                 extracted_data[field] = ""
+                
+            # 为project_leader设置默认值
+            from src.core.config_manager import config_manager
+            extracted_data['project_leader'] = config_manager.get("defaults.project_leader", "")
 
             # 添加文件路径字段
             extracted_data['file_path'] = doc_filepath

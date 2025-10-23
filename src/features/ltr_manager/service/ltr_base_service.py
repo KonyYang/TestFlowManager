@@ -409,6 +409,10 @@ class LTRBaseService:
                 'remarks_po': data_columns[12] if len(data_columns) > 12 else ""
             }
 
+            # 如果project_leader为空，使用配置中的默认值
+            if not modified_data['project_leader']:
+                modified_data['project_leader'] = config_manager.get("defaults.project_leader", "")
+                
             # 字段名称映射
             field_names = [
                 'project_type', 'sample_information', 'tests_to_be_performed', 'test_type',

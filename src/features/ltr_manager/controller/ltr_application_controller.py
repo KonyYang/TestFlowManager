@@ -215,6 +215,7 @@ class LTRApplicationController:
                         # 保存申请数据
                         self.ltr_data_manager.save_to_project_file(result['ltr_number'], application_data)
                         logger.info(f"完整项目结构创建成功: {project_result}")
+                        QMessageBox.information(parent, "成功", f"项目文件夹已成功创建！\n路径: {project_result}")
                     else:
                         logger.error("完整项目结构创建失败")
                         QMessageBox.warning(parent, "警告", "项目文件夹创建失败")

@@ -157,6 +157,11 @@ class LTRApplicationDialog(QDialog):
                     # 仅在需要显示到multiline编辑器时才换行，不影响原始数据
                     data[key] = data[key].replace(';', '\n')
 
+        # 如果project_leader为空，使用配置中的默认值
+        from src.core.config_manager import config_manager
+        if not data.get('project_leader'):
+            data['project_leader'] = config_manager.get("defaults.project_leader", "")
+
         # 构造table_items_data
         self.table_items_data = []
         for default_item in self._default_items_structure:

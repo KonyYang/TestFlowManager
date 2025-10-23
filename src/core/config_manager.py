@@ -55,6 +55,11 @@ class ConfigManager:
                 if 'Passwords' in paths_config:
                     for key, value in paths_config['Passwords'].items():
                         self.set(f"passwords.{key.lower()}", value)
+                        
+                # 加载默认值配置
+                if 'Defaults' in paths_config:
+                    for key, value in paths_config['Defaults'].items():
+                        self.set(f"defaults.{key.lower()}", value)
         except Exception as e:
             print(f"Failed to load paths config from {paths_file}: {e}")
 

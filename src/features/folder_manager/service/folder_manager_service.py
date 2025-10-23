@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import QMessageBox, QWidget
 from src.core.config_manager import config_manager
 from src.core.logger import logger
 from src.utils.file_utils import ensure_directory_exists
+from src.utils.excel_initializer import initialize_customer_feedback_form, initialize_fee_evaluation_form
 
 
 class FolderManagerService:
@@ -295,7 +296,33 @@ class FolderManagerService:
         # Step 4: 创建子目录结构 (E-mail, Submitted Material)
         folder_structure = self.create_subfolders_in_project(subfolder_path)
 
-        # Step 5: 获取附件来源路径
+        # Step 5: 初始化 Excel 表格
+        # 获取默认的project_leader
+        default_project_leader = config_manager.get("defaults.project_leader", "")
+        # 构建带project_leader的文件名（仅用于客户反馈表）
+        fee_filename = f"{os.path.basename(new_subfolder_name)} Form for Testing Fee Evaluation.xls"
+        if default_project_leader:
+            feedback_filename = f"{os.path.basename(new_subfolder_name)} Customer Feedback Form_{default_project_leader}.xlsx"
+        else:
+            feedback_filename = f"{os.path.basename(new_subfolder_name)} Customer Feedback Form.xlsx"
+        
+        success_fee = initialize_fee_evaluation_form(
+            template_dir, subfolder_path,
+            fee_filename,
+            project_data
+        )
+        success_feedback = initialize_customer_feedback_form(
+            template_dir, subfolder_path,
+            feedback_filename,
+            project_data
+        )
+
+        if not success_fee:
+            logger.warning("测试费用评估表初始化失败")
+        if not success_feedback:
+            logger.warning("客户反馈表初始化失败")
+
+        # Step 6: 获取附件来源路径
         temp_file_path = project_data.get('file_path', None)
         logger.debug(f"从项目数据中获取的临时文件路径: {temp_file_path}")
         if not temp_file_path or not os.path.exists(temp_file_path):
@@ -314,11 +341,11 @@ class FolderManagerService:
                 
             logger.info(f"使用附件来源路径: {src_dir}")
 
-            # Step 6: 复制 .msg 文件到 E-mail
+            # Step 7: 复制 .msg 文件到 E-mail
             if not self.move_files_by_extension(src_dir, folder_structure["email"], "*.msg", copy_only=True):
                 logger.warning("复制 .msg 文件失败或无匹配文件")
 
-            # Step 7: 复制其他文件到 Submitted Material
+            # Step 8: 复制其他文件到 Submitted Material
             other_files = [
                 f for f in os.listdir(src_dir)
                 if os.path.isfile(os.path.join(src_dir, f))
