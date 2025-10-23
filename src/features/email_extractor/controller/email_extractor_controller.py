@@ -214,3 +214,4 @@ class EmailExtractorController(BaseController):
     def clear_selection(self):
         """清空选择"""
         self.service.clear_selection()
+        self.view.clear_selection()

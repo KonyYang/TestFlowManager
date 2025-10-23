@@ -189,6 +189,36 @@ class EmailExtractorService:
             logger.error(f"保存附件时发生错误: {e}")
             return False
 
+    def cleanup_all_temp_folders(self) -> bool:
+        """
+        清理所有与邮件附件相关的临时文件夹
+        
+        Returns:
+            是否成功清理
+        """
+        try:
+            # 获取配置的临时目录路径
+            temp_base_dir = config_manager.get("paths.temp_dir", r"D:\TestFlowManager\Temp")
+            
+            # 确保临时目录存在
+            if not os.path.exists(temp_base_dir):
+                return True
+                
+            # 查找所有以email_attachments_开头的文件夹
+            for item in os.listdir(temp_base_dir):
+                item_path = os.path.join(temp_base_dir, item)
+                if os.path.isdir(item_path) and item.startswith("email_attachments_"):
+                    try:
+                        shutil.rmtree(item_path)
+                        logger.info(f"已清理邮件附件临时文件夹: {item_path}")
+                    except Exception as e:
+                        logger.error(f"清理邮件附件临时文件夹失败: {item_path}, 错误: {e}")
+            
+            return True
+        except Exception as e:
+            logger.error(f"清理所有临时文件夹时发生错误: {e}")
+            return False
+
     def process_msg_file(self, file_path: str) -> Dict[str, Any]:
         """
         处理MSG文件
@@ -223,7 +253,9 @@ class EmailExtractorService:
                 logger.error(f"MSG文件处理失败: {result.get('error', '未知错误')}")
             return result
         except Exception as e:
+            # 即使出现异常，也要确保清理临时文件夹
             logger.error(f"处理MSG文件时发生错误: {e}")
+            self.cleanup_temp_folder()
             return {"success": False, "error": str(e)}
 
     def create_temp_folder_with_attachments(self, attachments: List[Dict], msg_file_path: str) -> Optional[str]:

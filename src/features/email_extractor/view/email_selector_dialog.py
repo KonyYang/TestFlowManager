@@ -199,6 +199,9 @@ class EmailSelectorDialog(QDialog):
 
     def _handle_msg_file_selected(self, file_path):
         """处理选中的MSG文件"""
+        # 在处理新邮件前，清空之前的选择
+        self.clear_selection()
+        
         self.selected_msg_file = file_path
         self.select_button.setEnabled(True)
 
@@ -364,3 +367,7 @@ class EmailSelectorDialog(QDialog):
         self.email_info_label.setText("未选择邮件")
         self.attachment_table.setRowCount(0)
         self.select_button.setEnabled(False)
+        
+        # 清空附件列表
+        if hasattr(self, '_current_attachments'):
+            self._current_attachments = []

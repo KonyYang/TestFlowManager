@@ -300,6 +300,11 @@ class ProjectCreatorController:
             # 创建邮件选择对话框
             from src.features.email_extractor.view.email_selector_dialog import EmailSelectorDialog
             dialog = EmailSelectorDialog(self.parent_view)
+            
+            # 为对话框创建并关联控制器
+            from src.features.email_extractor.controller.email_extractor_controller import EmailExtractorController
+            controller = EmailExtractorController(dialog)
+            controller.initialize()
 
             # 设置邮件上下文信息
             if self.context.email_data:
@@ -317,31 +322,32 @@ class ProjectCreatorController:
                         'content_type': att.content_type,
                         'size': att.size
                     })
+
                 # 设置邮件上下文
-                dialog.set_email_context(email_info, attachments, self.context.selected_file_path)
+                dialog.set_email_context(email_info, attachments, self.context.email_data.file_path)
 
             # 显示对话框
             result = dialog.exec_()
-
-            # 如果用户点击了"选择"按钮
-            if result == QDialog.Accepted:
+            
+            # 如果用户确认选择
+            if result == EmailSelectorDialog.Accepted:
                 # 获取选中的附件
                 selected_attachment = dialog.get_selected_attachment()
-
                 if selected_attachment:
-                    # 更新选中的附件
-                    self.selected_attachment = selected_attachment
-                    logger.info(f"Reselected attachment: {selected_attachment.get('filename', 'Unknown')}")
-
-                    # 重新尝试处理项目创建
-                    self._continue_project_creation()
+                    # 更新上下文中的附件信息
+                    self.context.selected_attachment = selected_attachment
+                    logger.debug(f"已重新选择附件: {selected_attachment.get('filename', 'Unknown')}")
+                    
+                    # 更新界面显示
+                    if hasattr(self.view, 'update_attachment_info'):
+                        filename = selected_attachment.get('filename', 'Unknown')
+                        self.view.update_attachment_info(filename)
                 else:
-                    logger.warning("No attachment selected during reselection")
+                    logger.debug("用户未选择附件")
             else:
-                logger.info("User cancelled attachment reselection")
+                logger.debug("用户取消了附件重新选择")
 
         except Exception as e:
-            logger.error(f"Error during attachment reselection: {e}")
-            if self.parent_view:
-                QMessageBox.critical(self.parent_view, "错误", f"重新选择附件失败: {str(e)}")
-
+            logger.error(f"重新选择附件时发生错误: {e}")
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.critical(self.parent_view, "错误", f"重新选择附件时发生错误: {str(e)}")
