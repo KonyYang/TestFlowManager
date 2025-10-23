@@ -40,6 +40,8 @@ class LTRApplicationDialog(QDialog):
         self.parent_window = parent
         self.parent_controller = parent_controller
         self.application_data = application_data
+        # 保存临时文件夹路径
+        self.temp_folder_path = temp_folder_path
 
         self.dl_number = application_data.get('dl_number', '')
         self.original_data = application_data.get('data', {})
@@ -306,7 +308,8 @@ class LTRApplicationDialog(QDialog):
         # 如果有控制器，调用控制器处理LTR申请
         if self.controller and hasattr(self.controller, 'apply_ltr_number'):
             try:
-                result = self.controller.apply_ltr_number(form_data, self)
+                # 传递临时文件夹路径给控制器
+                result = self.controller.apply_ltr_number(form_data, self, self.temp_folder_path)
 
                 # 根据结果决定是否关闭对话框
                 if result.get("success"):

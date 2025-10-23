@@ -117,6 +117,7 @@ class LTRApplicationController:
 
             # 创建并显示对话框，传递临时文件夹路径
             dialog = LTRApplicationDialog(dialog_data, self.parent_view, self, temp_folder_path)
+            logger.debug(f"LTRApplicationDialog创建完成，传递的temp_folder_path: {temp_folder_path}")
             result = dialog.exec_()
             
             # 注意：由于我们在LTRApplicationDialog.accept()中使用了QTimer，
@@ -192,12 +193,21 @@ class LTRApplicationController:
                     application_data = self.ltr_data_manager.collect_application_data(form_data, result['ltr_number'])
                     logger.debug(f"收集到的申请数据: {application_data}")
                     
+                    # 检查申请数据中的file_path
+                    logger.debug(f"申请数据中的file_path: {application_data.get('file_path', 'None')}")
+                    logger.debug(f"传入的临时文件夹路径: {temp_folder_path}")
+                    
                     # 如果提供了临时文件夹路径，添加到申请数据中
                     if temp_folder_path:
                         application_data['file_path'] = temp_folder_path
                         logger.debug(f"已将临时文件夹路径添加到申请数据中: {temp_folder_path}")
                     else:
                         logger.warning("未提供临时文件夹路径")
+                        # 检查申请数据中是否已经有file_path
+                        if 'file_path' in application_data and application_data['file_path']:
+                            logger.debug(f"使用申请数据中已有的file_path: {application_data['file_path']}")
+                        else:
+                            logger.warning("申请数据中也没有有效的file_path")
                     
                     # 使用完整项目结构创建方法
                     project_result = self.folder_manager.create_complete_project_structure(application_data)

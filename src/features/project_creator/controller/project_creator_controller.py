@@ -126,11 +126,11 @@ class ProjectCreatorController:
             # 创建项目创建服务实例
             project_service = ProjectCreatorService()
 
-            # 创建临时项目结构
-            temp_folder = project_service.create_temp_folder_and_save_attachments(
-                self.context.selected_file_path,
-                self._get_attachments()
-            )
+            # 获取来自EmailExtractor的临时文件夹路径
+            temp_folder = None
+            if hasattr(self, 'email_extractor_controller') and self.email_extractor_controller:
+                temp_folder = self.email_extractor_controller.get_temp_folder_path()
+                logger.info(f"使用EmailExtractor提供的临时文件夹路径: {temp_folder}")
 
             self.context.temp_folder = temp_folder
 
@@ -218,6 +218,12 @@ class ProjectCreatorController:
             if hasattr(self, 'email_extractor_controller') and self.email_extractor_controller:
                 temp_folder_path = self.email_extractor_controller.get_temp_folder_path()
                 logger.debug(f"从email_extractor_controller获取到的临时文件夹路径: {temp_folder_path}")
+                # 检查路径是否存在
+                import os
+                if temp_folder_path and os.path.exists(temp_folder_path):
+                    logger.debug(f"临时文件夹路径存在: {temp_folder_path}")
+                else:
+                    logger.warning(f"临时文件夹路径不存在或为空: {temp_folder_path}")
 
             # 通过控制器显示对话框并传递临时文件夹路径
             # 将application_data传递给控制器，以便正确初始化申请单数据

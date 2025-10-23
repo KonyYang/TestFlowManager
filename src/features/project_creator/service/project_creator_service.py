@@ -4,7 +4,6 @@
 """
 
 import os
-import tempfile
 import shutil
 from typing import Dict, Any, Optional, List
 
@@ -21,56 +20,7 @@ class ProjectCreatorService:
     """
 
     def __init__(self):
-        self.temp_folder = None
-
-    def create_temp_folder_and_save_attachments(self, msg_file_path: str, attachments: List[Dict]) -> str:
-        """
-        创建临时项目结构，保存邮件和附件
-
-        Args:
-            msg_file_path: 邮件文件路径
-            attachments: 附件列表
-
-        Returns:
-            临时文件夹路径
-        """
-        try:
-            # 使用系统临时目录作为基础路径，创建应用专属临时目录
-            temp_dir = os.path.join(tempfile.gettempdir(), "TestFlowManager")
-
-            # 确保目录存在
-            os.makedirs(temp_dir, exist_ok=True)
-
-            # 使用项目中的日期工具生成时间戳
-            timestamp = get_current_datetime("%Y%m%d_%H%M%S")
-            temp_folder = os.path.join(temp_dir, f"ltr_application_{timestamp}")
-            os.makedirs(temp_folder, exist_ok=True)
-
-            # 保存原始.msg邮件文件
-            if msg_file_path and os.path.exists(msg_file_path):
-                msg_filename = os.path.basename(msg_file_path)
-                dest_path = os.path.join(temp_folder, msg_filename)
-                shutil.copy2(msg_file_path, dest_path)
-                logger.info(f"已保存邮件文件到: {dest_path}")
-
-            # 保存附件
-            for attachment in attachments:
-                filename = attachment.get('filename', '')
-                content = attachment.get('content', b'')
-                if filename and content:
-                    attachment_path = os.path.join(temp_folder, filename)
-                    with open(attachment_path, 'wb') as f:
-                        f.write(content)
-                    logger.info(f"已保存附件到: {attachment_path}")
-
-            self.temp_folder = temp_folder
-            logger.info(f"已创建临时文件夹: {temp_folder}")
-            return temp_folder
-
-        except Exception as e:
-            logger.error(f"创建临时文件夹和保存附件时出错: {e}")
-            raise
-
+        pass
 
     def process_word_attachment(self, word_attachment: Dict) -> Dict[str, Any]:
         """
@@ -83,9 +33,12 @@ class ProjectCreatorService:
             提取的数据或错误信息
         """
         try:
+                import tempfile
                 temp_dir = tempfile.gettempdir()
+                logger.info(f"[ProjectCreatorService] Word附件处理使用临时目录: {temp_dir}")
                 filename = word_attachment.get('filename', 'temp.doc')
                 temp_file_path = os.path.join(temp_dir, filename)
+                logger.info(f"[ProjectCreatorService] Word附件临时文件路径: {temp_file_path}")
 
                 # 写入附件数据到临时文件
                 content = word_attachment.get('content')

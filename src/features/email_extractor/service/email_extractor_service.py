@@ -201,6 +201,10 @@ class EmailExtractorService:
         """
         try:
             logger.info(f"正在处理MSG文件: {file_path}")
+            
+            # 在处理新邮件前，清理旧的临时文件夹
+            self.cleanup_temp_folder()
+            
             result = process_msg_file(file_path)
             if result.get("success"):
                 email_data = result.get("email_data", {})
@@ -236,6 +240,8 @@ class EmailExtractorService:
         try:
             # 获取配置的临时目录路径
             temp_base_dir = config_manager.get("paths.temp_dir", r"D:\TestFlowManager\Temp")
+            logger.info(f"[EmailExtractorService] 配置的临时目录路径: {temp_base_dir}")
+            logger.info(f"[EmailExtractorService] 系统临时目录: {tempfile.gettempdir()}")
             
             # 确保临时目录存在
             if not os.path.exists(temp_base_dir):
@@ -245,6 +251,7 @@ class EmailExtractorService:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             temp_folder_name = f"email_attachments_{timestamp}"
             self.temp_folder = os.path.join(temp_base_dir, temp_folder_name)
+            logger.info(f"[EmailExtractorService] 创建临时文件夹路径: {self.temp_folder}")
             
             # 创建临时文件夹
             os.makedirs(self.temp_folder)

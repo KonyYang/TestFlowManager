@@ -28,8 +28,8 @@ class ProjectData:
     project_id: str
     name: str
     created_time: str
-    temp_folder: str
     email_data: EmailData
+    temp_folder: Optional[str] = None
     extracted_ltr_data: Optional[Dict[str, Any]] = None
     status: str = "initialized"  # initialized, processing, completed, failed
 

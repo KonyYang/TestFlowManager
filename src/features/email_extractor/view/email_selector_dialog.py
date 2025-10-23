@@ -294,7 +294,9 @@ class EmailSelectorDialog(QDialog):
             # 创建临时文件
             import tempfile
             temp_dir = tempfile.gettempdir()
+            logger.info(f"[EmailSelectorDialog] 预览附件使用临时目录: {temp_dir}")
             temp_file_path = os.path.join(temp_dir, filename)
+            logger.info(f"[EmailSelectorDialog] 预览附件临时文件路径: {temp_file_path}")
 
             # 写入附件数据到临时文件
             content = attachment.get('content')
