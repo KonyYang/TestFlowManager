@@ -35,12 +35,15 @@ class LTRViewerController:
         try:
             logger.debug("Handling advanced view LTR file request")
 
-            # 1. 打开LTR文件（只打开一次）
+            # 1. 打开LTR文件（只打开一次，隐藏Excel以提高性能）
             workbook = self.service.open_ltr_file(with_password=False)
             if workbook is None:
                 logger.error("Failed to open LTR file")
                 return False
 
+            # 获取Excel应用程序对象
+            excel_app = workbook.Application
+            
             # 2. 加载可用工作表
             sheets = self.service.load_available_sheets(workbook)
             logger.info(f"Loaded {len(sheets)} available sheets")
@@ -59,17 +62,28 @@ class LTRViewerController:
                 else:
                     logger.warning("Failed to clear filters and unhide rows/columns")
 
-                # 定位到最后有效行
-                last_row = self.service.find_first_blank_cell_from_top(sheet, col_index=4)
+                # 定位到最后有效行（D列）
+                last_row = self.service.find_first_blank_cell_from_top(sheet, col_index=4)  # D列是第4列
                 if last_row > 0:
                     logger.info(f"Found last valid row at row {last_row}")
+                    # 将光标定位到D列的最后一个有效行
+                    try:
+                        sheet.Cells(last_row, 4).Select()  # 选择D列的最后一个有效行
+                    except Exception as e:
+                        logger.error(f"Failed to select cell at row {last_row}, column 4: {e}")
                 else:
                     logger.warning("Failed to find last valid row")
 
+            # 所有操作完成后再显示Excel应用程序
+            excel_app.Visible = True
+            
             logger.info("Advanced LTR file operations completed")
             return True
         except Exception as e:
             logger.error(f"Failed to handle advanced view LTR request: {e}")
+            # 如果出现异常，确保Excel应用程序可见，以便用户可以关闭它
+            if workbook and workbook.Application:
+                workbook.Application.Visible = True
             return False
         finally:
             # 确保工作簿被正确关闭，但不要过早关闭

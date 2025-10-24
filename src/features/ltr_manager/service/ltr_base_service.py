@@ -326,14 +326,14 @@ class LTRBaseService:
 
     def find_first_blank_cell_from_top(self, worksheet, col_index: int = 1) -> int:
         """
-        从顶部开始查找指定列的第一个空白单元格
+        从顶部开始查找指定列的最后一个非空单元格（即最后一行有效数据）
 
         Args:
             worksheet: Excel工作表对象
             col_index: 列索引（从1开始）
 
         Returns:
-            第一个空白单元格的行号，如果出错则返回0
+            最后一个非空单元格的行号，如果出错则返回0
         """
         try:
             # 获取使用范围的最后一行
@@ -341,17 +341,25 @@ class LTRBaseService:
             if not used_range:
                 return 0
 
-            last_row = used_range.Rows.Count + used_range.Row - 1
-
-            # 从最后一行开始向上查找第一个非空单元格
-            for row in range(last_row, 0, -1):
-                cell_value = worksheet.Cells(row, col_index).Value
+            # 使用Excel的EndUp方法快速找到最后一行有效数据
+            # Range("D1048576").End(xlUp).Row 等效于按Ctrl+Up箭头
+            last_row = worksheet.Cells(worksheet.Rows.Count, col_index).End(-4162).Row  # -4162 是 xlUp 的值
+            
+            # 确保返回的行号在合理范围内
+            if last_row > 0 and last_row < 1048576:
+                # 验证单元格是否真的有数据（避免返回空行）
+                cell_value = worksheet.Cells(last_row, col_index).Value
                 if cell_value is not None and str(cell_value).strip() != "":
-                    return row
-
+                    return last_row
+                # 如果最后一个单元格是空的，向上查找
+                for row in range(last_row - 1, 0, -1):
+                    cell_value = worksheet.Cells(row, col_index).Value
+                    if cell_value is not None and str(cell_value).strip() != "":
+                        return row
+            
             return 0
         except Exception as e:
-            logger.error(f"Failed to find first blank cell from top: {e}")
+            logger.error(f"Failed to find last non-empty cell: {e}")
             return 0
 
     def extract_row_data(self, worksheet, row: int) -> dict:

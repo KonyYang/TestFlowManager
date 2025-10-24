@@ -33031,3 +33031,226 @@
 2025-10-24 07:49:09,040 - TestFlowManager - DEBUG - Excel instance count decreased to -4
 2025-10-24 07:49:09,041 - TestFlowManager - INFO - MainWindowController shut down successfully
 2025-10-24 07:49:09,041 - TestFlowManager - INFO - Application shut down successfully
+2025-10-24 07:58:34,653 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-24 07:58:34,664 - TestFlowManager - INFO - Application initialized successfully
+2025-10-24 07:58:34,664 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-24 07:58:34,843 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-24 07:58:34,844 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-24 07:58:34,844 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-24 07:58:34,844 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-24 07:58:34,895 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-24 07:58:34,895 - TestFlowManager - DEBUG - Application state loaded
+2025-10-24 07:58:34,895 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-24 07:58:34,895 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-24 07:58:34,895 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-24 07:58:34,895 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-24 07:58:35,358 - TestFlowManager - INFO - Main window shown
+2025-10-24 07:58:37,055 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-24 07:58:37,055 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-24 08:00:16,034 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-10-24 08:00:16,582 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-24 08:00:16,582 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-24 08:00:17,592 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-24 08:00:17,592 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-24 08:00:17,803 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-24 08:00:17,805 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-24 08:00:17,805 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-24 08:00:17,807 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-10-24 08:00:18,031 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-24 08:00:18,031 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-10-24 08:00:25,971 - TestFlowManager - INFO - Found last valid row at row 99
+2025-10-24 08:00:25,971 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-10-24 08:00:25,972 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-24 08:00:25,972 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-24 08:00:25,972 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-24 08:01:50,341 - TestFlowManager - INFO - MainWindow closing
+2025-10-24 08:01:50,341 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-24 08:01:50,341 - TestFlowManager - DEBUG - Application state saved
+2025-10-24 08:01:50,341 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-24 08:01:50,341 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-24 08:01:50,412 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-24 08:01:50,476 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-24 08:01:50,476 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-24 08:01:50,503 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-24 08:01:50,503 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-24 08:01:50,522 - TestFlowManager - INFO - Application exited
+2025-10-24 08:01:50,522 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-24 08:01:50,522 - TestFlowManager - INFO - Closing all windows
+2025-10-24 08:01:50,522 - TestFlowManager - INFO - MainWindow closing
+2025-10-24 08:01:50,523 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-24 08:01:50,523 - TestFlowManager - DEBUG - Application state saved
+2025-10-24 08:01:50,523 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-24 08:01:50,523 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-24 08:01:50,523 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-24 08:01:50,523 - TestFlowManager - INFO - MainWindow closing
+2025-10-24 08:01:50,524 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-24 08:01:50,524 - TestFlowManager - DEBUG - Application state saved
+2025-10-24 08:01:50,524 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-24 08:01:50,524 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-24 08:01:50,525 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-24 08:01:50,525 - TestFlowManager - INFO - Application shut down successfully
+2025-10-24 08:04:02,575 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-24 08:04:02,586 - TestFlowManager - INFO - Application initialized successfully
+2025-10-24 08:04:02,586 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-24 08:04:02,765 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-24 08:04:02,766 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-24 08:04:02,766 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-24 08:04:02,766 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-24 08:04:02,800 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-24 08:04:02,800 - TestFlowManager - DEBUG - Application state loaded
+2025-10-24 08:04:02,800 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-24 08:04:02,800 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-24 08:04:02,800 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-24 08:04:02,800 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-24 08:04:03,256 - TestFlowManager - INFO - Main window shown
+2025-10-24 08:04:04,739 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-24 08:04:04,739 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-24 08:04:05,793 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-10-24 08:04:06,339 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-24 08:04:06,339 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-24 08:04:07,329 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-24 08:04:07,329 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-24 08:04:07,490 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-24 08:04:07,490 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-24 08:04:07,490 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-24 08:04:07,494 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-10-24 08:04:07,618 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-24 08:04:07,618 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-10-24 08:04:12,528 - TestFlowManager - INFO - Found last valid row at row 99
+2025-10-24 08:04:12,568 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-10-24 08:04:12,578 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-24 08:04:12,578 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-24 08:04:12,578 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-24 08:04:16,144 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-24 08:04:16,145 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-24 08:04:17,224 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-10-24 08:04:17,224 - TestFlowManager - DEBUG - Excel instance count increased to 2
+2025-10-24 08:04:17,643 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-24 08:04:17,643 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-24 08:04:17,826 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-24 08:04:17,827 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-24 08:04:17,827 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-24 08:04:17,831 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-10-24 08:04:18,091 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-24 08:04:18,092 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-10-24 08:04:22,303 - TestFlowManager - INFO - Found last valid row at row 99
+2025-10-24 08:04:22,341 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-10-24 08:04:22,346 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-24 08:04:22,346 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-24 08:04:22,346 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-25 00:03:18,454 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-25 00:03:18,495 - TestFlowManager - INFO - Application initialized successfully
+2025-10-25 00:03:18,495 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-25 00:03:18,782 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-25 00:03:18,782 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-25 00:03:18,782 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-25 00:03:18,782 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-25 00:03:18,852 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-25 00:03:18,852 - TestFlowManager - DEBUG - Application state loaded
+2025-10-25 00:03:18,852 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-25 00:03:18,852 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-25 00:03:18,852 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-25 00:03:18,852 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-25 00:03:19,301 - TestFlowManager - INFO - Main window shown
+2025-10-25 00:03:21,448 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-25 00:03:21,448 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-25 00:03:22,878 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-10-25 00:03:23,718 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-25 00:03:23,718 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-25 00:03:25,389 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-25 00:03:25,390 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-25 00:03:25,629 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-25 00:03:25,630 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-25 00:03:25,630 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-25 00:03:25,635 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-10-25 00:03:25,931 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-25 00:03:25,932 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-10-25 00:03:33,108 - TestFlowManager - INFO - Found last valid row at row 99
+2025-10-25 00:03:33,151 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-10-25 00:03:33,157 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-25 00:03:33,157 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-25 00:03:33,157 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-25 00:05:45,915 - TestFlowManager - INFO - MainWindow closing
+2025-10-25 00:05:45,915 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-25 00:05:45,915 - TestFlowManager - DEBUG - Application state saved
+2025-10-25 00:05:45,915 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-25 00:05:45,915 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-25 00:05:45,920 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-25 00:05:45,987 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-25 00:05:45,987 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-25 00:05:46,036 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-25 00:05:46,036 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-25 00:05:46,070 - TestFlowManager - INFO - Application exited
+2025-10-25 00:05:46,070 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-25 00:05:46,070 - TestFlowManager - INFO - Closing all windows
+2025-10-25 00:05:46,070 - TestFlowManager - INFO - MainWindow closing
+2025-10-25 00:05:46,070 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-25 00:05:46,071 - TestFlowManager - DEBUG - Application state saved
+2025-10-25 00:05:46,071 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-25 00:05:46,071 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-25 00:05:46,072 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-25 00:05:46,072 - TestFlowManager - INFO - MainWindow closing
+2025-10-25 00:05:46,072 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-25 00:05:46,072 - TestFlowManager - DEBUG - Application state saved
+2025-10-25 00:05:46,072 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-25 00:05:46,072 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-25 00:05:46,072 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-25 00:05:46,073 - TestFlowManager - INFO - Application shut down successfully
+2025-10-25 00:16:25,144 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-25 00:16:25,156 - TestFlowManager - INFO - Application initialized successfully
+2025-10-25 00:16:25,156 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-25 00:16:25,354 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-25 00:16:25,354 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-25 00:16:25,354 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-25 00:16:25,355 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-25 00:16:25,401 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-25 00:16:25,401 - TestFlowManager - DEBUG - Application state loaded
+2025-10-25 00:16:25,401 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-25 00:16:25,401 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-25 00:16:25,401 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-25 00:16:25,401 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-25 00:16:25,814 - TestFlowManager - INFO - Main window shown
+2025-10-25 00:16:26,940 - TestFlowManager - DEBUG - View LTR action triggered
+2025-10-25 00:16:26,940 - TestFlowManager - DEBUG - Handling view LTR file request from main window
+2025-10-25 00:16:28,272 - TestFlowManager - DEBUG - Handling advanced view LTR file request
+2025-10-25 00:16:28,838 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-25 00:16:28,838 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-25 00:16:29,564 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=True)
+2025-10-25 00:16:29,564 - TestFlowManager - INFO - 成功以只读模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-25 00:16:29,585 - TestFlowManager - DEBUG - Retrieved 9 worksheet names
+2025-10-25 00:16:29,585 - TestFlowManager - INFO - 成功加载 9 个工作表
+2025-10-25 00:16:29,585 - TestFlowManager - INFO - Loaded 9 available sheets
+2025-10-25 00:16:29,586 - TestFlowManager - DEBUG - Current sheet set to: 2025
+2025-10-25 00:16:29,610 - TestFlowManager - DEBUG - 成功清除筛选条件并取消隐藏行列
+2025-10-25 00:16:29,610 - TestFlowManager - DEBUG - Successfully cleared filters and unhidden rows/columns
+2025-10-25 00:16:29,622 - TestFlowManager - INFO - Found last valid row at row 99
+2025-10-25 00:16:29,799 - TestFlowManager - INFO - Advanced LTR file operations completed
+2025-10-25 00:16:29,869 - TestFlowManager - DEBUG - Status updated: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-25 00:16:29,869 - TestFlowManager - DEBUG - Updated status: 已处理LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-25 00:16:29,869 - TestFlowManager - INFO - LTR file processed successfully from main window: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-25 00:16:44,500 - TestFlowManager - INFO - MainWindow closing
+2025-10-25 00:16:44,500 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-25 00:16:44,500 - TestFlowManager - DEBUG - Application state saved
+2025-10-25 00:16:44,500 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-25 00:16:44,500 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-25 00:16:44,502 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-25 00:16:44,540 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-25 00:16:44,541 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-25 00:16:44,585 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-25 00:16:44,585 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-25 00:16:44,605 - TestFlowManager - INFO - Application exited
+2025-10-25 00:16:44,605 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-25 00:16:44,605 - TestFlowManager - INFO - Closing all windows
+2025-10-25 00:16:44,606 - TestFlowManager - INFO - MainWindow closing
+2025-10-25 00:16:44,606 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-25 00:16:44,606 - TestFlowManager - DEBUG - Application state saved
+2025-10-25 00:16:44,606 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-25 00:16:44,606 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-25 00:16:44,606 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-25 00:16:44,607 - TestFlowManager - INFO - MainWindow closing
+2025-10-25 00:16:44,608 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-25 00:16:44,608 - TestFlowManager - DEBUG - Application state saved
+2025-10-25 00:16:44,608 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-25 00:16:44,608 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-25 00:16:44,608 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-25 00:16:44,609 - TestFlowManager - INFO - Application shut down successfully

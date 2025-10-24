@@ -133,7 +133,8 @@ def open_excel_file(file_path: str, read_only: bool = True, password: Optional[s
             logger.error("Failed to get Excel application instance")
             return None
 
-        excel_app.Visible = True
+        # 先隐藏Excel应用程序以提高性能
+        excel_app.Visible = False
         excel_app.DisplayAlerts = False
         excel_app.EnableEvents = False
 
