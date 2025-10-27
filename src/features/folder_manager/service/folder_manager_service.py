@@ -238,7 +238,7 @@ class FolderManagerService:
         if os.path.exists(target_folder):
             result = self.handle_existing_project(target_folder, backup_path, parent)
             if result is False:  # 用户点击取消或处理失败
-                logger.info("用户取消项目创建流程或操作被中断")
+                logger.info("用户取消项目创建流程")
                 return None
             elif not result:
                 logger.error("处理已有项目失败")

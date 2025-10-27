@@ -52,8 +52,9 @@ class ConfigManager:
                 # 将INI配置转换为内部配置格式
                 if 'Paths' in paths_config:
                     for key, value in paths_config['Paths'].items():
-                        # 保持原始路径格式，不做转换
-                        self.set(f"paths.{key.lower()}", value)
+                        # 只加载ltr_file配置，其他路径配置从settings.json获取
+                        if key.lower() == 'ltr_file':
+                            self.set(f"paths.{key.lower()}", value)
 
                 # 加载密码配置
                 if 'Passwords' in paths_config:
@@ -78,14 +79,19 @@ class ConfigManager:
         Returns:
             资源文件的绝对路径
         """
-        # 检查是否为可执行文件模式
+        # 1. 首先尝试使用固定的生成环境路径
+        generated_env_path = os.path.join(r"D:\TestFlowManager", relative_path)
+        if os.path.exists(generated_env_path):
+            return generated_env_path
+
+        # 2. 如果生成环境路径不存在，则检查是否为可执行文件模式
         if getattr(sys, 'frozen', False):
             # 如果是可执行文件模式，从可执行文件所在目录加载配置
             base_path = os.path.dirname(sys.executable)
         else:
             # 如果是开发模式，使用当前工作目录
             base_path = os.path.abspath(".")
-        
+
         return os.path.join(base_path, relative_path)
 
     def save_config(self) -> None:

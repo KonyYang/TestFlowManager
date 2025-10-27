@@ -84,7 +84,6 @@ class LTRApplicationController:
         """
         try:
             logger.info("Handling new blank LTR application")
-
             # 创建新的空白申请单
             self.application_data = self.service.create_new_application()
 

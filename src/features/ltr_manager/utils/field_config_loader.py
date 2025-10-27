@@ -36,7 +36,8 @@ class LTRFieldConfigLoader:
             # 在可执行文件环境中，使用可执行文件所在目录作为基础路径
             base_path = os.path.dirname(sys.executable)
         else:
-            # 在开发环境中，使用项目根目录作为基础路径
+            # 在开发环境中，使
+            # 用项目根目录作为基础路径
             base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
         # 组合完整路径
@@ -57,21 +58,28 @@ class LTRFieldConfigLoader:
 
     def load_application_field_mapping(self) -> List[Dict[str, Any]]:
         """
-        从配置文件加载申请单字段映射关系
+        从配置文件加载应用字段映射关系
 
         Returns:
             字段映射关系列表
         """
         try:
-            # 确定要加载的配置文件路径
-            if os.path.exists(self.config_file_path):
-                # 使用用户自定义配置文件
-                config_file_path = self.config_file_path
-                logger.info(f"使用用户配置文件: {config_file_path}")
-            else:
-                # 使用项目内置默认配置文件
-                config_file_path = self._get_default_config_path()
-                logger.info(f"用户配置文件不存在，使用默认配置文件: {config_file_path}")
+            import os
+            from pathlib import Path
+
+            # 获取当前模块的路径
+            current_dir = Path(__file__).parent
+
+            # 尝试从项目根目录查找
+            config_file_path = current_dir / ".." / ".." / ".." / "app" / "config" / "ltr_fields.json"
+
+            if not config_file_path.exists():
+                # 如果上述路径不存在，尝试从标准位置查找
+                config_file_path = Path("src/app/config/ltr_fields.json")
+
+            if not config_file_path.exists():
+                logger.error(f"LTR字段配置文件未找到: {config_file_path}")
+                return []
 
             # 读取并解析JSON配置文件
             with open(config_file_path, 'r', encoding='utf-8') as f:
@@ -79,15 +87,16 @@ class LTRFieldConfigLoader:
 
             field_mapping = config.get('application_field_mapping', [])
 
-            logger.info(f"成功从 {config_file_path} 加载 {len(field_mapping)} 个申请单字段配置")
+            logger.info(f"成功从 {config_file_path} 加载 {len(field_mapping)} 个应用字段配置")
             return field_mapping
 
         except json.JSONDecodeError as e:
             logger.error(f"LTR字段配置文件格式错误: {e}")
             return []
         except Exception as e:
-            logger.error(f"加载LTR申请单字段配置时发生错误: {e}")
+            logger.error(f"加载LTR应用字段配置时发生错误: {e}")
             return []
+
 
     def load_editor_field_mapping(self) -> List[Dict[str, Any]]:
         """
