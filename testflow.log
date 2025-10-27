@@ -12,3 +12,7 @@
 2025-09-05 07:18:37,068 - TestFlowManager - DEBUG - LTR file path set to: D:\Source\Office Auto\TestDocument\LTR_number.xls
 2025-09-05 07:18:37,068 - TestFlowManager - DEBUG - LTR file path set to: test_data/protected_file.xlsx
 2025-09-05 07:18:37,068 - TestFlowManager - ERROR - Failed to open LTR file with password: test_data/protected_file.xlsx
+2025-10-25 14:30:26,201 - TestFlowManager - INFO - 成功收集LTR申请数据
+2025-10-25 14:30:26,201 - TestFlowManager - INFO - 成功收集LTR申请数据
+2025-10-25 14:30:26,204 - TestFlowManager - INFO - 成功收集LTR申请数据
+2025-10-25 14:30:26,205 - TestFlowManager - INFO - 申请数据已保存到: C:\Users\White\AppData\Local\Temp\tmpq2b67_jl\DL-2025-10-001\application_data.json

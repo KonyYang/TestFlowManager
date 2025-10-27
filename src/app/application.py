@@ -4,6 +4,7 @@
 """
 
 import sys
+import os
 from PyQt5.QtWidgets import QApplication
 from src.core.logger import logger
 from src.core.config_manager import config_manager

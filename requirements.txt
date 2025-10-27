@@ -3,3 +3,4 @@ requests>=2.25.0
 pywin32>=227
 python-docx>=0.8.10
 openpyxl>=3.0.7
+PyInstaller>=4.0

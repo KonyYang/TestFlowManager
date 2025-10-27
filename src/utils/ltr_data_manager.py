@@ -1,11 +1,7 @@
-"""
-LTR数据管理器模块
-负责管理LTR申请数据的收集和保存
-"""
-
+from dataclasses import dataclass
+from typing import Dict, Any, Optional
 import os
 import json
-from typing import Dict, Any, Optional
 from src.core.config_manager import config_manager
 from src.core.logger import logger
 from src.utils.file_utils import ensure_directory_exists
@@ -18,13 +14,14 @@ class LTRDataManager:
         """初始化LTR数据管理器"""
         pass
 
-    def collect_application_data(self, form_data: Dict[str, Any], dl_number: Optional[str] = None) -> Dict[str, Any]:
+    def collect_application_data(self, form_data: Dict[str, Any], dl_number: Optional[str] = None, selected_filename: Optional[str] = None) -> Dict[str, Any]:
         """
         收集LTR申请数据
 
         Args:
             form_data: 来自申请对话框的表单数据
             dl_number: DL编号（可选）
+            selected_filename: 选中的申请单文件名（可选）
 
         Returns:
             完整的LTR申请数据字典
@@ -37,6 +34,9 @@ class LTRDataManager:
             application_data['DL'] = dl_number
         elif 'DL' not in application_data:
             application_data['DL'] = ''
+        
+        # 添加选中的申请单文件名
+        application_data['selected_filename'] = selected_filename if selected_filename else ''
         
         # 添加一些额外的字段
         application_data['status'] = 'new'

@@ -6,6 +6,7 @@ LTR编号生成器模块
 
 import os
 import re
+import sys
 from datetime import datetime
 from PyQt5.QtWidgets import QMessageBox, QInputDialog
 from src.core.config_manager import config_manager
@@ -85,9 +86,23 @@ class LTRNumberGenerator:
             ltr_file_path = config_manager.get("paths.ltr_file")
             print(f"[DEBUG] 获取LTR文件路径: {ltr_file_path}")
             if not ltr_file_path or not os.path.exists(ltr_file_path):
-                if self.parent:
-                    QMessageBox.critical(self.parent, "错误", f"LTR文件不存在: {ltr_file_path}")
-                return False
+                # 检查路径是否为相对路径
+                if ltr_file_path and not os.path.isabs(ltr_file_path):
+                    # 尝试在可执行文件目录下查找
+                    if getattr(sys, 'frozen', False):
+                        # 可执行文件模式
+                        base_path = os.path.dirname(sys.executable)
+                    else:
+                        # 开发模式
+                        base_path = os.path.abspath(".")
+                    ltr_file_path = os.path.join(base_path, ltr_file_path)
+                    print(f"[DEBUG] 尝试在目录查找LTR文件: {ltr_file_path}")
+                    
+                # 再次检查文件是否存在
+                if not os.path.exists(ltr_file_path):
+                    if self.parent:
+                        QMessageBox.critical(self.parent, "错误", f"LTR文件不存在: {ltr_file_path}")
+                    return False
 
             self.workbook = self.ltr_service.open_ltr_file(with_password=True)
             if not self.workbook:

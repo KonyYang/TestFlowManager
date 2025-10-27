@@ -33254,3 +33254,1387 @@
 2025-10-25 00:16:44,608 - TestFlowManager - DEBUG - Excel instance count decreased to -3
 2025-10-25 00:16:44,608 - TestFlowManager - INFO - MainWindowController shut down successfully
 2025-10-25 00:16:44,609 - TestFlowManager - INFO - Application shut down successfully
+2025-10-25 14:32:08,763 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-25 14:32:08,800 - TestFlowManager - INFO - Application initialized successfully
+2025-10-25 14:32:08,800 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-25 14:32:08,998 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-25 14:32:08,998 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-25 14:32:08,998 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-25 14:32:08,998 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-25 14:32:09,094 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-25 14:32:09,094 - TestFlowManager - DEBUG - Application state loaded
+2025-10-25 14:32:09,094 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-25 14:32:09,094 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-25 14:32:09,094 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-25 14:32:09,095 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-25 14:32:10,267 - TestFlowManager - INFO - Main window shown
+2025-10-25 14:32:11,903 - TestFlowManager - DEBUG - New file action triggered
+2025-10-25 14:32:11,903 - TestFlowManager - DEBUG - Handling new file request
+2025-10-25 14:32:11,903 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-25 14:32:11,916 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-25 14:32:11,916 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-25 14:32:18,433 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:32:18,433 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:32:18,433 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:32:18,446 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-25 14:32:18,446 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-25 14:32:18,446 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-25 14:32:18,446 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:32:18,446 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-25 14:32:18,446 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-25 14:32:18,447 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-25 14:32:18,447 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_143218
+2025-10-25 14:32:18,447 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143218
+2025-10-25 14:32:18,447 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143218\78C3E92B@8F7F2C17.0970AE67.jpg
+2025-10-25 14:32:18,448 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143218\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:32:18,449 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143218\转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:32:18,449 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143218
+2025-10-25 14:32:21,042 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:32:21,042 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:32:21,042 - TestFlowManager - INFO - 已清理临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143218
+2025-10-25 14:32:21,042 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:32:21,046 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-25 14:32:21,046 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-25 14:32:21,046 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-25 14:32:21,046 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:32:21,046 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-25 14:32:21,046 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-25 14:32:21,046 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-25 14:32:21,046 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:21,046 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:21,047 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143221\78C3E92B@8F7F2C17.0970AE67.jpg
+2025-10-25 14:32:21,048 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143221\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:32:21,048 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143221\转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:32:21,049 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:21,055 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-25 14:32:21,055 - TestFlowManager - INFO - Successfully processed email data
+2025-10-25 14:32:21,055 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-25 14:32:21,055 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:21,055 - TestFlowManager - INFO - 使用EmailExtractor提供的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:21,055 - TestFlowManager - DEBUG - Using saved selected attachment: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:32:21,055 - TestFlowManager - INFO - Using selected attachment: e-3718_h_laboratory_test_request_cphd 10mm(.docx
+2025-10-25 14:32:21,055 - TestFlowManager - INFO - [ProjectCreatorService] Word附件处理使用临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-25 14:32:21,055 - TestFlowManager - INFO - [ProjectCreatorService] Word附件临时文件路径: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:32:21,055 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:32:21,056 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:32:21,056 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:32:23,385 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-25 14:32:23,385 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-25 14:32:23,385 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-25 14:32:23,980 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-25 14:32:24,029 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-25 14:32:24,082 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-25 14:32:24,089 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-25 14:32:24,089 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-25 14:32:24,092 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-25 14:32:24,126 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-25 14:32:24,134 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev H		GS-03-008'
+2025-10-25 14:32:24,134 - TestFlowManager - DEBUG - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Found 'Rev' and extracted version 'H' from footer PARAGRAPH.
+2025-10-25 14:32:24,135 - TestFlowManager - INFO - Document: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-25 14:32:24,171 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:32:24,171 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-25 14:32:24,339 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx (read_only=True)
+2025-10-25 14:32:24,339 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-25 14:32:24,492 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-25 14:32:24,662 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-25 14:32:24,768 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-25 14:32:24,909 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-25 14:32:26,461 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-25 14:32:28,340 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-25 14:32:29,396 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-25 14:32:29,667 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-25 14:32:29,951 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-25 14:32:30,446 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-25 14:32:31,664 - TestFlowManager - INFO - Successfully processed application file
+2025-10-25 14:32:31,680 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:32:31,681 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:32:31,681 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-25 14:32:31,681 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:31,681 - TestFlowManager - DEBUG - 从email_extractor_controller获取到的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:31,681 - TestFlowManager - DEBUG - 临时文件夹路径存在: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:31,681 - TestFlowManager - DEBUG - Showing LTR application dialog
+2025-10-25 14:32:31,681 - TestFlowManager - DEBUG - 传递给对话框的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:31,681 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-25 14:32:31,681 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-25 14:32:31,715 - TestFlowManager - DEBUG - LTRApplicationDialog创建完成，传递的temp_folder_path: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:33,773 - TestFlowManager - INFO - 开始处理LTR编号申请请求
+2025-10-25 14:32:33,773 - TestFlowManager - DEBUG - apply_ltr_number接收到的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:33,773 - TestFlowManager - INFO - 开始执行LTR编号申请
+2025-10-25 14:32:34,702 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-25 14:32:34,702 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-25 14:32:35,748 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-25 14:32:35,748 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-25 14:32:38,687 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-25 14:32:38,693 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-25 14:32:38,693 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-25 14:32:38,693 - TestFlowManager - INFO - LTR编号申请成功: DL-2025-10-081
+2025-10-25 14:32:39,703 - TestFlowManager - INFO - 成功收集LTR申请数据
+2025-10-25 14:32:39,703 - TestFlowManager - DEBUG - 收集到的申请数据: {'DL': 'DL-2025-10-081', 'project_type': 'NPD', 'sample_information': 'Board Connector:10173947-100006LF\nCable Connector:10173946-100006LF\nTest Busbar  Preliminary:CAD0002928092', 'tests_to_be_performed': 'High Temperature life test,Mating/Unmating Force', 'applicable_specifications': 'EIA 364-17, Method A (125 ± 2℃  for 241 hours),EIA 364-13. Method A. Mating Force (Per Pin) 31N MAX.Unmating Force(Per Pin)  15N MIN.', 'test_type': 'Partial Qualification', 'requested_by': 'Chen, Lu', 'location': 'Dongguan', 'project_leader': 'Even Yang', 'test_result': 'In progress', 'failed_item': '', 'sample_deposition': '', 'sub_contract': 'Yes', 'test_fee': '', 'remarks_po': '', 'phone': '15819012124', 'email_requestor': 'Lu.Chen@fci.com', 'product_description': '', 'lab_performing_the_tests': 'Dongguan', 'condition_of_samples_when_received': 'Acceptable', 'date_lab_received_samples': '25 Oct 2025', 'estimated_completion_date': '25 Oct 2025', 'start_test_date': '25 Oct 2025', 'finish_test_date': '25 Oct 2025', 'report_date': '25 Oct 2025', 'selected_filename': 'E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx', 'status': 'new', 'error': ''}
+2025-10-25 14:32:39,703 - TestFlowManager - DEBUG - 申请数据中的file_path: None
+2025-10-25 14:32:39,703 - TestFlowManager - DEBUG - 传入的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:39,703 - TestFlowManager - DEBUG - 已将临时文件夹路径添加到申请数据中: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:39,703 - TestFlowManager - INFO - 开始创建完整项目结构
+2025-10-25 14:32:39,703 - TestFlowManager - INFO - 【创建新项目】开始创建完整项目结构
+2025-10-25 14:32:39,703 - TestFlowManager - DEBUG - 接收到的项目数据: {'DL': 'DL-2025-10-081', 'project_type': 'NPD', 'sample_information': 'Board Connector:10173947-100006LF\nCable Connector:10173946-100006LF\nTest Busbar  Preliminary:CAD0002928092', 'tests_to_be_performed': 'High Temperature life test,Mating/Unmating Force', 'applicable_specifications': 'EIA 364-17, Method A (125 ± 2℃  for 241 hours),EIA 364-13. Method A. Mating Force (Per Pin) 31N MAX.Unmating Force(Per Pin)  15N MIN.', 'test_type': 'Partial Qualification', 'requested_by': 'Chen, Lu', 'location': 'Dongguan', 'project_leader': 'Even Yang', 'test_result': 'In progress', 'failed_item': '', 'sample_deposition': '', 'sub_contract': 'Yes', 'test_fee': '', 'remarks_po': '', 'phone': '15819012124', 'email_requestor': 'Lu.Chen@fci.com', 'product_description': '', 'lab_performing_the_tests': 'Dongguan', 'condition_of_samples_when_received': 'Acceptable', 'date_lab_received_samples': '25 Oct 2025', 'estimated_completion_date': '25 Oct 2025', 'start_test_date': '25 Oct 2025', 'finish_test_date': '25 Oct 2025', 'report_date': '25 Oct 2025', 'selected_filename': 'E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx', 'status': 'new', 'error': '', 'file_path': 'D:\\TestFlowManager\\Temp\\email_attachments_20251025_143221'}
+2025-10-25 14:32:39,708 - TestFlowManager - INFO - 成功复制模板到目标路径: D:\TestFlowManager\Projects\DL-2025-10-081
+2025-10-25 14:32:39,708 - TestFlowManager - INFO - 重命名文件夹: D:\TestFlowManager\Projects\DL-2025-10-081\DL-XXXX-YY-ZZZ Title -> D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force
+2025-10-25 14:32:39,708 - TestFlowManager - INFO - E-mail 文件夹已存在: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force\E-mail
+2025-10-25 14:32:39,708 - TestFlowManager - INFO - Submitted Material 文件夹已存在: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force\Submitted Material
+2025-10-25 14:32:39,708 - TestFlowManager - INFO - 使用模板目录: D:\TestFlowManager\Template
+2025-10-25 14:32:39,708 - TestFlowManager - INFO - 目标文件夹: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force
+2025-10-25 14:32:39,708 - TestFlowManager - INFO - 正在查找 'Fee Evaluation' 类型的模板文件: D:\TestFlowManager\Template
+2025-10-25 14:32:39,709 - TestFlowManager - DEBUG - 找到模板文件: ['D:\\TestFlowManager\\Template\\Testing Fee Evaluation_Rev_D.xls']
+2025-10-25 14:32:39,709 - TestFlowManager - DEBUG - 模板文件绝对路径: D:\TestFlowManager\Template\Testing Fee Evaluation_Rev_D.xls
+2025-10-25 14:32:39,709 - TestFlowManager - DEBUG - 目标文件绝对路径: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force\DL-2025-10-081 High Temperature life test,Mating_Unmating Force Form for Testing Fee Evaluation.xls
+2025-10-25 14:32:39,709 - TestFlowManager - INFO - 准备复制文件到: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force\DL-2025-10-081 High Temperature life test,Mating_Unmating Force Form for Testing Fee Evaluation.xls
+2025-10-25 14:32:39,710 - TestFlowManager - INFO - 费用评估表已成功复制至: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force\DL-2025-10-081 High Temperature life test,Mating_Unmating Force Form for Testing Fee Evaluation.xls
+2025-10-25 14:32:41,167 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-25 14:32:41,168 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-25 14:32:41,729 - TestFlowManager - DEBUG - 当前工作簿包含的工作表: ['Testing Prices ', 'Unit Price Reference']
+2025-10-25 14:32:41,780 - TestFlowManager - INFO - 数据已成功写入费用评估表
+2025-10-25 14:32:41,856 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-25 14:32:41,860 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-25 14:32:41,860 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-25 14:32:41,860 - TestFlowManager - INFO - ✅ 费用评估表已成功初始化
+2025-10-25 14:32:41,950 - TestFlowManager - INFO - 使用模板目录: D:\TestFlowManager\Template
+2025-10-25 14:32:41,950 - TestFlowManager - INFO - 目标文件夹: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force
+2025-10-25 14:32:41,950 - TestFlowManager - INFO - 正在查找 'E-4243*.xlsx' 模板文件: D:\TestFlowManager\Template
+2025-10-25 14:32:41,951 - TestFlowManager - DEBUG - 找到模板文件: ['D:\\TestFlowManager\\Template\\E-4243_D Customer Feedback Form_241128.xlsx']
+2025-10-25 14:32:41,951 - TestFlowManager - DEBUG - 模板文件绝对路径: D:\TestFlowManager\Template\E-4243_D Customer Feedback Form_241128.xlsx
+2025-10-25 14:32:41,951 - TestFlowManager - DEBUG - 目标文件绝对路径: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force\DL-2025-10-081 High Temperature life test,Mating_Unmating Force Customer Feedback Form_Even Yang.xlsx
+2025-10-25 14:32:41,951 - TestFlowManager - INFO - 准备复制文件到: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force\DL-2025-10-081 High Temperature life test,Mating_Unmating Force Customer Feedback Form_Even Yang.xlsx
+2025-10-25 14:32:41,952 - TestFlowManager - INFO - 客户反馈表已成功复制至: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force\DL-2025-10-081 High Temperature life test,Mating_Unmating Force Customer Feedback Form_Even Yang.xlsx
+2025-10-25 14:32:43,009 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-25 14:32:43,009 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-25 14:32:43,210 - TestFlowManager - DEBUG - 当前工作簿包含的工作表: ['Customer Feedback Form']
+2025-10-25 14:32:43,321 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-25 14:32:43,325 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-25 14:32:43,325 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-25 14:32:43,325 - TestFlowManager - INFO - ✅ 客户反馈表已成功初始化
+2025-10-25 14:32:45,702 - TestFlowManager - DEBUG - 从项目数据中获取的临时文件路径: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:45,703 - TestFlowManager - INFO - 使用附件来源路径: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:45,703 - TestFlowManager - INFO - 复制 文件: D:\TestFlowManager\Temp\email_attachments_20251025_143221\转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg -> D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force\E-mail
+2025-10-25 14:32:45,704 - TestFlowManager - INFO - 复制其他文件: D:\TestFlowManager\Temp\email_attachments_20251025_143221\78C3E92B@8F7F2C17.0970AE67.jpg -> D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force\Submitted Material\78C3E92B@8F7F2C17.0970AE67.jpg
+2025-10-25 14:32:45,705 - TestFlowManager - INFO - 复制其他文件: D:\TestFlowManager\Temp\email_attachments_20251025_143221\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx -> D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force\Submitted Material\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:32:45,705 - TestFlowManager - INFO - 项目 DL-2025-10-081 已成功创建！
+2025-10-25 14:32:45,705 - TestFlowManager - INFO - 【创建新项目】流程结束
+2025-10-25 14:32:45,706 - TestFlowManager - INFO - 已清理临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143221
+2025-10-25 14:32:45,706 - TestFlowManager - INFO - 完整项目结构创建成功: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force
+2025-10-25 14:32:45,706 - TestFlowManager - INFO - 申请数据已保存到: D:\TestFlowManager\Projects\DL-2025-10-081\application_data.json
+2025-10-25 14:32:45,706 - TestFlowManager - INFO - 完整项目结构创建成功: D:\TestFlowManager\Projects\DL-2025-10-081\DL-2025-10-081 High Temperature life test,Mating_Unmating Force
+2025-10-25 14:32:49,022 - TestFlowManager - DEBUG - Word instance count decreased to 1
+2025-10-25 14:32:49,022 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-25 14:32:49,027 - TestFlowManager - INFO - User accepted the application dialog
+2025-10-25 14:32:49,027 - TestFlowManager - DEBUG - Status updated: 确认LTR申请单: 
+2025-10-25 14:32:49,027 - TestFlowManager - DEBUG - Updated status: 确认LTR申请单: 
+2025-10-25 14:32:49,027 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-25 14:32:49,027 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-25 14:32:49,027 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-25 14:32:49,029 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-25 14:32:49,029 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-25 14:32:49,029 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-25 14:32:49,029 - TestFlowManager - INFO - New project created successfully
+2025-10-25 14:32:49,030 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-25 14:32:49,030 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-25 14:32:49,030 - TestFlowManager - INFO - LTR application processed successfully: 
+2025-10-25 14:32:49,030 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-25 14:32:49,030 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-25 14:32:49,030 - TestFlowManager - INFO - LTR application processed successfully: 
+2025-10-25 14:32:49,030 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-25 14:32:49,030 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-25 14:32:49,030 - TestFlowManager - INFO - LTR application processed successfully: 
+2025-10-25 14:33:46,024 - TestFlowManager - DEBUG - New file action triggered
+2025-10-25 14:33:46,024 - TestFlowManager - DEBUG - Handling new file request
+2025-10-25 14:33:46,024 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-25 14:33:46,027 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-25 14:33:46,027 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-25 14:33:49,352 - TestFlowManager - INFO - 选中MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:33:49,352 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:33:49,352 - TestFlowManager - INFO - 正在处理MSG文件: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:33:49,355 - TestFlowManager - DEBUG - 提取附件: 78C3E92B@8F7F2C17.0970AE67.jpg, 大小: 2645 字节
+2025-10-25 14:33:49,355 - TestFlowManager - DEBUG - 提取附件: E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx, 大小: 86990 字节
+2025-10-25 14:33:49,355 - TestFlowManager - INFO - 成功处理MSG文件，提取到 2 个附件
+2025-10-25 14:33:49,355 - TestFlowManager - DEBUG - 已设置MSG文件数据: C:/Users/White/Desktop/转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:33:49,355 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-25 14:33:49,355 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-25 14:33:49,356 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-25 14:33:49,356 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_143349
+2025-10-25 14:33:49,356 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143349
+2025-10-25 14:33:49,356 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143349\78C3E92B@8F7F2C17.0970AE67.jpg
+2025-10-25 14:33:49,356 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143349\E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx
+2025-10-25 14:33:49,358 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143349\转发： CPHD 10mm Connector High Temperature life test and MF_UMF Testing_NPD.msg
+2025-10-25 14:33:49,358 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_143349
+2025-10-25 14:33:51,664 - TestFlowManager - INFO - User cancelled email selection
+2025-10-25 14:33:51,664 - TestFlowManager - DEBUG - Status updated: 创建新项目失败
+2025-10-25 14:33:51,664 - TestFlowManager - DEBUG - Updated status: 创建新项目失败
+2025-10-25 14:33:51,664 - TestFlowManager - ERROR - Failed to create new project
+2025-10-25 15:58:04,156 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-25 15:58:04,172 - TestFlowManager - INFO - Application initialized successfully
+2025-10-25 15:58:04,172 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-25 15:58:04,384 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-25 15:58:04,384 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-25 15:58:04,384 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-25 15:58:04,384 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-25 15:58:04,444 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-25 15:58:04,444 - TestFlowManager - DEBUG - Application state loaded
+2025-10-25 15:58:04,444 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-25 15:58:04,444 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-25 15:58:04,444 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-25 15:58:04,444 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-25 15:58:05,313 - TestFlowManager - INFO - Main window shown
+2025-10-25 15:58:07,275 - TestFlowManager - DEBUG - New file action triggered
+2025-10-25 15:58:07,275 - TestFlowManager - DEBUG - Handling new file request
+2025-10-25 15:58:07,275 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-25 15:58:07,278 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-25 15:58:07,278 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-25 15:58:13,388 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:13,388 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:13,388 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:13,399 - TestFlowManager - DEBUG - 提取附件: GS-12-1941_Rev1 CoolPower HD.pdf, 大小: 384458 字节
+2025-10-25 15:58:13,400 - TestFlowManager - DEBUG - 提取附件: Coolpower Rev.G.docx, 大小: 85285 字节
+2025-10-25 15:58:13,400 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx, 大小: 84228 字节
+2025-10-25 15:58:13,400 - TestFlowManager - DEBUG - 提取附件: GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx, 大小: 360091 字节
+2025-10-25 15:58:13,400 - TestFlowManager - DEBUG - 提取附件: image001.jpg, 大小: 22992 字节
+2025-10-25 15:58:13,400 - TestFlowManager - INFO - 成功处理MSG文件，提取到 5 个附件
+2025-10-25 15:58:13,400 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:13,400 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-25 15:58:13,400 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-25 15:58:13,400 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-25 15:58:13,400 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155813
+2025-10-25 15:58:13,401 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155813
+2025-10-25 15:58:13,401 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155813\GS-12-1941_Rev1 CoolPower HD.pdf
+2025-10-25 15:58:13,401 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155813\Coolpower Rev.G.docx
+2025-10-25 15:58:13,402 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155813\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx
+2025-10-25 15:58:13,402 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155813\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx
+2025-10-25 15:58:13,402 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155813\image001.jpg
+2025-10-25 15:58:13,403 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155813\转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:13,403 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155813
+2025-10-25 15:58:16,722 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:16,722 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:16,723 - TestFlowManager - INFO - 已清理临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155813
+2025-10-25 15:58:16,723 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:16,729 - TestFlowManager - DEBUG - 提取附件: GS-12-1941_Rev1 CoolPower HD.pdf, 大小: 384458 字节
+2025-10-25 15:58:16,729 - TestFlowManager - DEBUG - 提取附件: Coolpower Rev.G.docx, 大小: 85285 字节
+2025-10-25 15:58:16,729 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx, 大小: 84228 字节
+2025-10-25 15:58:16,729 - TestFlowManager - DEBUG - 提取附件: GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx, 大小: 360091 字节
+2025-10-25 15:58:16,729 - TestFlowManager - DEBUG - 提取附件: image001.jpg, 大小: 22992 字节
+2025-10-25 15:58:16,729 - TestFlowManager - INFO - 成功处理MSG文件，提取到 5 个附件
+2025-10-25 15:58:16,729 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:16,729 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-25 15:58:16,729 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-25 15:58:16,729 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-25 15:58:16,729 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155816
+2025-10-25 15:58:16,729 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155816
+2025-10-25 15:58:16,729 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155816\GS-12-1941_Rev1 CoolPower HD.pdf
+2025-10-25 15:58:16,730 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155816\Coolpower Rev.G.docx
+2025-10-25 15:58:16,732 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155816\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx
+2025-10-25 15:58:16,732 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155816\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx
+2025-10-25 15:58:16,732 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155816\image001.jpg
+2025-10-25 15:58:16,734 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155816\转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:16,734 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155816
+2025-10-25 15:58:16,746 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-25 15:58:16,746 - TestFlowManager - INFO - Successfully processed email data
+2025-10-25 15:58:16,746 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-25 15:58:16,746 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155816
+2025-10-25 15:58:16,746 - TestFlowManager - INFO - 使用EmailExtractor提供的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155816
+2025-10-25 15:58:16,746 - TestFlowManager - DEBUG - Got attachment from controller: None
+2025-10-25 15:58:16,746 - TestFlowManager - INFO - No attachment selected by user
+2025-10-25 15:58:16,746 - TestFlowManager - INFO - No valid Word attachment found or selected, prompting user for action
+2025-10-25 15:58:25,354 - TestFlowManager - DEBUG - Reselecting attachment while keeping email data
+2025-10-25 15:58:25,355 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-25 15:58:25,355 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-25 15:58:27,737 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:27,737 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:27,738 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:27,743 - TestFlowManager - DEBUG - 提取附件: GS-12-1941_Rev1 CoolPower HD.pdf, 大小: 384458 字节
+2025-10-25 15:58:27,743 - TestFlowManager - DEBUG - 提取附件: Coolpower Rev.G.docx, 大小: 85285 字节
+2025-10-25 15:58:27,743 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx, 大小: 84228 字节
+2025-10-25 15:58:27,743 - TestFlowManager - DEBUG - 提取附件: GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx, 大小: 360091 字节
+2025-10-25 15:58:27,743 - TestFlowManager - DEBUG - 提取附件: image001.jpg, 大小: 22992 字节
+2025-10-25 15:58:27,743 - TestFlowManager - INFO - 成功处理MSG文件，提取到 5 个附件
+2025-10-25 15:58:27,743 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:27,743 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-25 15:58:27,743 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-25 15:58:27,743 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-25 15:58:27,744 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155827
+2025-10-25 15:58:27,744 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155827
+2025-10-25 15:58:27,744 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155827\GS-12-1941_Rev1 CoolPower HD.pdf
+2025-10-25 15:58:27,744 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155827\Coolpower Rev.G.docx
+2025-10-25 15:58:27,747 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155827\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx
+2025-10-25 15:58:27,747 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155827\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx
+2025-10-25 15:58:27,747 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155827\image001.jpg
+2025-10-25 15:58:27,748 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155827\转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:27,748 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155827
+2025-10-25 15:58:27,761 - TestFlowManager - DEBUG - 已重新选择附件: Coolpower Rev.G.docx
+2025-10-25 15:58:27,761 - TestFlowManager - ERROR - 重新选择附件时发生错误: 'ProjectCreatorController' object has no attribute 'view'
+2025-10-25 15:58:30,757 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-25 15:58:30,757 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-25 15:58:30,757 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-25 15:58:30,757 - TestFlowManager - INFO - New project created successfully
+2025-10-25 15:58:31,951 - TestFlowManager - INFO - MainWindow closing
+2025-10-25 15:58:31,952 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-25 15:58:31,952 - TestFlowManager - DEBUG - Application state saved
+2025-10-25 15:58:31,952 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-25 15:58:31,952 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-25 15:58:31,952 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-25 15:58:32,008 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-25 15:58:32,008 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-25 15:58:32,015 - TestFlowManager - INFO - Application exited
+2025-10-25 15:58:32,015 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-25 15:58:32,015 - TestFlowManager - INFO - Closing all windows
+2025-10-25 15:58:32,015 - TestFlowManager - INFO - MainWindow closing
+2025-10-25 15:58:32,015 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-25 15:58:32,015 - TestFlowManager - DEBUG - Application state saved
+2025-10-25 15:58:32,015 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-25 15:58:32,015 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-25 15:58:32,015 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-25 15:58:32,016 - TestFlowManager - INFO - MainWindow closing
+2025-10-25 15:58:32,016 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-25 15:58:32,016 - TestFlowManager - DEBUG - Application state saved
+2025-10-25 15:58:32,016 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-25 15:58:32,016 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-25 15:58:32,016 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-25 15:58:32,016 - TestFlowManager - INFO - Application shut down successfully
+2025-10-25 15:58:33,366 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-25 15:58:33,377 - TestFlowManager - INFO - Application initialized successfully
+2025-10-25 15:58:33,377 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-25 15:58:33,562 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-25 15:58:33,562 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-25 15:58:33,562 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-25 15:58:33,562 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-25 15:58:33,577 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-25 15:58:33,577 - TestFlowManager - DEBUG - Application state loaded
+2025-10-25 15:58:33,577 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-25 15:58:33,577 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-25 15:58:33,577 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-25 15:58:33,577 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-25 15:58:34,308 - TestFlowManager - INFO - Main window shown
+2025-10-25 15:58:35,271 - TestFlowManager - DEBUG - New file action triggered
+2025-10-25 15:58:35,271 - TestFlowManager - DEBUG - Handling new file request
+2025-10-25 15:58:35,271 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-25 15:58:35,274 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-25 15:58:35,274 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-25 15:58:38,279 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:38,279 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:38,279 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:38,287 - TestFlowManager - DEBUG - 提取附件: GS-12-1941_Rev1 CoolPower HD.pdf, 大小: 384458 字节
+2025-10-25 15:58:38,287 - TestFlowManager - DEBUG - 提取附件: Coolpower Rev.G.docx, 大小: 85285 字节
+2025-10-25 15:58:38,287 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx, 大小: 84228 字节
+2025-10-25 15:58:38,287 - TestFlowManager - DEBUG - 提取附件: GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx, 大小: 360091 字节
+2025-10-25 15:58:38,287 - TestFlowManager - DEBUG - 提取附件: image001.jpg, 大小: 22992 字节
+2025-10-25 15:58:38,287 - TestFlowManager - INFO - 成功处理MSG文件，提取到 5 个附件
+2025-10-25 15:58:38,287 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:38,287 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-25 15:58:38,287 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-25 15:58:38,288 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-25 15:58:38,288 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155838
+2025-10-25 15:58:38,290 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155838
+2025-10-25 15:58:38,290 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155838\GS-12-1941_Rev1 CoolPower HD.pdf
+2025-10-25 15:58:38,290 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155838\Coolpower Rev.G.docx
+2025-10-25 15:58:38,291 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155838\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx
+2025-10-25 15:58:38,291 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155838\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx
+2025-10-25 15:58:38,292 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155838\image001.jpg
+2025-10-25 15:58:38,292 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155838\转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:38,292 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155838
+2025-10-25 15:58:40,386 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:40,386 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:40,388 - TestFlowManager - INFO - 已清理临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155838
+2025-10-25 15:58:40,388 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:40,394 - TestFlowManager - DEBUG - 提取附件: GS-12-1941_Rev1 CoolPower HD.pdf, 大小: 384458 字节
+2025-10-25 15:58:40,394 - TestFlowManager - DEBUG - 提取附件: Coolpower Rev.G.docx, 大小: 85285 字节
+2025-10-25 15:58:40,394 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx, 大小: 84228 字节
+2025-10-25 15:58:40,394 - TestFlowManager - DEBUG - 提取附件: GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx, 大小: 360091 字节
+2025-10-25 15:58:40,394 - TestFlowManager - DEBUG - 提取附件: image001.jpg, 大小: 22992 字节
+2025-10-25 15:58:40,394 - TestFlowManager - INFO - 成功处理MSG文件，提取到 5 个附件
+2025-10-25 15:58:40,394 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:40,394 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-25 15:58:40,394 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-25 15:58:40,394 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-25 15:58:40,394 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:58:40,394 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:58:40,394 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155840\GS-12-1941_Rev1 CoolPower HD.pdf
+2025-10-25 15:58:40,395 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155840\Coolpower Rev.G.docx
+2025-10-25 15:58:40,397 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155840\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx
+2025-10-25 15:58:40,397 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155840\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx
+2025-10-25 15:58:40,397 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155840\image001.jpg
+2025-10-25 15:58:40,398 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155840\转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-25 15:58:40,398 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:58:40,404 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-25 15:58:40,404 - TestFlowManager - INFO - Successfully processed email data
+2025-10-25 15:58:40,404 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-25 15:58:40,404 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:58:40,404 - TestFlowManager - INFO - 使用EmailExtractor提供的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:58:40,404 - TestFlowManager - DEBUG - Using saved selected attachment: Coolpower Rev.G.docx
+2025-10-25 15:58:40,404 - TestFlowManager - INFO - Using selected attachment: coolpower rev.g.docx
+2025-10-25 15:58:40,404 - TestFlowManager - INFO - [ProjectCreatorService] Word附件处理使用临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-25 15:58:40,404 - TestFlowManager - INFO - [ProjectCreatorService] Word附件临时文件路径: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx
+2025-10-25 15:58:40,405 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx
+2025-10-25 15:58:40,405 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: Coolpower Rev.G.docx
+2025-10-25 15:58:40,405 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: Coolpower Rev.G.docx
+2025-10-25 15:58:41,493 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-25 15:58:41,493 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-25 15:58:41,493 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-25 15:58:41,850 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx (read_only=True)
+2025-10-25 15:58:41,881 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-25 15:58:41,910 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-25 15:58:41,915 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-25 15:58:41,915 - TestFlowManager - DEBUG - Document: Coolpower Rev.G.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-25 15:58:41,916 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-25 15:58:41,936 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-25 15:58:41,941 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev G		GS-03-008'
+2025-10-25 15:58:41,941 - TestFlowManager - DEBUG - Document: Coolpower Rev.G.docx - Found 'Rev' and extracted version 'G' from footer PARAGRAPH.
+2025-10-25 15:58:41,942 - TestFlowManager - INFO - Document: Coolpower Rev.G.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-25 15:58:41,969 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx
+2025-10-25 15:58:41,969 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-25 15:58:42,084 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx (read_only=True)
+2025-10-25 15:58:42,084 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-25 15:58:42,148 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-25 15:58:42,243 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-25 15:58:42,297 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-25 15:58:42,382 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-25 15:58:43,183 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-25 15:58:44,044 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-25 15:58:44,748 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-25 15:58:44,957 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-25 15:58:45,167 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-25 15:58:45,502 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-25 15:58:46,273 - TestFlowManager - INFO - Successfully processed application file
+2025-10-25 15:58:46,291 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: Coolpower Rev.G.docx
+2025-10-25 15:58:46,291 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: Coolpower Rev.G.docx
+2025-10-25 15:58:46,291 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-25 15:58:46,291 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:58:46,291 - TestFlowManager - DEBUG - 从email_extractor_controller获取到的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:58:46,291 - TestFlowManager - DEBUG - 临时文件夹路径存在: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:58:46,291 - TestFlowManager - DEBUG - Showing LTR application dialog
+2025-10-25 15:58:46,292 - TestFlowManager - DEBUG - 传递给对话框的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:58:46,292 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-25 15:58:46,292 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-25 15:58:46,314 - TestFlowManager - DEBUG - LTRApplicationDialog创建完成，传递的temp_folder_path: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:59:37,790 - TestFlowManager - INFO - 开始处理LTR编号申请请求
+2025-10-25 15:59:37,790 - TestFlowManager - DEBUG - apply_ltr_number接收到的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:59:37,790 - TestFlowManager - INFO - 开始执行LTR编号申请
+2025-10-25 15:59:38,351 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-25 15:59:38,352 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-25 15:59:39,337 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-25 15:59:39,337 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-25 15:59:42,509 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-25 15:59:42,521 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-25 15:59:42,521 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-25 15:59:42,521 - TestFlowManager - INFO - LTR编号申请成功: DL-2025-10-082
+2025-10-25 15:59:45,545 - TestFlowManager - INFO - 成功收集LTR申请数据
+2025-10-25 15:59:45,546 - TestFlowManager - DEBUG - 收集到的申请数据: {'DL': 'DL-2025-10-082', 'project_type': 'NPD', 'sample_information': 'CoolPowerHD 2X3.5  Female Connector:10173098-001LF  rev03', 'tests_to_be_performed': 'CoolPWR cable assembly bend testing', 'applicable_specifications': 'EIA-364-41E', 'test_type': 'Qualification', 'requested_by': 'Neo Xu', 'location': 'Nantong', 'project_leader': 'Even Yang', 'test_result': 'In progress', 'failed_item': '', 'sample_deposition': '', 'sub_contract': 'Yes', 'test_fee': '', 'remarks_po': '', 'phone': '0513-80167327', 'email_requestor': '', 'product_description': '', 'lab_performing_the_tests': 'Dongguan', 'condition_of_samples_when_received': 'Acceptable', 'date_lab_received_samples': '17 Oct 2024', 'estimated_completion_date': '29 Dec 2025', 'start_test_date': '25 Oct 2025', 'finish_test_date': '25 Oct 2025', 'report_date': '25 Oct 2025', 'selected_filename': 'Coolpower Rev.G.docx', 'status': 'new', 'error': ''}
+2025-10-25 15:59:45,546 - TestFlowManager - DEBUG - 申请数据中的file_path: None
+2025-10-25 15:59:45,546 - TestFlowManager - DEBUG - 传入的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:59:45,546 - TestFlowManager - DEBUG - 已将临时文件夹路径添加到申请数据中: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:59:45,546 - TestFlowManager - INFO - 开始创建完整项目结构
+2025-10-25 15:59:45,546 - TestFlowManager - INFO - 【创建新项目】开始创建完整项目结构
+2025-10-25 15:59:45,546 - TestFlowManager - DEBUG - 接收到的项目数据: {'DL': 'DL-2025-10-082', 'project_type': 'NPD', 'sample_information': 'CoolPowerHD 2X3.5  Female Connector:10173098-001LF  rev03', 'tests_to_be_performed': 'CoolPWR cable assembly bend testing', 'applicable_specifications': 'EIA-364-41E', 'test_type': 'Qualification', 'requested_by': 'Neo Xu', 'location': 'Nantong', 'project_leader': 'Even Yang', 'test_result': 'In progress', 'failed_item': '', 'sample_deposition': '', 'sub_contract': 'Yes', 'test_fee': '', 'remarks_po': '', 'phone': '0513-80167327', 'email_requestor': '', 'product_description': '', 'lab_performing_the_tests': 'Dongguan', 'condition_of_samples_when_received': 'Acceptable', 'date_lab_received_samples': '17 Oct 2024', 'estimated_completion_date': '29 Dec 2025', 'start_test_date': '25 Oct 2025', 'finish_test_date': '25 Oct 2025', 'report_date': '25 Oct 2025', 'selected_filename': 'Coolpower Rev.G.docx', 'status': 'new', 'error': '', 'file_path': 'D:\\TestFlowManager\\Temp\\email_attachments_20251025_155840'}
+2025-10-25 15:59:45,551 - TestFlowManager - INFO - 成功复制模板到目标路径: D:\TestFlowManager\Projects\DL-2025-10-082
+2025-10-25 15:59:45,551 - TestFlowManager - INFO - 重命名文件夹: D:\TestFlowManager\Projects\DL-2025-10-082\DL-XXXX-YY-ZZZ Title -> D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing
+2025-10-25 15:59:45,551 - TestFlowManager - INFO - E-mail 文件夹已存在: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\E-mail
+2025-10-25 15:59:45,551 - TestFlowManager - INFO - Submitted Material 文件夹已存在: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\Submitted Material
+2025-10-25 15:59:45,551 - TestFlowManager - INFO - 使用模板目录: D:\TestFlowManager\Template
+2025-10-25 15:59:45,551 - TestFlowManager - INFO - 目标文件夹: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing
+2025-10-25 15:59:45,551 - TestFlowManager - INFO - 正在查找 'Fee Evaluation' 类型的模板文件: D:\TestFlowManager\Template
+2025-10-25 15:59:45,551 - TestFlowManager - DEBUG - 找到模板文件: ['D:\\TestFlowManager\\Template\\Testing Fee Evaluation_Rev_D.xls']
+2025-10-25 15:59:45,551 - TestFlowManager - DEBUG - 模板文件绝对路径: D:\TestFlowManager\Template\Testing Fee Evaluation_Rev_D.xls
+2025-10-25 15:59:45,551 - TestFlowManager - DEBUG - 目标文件绝对路径: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\DL-2025-10-082 CoolPWR cable assembly bend testing Form for Testing Fee Evaluation.xls
+2025-10-25 15:59:45,551 - TestFlowManager - INFO - 准备复制文件到: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\DL-2025-10-082 CoolPWR cable assembly bend testing Form for Testing Fee Evaluation.xls
+2025-10-25 15:59:45,552 - TestFlowManager - INFO - 费用评估表已成功复制至: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\DL-2025-10-082 CoolPWR cable assembly bend testing Form for Testing Fee Evaluation.xls
+2025-10-25 15:59:46,871 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-25 15:59:46,871 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-25 15:59:47,372 - TestFlowManager - DEBUG - 当前工作簿包含的工作表: ['Testing Prices ', 'Unit Price Reference']
+2025-10-25 15:59:47,423 - TestFlowManager - INFO - 数据已成功写入费用评估表
+2025-10-25 15:59:47,506 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-25 15:59:47,510 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-25 15:59:47,510 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-25 15:59:47,511 - TestFlowManager - INFO - ✅ 费用评估表已成功初始化
+2025-10-25 15:59:47,588 - TestFlowManager - INFO - 使用模板目录: D:\TestFlowManager\Template
+2025-10-25 15:59:47,588 - TestFlowManager - INFO - 目标文件夹: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing
+2025-10-25 15:59:47,588 - TestFlowManager - INFO - 正在查找 'E-4243*.xlsx' 模板文件: D:\TestFlowManager\Template
+2025-10-25 15:59:47,588 - TestFlowManager - DEBUG - 找到模板文件: ['D:\\TestFlowManager\\Template\\E-4243_D Customer Feedback Form_241128.xlsx']
+2025-10-25 15:59:47,588 - TestFlowManager - DEBUG - 模板文件绝对路径: D:\TestFlowManager\Template\E-4243_D Customer Feedback Form_241128.xlsx
+2025-10-25 15:59:47,588 - TestFlowManager - DEBUG - 目标文件绝对路径: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\DL-2025-10-082 CoolPWR cable assembly bend testing Customer Feedback Form_Even Yang.xlsx
+2025-10-25 15:59:47,589 - TestFlowManager - INFO - 准备复制文件到: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\DL-2025-10-082 CoolPWR cable assembly bend testing Customer Feedback Form_Even Yang.xlsx
+2025-10-25 15:59:47,589 - TestFlowManager - INFO - 客户反馈表已成功复制至: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\DL-2025-10-082 CoolPWR cable assembly bend testing Customer Feedback Form_Even Yang.xlsx
+2025-10-25 15:59:48,659 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-25 15:59:48,659 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-25 15:59:48,846 - TestFlowManager - DEBUG - 当前工作簿包含的工作表: ['Customer Feedback Form']
+2025-10-25 15:59:48,940 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-25 15:59:48,943 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-25 15:59:48,943 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-25 15:59:48,943 - TestFlowManager - INFO - ✅ 客户反馈表已成功初始化
+2025-10-25 15:59:49,002 - TestFlowManager - DEBUG - 从项目数据中获取的临时文件路径: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:59:49,002 - TestFlowManager - INFO - 使用附件来源路径: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:59:49,003 - TestFlowManager - INFO - 复制 文件: D:\TestFlowManager\Temp\email_attachments_20251025_155840\转发_ Coolpower HD 3_5mm product qulification test.msg -> D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\E-mail
+2025-10-25 15:59:49,009 - TestFlowManager - DEBUG - 选中的文件名: Coolpower Rev.G.docx
+2025-10-25 15:59:49,009 - TestFlowManager - DEBUG - DL编号: DL-2025-10-082
+2025-10-25 15:59:49,010 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251025_155840\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx -> D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\Submitted Material\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx
+2025-10-25 15:59:49,010 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251025_155840\Coolpower Rev.G.docx -> D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\Submitted Material\Coolpower Rev.G.docx
+2025-10-25 15:59:49,011 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251025_155840\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx -> D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\Submitted Material\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx
+2025-10-25 15:59:49,012 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251025_155840\GS-12-1941_Rev1 CoolPower HD.pdf -> D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\Submitted Material\GS-12-1941_Rev1 CoolPower HD.pdf
+2025-10-25 15:59:49,012 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251025_155840\image001.jpg -> D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\Submitted Material\image001.jpg
+2025-10-25 15:59:49,013 - TestFlowManager - INFO - 找到匹配的文件: Coolpower Rev.G.docx
+2025-10-25 15:59:49,013 - TestFlowManager - INFO - 更新Word文档: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\Submitted Material\Coolpower Rev.G.docx
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Project Type' 对应值 'NPD' 准备写入
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Test Type' 对应值 'Qualification' 准备写入
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Requested By:' 对应值 'Neo Xu' 准备写入
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Mfg. Site:' 对应值 'Nantong' 准备写入
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Can testing be subcontracted?' 对应值 'Yes' 准备写入
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Phone #:' 对应值 '0513-80167327' 准备写入
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Email:' 对应值 '' 准备写入
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Lab Performing the Tests:' 对应值 'Dongguan' 准备写入
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Condition of Samples when Received:' 对应值 'Acceptable' 准备写入
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Lab Personnel Assigned:' 对应值 'Even Yang' 准备写入
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Date Lab Received Samples:' 对应值 '17 Oct 2024' 准备写入
+2025-10-25 15:59:49,160 - TestFlowManager - DEBUG - 字段 'Estimated Completion Date:' 对应值 '29 Dec 2025' 准备写入
+2025-10-25 15:59:49,608 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 3, Locked: False
+2025-10-25 15:59:49,619 - TestFlowManager - INFO - 修改字段 'Project Type' 为 'NPD'
+2025-10-25 15:59:49,843 - TestFlowManager - DEBUG - ContentControl Title: 'Test Type', Type: 4, Locked: False
+2025-10-25 15:59:49,862 - TestFlowManager - WARNING - Dropdown option 'Qualification' not found in content control
+2025-10-25 15:59:49,863 - TestFlowManager - WARNING - 修改字段 'Test Type' 失败
+2025-10-25 15:59:49,918 - TestFlowManager - INFO - 修改字段 'Requested By:' 为 'Neo Xu'
+2025-10-25 15:59:50,039 - TestFlowManager - DEBUG - ContentControl Title: 'Select One', Type: 4, Locked: False
+2025-10-25 15:59:50,258 - TestFlowManager - INFO - 修改字段 'Mfg. Site:' 为 'Nantong'
+2025-10-25 15:59:51,025 - TestFlowManager - DEBUG - ContentControl Title: 'Subcontracted', Type: 4, Locked: False
+2025-10-25 15:59:51,037 - TestFlowManager - INFO - 修改字段 'Can testing be subcontracted?' 为 'Yes'
+2025-10-25 15:59:51,105 - TestFlowManager - INFO - 修改字段 'Phone #:' 为 '0513-80167327'
+2025-10-25 15:59:51,204 - TestFlowManager - INFO - 修改字段 'Email:' 为 ''
+2025-10-25 15:59:52,118 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 3, Locked: False
+2025-10-25 15:59:52,124 - TestFlowManager - INFO - 修改字段 'Lab Performing the Tests:' 为 'Dongguan'
+2025-10-25 15:59:52,988 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 3, Locked: False
+2025-10-25 15:59:52,995 - TestFlowManager - INFO - 修改字段 'Condition of Samples when Received:' 为 'Acceptable'
+2025-10-25 15:59:53,805 - TestFlowManager - INFO - 修改字段 'Lab Personnel Assigned:' 为 'Even Yang'
+2025-10-25 15:59:54,688 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 6, Locked: False
+2025-10-25 15:59:54,698 - TestFlowManager - INFO - 修改字段 'Date Lab Received Samples:' 为 '17 Oct 2024'
+2025-10-25 15:59:55,522 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 6, Locked: False
+2025-10-25 15:59:55,531 - TestFlowManager - INFO - 修改字段 'Estimated Completion Date:' 为 '29 Dec 2025'
+2025-10-25 15:59:55,650 - TestFlowManager - INFO - 成功更新Word文档: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing\Submitted Material\Coolpower Rev.G.docx
+2025-10-25 15:59:58,969 - TestFlowManager - INFO - 项目 DL-2025-10-082 已成功创建！
+2025-10-25 15:59:58,969 - TestFlowManager - INFO - 【创建新项目】流程结束
+2025-10-25 15:59:58,970 - TestFlowManager - INFO - 已清理临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251025_155840
+2025-10-25 15:59:58,970 - TestFlowManager - INFO - 完整项目结构创建成功: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing
+2025-10-25 15:59:58,971 - TestFlowManager - INFO - 申请数据已保存到: D:\TestFlowManager\Projects\DL-2025-10-082\application_data.json
+2025-10-25 15:59:58,971 - TestFlowManager - INFO - 完整项目结构创建成功: D:\TestFlowManager\Projects\DL-2025-10-082\DL-2025-10-082 CoolPWR cable assembly bend testing
+2025-10-25 16:00:01,118 - TestFlowManager - DEBUG - Word instance count decreased to 1
+2025-10-25 16:00:01,118 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-25 16:00:01,121 - TestFlowManager - INFO - User accepted the application dialog
+2025-10-25 16:00:01,121 - TestFlowManager - DEBUG - Status updated: 确认LTR申请单: 
+2025-10-25 16:00:01,121 - TestFlowManager - DEBUG - Updated status: 确认LTR申请单: 
+2025-10-25 16:00:01,121 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-25 16:00:01,121 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-25 16:00:01,121 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-25 16:00:01,125 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-25 16:00:01,125 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-25 16:00:01,125 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-25 16:00:01,125 - TestFlowManager - INFO - New project created successfully
+2025-10-25 16:00:01,126 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-25 16:00:01,126 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-25 16:00:01,126 - TestFlowManager - INFO - LTR application processed successfully: 
+2025-10-25 16:00:01,126 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-25 16:00:01,126 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-25 16:00:01,126 - TestFlowManager - INFO - LTR application processed successfully: 
+2025-10-25 16:00:01,126 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-25 16:00:01,126 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-25 16:00:01,126 - TestFlowManager - INFO - LTR application processed successfully: 
+2025-10-26 11:25:47,872 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-26 11:25:47,915 - TestFlowManager - INFO - Application initialized successfully
+2025-10-26 11:25:47,915 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-26 11:25:48,249 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-26 11:25:48,249 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-26 11:25:48,249 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-26 11:25:48,249 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-26 11:25:48,315 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-26 11:25:48,315 - TestFlowManager - DEBUG - Application state loaded
+2025-10-26 11:25:48,315 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-26 11:25:48,315 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-26 11:25:48,315 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-26 11:25:48,315 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-26 11:25:48,827 - TestFlowManager - INFO - Main window shown
+2025-10-26 11:25:54,475 - TestFlowManager - DEBUG - New file action triggered
+2025-10-26 11:25:54,475 - TestFlowManager - DEBUG - Handling new file request
+2025-10-26 11:25:54,475 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-26 11:25:54,486 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-26 11:25:54,486 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-26 11:26:01,532 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 11:26:01,532 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 11:26:01,532 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 11:26:01,542 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx, 大小: 84946 字节
+2025-10-26 11:26:01,542 - TestFlowManager - DEBUG - 提取附件: image001.png, 大小: 3059 字节
+2025-10-26 11:26:01,542 - TestFlowManager - DEBUG - 提取附件: image002.png, 大小: 71247 字节
+2025-10-26 11:26:01,542 - TestFlowManager - DEBUG - 提取附件: image003.jpg, 大小: 10949 字节
+2025-10-26 11:26:01,542 - TestFlowManager - INFO - 成功处理MSG文件，提取到 4 个附件
+2025-10-26 11:26:01,542 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 11:26:01,542 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-26 11:26:01,542 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-26 11:26:01,543 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 11:26:01,543 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_112601
+2025-10-26 11:26:01,543 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112601
+2025-10-26 11:26:01,543 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112601\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 11:26:01,543 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112601\image001.png
+2025-10-26 11:26:01,544 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112601\image002.png
+2025-10-26 11:26:01,544 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112601\image003.jpg
+2025-10-26 11:26:01,545 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112601\PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 11:26:01,545 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112601
+2025-10-26 11:26:02,951 - TestFlowManager - INFO - [EmailSelectorDialog] 预览附件使用临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 11:26:02,951 - TestFlowManager - INFO - [EmailSelectorDialog] 预览附件临时文件路径: C:\Users\White\AppData\Local\Temp\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 11:26:07,979 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 11:26:07,979 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 11:26:07,980 - TestFlowManager - INFO - 已清理临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112601
+2025-10-26 11:26:07,980 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 11:26:07,984 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx, 大小: 84946 字节
+2025-10-26 11:26:07,984 - TestFlowManager - DEBUG - 提取附件: image001.png, 大小: 3059 字节
+2025-10-26 11:26:07,984 - TestFlowManager - DEBUG - 提取附件: image002.png, 大小: 71247 字节
+2025-10-26 11:26:07,984 - TestFlowManager - DEBUG - 提取附件: image003.jpg, 大小: 10949 字节
+2025-10-26 11:26:07,984 - TestFlowManager - INFO - 成功处理MSG文件，提取到 4 个附件
+2025-10-26 11:26:07,984 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 11:26:07,984 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-26 11:26:07,985 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-26 11:26:07,985 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 11:26:07,985 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_112607
+2025-10-26 11:26:07,985 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112607
+2025-10-26 11:26:07,985 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112607\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 11:26:07,985 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112607\image001.png
+2025-10-26 11:26:07,987 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112607\image002.png
+2025-10-26 11:26:07,987 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112607\image003.jpg
+2025-10-26 11:26:07,988 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112607\PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 11:26:07,988 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_112607
+2025-10-26 11:26:07,994 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-26 11:26:07,994 - TestFlowManager - INFO - Successfully processed email data
+2025-10-26 11:26:07,994 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-26 11:26:07,994 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_112607
+2025-10-26 11:26:07,994 - TestFlowManager - INFO - 使用EmailExtractor提供的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_112607
+2025-10-26 11:26:07,994 - TestFlowManager - DEBUG - Using saved selected attachment: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 11:26:07,994 - TestFlowManager - INFO - Using selected attachment: 10172012-2504201&10175400-2504201_internal qualification report request_rev1_20240828.docx
+2025-10-26 11:26:07,994 - TestFlowManager - INFO - [ProjectCreatorService] Word附件处理使用临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 11:26:07,994 - TestFlowManager - INFO - [ProjectCreatorService] Word附件临时文件路径: C:\Users\White\AppData\Local\Temp\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 11:26:07,994 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 11:26:07,994 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 11:26:07,994 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 11:26:09,924 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-26 11:26:09,925 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-26 11:26:09,925 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-26 11:26:10,249 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx (read_only=True)
+2025-10-26 11:26:10,278 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-26 11:26:10,316 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-26 11:26:10,320 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-26 11:26:10,320 - TestFlowManager - DEBUG - Document: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-26 11:26:10,321 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-26 11:26:10,343 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-26 11:26:10,349 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev H		GS-03-008'
+2025-10-26 11:26:10,349 - TestFlowManager - DEBUG - Document: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx - Found 'Rev' and extracted version 'H' from footer PARAGRAPH.
+2025-10-26 11:26:10,349 - TestFlowManager - INFO - Document: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-26 11:26:10,375 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 11:26:10,375 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-26 11:26:10,500 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx (read_only=True)
+2025-10-26 11:26:10,500 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-26 11:26:10,588 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-26 11:26:10,707 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-26 11:26:10,781 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-26 11:26:10,870 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-26 11:26:11,823 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-26 11:26:12,780 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-26 11:26:13,624 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-26 11:26:13,852 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-26 11:26:14,102 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-26 11:26:14,563 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-26 11:26:15,383 - TestFlowManager - INFO - Successfully processed application file
+2025-10-26 11:26:15,396 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 11:26:15,396 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 11:26:15,396 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-26 11:26:15,396 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_112607
+2025-10-26 11:26:15,396 - TestFlowManager - DEBUG - 从email_extractor_controller获取到的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_112607
+2025-10-26 11:26:15,396 - TestFlowManager - DEBUG - 临时文件夹路径存在: D:\TestFlowManager\Temp\email_attachments_20251026_112607
+2025-10-26 11:26:15,396 - TestFlowManager - DEBUG - Showing LTR application dialog
+2025-10-26 11:26:15,396 - TestFlowManager - DEBUG - 传递给对话框的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_112607
+2025-10-26 11:26:15,396 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-26 11:26:15,397 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-26 11:26:15,425 - TestFlowManager - DEBUG - LTRApplicationDialog创建完成，传递的temp_folder_path: D:\TestFlowManager\Temp\email_attachments_20251026_112607
+2025-10-26 13:23:37,092 - TestFlowManager - INFO - User cancelled the application dialog
+2025-10-26 13:23:37,094 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-26 13:23:37,094 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-26 13:23:37,094 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-26 13:23:37,094 - TestFlowManager - INFO - New project created successfully
+2025-10-26 13:23:39,639 - TestFlowManager - INFO - MainWindow closing
+2025-10-26 13:23:39,639 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-26 13:23:39,640 - TestFlowManager - DEBUG - Application state saved
+2025-10-26 13:23:39,640 - TestFlowManager - DEBUG - Word instance count decreased to 1
+2025-10-26 13:23:39,640 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-26 13:23:39,640 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-26 13:23:39,676 - TestFlowManager - DEBUG - Word instance count decreased to 0
+2025-10-26 13:23:39,680 - TestFlowManager - ERROR - Error while quitting Word application: (-2147023174, 'RPC 服务器不可用。', None, None)
+2025-10-26 13:23:39,681 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-26 13:23:39,681 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-26 13:23:39,692 - TestFlowManager - INFO - Application exited
+2025-10-26 13:23:39,692 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-26 13:23:39,692 - TestFlowManager - INFO - Closing all windows
+2025-10-26 13:23:39,692 - TestFlowManager - INFO - MainWindow closing
+2025-10-26 13:23:39,692 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-26 13:23:39,692 - TestFlowManager - DEBUG - Application state saved
+2025-10-26 13:23:39,692 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-26 13:23:39,692 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-26 13:23:39,692 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-26 13:23:39,692 - TestFlowManager - INFO - MainWindow closing
+2025-10-26 13:23:39,692 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-26 13:23:39,693 - TestFlowManager - DEBUG - Application state saved
+2025-10-26 13:23:39,693 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-26 13:23:39,693 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-26 13:23:39,693 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-26 13:23:39,693 - TestFlowManager - INFO - Application shut down successfully
+2025-10-26 13:29:36,476 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-26 13:29:36,487 - TestFlowManager - INFO - Application initialized successfully
+2025-10-26 13:29:36,487 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-26 13:29:36,688 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-26 13:29:36,688 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-26 13:29:36,688 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-26 13:29:36,688 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-26 13:29:36,738 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-26 13:29:36,738 - TestFlowManager - DEBUG - Application state loaded
+2025-10-26 13:29:36,738 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-26 13:29:36,738 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-26 13:29:36,738 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-26 13:29:36,738 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-26 13:29:37,265 - TestFlowManager - INFO - Main window shown
+2025-10-26 13:29:38,572 - TestFlowManager - DEBUG - New file action triggered
+2025-10-26 13:29:38,572 - TestFlowManager - DEBUG - Handling new file request
+2025-10-26 13:29:38,572 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-26 13:29:38,575 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-26 13:29:38,575 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-26 13:29:43,900 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 13:29:43,900 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 13:29:43,900 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 13:29:43,907 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx, 大小: 84946 字节
+2025-10-26 13:29:43,907 - TestFlowManager - DEBUG - 提取附件: image001.png, 大小: 3059 字节
+2025-10-26 13:29:43,907 - TestFlowManager - DEBUG - 提取附件: image002.png, 大小: 71247 字节
+2025-10-26 13:29:43,907 - TestFlowManager - DEBUG - 提取附件: image003.jpg, 大小: 10949 字节
+2025-10-26 13:29:43,907 - TestFlowManager - INFO - 成功处理MSG文件，提取到 4 个附件
+2025-10-26 13:29:43,907 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 13:29:43,907 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-26 13:29:43,907 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-26 13:29:43,907 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 13:29:43,907 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_132943
+2025-10-26 13:29:43,908 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132943
+2025-10-26 13:29:43,908 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132943\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:29:43,908 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132943\image001.png
+2025-10-26 13:29:43,910 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132943\image002.png
+2025-10-26 13:29:43,910 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132943\image003.jpg
+2025-10-26 13:29:43,911 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132943\PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 13:29:43,911 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132943
+2025-10-26 13:29:46,401 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 13:29:46,402 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 13:29:46,402 - TestFlowManager - INFO - 已清理临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132943
+2025-10-26 13:29:46,402 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 13:29:46,407 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx, 大小: 84946 字节
+2025-10-26 13:29:46,407 - TestFlowManager - DEBUG - 提取附件: image001.png, 大小: 3059 字节
+2025-10-26 13:29:46,407 - TestFlowManager - DEBUG - 提取附件: image002.png, 大小: 71247 字节
+2025-10-26 13:29:46,407 - TestFlowManager - DEBUG - 提取附件: image003.jpg, 大小: 10949 字节
+2025-10-26 13:29:46,407 - TestFlowManager - INFO - 成功处理MSG文件，提取到 4 个附件
+2025-10-26 13:29:46,407 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 13:29:46,407 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-26 13:29:46,407 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-26 13:29:46,407 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 13:29:46,407 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:29:46,407 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:29:46,408 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132946\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:29:46,408 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132946\image001.png
+2025-10-26 13:29:46,408 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132946\image002.png
+2025-10-26 13:29:46,409 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132946\image003.jpg
+2025-10-26 13:29:46,409 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132946\PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg
+2025-10-26 13:29:46,409 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:29:46,414 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-26 13:29:46,414 - TestFlowManager - INFO - Successfully processed email data
+2025-10-26 13:29:46,414 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-26 13:29:46,414 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:29:46,414 - TestFlowManager - INFO - 使用EmailExtractor提供的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:29:46,414 - TestFlowManager - DEBUG - Using saved selected attachment: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:29:46,414 - TestFlowManager - INFO - Using selected attachment: 10172012-2504201&10175400-2504201_internal qualification report request_rev1_20240828.docx
+2025-10-26 13:29:46,414 - TestFlowManager - INFO - [ProjectCreatorService] Word附件处理使用临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 13:29:46,414 - TestFlowManager - INFO - [ProjectCreatorService] Word附件临时文件路径: C:\Users\White\AppData\Local\Temp\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:29:46,415 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:29:46,415 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:29:46,415 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:29:48,715 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-26 13:29:48,715 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-26 13:29:48,715 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-26 13:29:49,069 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx (read_only=True)
+2025-10-26 13:29:49,098 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-26 13:29:49,126 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-26 13:29:49,130 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-26 13:29:49,130 - TestFlowManager - DEBUG - Document: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-26 13:29:49,131 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-26 13:29:49,149 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-26 13:29:49,155 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev H		GS-03-008'
+2025-10-26 13:29:49,155 - TestFlowManager - DEBUG - Document: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx - Found 'Rev' and extracted version 'H' from footer PARAGRAPH.
+2025-10-26 13:29:49,155 - TestFlowManager - INFO - Document: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-26 13:29:49,181 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:29:49,182 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-26 13:29:49,302 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx (read_only=True)
+2025-10-26 13:29:49,302 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-26 13:29:49,382 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-26 13:29:49,506 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-26 13:29:49,577 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-26 13:29:49,669 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-26 13:29:50,590 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-26 13:29:51,622 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-26 13:29:52,456 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-26 13:29:52,680 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-26 13:29:52,906 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-26 13:29:53,366 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-26 13:29:54,210 - TestFlowManager - INFO - Successfully processed application file
+2025-10-26 13:29:54,222 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:29:54,222 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:29:54,222 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-26 13:29:54,222 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:29:54,222 - TestFlowManager - DEBUG - 从email_extractor_controller获取到的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:29:54,222 - TestFlowManager - DEBUG - 临时文件夹路径存在: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:29:54,222 - TestFlowManager - DEBUG - Showing LTR application dialog
+2025-10-26 13:29:54,222 - TestFlowManager - DEBUG - 传递给对话框的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:29:54,223 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-26 13:29:54,223 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-26 13:29:54,244 - TestFlowManager - DEBUG - LTRApplicationDialog创建完成，传递的temp_folder_path: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:31:22,325 - TestFlowManager - INFO - 开始处理LTR编号申请请求
+2025-10-26 13:31:22,325 - TestFlowManager - DEBUG - apply_ltr_number接收到的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:31:22,325 - TestFlowManager - INFO - 开始执行LTR编号申请
+2025-10-26 13:31:23,014 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-26 13:31:23,014 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-26 13:31:23,945 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-26 13:31:23,945 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-26 13:31:26,978 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-26 13:31:26,991 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-26 13:31:26,991 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-26 13:31:26,991 - TestFlowManager - INFO - LTR编号申请成功: DL-2025-10-083
+2025-10-26 13:31:27,809 - TestFlowManager - INFO - 成功收集LTR申请数据
+2025-10-26 13:31:27,810 - TestFlowManager - DEBUG - 收集到的申请数据: {'DL': 'DL-2025-10-083', 'project_type': 'NPD', 'sample_information': 'PwrBlade Ultra Pro Rec.R/A TYPE,WITH 2HP+20S:10175400-2504201LF\nPwrBlade Ultra Pro RAH WITH 2HP+20S+5LP:10172012-2504201LF\n5 LP CABLE:10132080', 'tests_to_be_performed': 'Qualifcaiton test', 'applicable_specifications': 'GS-12-1880', 'test_type': 'Partial Qualification', 'requested_by': 'Yi-Peng Wu', 'location': 'Dongguan', 'project_leader': 'Even Yang', 'test_result': 'In progress', 'failed_item': '', 'sample_deposition': '', 'sub_contract': 'No', 'test_fee': '', 'remarks_po': '', 'phone': '15342873107', 'email_requestor': 'Yi-Peng.Wu@fci.com', 'product_description': '', 'lab_performing_the_tests': 'Dongguan', 'condition_of_samples_when_received': 'Acceptable', 'date_lab_received_samples': '26 Oct 2025', 'estimated_completion_date': '26 Oct 2025', 'start_test_date': '26 Oct 2025', 'finish_test_date': '26 Oct 2025', 'report_date': '26 Oct 2025', 'selected_filename': '10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx', 'status': 'new', 'error': ''}
+2025-10-26 13:31:27,810 - TestFlowManager - DEBUG - 申请数据中的file_path: None
+2025-10-26 13:31:27,810 - TestFlowManager - DEBUG - 传入的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:31:27,810 - TestFlowManager - DEBUG - 已将临时文件夹路径添加到申请数据中: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:31:27,810 - TestFlowManager - INFO - 开始创建完整项目结构
+2025-10-26 13:31:27,810 - TestFlowManager - INFO - 【创建新项目】开始创建完整项目结构
+2025-10-26 13:31:27,810 - TestFlowManager - DEBUG - 接收到的项目数据: {'DL': 'DL-2025-10-083', 'project_type': 'NPD', 'sample_information': 'PwrBlade Ultra Pro Rec.R/A TYPE,WITH 2HP+20S:10175400-2504201LF\nPwrBlade Ultra Pro RAH WITH 2HP+20S+5LP:10172012-2504201LF\n5 LP CABLE:10132080', 'tests_to_be_performed': 'Qualifcaiton test', 'applicable_specifications': 'GS-12-1880', 'test_type': 'Partial Qualification', 'requested_by': 'Yi-Peng Wu', 'location': 'Dongguan', 'project_leader': 'Even Yang', 'test_result': 'In progress', 'failed_item': '', 'sample_deposition': '', 'sub_contract': 'No', 'test_fee': '', 'remarks_po': '', 'phone': '15342873107', 'email_requestor': 'Yi-Peng.Wu@fci.com', 'product_description': '', 'lab_performing_the_tests': 'Dongguan', 'condition_of_samples_when_received': 'Acceptable', 'date_lab_received_samples': '26 Oct 2025', 'estimated_completion_date': '26 Oct 2025', 'start_test_date': '26 Oct 2025', 'finish_test_date': '26 Oct 2025', 'report_date': '26 Oct 2025', 'selected_filename': '10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx', 'status': 'new', 'error': '', 'file_path': 'D:\\TestFlowManager\\Temp\\email_attachments_20251026_132946'}
+2025-10-26 13:31:27,814 - TestFlowManager - INFO - 成功复制模板到目标路径: D:\TestFlowManager\Projects\DL-2025-10-083
+2025-10-26 13:31:27,815 - TestFlowManager - INFO - 重命名文件夹: D:\TestFlowManager\Projects\DL-2025-10-083\DL-XXXX-YY-ZZZ Title -> D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test
+2025-10-26 13:31:27,815 - TestFlowManager - INFO - E-mail 文件夹已存在: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\E-mail
+2025-10-26 13:31:27,815 - TestFlowManager - INFO - Submitted Material 文件夹已存在: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\Submitted Material
+2025-10-26 13:31:27,815 - TestFlowManager - INFO - 使用模板目录: D:\TestFlowManager\Template
+2025-10-26 13:31:27,815 - TestFlowManager - INFO - 目标文件夹: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test
+2025-10-26 13:31:27,815 - TestFlowManager - INFO - 正在查找 'Fee Evaluation' 类型的模板文件: D:\TestFlowManager\Template
+2025-10-26 13:31:27,815 - TestFlowManager - DEBUG - 找到模板文件: ['D:\\TestFlowManager\\Template\\Testing Fee Evaluation_Rev_D.xls']
+2025-10-26 13:31:27,815 - TestFlowManager - DEBUG - 模板文件绝对路径: D:\TestFlowManager\Template\Testing Fee Evaluation_Rev_D.xls
+2025-10-26 13:31:27,815 - TestFlowManager - DEBUG - 目标文件绝对路径: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\DL-2025-10-083 Qualifcaiton test Form for Testing Fee Evaluation.xls
+2025-10-26 13:31:27,815 - TestFlowManager - INFO - 准备复制文件到: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\DL-2025-10-083 Qualifcaiton test Form for Testing Fee Evaluation.xls
+2025-10-26 13:31:27,816 - TestFlowManager - INFO - 费用评估表已成功复制至: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\DL-2025-10-083 Qualifcaiton test Form for Testing Fee Evaluation.xls
+2025-10-26 13:31:28,989 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-26 13:31:28,989 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-26 13:31:29,531 - TestFlowManager - DEBUG - 当前工作簿包含的工作表: ['Testing Prices ', 'Unit Price Reference']
+2025-10-26 13:31:29,578 - TestFlowManager - INFO - 数据已成功写入费用评估表
+2025-10-26 13:31:29,652 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-26 13:31:29,656 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-26 13:31:29,656 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-26 13:31:29,656 - TestFlowManager - INFO - ✅ 费用评估表已成功初始化
+2025-10-26 13:31:29,730 - TestFlowManager - INFO - 使用模板目录: D:\TestFlowManager\Template
+2025-10-26 13:31:29,730 - TestFlowManager - INFO - 目标文件夹: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test
+2025-10-26 13:31:29,730 - TestFlowManager - INFO - 正在查找 'E-4243*.xlsx' 模板文件: D:\TestFlowManager\Template
+2025-10-26 13:31:29,730 - TestFlowManager - DEBUG - 找到模板文件: ['D:\\TestFlowManager\\Template\\E-4243_D Customer Feedback Form_241128.xlsx']
+2025-10-26 13:31:29,730 - TestFlowManager - DEBUG - 模板文件绝对路径: D:\TestFlowManager\Template\E-4243_D Customer Feedback Form_241128.xlsx
+2025-10-26 13:31:29,730 - TestFlowManager - DEBUG - 目标文件绝对路径: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\DL-2025-10-083 Qualifcaiton test Customer Feedback Form_Even Yang.xlsx
+2025-10-26 13:31:29,731 - TestFlowManager - INFO - 准备复制文件到: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\DL-2025-10-083 Qualifcaiton test Customer Feedback Form_Even Yang.xlsx
+2025-10-26 13:31:29,733 - TestFlowManager - INFO - 客户反馈表已成功复制至: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\DL-2025-10-083 Qualifcaiton test Customer Feedback Form_Even Yang.xlsx
+2025-10-26 13:31:30,817 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-26 13:31:30,817 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-26 13:31:31,028 - TestFlowManager - DEBUG - 当前工作簿包含的工作表: ['Customer Feedback Form']
+2025-10-26 13:31:31,123 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-26 13:31:31,127 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-26 13:31:31,128 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-26 13:31:31,128 - TestFlowManager - INFO - ✅ 客户反馈表已成功初始化
+2025-10-26 13:31:31,184 - TestFlowManager - DEBUG - 从项目数据中获取的临时文件路径: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:31:31,184 - TestFlowManager - INFO - 使用附件来源路径: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:31:31,185 - TestFlowManager - INFO - 复制 文件: D:\TestFlowManager\Temp\email_attachments_20251026_132946\PBU Pro BTB Connector system with cable assembly Qulification Testing_NPD.msg -> D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\E-mail
+2025-10-26 13:31:31,191 - TestFlowManager - DEBUG - 选中的文件名: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:31:31,191 - TestFlowManager - DEBUG - DL编号: DL-2025-10-083
+2025-10-26 13:31:31,192 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251026_132946\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx -> D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\Submitted Material\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:31:31,192 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251026_132946\image001.png -> D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\Submitted Material\image001.png
+2025-10-26 13:31:31,193 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251026_132946\image002.png -> D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\Submitted Material\image002.png
+2025-10-26 13:31:31,193 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251026_132946\image003.jpg -> D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\Submitted Material\image003.jpg
+2025-10-26 13:31:31,193 - TestFlowManager - INFO - 找到匹配的文件: 10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:31:31,193 - TestFlowManager - INFO - 更新Word文档: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\Submitted Material\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:31:31,656 - TestFlowManager - INFO - 找到 'Lab Test Request Number:' 段落，索引: 0
+2025-10-26 13:31:31,656 - TestFlowManager - INFO - 找到 'Page' 段落，索引: 3
+2025-10-26 13:31:31,755 - TestFlowManager - INFO - 成功在页眉中插入新测试编号: DL-2025-10-083
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Project Type' 对应值 'NPD' 准备写入
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Test Type' 对应值 'Partial Qualification' 准备写入
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Requested By:' 对应值 'Yi-Peng Wu' 准备写入
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Mfg. Site:' 对应值 'Dongguan' 准备写入
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Can testing be subcontracted?' 对应值 'No' 准备写入
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Phone #:' 对应值 '15342873107' 准备写入
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Email:' 对应值 'Yi-Peng.Wu@fci.com' 准备写入
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Lab Performing the Tests:' 对应值 'Dongguan' 准备写入
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Condition of Samples when Received:' 对应值 'Acceptable' 准备写入
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Lab Personnel Assigned:' 对应值 'Even Yang' 准备写入
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Date Lab Received Samples:' 对应值 '26 Oct 2025' 准备写入
+2025-10-26 13:31:31,758 - TestFlowManager - DEBUG - 字段 'Estimated Completion Date:' 对应值 '26 Oct 2025' 准备写入
+2025-10-26 13:31:32,080 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 3, Locked: False
+2025-10-26 13:31:32,092 - TestFlowManager - INFO - 修改字段 'Project Type' 为 'NPD'
+2025-10-26 13:31:32,526 - TestFlowManager - DEBUG - ContentControl Title: 'Test Type', Type: 4, Locked: False
+2025-10-26 13:31:32,546 - TestFlowManager - WARNING - Dropdown option 'Partial Qualification' not found in content control
+2025-10-26 13:31:32,546 - TestFlowManager - WARNING - 修改字段 'Test Type' 失败
+2025-10-26 13:31:32,658 - TestFlowManager - INFO - 修改字段 'Requested By:' 为 'Yi-Peng Wu'
+2025-10-26 13:31:32,804 - TestFlowManager - DEBUG - ContentControl Title: 'Select One', Type: 4, Locked: False
+2025-10-26 13:31:32,997 - TestFlowManager - INFO - 修改字段 'Mfg. Site:' 为 'Dongguan'
+2025-10-26 13:31:34,153 - TestFlowManager - DEBUG - ContentControl Title: 'Subcontracted', Type: 4, Locked: False
+2025-10-26 13:31:34,170 - TestFlowManager - INFO - 修改字段 'Can testing be subcontracted?' 为 'No'
+2025-10-26 13:31:34,257 - TestFlowManager - INFO - 修改字段 'Phone #:' 为 '15342873107'
+2025-10-26 13:31:34,384 - TestFlowManager - INFO - 修改字段 'Email:' 为 'Yi-Peng.Wu@fci.com'
+2025-10-26 13:31:35,540 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 3, Locked: False
+2025-10-26 13:31:35,549 - TestFlowManager - INFO - 修改字段 'Lab Performing the Tests:' 为 'Dongguan'
+2025-10-26 13:31:36,807 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 3, Locked: False
+2025-10-26 13:31:36,817 - TestFlowManager - INFO - 修改字段 'Condition of Samples when Received:' 为 'Acceptable'
+2025-10-26 13:31:37,997 - TestFlowManager - INFO - 修改字段 'Lab Personnel Assigned:' 为 'Even Yang'
+2025-10-26 13:31:39,160 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 6, Locked: False
+2025-10-26 13:31:39,174 - TestFlowManager - INFO - 修改字段 'Date Lab Received Samples:' 为 '26 Oct 2025'
+2025-10-26 13:31:40,375 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 6, Locked: False
+2025-10-26 13:31:40,385 - TestFlowManager - INFO - 修改字段 'Estimated Completion Date:' 为 '26 Oct 2025'
+2025-10-26 13:31:40,479 - TestFlowManager - INFO - 成功更新Word文档: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test\Submitted Material\10172012-2504201&10175400-2504201_Internal qualification report Request_rev1_20240828.docx
+2025-10-26 13:31:40,815 - TestFlowManager - INFO - 项目 DL-2025-10-083 已成功创建！
+2025-10-26 13:31:40,815 - TestFlowManager - INFO - 【创建新项目】流程结束
+2025-10-26 13:31:40,816 - TestFlowManager - INFO - 已清理临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_132946
+2025-10-26 13:31:40,816 - TestFlowManager - INFO - 完整项目结构创建成功: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test
+2025-10-26 13:31:40,817 - TestFlowManager - INFO - 申请数据已保存到: D:\TestFlowManager\Projects\DL-2025-10-083\application_data.json
+2025-10-26 13:31:40,817 - TestFlowManager - INFO - 完整项目结构创建成功: D:\TestFlowManager\Projects\DL-2025-10-083\DL-2025-10-083 Qualifcaiton test
+2025-10-26 13:31:42,685 - TestFlowManager - DEBUG - Word instance count decreased to 1
+2025-10-26 13:31:42,685 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-26 13:31:42,693 - TestFlowManager - INFO - User accepted the application dialog
+2025-10-26 13:31:42,693 - TestFlowManager - DEBUG - Status updated: 确认LTR申请单: 
+2025-10-26 13:31:42,693 - TestFlowManager - DEBUG - Updated status: 确认LTR申请单: 
+2025-10-26 13:31:42,693 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-26 13:31:42,693 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-26 13:31:42,693 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-26 13:31:42,699 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-26 13:31:42,699 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-26 13:31:42,699 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-26 13:31:42,699 - TestFlowManager - INFO - New project created successfully
+2025-10-26 13:31:42,700 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-26 13:31:42,700 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-26 13:31:42,700 - TestFlowManager - INFO - LTR application processed successfully: 
+2025-10-26 13:31:42,700 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-26 13:31:42,700 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-26 13:31:42,700 - TestFlowManager - INFO - LTR application processed successfully: 
+2025-10-26 13:31:42,700 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-26 13:31:42,700 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-26 13:31:42,700 - TestFlowManager - INFO - LTR application processed successfully: 
+2025-10-26 13:32:53,623 - TestFlowManager - INFO - MainWindow closing
+2025-10-26 13:32:53,623 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-26 13:32:53,623 - TestFlowManager - DEBUG - Application state saved
+2025-10-26 13:32:53,623 - TestFlowManager - DEBUG - Word instance count decreased to 0
+2025-10-26 13:32:53,624 - TestFlowManager - ERROR - Error while quitting Word application: (-2147023174, 'RPC 服务器不可用。', None, None)
+2025-10-26 13:32:53,624 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-26 13:32:53,624 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-26 13:32:53,624 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-26 13:32:53,674 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-26 13:32:53,674 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-26 13:32:53,682 - TestFlowManager - INFO - Application exited
+2025-10-26 13:32:53,682 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-26 13:32:53,683 - TestFlowManager - INFO - Closing all windows
+2025-10-26 13:32:53,683 - TestFlowManager - INFO - MainWindow closing
+2025-10-26 13:32:53,683 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-26 13:32:53,683 - TestFlowManager - DEBUG - Application state saved
+2025-10-26 13:32:53,683 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-26 13:32:53,683 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-26 13:32:53,683 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-26 13:32:53,683 - TestFlowManager - INFO - MainWindow closing
+2025-10-26 13:32:53,683 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-26 13:32:53,683 - TestFlowManager - DEBUG - Application state saved
+2025-10-26 13:32:53,683 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-26 13:32:53,683 - TestFlowManager - DEBUG - Excel instance count decreased to -5
+2025-10-26 13:32:53,683 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-26 13:32:53,683 - TestFlowManager - INFO - Application shut down successfully
+2025-10-26 22:37:20,388 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-26 22:37:20,401 - TestFlowManager - INFO - Application initialized successfully
+2025-10-26 22:37:20,401 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-26 22:37:20,574 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-26 22:37:20,574 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-26 22:37:20,574 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-26 22:37:20,575 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-26 22:37:20,618 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-26 22:37:20,619 - TestFlowManager - DEBUG - Application state loaded
+2025-10-26 22:37:20,619 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-26 22:37:20,619 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-26 22:37:20,619 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-26 22:37:20,619 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-26 22:37:21,477 - TestFlowManager - INFO - Main window shown
+2025-10-26 22:37:22,488 - TestFlowManager - DEBUG - New file action triggered
+2025-10-26 22:37:22,488 - TestFlowManager - DEBUG - Handling new file request
+2025-10-26 22:37:22,488 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-26 22:37:22,491 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-26 22:37:22,491 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-26 22:37:26,513 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:26,513 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:26,514 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:26,531 - TestFlowManager - DEBUG - 提取附件: GS-12-1941_Rev1 CoolPower HD.pdf, 大小: 384458 字节
+2025-10-26 22:37:26,531 - TestFlowManager - DEBUG - 提取附件: Coolpower Rev.G.docx, 大小: 85285 字节
+2025-10-26 22:37:26,531 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx, 大小: 84228 字节
+2025-10-26 22:37:26,531 - TestFlowManager - DEBUG - 提取附件: GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx, 大小: 360091 字节
+2025-10-26 22:37:26,531 - TestFlowManager - DEBUG - 提取附件: image001.jpg, 大小: 22992 字节
+2025-10-26 22:37:26,531 - TestFlowManager - INFO - 成功处理MSG文件，提取到 5 个附件
+2025-10-26 22:37:26,532 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:26,532 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-26 22:37:26,532 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-26 22:37:26,532 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 22:37:26,533 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223726
+2025-10-26 22:37:26,533 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223726
+2025-10-26 22:37:26,533 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223726\GS-12-1941_Rev1 CoolPower HD.pdf
+2025-10-26 22:37:26,534 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223726\Coolpower Rev.G.docx
+2025-10-26 22:37:26,534 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223726\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx
+2025-10-26 22:37:26,535 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223726\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx
+2025-10-26 22:37:26,535 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223726\image001.jpg
+2025-10-26 22:37:26,536 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223726\转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:26,536 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223726
+2025-10-26 22:37:28,492 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:28,492 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:28,493 - TestFlowManager - INFO - 已清理临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223726
+2025-10-26 22:37:28,493 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:28,499 - TestFlowManager - DEBUG - 提取附件: GS-12-1941_Rev1 CoolPower HD.pdf, 大小: 384458 字节
+2025-10-26 22:37:28,499 - TestFlowManager - DEBUG - 提取附件: Coolpower Rev.G.docx, 大小: 85285 字节
+2025-10-26 22:37:28,499 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx, 大小: 84228 字节
+2025-10-26 22:37:28,499 - TestFlowManager - DEBUG - 提取附件: GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx, 大小: 360091 字节
+2025-10-26 22:37:28,499 - TestFlowManager - DEBUG - 提取附件: image001.jpg, 大小: 22992 字节
+2025-10-26 22:37:28,499 - TestFlowManager - INFO - 成功处理MSG文件，提取到 5 个附件
+2025-10-26 22:37:28,499 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:28,499 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-26 22:37:28,499 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-26 22:37:28,499 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 22:37:28,499 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223728
+2025-10-26 22:37:28,500 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223728
+2025-10-26 22:37:28,500 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223728\GS-12-1941_Rev1 CoolPower HD.pdf
+2025-10-26 22:37:28,500 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223728\Coolpower Rev.G.docx
+2025-10-26 22:37:28,502 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223728\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx
+2025-10-26 22:37:28,502 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223728\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx
+2025-10-26 22:37:28,502 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223728\image001.jpg
+2025-10-26 22:37:28,503 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223728\转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:28,503 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223728
+2025-10-26 22:37:28,512 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-26 22:37:28,512 - TestFlowManager - INFO - Successfully processed email data
+2025-10-26 22:37:28,512 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-26 22:37:28,512 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223728
+2025-10-26 22:37:28,512 - TestFlowManager - INFO - 使用EmailExtractor提供的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223728
+2025-10-26 22:37:28,513 - TestFlowManager - DEBUG - Using saved selected attachment: Coolpower Rev.G.docx
+2025-10-26 22:37:28,513 - TestFlowManager - INFO - Using selected attachment: coolpower rev.g.docx
+2025-10-26 22:37:28,513 - TestFlowManager - INFO - [ProjectCreatorService] Word附件处理使用临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 22:37:28,513 - TestFlowManager - INFO - [ProjectCreatorService] Word附件临时文件路径: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx
+2025-10-26 22:37:28,513 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx
+2025-10-26 22:37:28,513 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: Coolpower Rev.G.docx
+2025-10-26 22:37:28,513 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: Coolpower Rev.G.docx
+2025-10-26 22:37:30,820 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-26 22:37:30,821 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-26 22:37:30,821 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-26 22:37:31,148 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx (read_only=True)
+2025-10-26 22:37:31,183 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-26 22:37:31,210 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-26 22:37:31,214 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-26 22:37:31,214 - TestFlowManager - DEBUG - Document: Coolpower Rev.G.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-26 22:37:31,215 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-26 22:37:31,235 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-26 22:37:31,240 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev G		GS-03-008'
+2025-10-26 22:37:31,240 - TestFlowManager - DEBUG - Document: Coolpower Rev.G.docx - Found 'Rev' and extracted version 'G' from footer PARAGRAPH.
+2025-10-26 22:37:31,241 - TestFlowManager - INFO - Document: Coolpower Rev.G.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-26 22:37:31,267 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx
+2025-10-26 22:37:31,267 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-26 22:37:31,397 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx (read_only=True)
+2025-10-26 22:37:31,397 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-26 22:37:31,479 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-26 22:37:31,610 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-26 22:37:31,678 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-26 22:37:31,788 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-26 22:37:32,594 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-26 22:37:33,470 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-26 22:37:34,155 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-26 22:37:34,393 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-26 22:37:34,633 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-26 22:37:34,964 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-26 22:37:35,660 - TestFlowManager - INFO - Successfully processed application file
+2025-10-26 22:37:35,676 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: Coolpower Rev.G.docx
+2025-10-26 22:37:35,677 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: Coolpower Rev.G.docx
+2025-10-26 22:37:35,677 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-26 22:37:35,677 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223728
+2025-10-26 22:37:35,677 - TestFlowManager - DEBUG - 从email_extractor_controller获取到的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223728
+2025-10-26 22:37:35,677 - TestFlowManager - DEBUG - 临时文件夹路径存在: D:\TestFlowManager\Temp\email_attachments_20251026_223728
+2025-10-26 22:37:35,677 - TestFlowManager - DEBUG - Showing LTR application dialog
+2025-10-26 22:37:35,677 - TestFlowManager - DEBUG - 传递给对话框的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223728
+2025-10-26 22:37:35,677 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-26 22:37:35,677 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-26 22:37:35,696 - TestFlowManager - DEBUG - LTRApplicationDialog创建完成，传递的temp_folder_path: D:\TestFlowManager\Temp\email_attachments_20251026_223728
+2025-10-26 22:37:38,305 - TestFlowManager - INFO - User cancelled the application dialog
+2025-10-26 22:37:38,306 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-26 22:37:38,306 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-26 22:37:38,307 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-26 22:37:38,307 - TestFlowManager - INFO - New project created successfully
+2025-10-26 22:37:39,191 - TestFlowManager - INFO - MainWindow closing
+2025-10-26 22:37:39,191 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-26 22:37:39,191 - TestFlowManager - DEBUG - Application state saved
+2025-10-26 22:37:39,191 - TestFlowManager - DEBUG - Word instance count decreased to 1
+2025-10-26 22:37:39,192 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-26 22:37:39,192 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-26 22:37:39,222 - TestFlowManager - DEBUG - Word instance count decreased to 0
+2025-10-26 22:37:39,261 - TestFlowManager - DEBUG - Word application quit successfully
+2025-10-26 22:37:39,946 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-26 22:37:39,946 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-26 22:37:39,952 - TestFlowManager - INFO - Application exited
+2025-10-26 22:37:39,952 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-26 22:37:39,952 - TestFlowManager - INFO - Closing all windows
+2025-10-26 22:37:39,952 - TestFlowManager - INFO - MainWindow closing
+2025-10-26 22:37:39,953 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-26 22:37:39,953 - TestFlowManager - DEBUG - Application state saved
+2025-10-26 22:37:39,953 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-26 22:37:39,953 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-26 22:37:39,953 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-26 22:37:39,953 - TestFlowManager - INFO - MainWindow closing
+2025-10-26 22:37:39,953 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-26 22:37:39,953 - TestFlowManager - DEBUG - Application state saved
+2025-10-26 22:37:39,953 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-26 22:37:39,953 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-26 22:37:39,953 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-26 22:37:39,953 - TestFlowManager - INFO - Application shut down successfully
+2025-10-26 22:37:42,545 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-26 22:37:42,556 - TestFlowManager - INFO - Application initialized successfully
+2025-10-26 22:37:42,556 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-26 22:37:42,744 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-26 22:37:42,745 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-26 22:37:42,745 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-26 22:37:42,745 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-26 22:37:42,789 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-26 22:37:42,790 - TestFlowManager - DEBUG - Application state loaded
+2025-10-26 22:37:42,790 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-26 22:37:42,790 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-26 22:37:42,790 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-26 22:37:42,790 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-26 22:37:43,655 - TestFlowManager - INFO - Main window shown
+2025-10-26 22:37:45,135 - TestFlowManager - DEBUG - New file action triggered
+2025-10-26 22:37:45,135 - TestFlowManager - DEBUG - Handling new file request
+2025-10-26 22:37:45,135 - TestFlowManager - DEBUG - Handling create new project request
+2025-10-26 22:37:45,139 - TestFlowManager - INFO - 正在初始化邮件提取控制器...
+2025-10-26 22:37:45,139 - TestFlowManager - INFO - 邮件提取控制器初始化成功
+2025-10-26 22:37:48,180 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:48,180 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:48,180 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:48,189 - TestFlowManager - DEBUG - 提取附件: GS-12-1941_Rev1 CoolPower HD.pdf, 大小: 384458 字节
+2025-10-26 22:37:48,189 - TestFlowManager - DEBUG - 提取附件: Coolpower Rev.G.docx, 大小: 85285 字节
+2025-10-26 22:37:48,189 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx, 大小: 84228 字节
+2025-10-26 22:37:48,189 - TestFlowManager - DEBUG - 提取附件: GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx, 大小: 360091 字节
+2025-10-26 22:37:48,190 - TestFlowManager - DEBUG - 提取附件: image001.jpg, 大小: 22992 字节
+2025-10-26 22:37:48,190 - TestFlowManager - INFO - 成功处理MSG文件，提取到 5 个附件
+2025-10-26 22:37:48,190 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:48,190 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-26 22:37:48,190 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-26 22:37:48,190 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 22:37:48,190 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223748
+2025-10-26 22:37:48,191 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223748
+2025-10-26 22:37:48,191 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223748\GS-12-1941_Rev1 CoolPower HD.pdf
+2025-10-26 22:37:48,191 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223748\Coolpower Rev.G.docx
+2025-10-26 22:37:48,193 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223748\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx
+2025-10-26 22:37:48,193 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223748\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx
+2025-10-26 22:37:48,193 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223748\image001.jpg
+2025-10-26 22:37:48,194 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223748\转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:48,194 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223748
+2025-10-26 22:37:50,433 - TestFlowManager - INFO - 选中MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:50,433 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:50,434 - TestFlowManager - INFO - 已清理临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223748
+2025-10-26 22:37:50,434 - TestFlowManager - INFO - 正在处理MSG文件: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:50,439 - TestFlowManager - DEBUG - 提取附件: GS-12-1941_Rev1 CoolPower HD.pdf, 大小: 384458 字节
+2025-10-26 22:37:50,439 - TestFlowManager - DEBUG - 提取附件: Coolpower Rev.G.docx, 大小: 85285 字节
+2025-10-26 22:37:50,440 - TestFlowManager - DEBUG - 提取附件: 10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx, 大小: 84228 字节
+2025-10-26 22:37:50,440 - TestFlowManager - DEBUG - 提取附件: GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx, 大小: 360091 字节
+2025-10-26 22:37:50,440 - TestFlowManager - DEBUG - 提取附件: image001.jpg, 大小: 22992 字节
+2025-10-26 22:37:50,440 - TestFlowManager - INFO - 成功处理MSG文件，提取到 5 个附件
+2025-10-26 22:37:50,440 - TestFlowManager - DEBUG - 已设置MSG文件数据: D:/PythonProject/TestFlowManager/src/app/e-mail/转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:50,440 - TestFlowManager - INFO - MSG文件处理成功
+2025-10-26 22:37:50,440 - TestFlowManager - INFO - [EmailExtractorService] 配置的临时目录路径: D:\TestFlowManager\Temp
+2025-10-26 22:37:50,440 - TestFlowManager - INFO - [EmailExtractorService] 系统临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 22:37:50,440 - TestFlowManager - INFO - [EmailExtractorService] 创建临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:37:50,440 - TestFlowManager - INFO - 创建临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:37:50,440 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223750\GS-12-1941_Rev1 CoolPower HD.pdf
+2025-10-26 22:37:50,441 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223750\Coolpower Rev.G.docx
+2025-10-26 22:37:50,442 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223750\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx
+2025-10-26 22:37:50,443 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223750\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx
+2025-10-26 22:37:50,443 - TestFlowManager - INFO - 附件已保存到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223750\image001.jpg
+2025-10-26 22:37:50,444 - TestFlowManager - INFO - MSG文件已复制到临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223750\转发_ Coolpower HD 3_5mm product qulification test.msg
+2025-10-26 22:37:50,444 - TestFlowManager - INFO - 已创建包含附件的临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:37:50,450 - TestFlowManager - INFO - Successfully obtained email data
+2025-10-26 22:37:50,450 - TestFlowManager - INFO - Successfully processed email data
+2025-10-26 22:37:50,450 - TestFlowManager - DEBUG - Continuing project creation process
+2025-10-26 22:37:50,450 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:37:50,451 - TestFlowManager - INFO - 使用EmailExtractor提供的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:37:50,451 - TestFlowManager - DEBUG - Using saved selected attachment: Coolpower Rev.G.docx
+2025-10-26 22:37:50,451 - TestFlowManager - INFO - Using selected attachment: coolpower rev.g.docx
+2025-10-26 22:37:50,451 - TestFlowManager - INFO - [ProjectCreatorService] Word附件处理使用临时目录: C:\Users\White\AppData\Local\Temp
+2025-10-26 22:37:50,451 - TestFlowManager - INFO - [ProjectCreatorService] Word附件临时文件路径: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx
+2025-10-26 22:37:50,451 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx
+2025-10-26 22:37:50,451 - TestFlowManager - DEBUG - Status updated: 正在处理LTR申请单: Coolpower Rev.G.docx
+2025-10-26 22:37:50,451 - TestFlowManager - DEBUG - Updated status: 正在处理LTR申请单: Coolpower Rev.G.docx
+2025-10-26 22:37:52,402 - TestFlowManager - DEBUG - Created new shared Word application instance
+2025-10-26 22:37:52,402 - TestFlowManager - DEBUG - Word instance count increased to 1
+2025-10-26 22:37:52,402 - TestFlowManager - DEBUG - Word instance count increased to 2
+2025-10-26 22:37:52,721 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx (read_only=True)
+2025-10-26 22:37:52,752 - TestFlowManager - DEBUG - Checking headers in the first section for validation text.
+2025-10-26 22:37:52,782 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): '/'
+2025-10-26 22:37:52,787 - TestFlowManager - DEBUG - DEBUG: Header Table Cell Text (First Section): 'Laboratory Testing Request'
+2025-10-26 22:37:52,787 - TestFlowManager - DEBUG - Document: Coolpower Rev.G.docx - Found 'Laboratory Testing Request' in header table cell of first section.
+2025-10-26 22:37:52,788 - TestFlowManager - DEBUG - Checking footers in the first section for version text (Paragraphs first, then Tables).
+2025-10-26 22:37:52,808 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Form No. E-3718		Reference doc.'
+2025-10-26 22:37:52,813 - TestFlowManager - DEBUG - DEBUG: Footer Paragraph Text (First Section): 'Rev G		GS-03-008'
+2025-10-26 22:37:52,813 - TestFlowManager - DEBUG - Document: Coolpower Rev.G.docx - Found 'Rev' and extracted version 'G' from footer PARAGRAPH.
+2025-10-26 22:37:52,813 - TestFlowManager - INFO - Document: Coolpower Rev.G.docx - Validated as application form (Header OK in first section). Version found: None
+2025-10-26 22:37:52,840 - TestFlowManager - INFO - Processing application file: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx
+2025-10-26 22:37:52,840 - TestFlowManager - DEBUG - Word instance count increased to 3
+2025-10-26 22:37:52,954 - TestFlowManager - DEBUG - Successfully opened document: C:\Users\White\AppData\Local\Temp\Coolpower Rev.G.docx (read_only=True)
+2025-10-26 22:37:52,955 - TestFlowManager - DEBUG - Searching for keyword 'Requested By:' in tables...
+2025-10-26 22:37:53,032 - TestFlowManager - DEBUG - Searching for keyword 'Mfg. Site:' in tables...
+2025-10-26 22:37:53,151 - TestFlowManager - DEBUG - Searching for keyword 'Phone #:' in tables...
+2025-10-26 22:37:53,216 - TestFlowManager - DEBUG - Searching for keyword 'Email:' in tables...
+2025-10-26 22:37:53,308 - TestFlowManager - DEBUG - Searching for keyword 'Date Lab Received Samples:' in tables...
+2025-10-26 22:37:54,127 - TestFlowManager - DEBUG - Searching for keyword 'Estimated Completion Date:' in tables...
+2025-10-26 22:37:54,969 - TestFlowManager - DEBUG - Searching for keyword 'Can testing be subcontracted?' in tables...
+2025-10-26 22:37:55,700 - TestFlowManager - DEBUG - Searching for keyword 'Test Type' in tables...
+2025-10-26 22:37:55,940 - TestFlowManager - DEBUG - Searching for keyword 'Project Type' in tables...
+2025-10-26 22:37:56,162 - TestFlowManager - DEBUG - Extracting test sample info...
+2025-10-26 22:37:56,543 - TestFlowManager - DEBUG - Extracting requested testing info...
+2025-10-26 22:37:57,286 - TestFlowManager - INFO - Successfully processed application file
+2025-10-26 22:37:57,298 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: Coolpower Rev.G.docx
+2025-10-26 22:37:57,300 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: Coolpower Rev.G.docx
+2025-10-26 22:37:57,300 - TestFlowManager - DEBUG - Word instance count decreased to 2
+2025-10-26 22:37:57,300 - TestFlowManager - DEBUG - EmailExtractorController返回的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:37:57,300 - TestFlowManager - DEBUG - 从email_extractor_controller获取到的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:37:57,300 - TestFlowManager - DEBUG - 临时文件夹路径存在: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:37:57,300 - TestFlowManager - DEBUG - Showing LTR application dialog
+2025-10-26 22:37:57,300 - TestFlowManager - DEBUG - 传递给对话框的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:37:57,300 - TestFlowManager - INFO - 使用用户配置文件: D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json
+2025-10-26 22:37:57,300 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app/config/ltr_fields.json 加载 25 个申请单字段配置
+2025-10-26 22:37:57,322 - TestFlowManager - DEBUG - LTRApplicationDialog创建完成，传递的temp_folder_path: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:38:37,181 - TestFlowManager - INFO - 开始处理LTR编号申请请求
+2025-10-26 22:38:37,181 - TestFlowManager - DEBUG - apply_ltr_number接收到的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:38:37,181 - TestFlowManager - INFO - 开始执行LTR编号申请
+2025-10-26 22:38:37,915 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-26 22:38:37,916 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-26 22:38:38,652 - TestFlowManager - DEBUG - Successfully opened workbook: D:\Source\Office Auto\TestDocument\LTR_number.xls (read_only=False)
+2025-10-26 22:38:38,652 - TestFlowManager - INFO - 成功以读写模式打开LTR文件: D:\Source\Office Auto\TestDocument\LTR_number.xls
+2025-10-26 22:38:40,768 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-26 22:38:40,774 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-26 22:38:40,774 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-26 22:38:40,774 - TestFlowManager - INFO - LTR编号申请成功: DL-2025-10-084
+2025-10-26 22:38:42,658 - TestFlowManager - INFO - 成功收集LTR申请数据
+2025-10-26 22:38:42,658 - TestFlowManager - DEBUG - 收集到的申请数据: {'DL': 'DL-2025-10-084', 'project_type': 'NPD', 'sample_information': 'CoolPowerHD 2X3.5  Female Connector:10173098-001LF  rev03', 'tests_to_be_performed': 'CoolPWR cable assembly bend testing', 'applicable_specifications': 'EIA-364-41E', 'test_type': 'Partial Qualification', 'requested_by': 'Neo Xu', 'location': 'Nantong', 'project_leader': 'Even Yang', 'test_result': 'In progress', 'failed_item': '', 'sample_deposition': '', 'sub_contract': 'Yes', 'test_fee': '', 'remarks_po': '', 'phone': '0513-80167327', 'email_requestor': '', 'product_description': '', 'lab_performing_the_tests': 'Dongguan', 'condition_of_samples_when_received': 'Acceptable', 'date_lab_received_samples': '16 May 2025', 'estimated_completion_date': '31 Oct 2025', 'start_test_date': '26 Oct 2025', 'finish_test_date': '31 Oct 2025', 'report_date': '31 Oct 2025', 'selected_filename': 'Coolpower Rev.G.docx', 'status': 'new', 'error': ''}
+2025-10-26 22:38:42,658 - TestFlowManager - DEBUG - 申请数据中的file_path: None
+2025-10-26 22:38:42,658 - TestFlowManager - DEBUG - 传入的临时文件夹路径: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:38:42,658 - TestFlowManager - DEBUG - 已将临时文件夹路径添加到申请数据中: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:38:42,658 - TestFlowManager - INFO - 开始创建完整项目结构
+2025-10-26 22:38:42,658 - TestFlowManager - INFO - 【创建新项目】开始创建完整项目结构
+2025-10-26 22:38:42,658 - TestFlowManager - DEBUG - 接收到的项目数据: {'DL': 'DL-2025-10-084', 'project_type': 'NPD', 'sample_information': 'CoolPowerHD 2X3.5  Female Connector:10173098-001LF  rev03', 'tests_to_be_performed': 'CoolPWR cable assembly bend testing', 'applicable_specifications': 'EIA-364-41E', 'test_type': 'Partial Qualification', 'requested_by': 'Neo Xu', 'location': 'Nantong', 'project_leader': 'Even Yang', 'test_result': 'In progress', 'failed_item': '', 'sample_deposition': '', 'sub_contract': 'Yes', 'test_fee': '', 'remarks_po': '', 'phone': '0513-80167327', 'email_requestor': '', 'product_description': '', 'lab_performing_the_tests': 'Dongguan', 'condition_of_samples_when_received': 'Acceptable', 'date_lab_received_samples': '16 May 2025', 'estimated_completion_date': '31 Oct 2025', 'start_test_date': '26 Oct 2025', 'finish_test_date': '31 Oct 2025', 'report_date': '31 Oct 2025', 'selected_filename': 'Coolpower Rev.G.docx', 'status': 'new', 'error': '', 'file_path': 'D:\\TestFlowManager\\Temp\\email_attachments_20251026_223750'}
+2025-10-26 22:38:42,662 - TestFlowManager - INFO - 成功复制模板到目标路径: D:\TestFlowManager\Projects\DL-2025-10-084
+2025-10-26 22:38:42,662 - TestFlowManager - INFO - 重命名文件夹: D:\TestFlowManager\Projects\DL-2025-10-084\DL-XXXX-YY-ZZZ Title -> D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing
+2025-10-26 22:38:42,662 - TestFlowManager - INFO - E-mail 文件夹已存在: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\E-mail
+2025-10-26 22:38:42,662 - TestFlowManager - INFO - Submitted Material 文件夹已存在: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\Submitted Material
+2025-10-26 22:38:42,662 - TestFlowManager - INFO - 使用模板目录: D:\TestFlowManager\Template
+2025-10-26 22:38:42,662 - TestFlowManager - INFO - 目标文件夹: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing
+2025-10-26 22:38:42,662 - TestFlowManager - INFO - 正在查找 'Fee Evaluation' 类型的模板文件: D:\TestFlowManager\Template
+2025-10-26 22:38:42,662 - TestFlowManager - DEBUG - 找到模板文件: ['D:\\TestFlowManager\\Template\\Testing Fee Evaluation_Rev_D.xls']
+2025-10-26 22:38:42,662 - TestFlowManager - DEBUG - 模板文件绝对路径: D:\TestFlowManager\Template\Testing Fee Evaluation_Rev_D.xls
+2025-10-26 22:38:42,663 - TestFlowManager - DEBUG - 目标文件绝对路径: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\DL-2025-10-084 CoolPWR cable assembly bend testing Form for Testing Fee Evaluation.xls
+2025-10-26 22:38:42,663 - TestFlowManager - INFO - 准备复制文件到: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\DL-2025-10-084 CoolPWR cable assembly bend testing Form for Testing Fee Evaluation.xls
+2025-10-26 22:38:42,663 - TestFlowManager - INFO - 费用评估表已成功复制至: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\DL-2025-10-084 CoolPWR cable assembly bend testing Form for Testing Fee Evaluation.xls
+2025-10-26 22:38:43,698 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-26 22:38:43,698 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-26 22:38:44,204 - TestFlowManager - DEBUG - 当前工作簿包含的工作表: ['Testing Prices ', 'Unit Price Reference']
+2025-10-26 22:38:44,251 - TestFlowManager - INFO - 数据已成功写入费用评估表
+2025-10-26 22:38:44,327 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-26 22:38:44,331 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-26 22:38:44,331 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-26 22:38:44,331 - TestFlowManager - INFO - ✅ 费用评估表已成功初始化
+2025-10-26 22:38:44,406 - TestFlowManager - INFO - 使用模板目录: D:\TestFlowManager\Template
+2025-10-26 22:38:44,406 - TestFlowManager - INFO - 目标文件夹: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing
+2025-10-26 22:38:44,406 - TestFlowManager - INFO - 正在查找 'E-4243*.xlsx' 模板文件: D:\TestFlowManager\Template
+2025-10-26 22:38:44,406 - TestFlowManager - DEBUG - 找到模板文件: ['D:\\TestFlowManager\\Template\\E-4243_D Customer Feedback Form_241128.xlsx']
+2025-10-26 22:38:44,406 - TestFlowManager - DEBUG - 模板文件绝对路径: D:\TestFlowManager\Template\E-4243_D Customer Feedback Form_241128.xlsx
+2025-10-26 22:38:44,406 - TestFlowManager - DEBUG - 目标文件绝对路径: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\DL-2025-10-084 CoolPWR cable assembly bend testing Customer Feedback Form_Even Yang.xlsx
+2025-10-26 22:38:44,406 - TestFlowManager - INFO - 准备复制文件到: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\DL-2025-10-084 CoolPWR cable assembly bend testing Customer Feedback Form_Even Yang.xlsx
+2025-10-26 22:38:44,407 - TestFlowManager - INFO - 客户反馈表已成功复制至: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\DL-2025-10-084 CoolPWR cable assembly bend testing Customer Feedback Form_Even Yang.xlsx
+2025-10-26 22:38:45,417 - TestFlowManager - DEBUG - Created new shared Excel application instance
+2025-10-26 22:38:45,417 - TestFlowManager - DEBUG - Excel instance count increased to 1
+2025-10-26 22:38:45,612 - TestFlowManager - DEBUG - 当前工作簿包含的工作表: ['Customer Feedback Form']
+2025-10-26 22:38:45,707 - TestFlowManager - DEBUG - Excel instance count decreased to 0
+2025-10-26 22:38:45,710 - TestFlowManager - DEBUG - Excel application quit successfully
+2025-10-26 22:38:45,710 - TestFlowManager - DEBUG - COM library uninitialized
+2025-10-26 22:38:45,710 - TestFlowManager - INFO - ✅ 客户反馈表已成功初始化
+2025-10-26 22:38:45,762 - TestFlowManager - DEBUG - 从项目数据中获取的临时文件路径: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:38:45,762 - TestFlowManager - INFO - 使用附件来源路径: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:38:45,763 - TestFlowManager - INFO - 复制 文件: D:\TestFlowManager\Temp\email_attachments_20251026_223750\转发_ Coolpower HD 3_5mm product qulification test.msg -> D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\E-mail
+2025-10-26 22:38:45,763 - TestFlowManager - DEBUG - 选中的文件名: Coolpower Rev.G.docx
+2025-10-26 22:38:45,763 - TestFlowManager - DEBUG - DL编号: DL-2025-10-084
+2025-10-26 22:38:45,765 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251026_223750\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx -> D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\Submitted Material\10172012-2504201&10175400-2504201_Internal qualification test Request_rev1_20240828.docx
+2025-10-26 22:38:45,767 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251026_223750\Coolpower Rev.G.docx -> D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\Submitted Material\Coolpower Rev.G.docx
+2025-10-26 22:38:45,767 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251026_223750\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx -> D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\Submitted Material\GS-12-1880_PwrBlade Pro BTB Product Specification_A2.docx
+2025-10-26 22:38:45,768 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251026_223750\GS-12-1941_Rev1 CoolPower HD.pdf -> D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\Submitted Material\GS-12-1941_Rev1 CoolPower HD.pdf
+2025-10-26 22:38:45,768 - TestFlowManager - INFO - 复制文件: D:\TestFlowManager\Temp\email_attachments_20251026_223750\image001.jpg -> D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\Submitted Material\image001.jpg
+2025-10-26 22:38:45,768 - TestFlowManager - INFO - 找到匹配的文件: Coolpower Rev.G.docx
+2025-10-26 22:38:45,768 - TestFlowManager - INFO - 更新Word文档: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\Submitted Material\Coolpower Rev.G.docx
+2025-10-26 22:38:46,078 - TestFlowManager - INFO - 找到 'Lab Test Request Number:' 段落，索引: 0
+2025-10-26 22:38:46,078 - TestFlowManager - INFO - 找到 'Page' 段落，索引: 3
+2025-10-26 22:38:46,186 - TestFlowManager - INFO - 成功在页眉中插入新测试编号: DL-2025-10-084
+2025-10-26 22:38:46,188 - TestFlowManager - DEBUG - 字段 'Project Type' 对应值 'NPD' 准备写入
+2025-10-26 22:38:46,188 - TestFlowManager - DEBUG - 字段 'Test Type' 对应值 'Partial Qualification' 准备写入
+2025-10-26 22:38:46,189 - TestFlowManager - DEBUG - 字段 'Requested By:' 对应值 'Neo Xu' 准备写入
+2025-10-26 22:38:46,189 - TestFlowManager - DEBUG - 字段 'Mfg. Site:' 对应值 'Nantong' 准备写入
+2025-10-26 22:38:46,189 - TestFlowManager - DEBUG - 字段 'Can testing be subcontracted?' 对应值 'Yes' 准备写入
+2025-10-26 22:38:46,189 - TestFlowManager - DEBUG - 字段 'Phone #:' 对应值 '0513-80167327' 准备写入
+2025-10-26 22:38:46,189 - TestFlowManager - DEBUG - 字段 'Email:' 对应值 '' 准备写入
+2025-10-26 22:38:46,189 - TestFlowManager - DEBUG - 字段 'Lab Performing the Tests:' 对应值 'Dongguan' 准备写入
+2025-10-26 22:38:46,189 - TestFlowManager - DEBUG - 字段 'Condition of Samples when Received:' 对应值 'Acceptable' 准备写入
+2025-10-26 22:38:46,189 - TestFlowManager - DEBUG - 字段 'Lab Personnel Assigned:' 对应值 'Even Yang' 准备写入
+2025-10-26 22:38:46,189 - TestFlowManager - DEBUG - 字段 'Date Lab Received Samples:' 对应值 '16 May 2025' 准备写入
+2025-10-26 22:38:46,189 - TestFlowManager - DEBUG - 字段 'Estimated Completion Date:' 对应值 '31 Oct 2025' 准备写入
+2025-10-26 22:38:46,462 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 3, Locked: False
+2025-10-26 22:38:46,468 - TestFlowManager - INFO - 修改字段 'Project Type' 为 'NPD'
+2025-10-26 22:38:46,697 - TestFlowManager - DEBUG - ContentControl Title: 'Test Type', Type: 4, Locked: False
+2025-10-26 22:38:46,717 - TestFlowManager - WARNING - Dropdown option 'Partial Qualification' not found in content control
+2025-10-26 22:38:46,718 - TestFlowManager - WARNING - 修改字段 'Test Type' 失败
+2025-10-26 22:38:46,801 - TestFlowManager - INFO - 修改字段 'Requested By:' 为 'Neo Xu'
+2025-10-26 22:38:46,920 - TestFlowManager - DEBUG - ContentControl Title: 'Select One', Type: 4, Locked: False
+2025-10-26 22:38:47,104 - TestFlowManager - INFO - 修改字段 'Mfg. Site:' 为 'Nantong'
+2025-10-26 22:38:47,786 - TestFlowManager - DEBUG - ContentControl Title: 'Subcontracted', Type: 4, Locked: False
+2025-10-26 22:38:47,798 - TestFlowManager - INFO - 修改字段 'Can testing be subcontracted?' 为 'Yes'
+2025-10-26 22:38:47,858 - TestFlowManager - INFO - 修改字段 'Phone #:' 为 '0513-80167327'
+2025-10-26 22:38:47,949 - TestFlowManager - INFO - 修改字段 'Email:' 为 ''
+2025-10-26 22:38:48,726 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 3, Locked: False
+2025-10-26 22:38:48,732 - TestFlowManager - INFO - 修改字段 'Lab Performing the Tests:' 为 'Dongguan'
+2025-10-26 22:38:49,534 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 3, Locked: False
+2025-10-26 22:38:49,540 - TestFlowManager - INFO - 修改字段 'Condition of Samples when Received:' 为 'Acceptable'
+2025-10-26 22:38:50,308 - TestFlowManager - INFO - 修改字段 'Lab Personnel Assigned:' 为 'Even Yang'
+2025-10-26 22:38:51,117 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 6, Locked: False
+2025-10-26 22:38:51,125 - TestFlowManager - INFO - 修改字段 'Date Lab Received Samples:' 为 '16 May 2025'
+2025-10-26 22:38:52,017 - TestFlowManager - DEBUG - ContentControl Title: '', Type: 6, Locked: False
+2025-10-26 22:38:52,025 - TestFlowManager - INFO - 修改字段 'Estimated Completion Date:' 为 '31 Oct 2025'
+2025-10-26 22:38:52,090 - TestFlowManager - INFO - 成功更新Word文档: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing\Submitted Material\Coolpower Rev.G.docx
+2025-10-26 22:38:55,347 - TestFlowManager - INFO - 项目 DL-2025-10-084 已成功创建！
+2025-10-26 22:38:55,348 - TestFlowManager - INFO - 【创建新项目】流程结束
+2025-10-26 22:38:55,350 - TestFlowManager - INFO - 已清理临时文件夹: D:\TestFlowManager\Temp\email_attachments_20251026_223750
+2025-10-26 22:38:55,350 - TestFlowManager - INFO - 完整项目结构创建成功: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing
+2025-10-26 22:38:55,350 - TestFlowManager - INFO - 申请数据已保存到: D:\TestFlowManager\Projects\DL-2025-10-084\application_data.json
+2025-10-26 22:38:55,350 - TestFlowManager - INFO - 完整项目结构创建成功: D:\TestFlowManager\Projects\DL-2025-10-084\DL-2025-10-084 CoolPWR cable assembly bend testing
+2025-10-26 22:38:56,665 - TestFlowManager - DEBUG - Word instance count decreased to 1
+2025-10-26 22:38:56,665 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-26 22:38:56,669 - TestFlowManager - INFO - User accepted the application dialog
+2025-10-26 22:38:56,669 - TestFlowManager - DEBUG - Status updated: 确认LTR申请单: 
+2025-10-26 22:38:56,669 - TestFlowManager - DEBUG - Updated status: 确认LTR申请单: 
+2025-10-26 22:38:56,669 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-26 22:38:56,669 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-26 22:38:56,669 - TestFlowManager - INFO - LTR application confirmed for DL: 
+2025-10-26 22:38:56,674 - TestFlowManager - INFO - Project creation process continued successfully
+2025-10-26 22:38:56,674 - TestFlowManager - DEBUG - Status updated: 已创建新项目
+2025-10-26 22:38:56,674 - TestFlowManager - DEBUG - Updated status: 已创建新项目
+2025-10-26 22:38:56,674 - TestFlowManager - INFO - New project created successfully
+2025-10-26 22:38:56,676 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-26 22:38:56,676 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-26 22:38:56,676 - TestFlowManager - INFO - LTR application processed successfully: 
+2025-10-26 22:38:56,676 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-26 22:38:56,676 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-26 22:38:56,676 - TestFlowManager - INFO - LTR application processed successfully: 
+2025-10-26 22:38:56,676 - TestFlowManager - DEBUG - Status updated: LTR申请单处理完成: 
+2025-10-26 22:38:56,676 - TestFlowManager - DEBUG - Updated status: LTR申请单处理完成: 
+2025-10-26 22:38:56,676 - TestFlowManager - INFO - LTR application processed successfully: 

@@ -345,22 +345,34 @@ class FolderManagerService:
             if not self.move_files_by_extension(src_dir, folder_structure["email"], "*.msg", copy_only=True):
                 logger.warning("复制 .msg 文件失败或无匹配文件")
 
-            # Step 8: 复制其他文件到 Submitted Material
-            other_files = [
-                f for f in os.listdir(src_dir)
-                if os.path.isfile(os.path.join(src_dir, f))
-                   and not f.endswith(".msg")
-                   and f != "application_data.json"
-            ]
-            for f in other_files:
-                src_path = os.path.join(src_dir, f)
-                dst_path = os.path.join(folder_structure["submitted"], f)
-                try:
-                    shutil.copy2(src_path, dst_path)
-                    logger.info(f"复制其他文件: {src_path} -> {dst_path}")
-                except Exception as e:
-                    logger.error(f"复制其他文件失败: {src_path} -> {dst_path}, 错误: {e}")
-                    continue
+            # Step 8: 先复制文件到 Submitted Material
+            # Step 9: 依据application_data.json找到关键字"selected_filename"的值处理文件
+            from src.features.document_parser.service.document_parser_service import DocumentParserService
+            document_parser = DocumentParserService()
+            document_parser.copy_ltr_application_form(project_data, folder_structure["submitted"], src_dir)
+
+            # Step 10: 根据application_data.json信息进行文档的操作更新
+            # 查找需要更新的Word文档
+            selected_filename = project_data.get('selected_filename', '')
+            if selected_filename:
+                word_file_path = os.path.join(folder_structure["submitted"], selected_filename)
+                if os.path.exists(word_file_path):
+                    logger.info(f"更新Word文档: {word_file_path}")
+                    document_parser.update_word_document(word_file_path, project_data)
+                else:
+                    logger.warning(f"要更新的Word文档不存在: {word_file_path}")
+            else:
+                # 如果没有指定selected_filename，尝试查找目录中的Word文档
+                submitted_files = [f for f in os.listdir(folder_structure["submitted"]) 
+                                 if os.path.isfile(os.path.join(folder_structure["submitted"], f))]
+                word_files = [f for f in submitted_files if f.endswith(('.doc', '.docx'))]
+                
+                if word_files:
+                    word_file_path = os.path.join(folder_structure["submitted"], word_files[0])
+                    logger.info(f"更新找到的第一个Word文档: {word_file_path}")
+                    document_parser.update_word_document(word_file_path, project_data)
+                else:
+                    logger.warning("在Submitted Material目录中未找到Word文档")
 
         logger.info(f"项目 {dl_number} 已成功创建！")
         logger.info("【创建新项目】流程结束")

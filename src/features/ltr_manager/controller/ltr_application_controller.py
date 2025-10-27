@@ -36,6 +36,8 @@ class LTRApplicationController:
         # 添加事件订阅
         from src.core.event_dispatcher import event_dispatcher
         event_dispatcher.subscribe("ltr.application.processed", self._on_ltr_application_processed)
+        # 添加属性来存储选中的文件名
+        self.selected_filename = None
 
 
     def handle_word_application(self, doc_filepath: str) -> bool:
@@ -189,8 +191,12 @@ class LTRApplicationController:
                 )
 
                 if reply == QMessageBox.Yes:
-                    # 收集完整的申请数据，包括DL编号
-                    application_data = self.ltr_data_manager.collect_application_data(form_data, result['ltr_number'])
+                    # 收集完整的申请数据，包括DL编号和选中的文件名
+                    application_data = self.ltr_data_manager.collect_application_data(
+                        form_data, 
+                        result['ltr_number'],
+                        self.selected_filename  # 传递选中的文件名
+                    )
                     logger.debug(f"收集到的申请数据: {application_data}")
                     
                     # 检查申请数据中的file_path
@@ -298,6 +304,15 @@ class LTRApplicationController:
             data: LTRApplicationData对象
         """
         self.application_data = data
+
+    def set_selected_filename(self, filename: Optional[str]):
+        """
+        设置选中的申请单文件名
+
+        Args:
+            filename: 选中的文件名
+        """
+        self.selected_filename = filename
 
     def _on_ltr_application_processed(self, data):
         """

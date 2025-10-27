@@ -160,7 +160,7 @@ class ProjectCreatorController:
 
                 if result and not result.get("error"):
                     # 成功提取数据，显示LTR申请窗口
-                    self._show_ltr_application_dialog(result)
+                    self._show_ltr_application_dialog(result, selected_attachment.get('filename', ''))
                 else:
                     # 未能提取数据，询问用户选择
                     error_msg = result.get("error", "未知错误") if result else "处理过程中发生错误"
@@ -200,7 +200,7 @@ class ProjectCreatorController:
             ]
         return []
 
-    def _show_ltr_application_dialog(self, application_data):
+    def _show_ltr_application_dialog(self, application_data, selected_filename=''):
         """显示LTR申请窗口"""
         try:
             # 准备LTR数据
@@ -212,6 +212,9 @@ class ProjectCreatorController:
             # 使用正确的LTR控制器
             from src.features.ltr_manager.controller.ltr_application_controller import LTRApplicationController
             ltr_controller = LTRApplicationController(self.parent_view)
+            
+            # 设置选中的文件名
+            ltr_controller.set_selected_filename(selected_filename)
             
             # 获取临时文件夹路径（如果有的话）
             temp_folder_path = None
@@ -284,7 +287,7 @@ class ProjectCreatorController:
 
         if msg_box.clickedButton() == blank_form_button:
             # 填写空白申请表
-            self._show_ltr_application_dialog(None)
+            self._show_ltr_application_dialog(None, '')  # 空文件名
         elif msg_box.clickedButton() == reselect_button:
             # 重新选择附件，但保持邮件信息不变
             self._reselect_attachment()
