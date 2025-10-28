@@ -24,6 +24,11 @@ class LTREditorData:
         # 从配置文件加载字段映射关系
         config_loader = LTRFieldConfigLoader()
         self.field_mapping: List[Dict[str, Any]] = config_loader.load_editor_field_mapping()
+        
+        # 如果字段映射为空，记录警告信息
+        if not self.field_mapping:
+            from src.core.logger import logger
+            logger.warning("LTR编辑器字段映射为空，可能配置文件加载失败")
 
     def set_dl_number(self, dl_number: str):
         """

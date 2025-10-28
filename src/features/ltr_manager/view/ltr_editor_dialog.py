@@ -5,12 +5,12 @@ LTR编辑对话框模块
 
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
                              QTableWidget, QTableWidgetItem, QHeaderView,
-                             QWidget, QScrollArea)
+                             QWidget, QScrollArea, QDesktopWidget)
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDesktopWidget
 from src.core.logger import logger
 from src.features.ltr_manager.model.ltr_editor_data import LTREditorData
 from src.features.ltr_manager.view.components.ltr_field_widgets import LTRTextEdit, LTRComboBox, LTRTableWidgetItem
+from src.core.window_utils import WindowUtils  # 导入窗口工具类
 
 
 class LTREditorDialog(QDialog):
@@ -43,6 +43,10 @@ class LTREditorDialog(QDialog):
 
         # 获取字段映射关系
         self.field_mapping = self.data_model.get_field_mapping()
+        
+        # 检查字段映射是否为空
+        if not self.field_mapping:
+            logger.warning("字段映射为空，对话框可能无法正常显示")
 
         self._setup_ui()
         self._populate_data()
@@ -53,10 +57,11 @@ class LTREditorDialog(QDialog):
         self.setWindowTitle(f"编辑 LTR 信息: {self.dl_number}")
         self.setModal(True)
 
-        # 获取屏幕尺寸并设置窗口大小为屏幕的60%
+        # 获取屏幕尺寸并设置窗口大小为屏幕的40%，并根据DPI进行适配
+        width, height = WindowUtils.get_scaled_screen_geometry(0.4)
+        self.resize(width, height)
+        # 居中显示
         desktop = QDesktopWidget().availableGeometry()
-        width, height = int(desktop.width() * 0.6), int(desktop.height() * 0.6)
-        self.setGeometry(0, 0, width, height)
         self.move((desktop.width() - width) // 2, (desktop.height() - height) // 2)
 
         layout = QVBoxLayout()
@@ -118,9 +123,13 @@ class LTREditorDialog(QDialog):
             if field_name:
                 self.original_data[field_name] = value
 
-
     def _populate_data(self):
         """填充数据到表格"""
+        # 检查字段映射是否为空
+        if not self.field_mapping:
+            logger.warning("字段映射为空，无法填充数据到表格")
+            return
+            
         self.data_table.setRowCount(len(self.field_mapping))
 
         row = 0
@@ -145,7 +154,7 @@ class LTREditorDialog(QDialog):
             self.data_table.setItem(row, 1, current_item)
 
             if editor_type == 'multiline':
-                # 对于多行文本，使用LTRTextEdit
+                # 对于多行文本，使用LTRTextEdit，设置为单行高度
                 text_edit = LTRTextEdit(str(original_value))
                 self.data_table.setCellWidget(row, 2, text_edit)
             elif editor_type == 'dropdown':

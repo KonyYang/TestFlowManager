@@ -12,18 +12,22 @@ class LTRTextEdit(QTextEdit):
     LTR多行文本编辑控件
     """
 
-    def __init__(self, text="", max_height=100, parent=None):
+    def __init__(self, text="", max_height=30, parent=None):
         """
         初始化LTR多行文本编辑控件
 
         Args:
             text: 初始文本
-            max_height: 最大高度
+            max_height: 最大高度，默认30像素(约一行高度)
             parent: 父控件
         """
         super().__init__(parent)
         self.setText(text)
         self.setMaximumHeight(max_height)
+        # 设置最小高度为单行高度
+        self.setMinimumHeight(25)
+        # 启用垂直滚动条
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
 
 class LTRComboBox(QComboBox):

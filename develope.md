@@ -663,7 +663,7 @@ class MainWindowUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("TestFlow Manager")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 200, 150)
         self.setup_ui()
     
     def setup_ui(self):

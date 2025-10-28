@@ -11,6 +11,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent
 from src.core.logger import logger
 from src.core.font_utils import FontUtils  # 导入字体工具类
+from src.core.window_utils import WindowUtils  # 导入窗口工具类
 
 
 class EmailSelectorDialog(QDialog):
@@ -43,7 +44,9 @@ class EmailSelectorDialog(QDialog):
         """设置用户界面"""
         self.setWindowTitle("选择邮件文件")
         self.setModal(True)
-        self.resize(600, 400)
+        # 根据DPI调整窗口尺寸，使用更小的默认尺寸
+        width, height = WindowUtils.get_scaled_window_size(500, 350)
+        self.resize(width, height)
 
         layout = QVBoxLayout()
 
@@ -73,7 +76,9 @@ class EmailSelectorDialog(QDialog):
             padding: 8px;
             border-radius: 4px;
         """)
-        self.email_info_label.setFixedHeight(90)
+        # 根据DPI调整高度
+        label_height = WindowUtils.get_scaled_size(70)
+        self.email_info_label.setFixedHeight(label_height)
         self.email_info_label.setWordWrap(True)
         self.email_info_label.setFont(font)
 
@@ -87,7 +92,9 @@ class EmailSelectorDialog(QDialog):
         self.attachment_table.setHorizontalHeaderLabels(["文件名", "大小"])
         self.attachment_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.attachment_table.setSelectionMode(QTableWidget.SingleSelection)
-        self.attachment_table.setMinimumHeight(200)
+        # 根据DPI调整最小高度
+        min_height = WindowUtils.get_scaled_size(150)
+        self.attachment_table.setMinimumHeight(min_height)
         self.attachment_table.setFont(font)
 
         # 👇 新增：设置表头字体

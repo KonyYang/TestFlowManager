@@ -16,3 +16,363 @@
 2025-10-25 14:30:26,201 - TestFlowManager - INFO - 成功收集LTR申请数据
 2025-10-25 14:30:26,204 - TestFlowManager - INFO - 成功收集LTR申请数据
 2025-10-25 14:30:26,205 - TestFlowManager - INFO - 申请数据已保存到: C:\Users\White\AppData\Local\Temp\tmpq2b67_jl\DL-2025-10-001\application_data.json
+2025-10-29 00:02:32,955 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-29 00:02:32,968 - TestFlowManager - INFO - Application initialized successfully
+2025-10-29 00:02:32,968 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-29 00:02:33,158 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-29 00:02:33,158 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-29 00:02:33,158 - TestFlowManager - DEBUG - 配置文件路径: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 00:02:33,158 - TestFlowManager - DEBUG - 尝试加载编辑器字段配置: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 00:02:33,158 - TestFlowManager - DEBUG - 加载到 13 个编辑器字段配置
+2025-10-29 00:02:33,158 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-29 00:02:33,174 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-29 00:02:33,175 - TestFlowManager - DEBUG - Application state loaded
+2025-10-29 00:02:33,175 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-29 00:02:33,175 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-29 00:02:33,175 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-29 00:02:33,175 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-29 00:02:33,848 - TestFlowManager - INFO - Main window shown
+2025-10-29 00:02:50,323 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 00:02:50,324 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 00:02:50,324 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 00:02:50,324 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-29 00:02:50,324 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-29 00:02:50,324 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 00:02:50,400 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-29 00:02:50,400 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-29 00:02:50,405 - TestFlowManager - INFO - Application exited
+2025-10-29 00:02:50,406 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-29 00:02:50,406 - TestFlowManager - INFO - Closing all windows
+2025-10-29 00:02:50,406 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 00:02:50,406 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 00:02:50,406 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 00:02:50,406 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-29 00:02:50,406 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-29 00:02:50,406 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 00:02:50,406 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 00:02:50,406 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 00:02:50,406 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 00:02:50,406 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-29 00:02:50,406 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-29 00:02:50,406 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 00:02:50,406 - TestFlowManager - INFO - Application shut down successfully
+2025-10-29 06:25:06,879 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-29 06:25:06,892 - TestFlowManager - INFO - Application initialized successfully
+2025-10-29 06:25:06,892 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-29 06:25:07,094 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-29 06:25:07,094 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-29 06:25:07,094 - TestFlowManager - DEBUG - 配置文件路径: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:25:07,094 - TestFlowManager - DEBUG - 尝试加载编辑器字段配置: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:25:07,094 - TestFlowManager - DEBUG - 加载到 13 个编辑器字段配置
+2025-10-29 06:25:07,094 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-29 06:25:07,111 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-29 06:25:07,111 - TestFlowManager - DEBUG - Application state loaded
+2025-10-29 06:25:07,111 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-29 06:25:07,111 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-29 06:25:07,111 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-29 06:25:07,111 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-29 06:25:07,525 - TestFlowManager - INFO - Main window shown
+2025-10-29 06:25:11,311 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:25:11,311 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:25:11,311 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:25:11,311 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-29 06:25:11,311 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-29 06:25:11,311 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:25:11,376 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-29 06:25:11,376 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-29 06:25:11,382 - TestFlowManager - INFO - Application exited
+2025-10-29 06:25:11,382 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-29 06:25:11,382 - TestFlowManager - INFO - Closing all windows
+2025-10-29 06:25:11,382 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:25:11,382 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:25:11,382 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:25:11,383 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-29 06:25:11,383 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-29 06:25:11,383 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:25:11,383 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:25:11,383 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:25:11,383 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:25:11,383 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-29 06:25:11,383 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-29 06:25:11,383 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:25:11,383 - TestFlowManager - INFO - Application shut down successfully
+2025-10-29 06:25:49,927 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-29 06:25:49,941 - TestFlowManager - INFO - Application initialized successfully
+2025-10-29 06:25:49,941 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-29 06:25:50,120 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-29 06:25:50,120 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-29 06:25:50,120 - TestFlowManager - DEBUG - 配置文件路径: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:25:50,120 - TestFlowManager - DEBUG - 尝试加载编辑器字段配置: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:25:50,120 - TestFlowManager - DEBUG - 加载到 13 个编辑器字段配置
+2025-10-29 06:25:50,120 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-29 06:25:50,137 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-29 06:25:50,137 - TestFlowManager - DEBUG - Application state loaded
+2025-10-29 06:25:50,137 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-29 06:25:50,137 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-29 06:25:50,137 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-29 06:25:50,137 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-29 06:25:50,545 - TestFlowManager - INFO - Main window shown
+2025-10-29 06:25:53,666 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:25:53,666 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:25:53,666 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:25:53,666 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-29 06:25:53,666 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-29 06:25:53,666 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:25:53,692 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-29 06:25:53,692 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-29 06:25:53,699 - TestFlowManager - INFO - Application exited
+2025-10-29 06:25:53,700 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-29 06:25:53,700 - TestFlowManager - INFO - Closing all windows
+2025-10-29 06:25:53,700 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:25:53,700 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:25:53,700 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:25:53,700 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-29 06:25:53,700 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-29 06:25:53,700 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:25:53,700 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:25:53,700 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:25:53,701 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:25:53,701 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-29 06:25:53,701 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-29 06:25:53,701 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:25:53,701 - TestFlowManager - INFO - Application shut down successfully
+2025-10-29 06:26:18,118 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-29 06:26:18,129 - TestFlowManager - INFO - Application initialized successfully
+2025-10-29 06:26:18,129 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-29 06:26:18,323 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-29 06:26:18,323 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-29 06:26:18,323 - TestFlowManager - DEBUG - 配置文件路径: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:26:18,323 - TestFlowManager - DEBUG - 尝试加载编辑器字段配置: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:26:18,323 - TestFlowManager - DEBUG - 加载到 13 个编辑器字段配置
+2025-10-29 06:26:18,323 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-29 06:26:18,343 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-29 06:26:18,343 - TestFlowManager - DEBUG - Application state loaded
+2025-10-29 06:26:18,343 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-29 06:26:18,343 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-29 06:26:18,343 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-29 06:26:18,343 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-29 06:26:18,895 - TestFlowManager - INFO - Main window shown
+2025-10-29 06:26:20,515 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:26:20,515 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:26:20,515 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:26:20,515 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-29 06:26:20,515 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-29 06:26:20,515 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:26:20,583 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-29 06:26:20,584 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-29 06:26:20,589 - TestFlowManager - INFO - Application exited
+2025-10-29 06:26:20,589 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-29 06:26:20,589 - TestFlowManager - INFO - Closing all windows
+2025-10-29 06:26:20,589 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:26:20,590 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:26:20,590 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:26:20,590 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-29 06:26:20,590 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-29 06:26:20,590 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:26:20,590 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:26:20,590 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:26:20,590 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:26:20,590 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-29 06:26:20,590 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-29 06:26:20,590 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:26:20,590 - TestFlowManager - INFO - Application shut down successfully
+2025-10-29 06:26:35,017 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-29 06:26:35,027 - TestFlowManager - INFO - Application initialized successfully
+2025-10-29 06:26:35,028 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-29 06:26:35,211 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-29 06:26:35,212 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-29 06:26:35,212 - TestFlowManager - DEBUG - 配置文件路径: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:26:35,212 - TestFlowManager - DEBUG - 尝试加载编辑器字段配置: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:26:35,212 - TestFlowManager - DEBUG - 加载到 13 个编辑器字段配置
+2025-10-29 06:26:35,212 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-29 06:26:35,228 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-29 06:26:35,228 - TestFlowManager - DEBUG - Application state loaded
+2025-10-29 06:26:35,228 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-29 06:26:35,229 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-29 06:26:35,229 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-29 06:26:35,229 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-29 06:26:35,666 - TestFlowManager - INFO - Main window shown
+2025-10-29 06:26:40,419 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:26:40,419 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:26:40,419 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:26:40,420 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-29 06:26:40,420 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-29 06:26:40,420 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:26:40,450 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-29 06:26:40,450 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-29 06:26:40,456 - TestFlowManager - INFO - Application exited
+2025-10-29 06:26:40,456 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-29 06:26:40,456 - TestFlowManager - INFO - Closing all windows
+2025-10-29 06:26:40,456 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:26:40,457 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:26:40,457 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:26:40,457 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-29 06:26:40,457 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-29 06:26:40,457 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:26:40,457 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:26:40,457 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:26:40,457 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:26:40,457 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-29 06:26:40,457 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-29 06:26:40,457 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:26:40,457 - TestFlowManager - INFO - Application shut down successfully
+2025-10-29 06:27:24,353 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-29 06:27:24,365 - TestFlowManager - INFO - Application initialized successfully
+2025-10-29 06:27:24,365 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-29 06:27:24,544 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-29 06:27:24,544 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-29 06:27:24,544 - TestFlowManager - DEBUG - 配置文件路径: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:27:24,544 - TestFlowManager - DEBUG - 尝试加载编辑器字段配置: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:27:24,544 - TestFlowManager - DEBUG - 加载到 13 个编辑器字段配置
+2025-10-29 06:27:24,544 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-29 06:27:24,558 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-29 06:27:24,558 - TestFlowManager - DEBUG - Application state loaded
+2025-10-29 06:27:24,558 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-29 06:27:24,558 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-29 06:27:24,558 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-29 06:27:24,559 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-29 06:27:25,012 - TestFlowManager - INFO - Main window shown
+2025-10-29 06:27:26,723 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:27:26,723 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:27:26,724 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:27:26,724 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-29 06:27:26,724 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-29 06:27:26,724 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:27:26,759 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-29 06:27:26,759 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-29 06:27:26,765 - TestFlowManager - INFO - Application exited
+2025-10-29 06:27:26,765 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-29 06:27:26,765 - TestFlowManager - INFO - Closing all windows
+2025-10-29 06:27:26,765 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:27:26,765 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:27:26,765 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:27:26,765 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-29 06:27:26,765 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-29 06:27:26,765 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:27:26,765 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:27:26,765 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:27:26,766 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:27:26,766 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-29 06:27:26,766 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-29 06:27:26,766 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:27:26,766 - TestFlowManager - INFO - Application shut down successfully
+2025-10-29 06:38:27,822 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-29 06:38:27,835 - TestFlowManager - INFO - Application initialized successfully
+2025-10-29 06:38:27,835 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-29 06:38:28,030 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-29 06:38:28,030 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-29 06:38:28,030 - TestFlowManager - DEBUG - 配置文件路径: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:38:28,030 - TestFlowManager - DEBUG - 尝试加载编辑器字段配置: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:38:28,030 - TestFlowManager - DEBUG - 加载到 13 个编辑器字段配置
+2025-10-29 06:38:28,030 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-29 06:38:28,045 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-29 06:38:28,045 - TestFlowManager - DEBUG - Application state loaded
+2025-10-29 06:38:28,045 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-29 06:38:28,045 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-29 06:38:28,045 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-29 06:38:28,045 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-29 06:38:28,767 - TestFlowManager - INFO - Main window shown
+2025-10-29 06:38:34,543 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:38:34,543 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:38:34,544 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:38:34,544 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-29 06:38:34,544 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-29 06:38:34,544 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:38:34,594 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-29 06:38:34,595 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-29 06:38:34,600 - TestFlowManager - INFO - Application exited
+2025-10-29 06:38:34,601 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-29 06:38:34,601 - TestFlowManager - INFO - Closing all windows
+2025-10-29 06:38:34,601 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:38:34,601 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:38:34,601 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:38:34,601 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-29 06:38:34,601 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-29 06:38:34,601 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:38:34,601 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:38:34,601 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:38:34,601 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:38:34,601 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-29 06:38:34,601 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-29 06:38:34,601 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:38:34,601 - TestFlowManager - INFO - Application shut down successfully
+2025-10-29 06:39:07,504 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-29 06:39:07,516 - TestFlowManager - INFO - Application initialized successfully
+2025-10-29 06:39:07,516 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-29 06:39:07,706 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-29 06:39:07,706 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-29 06:39:07,706 - TestFlowManager - DEBUG - 配置文件路径: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:39:07,706 - TestFlowManager - DEBUG - 尝试加载编辑器字段配置: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:39:07,706 - TestFlowManager - DEBUG - 加载到 13 个编辑器字段配置
+2025-10-29 06:39:07,707 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-29 06:39:07,722 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-29 06:39:07,722 - TestFlowManager - DEBUG - Application state loaded
+2025-10-29 06:39:07,722 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-29 06:39:07,722 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-29 06:39:07,722 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-29 06:39:07,723 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-29 06:39:08,172 - TestFlowManager - INFO - Main window shown
+2025-10-29 06:39:09,713 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:39:09,714 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:39:09,714 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:39:09,714 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-29 06:39:09,714 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-29 06:39:09,714 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:39:09,767 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-29 06:39:09,767 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-29 06:39:09,775 - TestFlowManager - INFO - Application exited
+2025-10-29 06:39:09,775 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-29 06:39:09,775 - TestFlowManager - INFO - Closing all windows
+2025-10-29 06:39:09,775 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:39:09,775 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:39:09,775 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:39:09,775 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-29 06:39:09,775 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-29 06:39:09,775 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:39:09,775 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:39:09,775 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:39:09,775 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:39:09,775 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-29 06:39:09,775 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-29 06:39:09,775 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:39:09,775 - TestFlowManager - INFO - Application shut down successfully
+2025-10-29 06:45:25,324 - TestFlowManager - INFO - Initializing TestFlow Manager application
+2025-10-29 06:45:25,337 - TestFlowManager - INFO - Application initialized successfully
+2025-10-29 06:45:25,337 - TestFlowManager - INFO - Starting TestFlow Manager application
+2025-10-29 06:45:25,524 - TestFlowManager - DEBUG - Status updated: 就绪
+2025-10-29 06:45:25,524 - TestFlowManager - DEBUG - Updated status: 就绪
+2025-10-29 06:45:25,524 - TestFlowManager - DEBUG - 配置文件路径: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:45:25,524 - TestFlowManager - DEBUG - 尝试加载编辑器字段配置: D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json
+2025-10-29 06:45:25,524 - TestFlowManager - DEBUG - 加载到 13 个编辑器字段配置
+2025-10-29 06:45:25,524 - TestFlowManager - INFO - 成功从 D:\PythonProject\TestFlowManager\src\app\config\ltr_fields.json 加载 13 个编辑器字段配置
+2025-10-29 06:45:25,537 - TestFlowManager - INFO - Initializing MainWindowController
+2025-10-29 06:45:25,537 - TestFlowManager - DEBUG - Application state loaded
+2025-10-29 06:45:25,537 - TestFlowManager - DEBUG - Loaded 0 recent files
+2025-10-29 06:45:25,537 - TestFlowManager - INFO - Loaded 0 recent files
+2025-10-29 06:45:25,537 - TestFlowManager - INFO - MainWindowController initialized successfully
+2025-10-29 06:45:25,538 - TestFlowManager - DEBUG - Window 'main' registered
+2025-10-29 06:45:25,973 - TestFlowManager - INFO - Main window shown
+2025-10-29 06:45:40,460 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:45:40,460 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:45:40,460 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:45:40,460 - TestFlowManager - DEBUG - Word instance count decreased to -1
+2025-10-29 06:45:40,460 - TestFlowManager - DEBUG - Excel instance count decreased to -1
+2025-10-29 06:45:40,460 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:45:40,493 - TestFlowManager - DEBUG - Word instance count decreased to -2
+2025-10-29 06:45:40,493 - TestFlowManager - DEBUG - Excel instance count decreased to -2
+2025-10-29 06:45:40,500 - TestFlowManager - INFO - Application exited
+2025-10-29 06:45:40,500 - TestFlowManager - INFO - Shutting down TestFlow Manager application
+2025-10-29 06:45:40,500 - TestFlowManager - INFO - Closing all windows
+2025-10-29 06:45:40,500 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:45:40,500 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:45:40,501 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:45:40,501 - TestFlowManager - DEBUG - Word instance count decreased to -3
+2025-10-29 06:45:40,501 - TestFlowManager - DEBUG - Excel instance count decreased to -3
+2025-10-29 06:45:40,501 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:45:40,501 - TestFlowManager - INFO - MainWindow closing
+2025-10-29 06:45:40,501 - TestFlowManager - INFO - Shutting down MainWindowController
+2025-10-29 06:45:40,501 - TestFlowManager - DEBUG - Application state saved
+2025-10-29 06:45:40,501 - TestFlowManager - DEBUG - Word instance count decreased to -4
+2025-10-29 06:45:40,501 - TestFlowManager - DEBUG - Excel instance count decreased to -4
+2025-10-29 06:45:40,501 - TestFlowManager - INFO - MainWindowController shut down successfully
+2025-10-29 06:45:40,501 - TestFlowManager - INFO - Application shut down successfully

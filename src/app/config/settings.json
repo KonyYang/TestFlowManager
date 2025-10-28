@@ -1,12 +1,12 @@
-{
+﻿{
     "app": {
         "name": "TestFlowManager",
         "version": "2.0.0",
         "debug": false
     },
     "window": {
-        "width": 800,
-        "height": 600,
+        "width": 500,
+        "height": 400,
         "position_x": 100,
         "position_y": 100
     },

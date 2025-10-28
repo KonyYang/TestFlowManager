@@ -17,6 +17,7 @@ from src.features.ltr_manager.service.ltr_application_service import LTRApplicat
 from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
 from src.common.widgets import EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
 from src.core.event_dispatcher import event_dispatcher
+from src.core.window_utils import WindowUtils  # 导入窗口工具类
 
 # Configure logging for this module
 logger = logging.getLogger(__name__)
@@ -68,8 +69,12 @@ class LTRApplicationDialog(QDialog):
     def _setup_ui(self):
         """设置用户界面"""
         self.setWindowTitle(f"LTR申请单: {self.dl_number}" if self.dl_number else "新LTR申请单")
-        self.setMinimumSize(800, 600)
-        self.resize(900, 700)
+        # 设置更小的最小尺寸并根据DPI进行适配
+        min_width, min_height = WindowUtils.get_scaled_window_size(600, 400)
+        self.setMinimumSize(min_width, min_height)
+        # 设置更小的初始尺寸并根据DPI进行适配
+        init_width, init_height = WindowUtils.get_scaled_window_size(700, 500)
+        self.resize(init_width, init_height)
 
         # 创建主布局
         main_layout = QVBoxLayout(self)
@@ -92,9 +97,13 @@ class LTRApplicationDialog(QDialog):
         # 设置列宽调整策略
         header = self.info_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.info_table.setColumnWidth(1, 300)
+        # 根据DPI调整列宽
+        column_width = WindowUtils.get_scaled_size(200)
+        self.info_table.setColumnWidth(1, column_width)
         self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.info_table.setMinimumWidth(600)
+        # 根据DPI调整最小宽度
+        min_width = WindowUtils.get_scaled_size(400)
+        self.info_table.setMinimumWidth(min_width)
 
         # 美化滚动条
         self.info_table.horizontalScrollBar().setStyleSheet("""
@@ -251,10 +260,13 @@ class LTRApplicationDialog(QDialog):
 
             elif item_data.get('editor_type') == 'multiline':
                 text_edit = QTextEdit()
-                text_edit.setMaximumHeight(80)
+                # 根据DPI调整最大高度，设置为单行高度
+                max_height = WindowUtils.get_scaled_size(30)
+                text_edit.setMaximumHeight(max_height)
                 text_edit.setPlainText(item_data.get('value', ''))
                 self.info_table.setCellWidget(row_index, 1, text_edit)
-                self.info_table.setRowHeight(row_index, 80)
+                # 设置行高为较小值
+                self.info_table.setRowHeight(row_index, max_height + 10)
             else:
                 value_item = QTableWidgetItem(item_data.get('value', ''))
                 value_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable)
