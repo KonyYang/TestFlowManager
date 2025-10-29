@@ -1,4 +1,4 @@
-﻿{
+{
     "app": {
         "name": "TestFlowManager",
         "version": "2.0.0",
@@ -11,7 +11,7 @@
         "position_y": 100
     },
     "logging": {
-        "level": "INFO",
+        "level": "WARNING",
         "file": "logs/testflow.log"
     },
     "ltr": {

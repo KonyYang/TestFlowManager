@@ -97,12 +97,11 @@ class LTRApplicationDialog(QDialog):
         # 设置列宽调整策略
         header = self.info_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        # 根据DPI调整列宽
-        column_width = WindowUtils.get_scaled_size(200)
-        self.info_table.setColumnWidth(1, column_width)
+        # 设置"具体内容"列随着窗口大小调整而自动调整
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
         self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         # 根据DPI调整最小宽度
-        min_width = WindowUtils.get_scaled_size(400)
+        min_width = WindowUtils.get_scaled_size(600)  # 保持最小宽度为600像素
         self.info_table.setMinimumWidth(min_width)
 
         # 美化滚动条
@@ -260,8 +259,12 @@ class LTRApplicationDialog(QDialog):
 
             elif item_data.get('editor_type') == 'multiline':
                 text_edit = QTextEdit()
-                # 根据DPI调整最大高度，设置为单行高度
-                max_height = WindowUtils.get_scaled_size(30)
+                # 根据DPI调整最大高度
+                # 仅对"Description P/N"字段应用4行显示，其他多行文本字段保持原来的一行显示
+                if item_data['key'] == 'sample_information':  # "Description P/N"字段
+                    max_height = WindowUtils.get_scaled_size(120)  # 4行大约需要120像素高度
+                else:  # 其他多行文本字段保持原来的一行显示
+                    max_height = WindowUtils.get_scaled_size(30)  # 保持原来的一行显示
                 text_edit.setMaximumHeight(max_height)
                 text_edit.setPlainText(item_data.get('value', ''))
                 self.info_table.setCellWidget(row_index, 1, text_edit)

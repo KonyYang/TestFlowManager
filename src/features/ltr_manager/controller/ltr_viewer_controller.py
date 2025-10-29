@@ -3,6 +3,7 @@ LTR控制器模块
 处理LTR文件的业务逻辑和事件
 """
 
+import os
 from typing import List, Optional
 from PyQt5.QtWidgets import QWidget
 from src.core.logger import logger

@@ -154,8 +154,12 @@ class LTREditorDialog(QDialog):
             self.data_table.setItem(row, 1, current_item)
 
             if editor_type == 'multiline':
-                # 对于多行文本，使用LTRTextEdit，设置为单行高度
-                text_edit = LTRTextEdit(str(original_value))
+                # 对于多行文本，使用LTRTextEdit
+                # 仅对"Description P/N"字段应用4行显示，其他多行文本字段保持原来的一行显示
+                if key == 'sample_information':  # "Description P/N"字段
+                    text_edit = LTRTextEdit(str(original_value), max_height=120)  # 4行大约需要120像素高度
+                else:  # 其他多行文本字段（如"Test Item"）保持原来的一行显示
+                    text_edit = LTRTextEdit(str(original_value), max_height=30)  # 保持原来的一行显示
                 self.data_table.setCellWidget(row, 2, text_edit)
             elif editor_type == 'dropdown':
                 # 对于下拉框字段，使用LTRComboBox

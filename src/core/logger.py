@@ -5,8 +5,10 @@
 
 import logging
 import os
+import sys
 from datetime import datetime
 from typing import Optional
+from src.core.config_manager import config_manager
 
 
 class Logger:
@@ -17,19 +19,32 @@ class Logger:
 
     def __init__(self, name: str = "TestFlowManager", log_file: Optional[str] = None):
         self.logger = logging.getLogger(name)
-        self.logger.setLevel(logging.DEBUG)
+        
+        # 从配置中获取日志级别，默认为INFO
+        log_level_str = config_manager.get("logging.level", "INFO")
+        log_level = getattr(logging, log_level_str.upper(), logging.INFO)
+        self.logger.setLevel(log_level)
 
         # 避免重复添加处理器
         if not self.logger.handlers:
             # 创建控制台处理器
             console_handler = logging.StreamHandler()
-            console_handler.setLevel(logging.INFO)
+            console_handler.setLevel(log_level)  # 使用与logger相同的级别
 
             # 创建文件处理器（如果指定了日志文件）
             file_handler = None
             if log_file:
-                file_handler = logging.FileHandler(log_file, encoding='utf-8')
-                file_handler.setLevel(logging.DEBUG)
+                try:
+                    # 确保日志目录存在
+                    log_dir = os.path.dirname(log_file)
+                    if log_dir and not os.path.exists(log_dir):
+                        os.makedirs(log_dir)
+                    
+                    file_handler = logging.FileHandler(log_file, encoding='utf-8')
+                    file_handler.setLevel(log_level)  # 使用与logger相同的级别
+                except Exception as e:
+                    print(f"无法创建日志文件 {log_file}: {e}")
+                    # 如果无法创建文件处理器，将继续只使用控制台处理器
 
             # 创建格式器
             formatter = logging.Formatter(
@@ -68,4 +83,19 @@ class Logger:
 
 
 # 创建全局日志实例
-logger = Logger("TestFlowManager", "testflow.log")
+# 从配置中获取日志文件路径
+log_file_path = config_manager.get("logging.file", "testflow.log")
+
+# 如果是相对路径，将其转换为绝对路径
+if not os.path.isabs(log_file_path):
+    # 获取项目根目录
+    if getattr(sys, 'frozen', False):
+        # 可执行文件模式
+        base_path = os.path.dirname(sys.executable)
+    else:
+        # 开发模式
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    
+    log_file_path = os.path.join(base_path, log_file_path)
+
+logger = Logger("TestFlowManager", log_file_path)

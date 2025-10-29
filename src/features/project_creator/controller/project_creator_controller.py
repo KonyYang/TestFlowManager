@@ -341,10 +341,10 @@ class ProjectCreatorController:
                     self.context.selected_attachment = selected_attachment
                     logger.debug(f"已重新选择附件: {selected_attachment.get('filename', 'Unknown')}")
                     
-                    # 更新界面显示
-                    if hasattr(self.view, 'update_attachment_info'):
+                    # 更新界面显示（如果父视图有相应的方法）
+                    if self.parent_view and hasattr(self.parent_view, 'update_attachment_info'):
                         filename = selected_attachment.get('filename', 'Unknown')
-                        self.view.update_attachment_info(filename)
+                        self.parent_view.update_attachment_info(filename)
                 else:
                     logger.debug("用户未选择附件")
             else:

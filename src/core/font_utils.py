@@ -27,7 +27,8 @@ class FontUtils:
             dpi = 96  # 默认 DPI
 
         # 计算缩放因子 (以96为基准DPI)
-        scale_factor = dpi / 96.0
+        # 使用稍微减小的缩放因子，避免在高DPI下字体过大
+        scale_factor = (dpi / 96.0) * 0.85  # 减小15%的缩放比例
         scaled_size = max(int(base_size * scale_factor), 1)  # 确保字体大小至少为1
 
         font = QFont()

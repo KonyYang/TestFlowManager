@@ -41,8 +41,23 @@ class LTRBaseService:
         try:
             ltr_file_path = config_manager.get("paths.ltr_file")
 
-            if not ltr_file_path or not os.path.exists(ltr_file_path):
-                logger.error(f"LTR文件路径无效: {ltr_file_path}")
+            if not ltr_file_path:
+                logger.error("LTR文件路径未配置")
+                return None
+
+            if not os.path.exists(ltr_file_path):
+                logger.error(f"LTR文件不存在: {ltr_file_path}")
+                # 显示错误消息给用户
+                try:
+                    from PyQt5.QtWidgets import QMessageBox
+                    # 尝试使用全局消息框
+                    QMessageBox.critical(
+                        None, 
+                        "文件不存在", 
+                        f"指定路径的Excel文档不存在，请确认文件路径：\n{ltr_file_path}"
+                    )
+                except Exception as e:
+                    logger.error(f"显示错误消息时出错: {e}")
                 return None
 
             if with_password:
