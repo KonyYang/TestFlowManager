@@ -121,12 +121,16 @@ class LTRApplicationController:
             logger.debug(f"LTRApplicationDialog创建完成，传递的temp_folder_path: {temp_folder_path}")
             result = dialog.exec_()
             
+            logger.debug(f"LTRApplicationDialog exec_ result: {result}")
+            logger.debug(f"LTRApplicationDialog final result: {dialog.result()}")
+            
             # 注意：由于我们在LTRApplicationDialog.accept()中使用了QTimer，
             # 这里的result可能不会立即反映对话框的真实状态。
             # 我们需要通过其他方式获取数据
 
             # 检查对话框是否接受了用户输入
             if dialog.result() == LTRApplicationDialog.Accepted:
+                logger.debug("LTRApplicationDialog was accepted by user")
                 # 获取用户修改后的数据
                 modified_data = dialog.get_modified_data()
                 # 处理数据转换
@@ -147,10 +151,11 @@ class LTRApplicationController:
                 }
             else:
                 logger.info("User cancelled the application dialog")
+                logger.debug(f"LTRApplicationDialog result code: {dialog.result()}")
                 return None
 
         except Exception as e:
-            logger.error(f"Error showing application dialog: {e}")
+            logger.error(f"Error showing application dialog: {e}", exc_info=True)
             if self.parent_view:
                 QMessageBox.critical(self.parent_view, "错误", f"显示申请单对话框时出错: {str(e)}")
             return None

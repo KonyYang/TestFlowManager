@@ -24,33 +24,33 @@ class ConfigManager:
     def load_main_config(self) -> None:
         """从主配置文件加载配置"""
         config_path = self._get_resource_path(self.config_file)
-        print(f"[DEBUG] Loading main config from: {config_path}")
+        # print(f"[DEBUG] Loading main config from: {config_path}")
         if os.path.exists(config_path):
             try:
                 # 尝试使用 utf-8-sig 编码（处理BOM）
                 with open(config_path, 'r', encoding='utf-8-sig') as f:
                     self._config = json.load(f)
-                print(f"[DEBUG] Loaded config: {self._config}")
+                # print(f"[DEBUG] Loaded config: {self._config}")
             except Exception as e:
                 print(f"Failed to load config from {config_path} with utf-8-sig: {e}")
                 try:
                     # 如果 utf-8-sig 失败，尝试使用 utf-8 编码
                     with open(config_path, 'r', encoding='utf-8') as f:
                         self._config = json.load(f)
-                    print(f"[DEBUG] Loaded config with utf-8: {self._config}")
+                    # print(f"[DEBUG] Loaded config with utf-8: {self._config}")
                 except Exception as e2:
                     print(f"Failed to load config from {config_path} with utf-8: {e2}")
                     try:
                         # 如果都失败了，尝试使用默认编码
                         with open(config_path, 'r') as f:
                             self._config = json.load(f)
-                        print(f"[DEBUG] Loaded config with default encoding: {self._config}")
+                        # print(f"[DEBUG] Loaded config with default encoding: {self._config}")
                     except Exception as e3:
                         print(f"Failed to load config from {config_path} with default encoding: {e3}")
                         self._config = {}
         else:
             # 如果配置文件不存在，使用默认配置
-            print(f"[DEBUG] Config file not found, using default config")
+            # print(f"[DEBUG] Config file not found, using default config")
             self._config = self._get_default_config()
 
     def load_paths_config(self, paths_file: str = "config/paths.ini") -> None:
@@ -101,48 +101,48 @@ class ConfigManager:
         if getattr(sys, 'frozen', False):
             # 如果是可执行文件模式，优先从生产环境路径加载配置
             production_config_path = os.path.join("D:", "TestFlowManager", relative_path)
-            print(f"[DEBUG] Frozen mode, checking production config path: {production_config_path}")
+            # print(f"[DEBUG] Frozen mode, checking production config path: {production_config_path}")
             if os.path.exists(production_config_path):
-                print(f"[DEBUG] Using production config path: {production_config_path}")
+                # print(f"[DEBUG] Using production config path: {production_config_path}")
                 return production_config_path
             
             # 如果生产环境路径不存在，则从可执行文件所在目录加载配置
             base_path = os.path.dirname(sys.executable)
-            print(f"[DEBUG] Frozen mode, using executable directory: {base_path}")
+            # print(f"[DEBUG] Frozen mode, using executable directory: {base_path}")
             
             # 在可执行文件模式下，检查生成环境路径
             generated_env_path = os.path.join(base_path, relative_path)
-            print(f"[DEBUG] Checking generated environment path: {generated_env_path}")
+            # print(f"[DEBUG] Checking generated environment path: {generated_env_path}")
             if os.path.exists(generated_env_path):
-                print(f"[DEBUG] Using generated environment path: {generated_env_path}")
+                # print(f"[DEBUG] Using generated environment path: {generated_env_path}")
                 return generated_env_path
             else:
                 # 如果直接路径不存在，尝试在config子目录中查找
                 config_path = os.path.join(base_path, "config", os.path.basename(relative_path))
-                print(f"[DEBUG] Checking config path: {config_path}")
+                # print(f"[DEBUG] Checking config path: {config_path}")
                 if os.path.exists(config_path):
-                    print(f"[DEBUG] Using config path: {config_path}")
+                    # print(f"[DEBUG] Using config path: {config_path}")
                     return config_path
         else:
             # 如果是开发模式，需要检查当前工作目录来确定正确的基路径
             base_path = os.path.abspath(".")
-            print(f"[DEBUG] Development mode, using current directory: {base_path}")
+            # print(f"[DEBUG] Development mode, using current directory: {base_path}")
             
             # 检查当前目录是否为src/app目录
             if os.path.basename(base_path) == "app" and os.path.basename(os.path.dirname(base_path)) == "src":
                 # 如果当前在src/app目录下，需要向上两级到达项目根目录
                 project_root = os.path.dirname(os.path.dirname(base_path))
                 result_path = os.path.join(project_root, "src", "app", relative_path)
-                print(f"[DEBUG] Development mode resource path from src/app: {result_path}")
+                # print(f"[DEBUG] Development mode resource path from src/app: {result_path}")
                 return result_path
             else:
                 # 否则假设当前在项目根目录
                 result_path = os.path.join(base_path, "src", "app", relative_path)
-                print(f"[DEBUG] Development mode resource path: {result_path}")
+                # print(f"[DEBUG] Development mode resource path: {result_path}")
                 return result_path
 
         result_path = os.path.join(base_path, relative_path)
-        print(f"[DEBUG] Final resource path: {result_path}")
+        # print(f"[DEBUG] Final resource path: {result_path}")
         return result_path
 
     def save_config(self) -> None:

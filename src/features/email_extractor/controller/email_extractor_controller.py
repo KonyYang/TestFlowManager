@@ -73,9 +73,12 @@ class EmailExtractorController(BaseController):
             info_text = f"主题: {subject}\n发件人: {sender}  时间: {received_time}"
             attachments = email_data.get("attachments", [])
             self.view.update_email_info(info_text, attachments)
+            
+            logger.debug(f"MSG file processed successfully, attachments count: {len(attachments)}")
 
             return True
         except Exception as e:
+            logger.error(f"处理MSG文件选中事件失败: {e}", exc_info=True)
             return self.handle_error(e, "处理MSG文件选中事件失败")
 
     def handle_msg_file_selection(self, file_path: str):

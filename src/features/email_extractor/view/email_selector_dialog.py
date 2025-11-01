@@ -33,6 +33,7 @@ class EmailSelectorDialog(QDialog):
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.selected_msg_file = None
         self.temp_folder = None  # 用于存储临时文件夹路径
+        self.is_reselect_mode = False  # 标志：是否为重新选择附件模式
 
         # 启用拖拽
         self.setAcceptDrops(True)
@@ -157,10 +158,10 @@ class EmailSelectorDialog(QDialog):
 
     def _on_apply_for_ltr(self):
         """申请LTR编号按钮点击事件"""
-        # 发射信号，让控制器处理后续逻辑
-        if self.selected_msg_file:
-            self.msg_file_selected.emit(self.selected_msg_file)
-        # 正确关闭对话框，返回Accepted结果
+        logger.debug("Apply for LTR button clicked")
+        # 直接关闭对话框，返回Accepted结果
+        # 邮件处理和附件提取已在用户选择或拖拽.msg文件时完成
+        logger.debug("Accepting email selector dialog")
         self.accept()
 
     def _on_attachment_selection_changed(self):
@@ -259,6 +260,9 @@ class EmailSelectorDialog(QDialog):
             attachments: 附件列表
             msg_file_path: 邮件文件路径
         """
+        # 设置为重新选择附件模式
+        self.is_reselect_mode = True
+        
         self.email_info_label.setText(email_info)
         self._current_attachments = attachments
         self.selected_msg_file = msg_file_path

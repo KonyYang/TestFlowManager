@@ -322,38 +322,47 @@ class LTRApplicationDialog(QDialog):
 
     def accept(self):
         """重写accept方法，添加数据验证和处理"""
+        logger.debug("LTRApplicationDialog.accept() called")
         # 收集表单数据
         form_data = self._collect_form_data()
+        logger.debug(f"Collected form data: {form_data}")
 
         # 如果有控制器，调用控制器处理LTR申请
         if self.controller and hasattr(self.controller, 'apply_ltr_number'):
+            logger.debug("Controller found, calling apply_ltr_number")
             try:
                 # 传递临时文件夹路径给控制器
                 result = self.controller.apply_ltr_number(form_data, self, self.temp_folder_path)
+                logger.debug(f"apply_ltr_number result: {result}")
 
                 # 根据结果决定是否关闭对话框
                 if result.get("success"):
+                    logger.debug("LTR application successful, scheduling dialog close")
                     # 使用QTimer延迟关闭对话框，确保所有事件处理完成
                     from PyQt5.QtCore import QTimer
                     QTimer.singleShot(100, self._delayed_accept)
                 elif result.get('retry', False):
                     # 需要重新输入，保持对话框打开
+                    logger.debug("LTR application needs retry, keeping dialog open")
                     return
                 else:
                     # 其他情况关闭对话框
+                    logger.debug("LTR application failed, rejecting dialog")
                     self.reject()
 
             except Exception as e:
                 import traceback
                 from PyQt5.QtWidgets import QMessageBox
+                logger.error(f"Exception in apply_ltr_number: {e}", exc_info=True)
                 QMessageBox.critical(self, "错误", f"处理申请时发生异常: {str(e)}")
                 self.reject()
         else:
-            print("[DEBUG] No controller found, closing dialog directly")
+            logger.debug("No controller found, closing dialog directly")
             super().accept()
             
     def _delayed_accept(self):
         """延迟接受对话框，确保所有操作完成"""
+        logger.debug("_delayed_accept called")
         try:
             # 确保所有COM对象被释放
             try:
@@ -364,11 +373,10 @@ class LTRApplicationDialog(QDialog):
                 pass
                 
             # 调用父类的accept方法
+            logger.debug("Calling super().accept()")
             super().accept()
         except Exception as e:
-            print(f"[DEBUG] Error in _delayed_accept: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Error in _delayed_accept: {e}", exc_info=True)
             try:
                 super().accept()
             except:

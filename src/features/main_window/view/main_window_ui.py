@@ -39,26 +39,26 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("TestFlow Manager")
         # 根据DPI调整窗口尺寸，使用更小的默认尺寸
         from src.core.config_manager import config_manager
-        print(f"[DEBUG] All config: {config_manager.get_all()}")
+        # print(f"[DEBUG] All config: {config_manager.get_all()}")
         base_width = config_manager.get("window.width", 300)
         base_height = config_manager.get("window.height", 200)
-        print(f"[DEBUG] Base window size from config: {base_width}x{base_height}")
+        # print(f"[DEBUG] Base window size from config: {base_width}x{base_height}")
         
         width = WindowUtils.get_scaled_size(base_width)
         height = WindowUtils.get_scaled_size(base_height)
-        print(f"[DEBUG] Scaled window size: {width}x{height}")
+        # print(f"[DEBUG] Scaled window size: {width}x{height}")
         
         self.resize(width, height)
         # 设置更小的最小尺寸限制
         min_width = WindowUtils.get_scaled_size(200)
         min_height = WindowUtils.get_scaled_size(150)
-        print(f"[DEBUG] Minimum window size: {min_width}x{min_height}")
+        # print(f"[DEBUG] Minimum window size: {min_width}x{min_height}")
         self.setMinimumSize(min_width, min_height)
         # 确保窗口不会被设置一个固定的大小
         self.setMaximumSize(16777215, 16777215)  # QWIDGETSIZE_MAX = 16777215
         
         # 添加调试信息，显示实际设置的窗口尺寸
-        print(f"[DEBUG] Setting main window size: {width}x{height}")
+        # print(f"[DEBUG] Setting main window size: {width}x{height}")
 
         # 应用全局字体
         global_font = FontUtils.get_scaled_font(10)
@@ -82,8 +82,8 @@ class MainWindow(QMainWindow):
         """窗口显示事件"""
         super().showEvent(event)
         # 显示实际窗口尺寸
-        actual_size = self.size()
-        print(f"[DEBUG] Main window actual size: {actual_size.width()}x{actual_size.height()}")
+        # actual_size = self.size()
+        # print(f"[DEBUG] Main window actual size: {actual_size.width()}x{actual_size.height()}")
 
     def _setup_menu(self) -> None:
         """设置菜单栏"""

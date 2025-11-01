@@ -45,6 +45,8 @@ class ProjectCreatorController:
                 logger.info("Successfully processed email data")
                 # 继续项目创建流程
                 self._continue_project_creation()
+            else:
+                logger.info("User cancelled or failed to process email data")
 
             return success
         except Exception as e:
@@ -72,6 +74,7 @@ class ProjectCreatorController:
 
                 # 如果用户点击了"选择"按钮（即接受了对话框）
                 if result == QDialog.Accepted:
+                    logger.debug("Email selector dialog accepted")
                     # 保存controller引用以便后续使用
                     self.email_extractor_controller = controller
                     # 保存选中的附件
@@ -160,6 +163,7 @@ class ProjectCreatorController:
 
                 if result and not result.get("error"):
                     # 成功提取数据，显示LTR申请窗口
+                    logger.debug("Successfully processed Word attachment, showing LTR application dialog")
                     self._show_ltr_application_dialog(result, selected_attachment.get('filename', ''))
                 else:
                     # 未能提取数据，询问用户选择
@@ -273,6 +277,7 @@ class ProjectCreatorController:
         """
         from PyQt5.QtWidgets import QMessageBox
 
+        logger.debug("Handling failed extraction - showing options dialog")
         msg_box = QMessageBox(self.parent_view)
         msg_box.setWindowTitle("选择操作")
         msg_box.setText("没有找到有效的申请单信息，您希望？")
@@ -284,13 +289,19 @@ class ProjectCreatorController:
 
         msg_box.setDefaultButton(blank_form_button)
         result = msg_box.exec_()
+        
+        logger.debug(f"User selection in options dialog: {msg_box.clickedButton()}")
 
         if msg_box.clickedButton() == blank_form_button:
+            logger.debug("User selected to fill blank form")
             # 填写空白申请表
             self._show_ltr_application_dialog(None, '')  # 空文件名
         elif msg_box.clickedButton() == reselect_button:
+            logger.debug("User selected to reselect attachment")
             # 重新选择附件，但保持邮件信息不变
             self._reselect_attachment()
+        else:
+            logger.debug("User cancelled the operation")
         # 如果点击取消，则不执行任何操作
 
     def _reselect_attachment(self):
@@ -328,9 +339,14 @@ class ProjectCreatorController:
 
                 # 设置邮件上下文
                 dialog.set_email_context(email_info, attachments, self.context.email_data.file_path)
+                
+                # 重要：确保对话框知道这是重新选择模式，不需要重新处理MSG文件
+                dialog.is_reselect_mode = True
 
             # 显示对话框
             result = dialog.exec_()
+            
+            logger.debug(f"Reselect attachment dialog result: {result}")
             
             # 如果用户确认选择
             if result == EmailSelectorDialog.Accepted:
@@ -339,14 +355,21 @@ class ProjectCreatorController:
                 if selected_attachment:
                     # 更新上下文中的附件信息
                     self.context.selected_attachment = selected_attachment
+                    # 更新选中的附件变量，确保后续流程可以获取到
+                    self.selected_attachment = selected_attachment
                     logger.debug(f"已重新选择附件: {selected_attachment.get('filename', 'Unknown')}")
                     
                     # 更新界面显示（如果父视图有相应的方法）
                     if self.parent_view and hasattr(self.parent_view, 'update_attachment_info'):
                         filename = selected_attachment.get('filename', 'Unknown')
                         self.parent_view.update_attachment_info(filename)
+                        
+                    # 继续项目创建流程
+                    self._continue_project_creation()
                 else:
                     logger.debug("用户未选择附件")
+                    # 当用户未选择附件时，显示选择操作对话框
+                    self._handle_failed_extraction()
             else:
                 logger.debug("用户取消了附件重新选择")
 
