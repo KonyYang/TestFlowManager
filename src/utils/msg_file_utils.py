@@ -4,7 +4,9 @@
 """
 
 import os
-import extract_msg
+import tempfile
+import shutil
+import win32com.client
 from typing import List, Dict, Any, Optional
 from src.core.logger import logger
 
@@ -26,74 +28,90 @@ def process_msg_file(file_path: str) -> Dict[str, Any]:
 
         logger.info(f"正在处理MSG文件: {file_path}")
 
-        # 打开.msg文件
-        msg = extract_msg.Message(file_path)
+        # 创建临时文件夹用于存储附件
+        temp_folder = tempfile.mkdtemp()
+        
+        success_count = 0
+        error_messages = []
+        attachments_info = []
 
-        # 提取邮件基本信息
-        email_info = {
-            'subject': getattr(msg, 'subject', '') or '',
-            'sender': getattr(msg, 'sender', '') or '',
-            'received_time': getattr(msg, 'date', '') or '',
-            'body': getattr(msg, 'body', '') or '',
-            'attachments': []
-        }
+        try:
+            # 创建Outlook应用程序对象
+            outlook = win32com.client.Dispatch("Outlook.Application")
 
-        # 提取附件
-        if hasattr(msg, 'attachments'):
-            for i, attachment in enumerate(msg.attachments):
+            # 打开.msg文件
+            msg = outlook.CreateItemFromTemplate(file_path)
+
+            # 提取邮件基本信息
+            email_info = {
+                'subject': getattr(msg, 'Subject', '') or '',
+                'sender': getattr(msg, 'SenderName', '') or '',
+                'received_time': getattr(msg, 'ReceivedTime', '') or '',
+                'body': getattr(msg, 'Body', '') or '',
+                'attachments': []
+            }
+
+            # 获取附件集合
+            attachments = msg.Attachments
+            total_count = attachments.Count
+
+            logger.info(f"找到 {total_count} 个附件")
+
+            # 遍历所有附件
+            for i in range(1, total_count + 1):
                 try:
-                    # 处理嵌套的邮件对象作为附件
-                    if isinstance(attachment, extract_msg.Message):
-                        # 这是一个嵌套的邮件对象，将其作为.msg附件处理
-                        filename = getattr(attachment, 'subject', f'attached_message_{i}') + '.msg'
-                        # 为嵌套邮件创建简单的字节表示
-                        attachment_data = f"Embedded message: {filename}".encode('utf-8')
-                        attachment_size = len(attachment_data)
+                    attachment = attachments.Item(i)
+                    attachment_name = attachment.FileName
 
-                        attachment_info = {
-                            'filename': filename,
-                            'size': attachment_size,
-                            'content': attachment_data
-                        }
+                    # 构建完整的保存路径
+                    save_path = os.path.join(temp_folder, attachment_name)
 
-                        email_info['attachments'].append(attachment_info)
-                        logger.debug(f"提取嵌套邮件附件: {filename}, 大小: {attachment_size} 字节")
-                        continue
+                    # 处理文件名冲突
+                    counter = 1
+                    base_name, extension = os.path.splitext(attachment_name)
+                    while os.path.exists(save_path):
+                        new_name = f"{base_name}_{counter}{extension}"
+                        save_path = os.path.join(temp_folder, new_name)
+                        counter += 1
 
-                    # 处理普通附件
-                    filename = getattr(attachment, 'longFilename', None) or \
-                              getattr(attachment, 'filename', f'attachment_{i}')
-
-                    # 安全地获取附件数据
-                    attachment_data = None
-                    attachment_size = 0
-
-                    if hasattr(attachment, 'data'):
-                        data = attachment.data
-                        if data is not None:
-                            try:
-                                attachment_size = len(data)
-                                attachment_data = data
-                            except TypeError:
-                                # 如果无法获取长度，则设置为0
-                                attachment_size = 0
-                                attachment_data = data
-
+                    # 保存附件
+                    attachment.SaveAsFile(save_path)
+                    
+                    # 读取附件内容
+                    with open(save_path, 'rb') as f:
+                        attachment_data = f.read()
+                    
                     attachment_info = {
-                        'filename': filename,
-                        'size': attachment_size,
+                        'filename': os.path.basename(save_path),
+                        'size': os.path.getsize(save_path),
                         'content': attachment_data
                     }
-
+                    
+                    attachments_info.append(attachment_info)
                     email_info['attachments'].append(attachment_info)
-                    logger.debug(f"提取附件: {filename}, 大小: {attachment_size} 字节")
+                    logger.debug(f"成功提取: {os.path.basename(save_path)}")
+                    success_count += 1
+
                 except Exception as e:
-                    logger.warning(f"处理附件时出错: {e}")
-                    continue
+                    error_msg = f"提取附件 {i} 时出错: {str(e)}"
+                    error_messages.append(error_msg)
+                    logger.warning(error_msg)
 
-        msg.close()
+            # 清理COM对象
+            msg = None
+            outlook = None
 
-        logger.info(f"成功处理MSG文件，提取到 {len(email_info['attachments'])} 个附件")
+        except Exception as e:
+            error_messages.append(f"处理文件时出错: {str(e)}")
+            logger.error(f"处理MSG文件时出错: {e}")
+            # 清理临时文件夹
+            shutil.rmtree(temp_folder, ignore_errors=True)
+            return {"success": False, "error": f"处理文件时出错: {str(e)}"}
+
+        # 清理临时文件夹
+        shutil.rmtree(temp_folder, ignore_errors=True)
+
+        logger.info(f"成功处理MSG文件，提取到 {success_count}/{total_count} 个附件")
         return {"success": True, "email_data": email_info}
 
     except FileNotFoundError:
@@ -102,9 +120,6 @@ def process_msg_file(file_path: str) -> Dict[str, Any]:
     except PermissionError:
         logger.error(f"没有权限访问MSG文件: {file_path}")
         return {"success": False, "error": f"没有权限访问文件: {file_path}"}
-    except extract_msg.exceptions.StandardViolationError as e:
-        logger.error(f"MSG文件格式错误: {e}")
-        return {"success": False, "error": f"文件格式错误: {str(e)}"}
     except Exception as e:
         logger.error(f"处理MSG文件时出错: {e}")
         return {"success": False, "error": f"处理文件时出错: {str(e)}"}
