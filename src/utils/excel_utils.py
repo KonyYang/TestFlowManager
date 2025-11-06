@@ -2,7 +2,8 @@
 Excel工具模块
 提供底层的Excel操作工具函数
 """
-
+import os
+from openpyxl import Workbook
 from typing import List, Optional, Any
 from src.core.logger import logger
 
@@ -123,7 +124,6 @@ def open_excel_file(file_path: str, read_only: bool = True, password: Optional[s
     """
     try:
         # 检查文件是否存在
-        import os
         if not os.path.exists(file_path):
             logger.error(f"Excel file not found: {file_path}")
             return None
@@ -156,6 +156,34 @@ def open_excel_file(file_path: str, read_only: bool = True, password: Optional[s
     except Exception as e:
         logger.error(f"Failed to open workbook '{file_path}': {e}")
         return None
+
+def save_to_excel(file_path, data):
+    """
+    将数据保存到Excel文件
+
+    Args:
+        file_path: 文件路径
+        data: 要保存的数据，二维列表格式
+
+    Returns:
+        bool: 保存成功返回True，失败返回False
+    """
+    try:
+        # 创建工作簿
+        wb = Workbook()
+        ws = wb.active
+
+        # 写入数据
+        for row_idx, row_data in enumerate(data):
+            for col_idx, cell_value in enumerate(row_data):
+                ws.cell(row=row_idx + 1, column=col_idx + 1, value=cell_value)
+
+        # 保存文件
+        wb.save(file_path)
+        return True
+    except Exception as e:
+        print(f"保存Excel失败: {e}")
+        return False
 
 def get_worksheet_names(workbook: Any) -> List[str]:
     """
