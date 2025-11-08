@@ -43,7 +43,7 @@ class MatrixDialog(QDialog):
         button_layout = QHBoxLayout()
         self.find_btn = QPushButton("查找")
         self.export_btn = QPushButton("导出Excel")
-        self.import_btn = QPushButton("导入Excel")
+        self.import_btn = QPushButton("导入Spec")
 
         button_layout.addWidget(self.find_btn)
         button_layout.addWidget(self.export_btn)
@@ -71,7 +71,7 @@ class MatrixDialog(QDialog):
         # 连接信号
         self.find_btn.clicked.connect(self._find_content)
         self.export_btn.clicked.connect(self._export_to_excel)
-        self.import_btn.clicked.connect(self._import_from_excel)
+        self.import_btn.clicked.connect(self._import_from_spec)
 
         layout.addLayout(button_layout)
         layout.addWidget(self.table_widget)
@@ -152,6 +152,7 @@ class MatrixDialog(QDialog):
         add_col_action = QAction("添加列", self)
         insert_col_action = QAction("插入列", self)
         move_col_action = QAction("移动列", self)
+        rename_col_action = QAction("重命名列", self)
         copy_col_action = QAction("复制列", self)
         paste_col_action = QAction("粘贴列", self)
         remove_col_action = QAction("删除列", self)
@@ -160,6 +161,7 @@ class MatrixDialog(QDialog):
         add_col_action.triggered.connect(self._add_column)
         insert_col_action.triggered.connect(self._insert_column)
         move_col_action.triggered.connect(lambda: self._move_column_at(col))
+        rename_col_action.triggered.connect(lambda: self._rename_column(col))
         copy_col_action.triggered.connect(lambda: self._copy_column(col))
         paste_col_action.triggered.connect(lambda: self._paste_column(col))
         remove_col_action.triggered.connect(self._remove_column)
@@ -178,6 +180,7 @@ class MatrixDialog(QDialog):
         menu.addAction(add_col_action)
         menu.addAction(insert_col_action)
         menu.addAction(move_col_action)
+        menu.addAction(rename_col_action)
         menu.addAction(copy_col_action)
         menu.addAction(paste_col_action)
         menu.addAction(remove_col_action)
@@ -191,17 +194,38 @@ class MatrixDialog(QDialog):
         self.table_widget.setRowCount(len(self.service.data_model.rows))
         self.table_widget.setColumnCount(len(self.service.data_model.headers))
         self.table_widget.setHorizontalHeaderLabels(self.service.data_model.headers)
+        
+        # 添加日志信息
+        print(f"更新表格显示: {len(self.service.data_model.rows)} 行, {len(self.service.data_model.headers)} 列")
 
         for row_idx, row_data in enumerate(self.service.data_model.rows):
             for col_idx, cell_value in enumerate(row_data):
                 item = QTableWidgetItem(cell_value)
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable)
                 self.table_widget.setItem(row_idx, col_idx, item)
+                
+        # 显示前几行的数据用于调试
+        if len(self.service.data_model.rows) > 0 and len(self.service.data_model.headers) > 0:
+            print(f"表头: {self.service.data_model.headers[:5]}...")
+            for i, row in enumerate(self.service.data_model.rows[:3]):  # 只显示前3行
+                print(f"第{i+1}行: {row[:5] if len(row) > 5 else row}...")
+
+    def _sync_table_to_model(self):
+        """将表格数据同步到数据模型 - View层数据同步"""
+        for row_idx in range(self.table_widget.rowCount()):
+            if row_idx < len(self.service.data_model.rows):
+                for col_idx in range(self.table_widget.columnCount()):
+                    if col_idx < len(self.service.data_model.rows[row_idx]):
+                        item = self.table_widget.item(row_idx, col_idx)
+                        if item:
+                            self.service.data_model.rows[row_idx][col_idx] = item.text()
 
     def _add_column(self):
         """添加列 - View层事件触发"""
         column_name, ok = QInputDialog.getText(self, "添加列", "请输入列名:")
         if ok and column_name:
+            # 同步表格数据到模型
+            self._sync_table_to_model()
             # 触发Controller层处理
             self.service.add_column(column_name)
             self._update_table()
@@ -212,6 +236,8 @@ class MatrixDialog(QDialog):
         if current_col >= 0:
             column_name, ok = QInputDialog.getText(self, "插入列", "请输入列名:")
             if ok and column_name:
+                # 同步表格数据到模型
+                self._sync_table_to_model()
                 # 在当前选中列之后插入新列（但不能在保护列之前，也不能在Remark列之后）
                 insert_position = max(5, current_col + 1)
                 # 确保不在Remark列之后插入
@@ -226,6 +252,8 @@ class MatrixDialog(QDialog):
         """移动列 - View层事件触发"""
         current_col = self.table_widget.currentColumn()
         if current_col >= 0:
+            # 同步表格数据到模型
+            self._sync_table_to_model()
             # 询问要移动到的位置
             new_position, ok = QInputDialog.getInt(
                 self, "移动列", "请输入目标列位置(从0开始):", 
@@ -242,6 +270,8 @@ class MatrixDialog(QDialog):
     def _move_column_at(self, col):
         """在指定列移动列 - View层事件触发"""
         if col >= 0:
+            # 同步表格数据到模型
+            self._sync_table_to_model()
             # 询问要移动到的位置
             new_position, ok = QInputDialog.getInt(
                 self, "移动列", "请输入目标列位置(从0开始):", 
@@ -269,16 +299,43 @@ class MatrixDialog(QDialog):
             if self.copied_col_data is None:
                 return
                 
+            # 同步表格数据到模型
+            self._sync_table_to_model()
             # 调用服务层粘贴列
             result = self.service.paste_column(col, self.copied_col_data)
             if result:
                 self._update_table()
         # 不再弹出提醒菜单
 
+    def _rename_column(self, col):
+        """重命名列 - View层事件触发"""
+        if col >= 0:
+            # 检查列是否可以重命名
+            if col < 5 or col == len(self.service.data_model.headers) - 1:
+                QMessageBox.warning(self, "操作失败", "无法重命名保护列")
+                return
+                
+            # 获取新列名
+            current_name = self.service.data_model.headers[col]
+            new_name, ok = QInputDialog.getText(self, "重命名列", "请输入新列名:", text=current_name)
+            if ok and new_name:
+                # 同步表格数据到模型
+                self._sync_table_to_model()
+                # 调用服务层重命名列
+                result = self.service.rename_column(col, new_name)
+                if result:
+                    self._update_table()
+                else:
+                    QMessageBox.warning(self, "操作失败", "列重命名失败")
+        else:
+            QMessageBox.warning(self, "操作失败", "请选择要重命名的列")
+
     def _remove_column(self):
         """删除列 - View层事件触发"""
         column_index = self.table_widget.currentColumn()
         if column_index >= 0:
+            # 同步表格数据到模型
+            self._sync_table_to_model()
             # 触发Controller层处理
             result = self.service.remove_column(column_index)
             if not result:
@@ -294,6 +351,8 @@ class MatrixDialog(QDialog):
 
     def _add_row(self):
         """添加行 - View层事件触发"""
+        # 同步表格数据到模型
+        self._sync_table_to_model()
         # 触发Controller层处理
         self.service.add_row()
         self._update_table()
@@ -302,11 +361,12 @@ class MatrixDialog(QDialog):
         """插入行 - View层事件触发"""
         current_row = self.table_widget.currentRow()
         if current_row >= 0:
-            # 检查是否可以在当前行插入
-            if current_row == 0:  # 标题行不能插入
-                QMessageBox.warning(self, "操作失败", "无法在标题行插入新行")
-            elif current_row == len(self.service.data_model.rows) - 1:  # 最后一行不能在其后插入
-                QMessageBox.warning(self, "操作失败", "无法在最后一行后插入新行")
+            # 同步表格数据到模型
+            self._sync_table_to_model()
+            # 移除对第一行和最后一行的限制，允许在任何位置插入
+            # 检查是否是有效的位置
+            if current_row < 0 or current_row >= len(self.service.data_model.rows):
+                QMessageBox.warning(self, "操作失败", "无法在选定位置插入新行")
             else:
                 # 触发Controller层处理
                 result = self.service.insert_row(current_row)
@@ -323,6 +383,8 @@ class MatrixDialog(QDialog):
         """移动行 - View层事件触发"""
         current_row = self.table_widget.currentRow()
         if current_row >= 0:
+            # 同步表格数据到模型
+            self._sync_table_to_model()
             # 询问要移动到的位置
             new_position, ok = QInputDialog.getInt(
                 self, "移动行", "请输入目标行位置(从0开始):", 
@@ -339,6 +401,8 @@ class MatrixDialog(QDialog):
     def _move_row_at(self, row):
         """在指定行移动行 - View层事件触发"""
         if row >= 0:
+            # 同步表格数据到模型
+            self._sync_table_to_model()
             # 询问要移动到的位置
             new_position, ok = QInputDialog.getInt(
                 self, "移动行", "请输入目标行位置(从0开始):", 
@@ -366,6 +430,8 @@ class MatrixDialog(QDialog):
             if self.copied_row_data is None:
                 return
                 
+            # 同步表格数据到模型
+            self._sync_table_to_model()
             # 调用服务层粘贴行
             result = self.service.paste_row(row, self.copied_row_data)
             if result:
@@ -376,6 +442,8 @@ class MatrixDialog(QDialog):
         """删除行 - View层事件触发"""
         row_index = self.table_widget.currentRow()
         if row_index >= 0:
+            # 同步表格数据到模型
+            self._sync_table_to_model()
             # 检查是否是受保护的行
             if row_index == 0:  # 第一行
                 QMessageBox.warning(self, "操作失败", "无法删除第一行")
@@ -409,11 +477,32 @@ class MatrixDialog(QDialog):
             self, "保存Excel文件", "", "Excel Files (*.xlsx)"
         )
         if file_path:
+            # 同步表格数据到模型
+            self._sync_table_to_model()
             # 触发Controller层处理
             if self.service.export_to_excel(file_path):
                 QMessageBox.information(self, "成功", "数据已成功导出到Excel")
             else:
                 QMessageBox.warning(self, "错误", "导出失败")
+
+    def _import_from_spec(self):
+        """从Spec导入数据 - View层事件触发"""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "选择Spec文件", "", "Spec Files (*.pdf *.doc *.docx *.xls *.xlsx)"
+        )
+        if file_path:
+            print(f"选择的文件路径: {file_path}")
+            # 同步表格数据到模型
+            self._sync_table_to_model()
+            # 触发Controller层处理
+            print("开始导入Spec数据...")
+            if self.service.import_from_spec(file_path):
+                print("Spec数据导入成功")
+                QMessageBox.information(self, "成功", "数据已成功导入")
+                self._update_table()
+            else:
+                print("Spec数据导入失败")
+                QMessageBox.warning(self, "错误", "导入失败")
 
     def _import_from_excel(self):
         """从Excel导入数据 - View层事件触发"""
@@ -421,6 +510,8 @@ class MatrixDialog(QDialog):
             self, "选择Excel文件", "", "Excel Files (*.xlsx)"
         )
         if file_path:
+            # 同步表格数据到模型
+            self._sync_table_to_model()
             # 触发Controller层处理
             if self.service.import_from_excel(file_path):
                 QMessageBox.information(self, "成功", "数据已成功导入")

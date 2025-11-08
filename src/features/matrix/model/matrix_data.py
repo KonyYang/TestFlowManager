@@ -93,15 +93,25 @@ class MatrixData:
         if row_index < 0 or row_index >= len(self.rows):
             return False
             
-        # 防止在受保护的行位置插入（第一行和最后一行）
-        if row_index == 0 or row_index == len(self.rows) - 1:
-            return False
+        # 允许在第一行之前和最后一行之后插入新行
+        # 但不能在标题行内部或Sample size行内部插入
+        if row_index == 0:
+            # 在标题行之前插入新行
+            if row_data is None:
+                row_data = [""] * len(self.headers)
+            self.rows.insert(row_index, row_data)
+        elif row_index == len(self.rows) - 1:
+            # 在Sample size行之后插入新行
+            if row_data is None:
+                row_data = [""] * len(self.headers)
+            # 插入到Sample size行之前（即倒数第二行位置）
+            self.rows.insert(row_index, row_data)
+        else:
+            # 在其他位置插入新行
+            if row_data is None:
+                row_data = [""] * len(self.headers)
+            self.rows.insert(row_index, row_data)
             
-        if row_data is None:
-            row_data = [""] * len(self.headers)
-            
-        # 在指定位置插入新行
-        self.rows.insert(row_index, row_data)
         # 确保最后一行首列始终是"Sample size"
         self.rows[-1][0] = "Sample size"
         return True
@@ -200,6 +210,20 @@ class MatrixData:
             
         # 确保最后一行首列始终是"Sample size"
         self.rows[-1][0] = "Sample size"
+        return True
+
+    def rename_column(self, col_index, new_name):
+        """重命名列 - Model层业务规则"""
+        # 检查索引是否有效
+        if col_index < 0 or col_index >= len(self.headers):
+            return False
+            
+        # 保护列不能被重命名（前5列和最后一列）
+        if col_index < 5 or col_index == len(self.headers) - 1:
+            return False
+            
+        # 更新列标题
+        self.headers[col_index] = new_name
         return True
 
     def get_cell_value(self, row_index, col_index):

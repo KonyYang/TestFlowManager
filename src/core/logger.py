@@ -61,25 +61,25 @@ class Logger:
             if file_handler:
                 self.logger.addHandler(file_handler)
 
-    def debug(self, message: str) -> None:
+    def debug(self, message: str, exc_info: bool = False) -> None:
         """记录调试信息"""
-        self.logger.debug(message)
+        self.logger.debug(message, exc_info=exc_info)
 
-    def info(self, message: str) -> None:
+    def info(self, message: str, exc_info: bool = False) -> None:
         """记录一般信息"""
-        self.logger.info(message)
+        self.logger.info(message, exc_info=exc_info)
 
-    def warning(self, message: str) -> None:
+    def warning(self, message: str, exc_info: bool = False) -> None:
         """记录警告信息"""
-        self.logger.warning(message)
+        self.logger.warning(message, exc_info=exc_info)
 
-    def error(self, message: str) -> None:
+    def error(self, message: str, exc_info: bool = False) -> None:
         """记录错误信息"""
-        self.logger.error(message)
+        self.logger.error(message, exc_info=exc_info)
 
-    def critical(self, message: str) -> None:
+    def critical(self, message: str, exc_info: bool = False) -> None:
         """记录严重错误信息"""
-        self.logger.critical(message)
+        self.logger.critical(message, exc_info=exc_info)
 
 
 # 创建全局日志实例

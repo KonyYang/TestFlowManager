@@ -26,3 +26,12 @@ class MatrixController:
     def import_from_excel(self, file_path):
         """从Excel导入数据 - Controller层业务流程"""
         return self.service.import_from_excel(file_path)
+
+    def import_from_spec(self, file_path):
+        """从Spec导入数据 - Controller层业务流程"""
+        return self.service.import_from_spec(file_path)
+
+    def show_test_group_selector(self):
+        """显示测试组选择器 - Controller层协调"""
+        # 这个方法可以直接通过View层调用对话框，不需要额外的业务逻辑
+        pass
