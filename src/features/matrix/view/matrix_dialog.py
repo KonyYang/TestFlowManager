@@ -57,8 +57,9 @@ class MatrixDialog(QDialog):
         self.table_widget.verticalHeader().setSectionResizeMode(QHeaderView.Interactive)
         self.table_widget.verticalHeader().setVisible(True)  # 显示行号
         self.table_widget.setAlternatingRowColors(True)  # 交替行颜色
-        # 禁用单元格的右键菜单，只保留行头和列头的右键菜单
-        self.table_widget.setContextMenuPolicy(Qt.NoContextMenu)
+        # 启用单元格的右键菜单
+        self.table_widget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table_widget.customContextMenuRequested.connect(self._show_cell_context_menu)
         # 连接行头和列头的右键菜单事件
         self.table_widget.verticalHeader().setContextMenuPolicy(Qt.CustomContextMenu)
         self.table_widget.verticalHeader().customContextMenuRequested.connect(self._show_row_context_menu)
@@ -77,10 +78,109 @@ class MatrixDialog(QDialog):
         layout.addWidget(self.table_widget)
         self.setLayout(layout)
 
-    def _show_context_menu(self, position):
-        """显示右键菜单"""
-        # 移除此方法，因为我们不再需要单元格的右键菜单
-        pass
+    def _show_cell_context_menu(self, position):
+        """显示单元格右键菜单"""
+        # 获取点击的单元格位置
+        cell_pos = self.table_widget.itemAt(position)
+        
+        # 创建单元格菜单
+        menu = QMenu()
+        
+        # 添加单元格相关菜单项
+        merge_cells_action = QAction("合并单元格", self)
+        split_cell_action = QAction("拆分单元格", self)
+        
+        # 连接动作到处理函数
+        merge_cells_action.triggered.connect(self._merge_cells)
+        split_cell_action.triggered.connect(self._split_cell)
+        
+        # 检查是否可以合并单元格（必须选中多个单元格）
+        selected_ranges = self.table_widget.selectedRanges()
+        if len(selected_ranges) == 0 or (selected_ranges[0].rowCount() == 1 and selected_ranges[0].columnCount() == 1):
+            merge_cells_action.setEnabled(False)
+            
+        # 检查是否可以拆分单元格（必须选中单个单元格且该单元格是合并的）
+        if len(selected_ranges) == 1:
+            range_ = selected_ranges[0]
+            if range_.rowCount() == 1 and range_.columnCount() == 1:
+                # 检查单元格是否是合并的
+                row = range_.topRow()
+                col = range_.leftColumn()
+                # 简单检查：如果单元格跨度大于1，则认为是合并的
+                # 注意：QTableWidget的单元格合并检查比较复杂，这里简化处理
+                pass
+            else:
+                split_cell_action.setEnabled(False)
+        else:
+            split_cell_action.setEnabled(False)
+        
+        # 添加动作到菜单
+        menu.addAction(merge_cells_action)
+        menu.addAction(split_cell_action)
+        
+        # 在鼠标位置显示菜单
+        menu.exec_(QCursor.pos())
+
+    def _merge_cells(self):
+        """合并选中的单元格"""
+        selected_ranges = self.table_widget.selectedRanges()
+        if len(selected_ranges) > 0:
+            range_ = selected_ranges[0]
+            # 获取选中区域的行数和列数
+            row_count = range_.rowCount()
+            col_count = range_.columnCount()
+            
+            if row_count > 1 or col_count > 1:
+                # 合并单元格
+                top_row = range_.topRow()
+                left_col = range_.leftColumn()
+                bottom_row = range_.bottomRow()
+                right_col = range_.rightColumn()
+                
+                # 获取合并区域第一个单元格的文本
+                first_cell_text = ""
+                first_item = self.table_widget.item(top_row, left_col)
+                if first_item:
+                    first_cell_text = first_item.text()
+                
+                # 设置第一个单元格的跨度
+                self.table_widget.setSpan(top_row, left_col, row_count, col_count)
+                
+                # 更新第一个单元格的文本
+                if first_item:
+                    first_item.setText(first_cell_text)
+                    first_item.setTextAlignment(Qt.AlignCenter)
+                
+                # 清除其他单元格的内容（这些单元格在视觉上被合并了，但实际仍存在）
+                for row in range(top_row, bottom_row + 1):
+                    for col in range(left_col, right_col + 1):
+                        if row != top_row or col != left_col:
+                            item = self.table_widget.item(row, col)
+                            if item:
+                                item.setText("")
+                
+                QMessageBox.information(self, "成功", f"成功合并 {row_count}x{col_count} 区域")
+            else:
+                QMessageBox.warning(self, "操作失败", "请选择多个单元格进行合并")
+
+    def _split_cell(self):
+        """拆分合并的单元格"""
+        selected_ranges = self.table_widget.selectedRanges()
+        if len(selected_ranges) > 0:
+            range_ = selected_ranges[0]
+            row = range_.topRow()
+            col = range_.leftColumn()
+            
+            # 获取当前单元格的跨度
+            row_span = self.table_widget.rowSpan(row, col)
+            col_span = self.table_widget.columnSpan(row, col)
+            
+            if row_span > 1 or col_span > 1:
+                # 拆分单元格
+                self.table_widget.setSpan(row, col, 1, 1)
+                QMessageBox.information(self, "成功", "成功拆分单元格")
+            else:
+                QMessageBox.warning(self, "操作失败", "选中的单元格未被合并")
 
     def _show_row_context_menu(self, position):
         """显示行右键菜单"""
@@ -113,11 +213,6 @@ class MatrixDialog(QDialog):
         paste_row_action.triggered.connect(lambda: self._paste_row(row))
         remove_row_action.triggered.connect(self._remove_row)
         
-        # 根据行位置启用/禁用某些菜单项
-        if row == 0 or row == len(self.service.data_model.rows) - 1:  # 标题行或最后一行
-            remove_row_action.setEnabled(False)
-            move_row_action.setEnabled(False)
-            
         # 如果没有复制的数据，禁用粘贴功能
         if self.copied_row_data is None:
             paste_row_action.setEnabled(False)
@@ -166,12 +261,6 @@ class MatrixDialog(QDialog):
         paste_col_action.triggered.connect(lambda: self._paste_column(col))
         remove_col_action.triggered.connect(self._remove_column)
         
-        # 根据列位置启用/禁用某些菜单项
-        if col < 5:  # 前5列是保护列
-            remove_col_action.setEnabled(False)
-        elif col == len(self.service.data_model.headers) - 1:  # 最后一列是Remark列
-            remove_col_action.setEnabled(False)
-            
         # 如果没有复制的数据，禁用粘贴功能
         if self.copied_col_data is None:
             paste_col_action.setEnabled(False)
@@ -202,6 +291,8 @@ class MatrixDialog(QDialog):
             for col_idx, cell_value in enumerate(row_data):
                 item = QTableWidgetItem(cell_value)
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable)
+                # 设置单元格内容水平和垂直居中
+                item.setTextAlignment(Qt.AlignCenter)
                 self.table_widget.setItem(row_idx, col_idx, item)
                 
         # 显示前几行的数据用于调试
@@ -209,6 +300,9 @@ class MatrixDialog(QDialog):
             print(f"表头: {self.service.data_model.headers[:5]}...")
             for i, row in enumerate(self.service.data_model.rows[:3]):  # 只显示前3行
                 print(f"第{i+1}行: {row[:5] if len(row) > 5 else row}...")
+        
+        # 根据内容自动调整行高
+        self.table_widget.resizeRowsToContents()
 
     def _sync_table_to_model(self):
         """将表格数据同步到数据模型 - View层数据同步"""
@@ -238,11 +332,8 @@ class MatrixDialog(QDialog):
             if ok and column_name:
                 # 同步表格数据到模型
                 self._sync_table_to_model()
-                # 在当前选中列之后插入新列（但不能在保护列之前，也不能在Remark列之后）
-                insert_position = max(5, current_col + 1)
-                # 确保不在Remark列之后插入
-                if insert_position >= len(self.service.data_model.headers) - 1:
-                    insert_position = len(self.service.data_model.headers) - 1
+                # 在当前选中列之后插入新列
+                insert_position = current_col + 1
                 self.service.add_column(column_name, insert_position)
                 self._update_table()
         else:
@@ -310,11 +401,6 @@ class MatrixDialog(QDialog):
     def _rename_column(self, col):
         """重命名列 - View层事件触发"""
         if col >= 0:
-            # 检查列是否可以重命名
-            if col < 5 or col == len(self.service.data_model.headers) - 1:
-                QMessageBox.warning(self, "操作失败", "无法重命名保护列")
-                return
-                
             # 获取新列名
             current_name = self.service.data_model.headers[col]
             new_name, ok = QInputDialog.getText(self, "重命名列", "请输入新列名:", text=current_name)
@@ -339,12 +425,7 @@ class MatrixDialog(QDialog):
             # 触发Controller层处理
             result = self.service.remove_column(column_index)
             if not result:
-                if column_index < 5:  # 保护的列无法删除
-                    QMessageBox.warning(self, "操作失败", "无法删除默认列，请删除用户自定义列")
-                elif column_index == len(self.service.data_model.headers) - 1:  # Remark列
-                    QMessageBox.warning(self, "操作失败", "无法删除Remark列")
-                else:
-                    QMessageBox.warning(self, "操作失败", "删除列失败")
+                QMessageBox.warning(self, "操作失败", "删除列失败")
             self._update_table()
         else:
             QMessageBox.warning(self, "操作失败", "请选择要删除的列")
@@ -363,19 +444,12 @@ class MatrixDialog(QDialog):
         if current_row >= 0:
             # 同步表格数据到模型
             self._sync_table_to_model()
-            # 移除对第一行和最后一行的限制，允许在任何位置插入
-            # 检查是否是有效的位置
-            if current_row < 0 or current_row >= len(self.service.data_model.rows):
-                QMessageBox.warning(self, "操作失败", "无法在选定位置插入新行")
+            # 触发Controller层处理
+            result = self.service.insert_row(current_row)
+            if result:
+                self._update_table()
             else:
-                # 触发Controller层处理
-                result = self.service.insert_row(current_row)
-                if result:
-                    self._update_table()
-                    # 不再弹出成功提醒
-                    # QMessageBox.information(self, "成功", "行插入成功")
-                else:
-                    QMessageBox.warning(self, "操作失败", "行插入失败")
+                QMessageBox.warning(self, "操作失败", "行插入失败")
         else:
             QMessageBox.warning(self, "操作失败", "请选择要在其前插入新行的位置")
 
@@ -444,17 +518,11 @@ class MatrixDialog(QDialog):
         if row_index >= 0:
             # 同步表格数据到模型
             self._sync_table_to_model()
-            # 检查是否是受保护的行
-            if row_index == 0:  # 第一行
-                QMessageBox.warning(self, "操作失败", "无法删除第一行")
-            elif row_index == len(self.service.data_model.rows) - 1:  # 最后一行
-                QMessageBox.warning(self, "操作失败", "无法删除最后一行")
-            else:
-                # 触发Controller层处理
-                result = self.service.remove_row(row_index)
-                if not result:
-                    QMessageBox.warning(self, "操作失败", "删除行失败")
-                self._update_table()
+            # 触发Controller层处理
+            result = self.service.remove_row(row_index)
+            if not result:
+                QMessageBox.warning(self, "操作失败", "删除行失败")
+            self._update_table()
         else:
             QMessageBox.warning(self, "操作失败", "请选择要删除的行")
 
@@ -498,7 +566,7 @@ class MatrixDialog(QDialog):
             print("开始导入Spec数据...")
             if self.service.import_from_spec(file_path):
                 print("Spec数据导入成功")
-                QMessageBox.information(self, "成功", "数据已成功导入")
+                # 静默更新，不显示成功消息框
                 self._update_table()
             else:
                 print("Spec数据导入失败")

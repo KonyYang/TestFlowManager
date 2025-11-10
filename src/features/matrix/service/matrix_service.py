@@ -23,19 +23,11 @@ class MatrixService:
 
     def add_row(self, row_data=None):
         """添加新行 - Service层业务逻辑"""
-        result = self.data_model.add_row(row_data)
-        # 确保最后一行首列始终是"Sample size"
-        if len(self.data_model.rows) > 0:
-            self.data_model.rows[-1][0] = "Sample size"
-        return result
+        return self.data_model.add_row(row_data)
 
     def insert_row(self, row_index, row_data=None):
         """在指定位置插入新行 - Service层业务逻辑"""
-        result = self.data_model.insert_row(row_index, row_data)
-        # 确保最后一行首列始终是"Sample size"
-        if len(self.data_model.rows) > 0:
-            self.data_model.rows[-1][0] = "Sample size"
-        return result
+        return self.data_model.insert_row(row_index, row_data)
 
     def remove_row(self, row_index):
         """删除指定行 - Service层业务逻辑"""
@@ -106,34 +98,21 @@ class MatrixService:
 
             # 读取表头
             for cell in ws[1]:
-                self.data_model.headers.append(cell.value)
+                self.data_model.headers.append(cell.value if cell.value is not None else "")
 
             # 读取数据行
             for row in ws.iter_rows(min_row=2, values_only=True):
-                self.data_model.rows.append(list(row))
+                self.data_model.rows.append([cell if cell is not None else "" for cell in row])
 
-            # 确保前5列是默认列
-            default_headers = ["Test Item", "PARA", "Test Method", "Condition", "Requirement"]
-            for i in range(min(5, len(self.data_model.headers))):
-                self.data_model.headers[i] = default_headers[i]
-            
-            # 确保有"Remark"列作为最后一列
-            if len(self.data_model.headers) <= 5:
-                self.data_model.headers.append("Remark")
-            elif self.data_model.headers[-1] != "Remark":
-                self.data_model.headers.append("Remark")
+            # 确保有默认列数
+            while len(self.data_model.headers) < 8:
+                self.data_model.headers.append(self.data_model._column_index_to_letter(len(self.data_model.headers)))
             
             # 确保有默认行
             if len(self.data_model.rows) == 0:
-                # 添加默认的第一行和第二行
-                self.data_model.rows.append(["1", "", "", "", "", ""])
-                self.data_model.rows.append(["", "", "", "", "", ""])
-            
-            # 确保最后一行首列是"Sample size"
-            if len(self.data_model.rows) > 0:
-                while len(self.data_model.rows) < 3:  # 确保至少有3行
-                    self.data_model.rows.insert(-1, [""] * len(self.data_model.headers))
-                self.data_model.rows[-1][0] = "Sample size"
+                # 添加默认行
+                self.data_model.rows.append([""] * len(self.data_model.headers))
+                self.data_model.rows.append([""] * len(self.data_model.headers))
 
             return True
         except Exception as e:
@@ -162,51 +141,30 @@ class MatrixService:
                 self.data_model.headers = []
                 self.data_model.rows = []
                 
-                # 处理表头
+                # 处理表头（使用字母标识）
                 if len(data) > 0:
-                    self.data_model.headers = data[0]  # 第一行为表头
+                    for i in range(len(data[0])):  # 根据数据列数创建表头
+                        self.data_model.headers.append(self.data_model._column_index_to_letter(i))
                     logger.info(f"设置表头，列数: {len(self.data_model.headers)}")
                     
                 # 处理数据行
-                if len(data) > 1:
-                    self.data_model.rows = data[1:]  # 其余行为数据行
+                if len(data) > 0:
+                    self.data_model.rows = data  # 数据行就是所有提取的数据
                     logger.info(f"设置数据行，行数: {len(self.data_model.rows)}")
-                    
-                # 确保前5列是默认列
-                default_headers = ["Test Item", "PARA", "Test Method", "Condition", "Requirement"]
-                for i in range(min(5, len(self.data_model.headers))):
-                    if i < len(default_headers):
-                        old_header = self.data_model.headers[i]
-                        self.data_model.headers[i] = default_headers[i]
-                        logger.info(f"更新第{i+1}列表头: {old_header} -> {default_headers[i]}")
                 
-                # 确保有"Remark"列作为最后一列
-                if len(self.data_model.headers) <= 5:
-                    self.data_model.headers.append("Remark")
-                    logger.info("添加Remark列")
-                elif self.data_model.headers[-1] != "Remark":
-                    self.data_model.headers.append("Remark")
-                    logger.info("确保最后一列为Remark列")
+                # 确保有默认列数
+                while len(self.data_model.headers) < 8:
+                    self.data_model.headers.append(self.data_model._column_index_to_letter(len(self.data_model.headers)))
                 
                 # 确保有默认行
                 if len(self.data_model.rows) == 0:
-                    # 添加默认的第一行和第二行
-                    self.data_model.rows.append(["1", "", "", "", "", ""])
-                    self.data_model.rows.append(["", "", "", "", "", ""])
+                    # 添加默认行
+                    self.data_model.rows.append([""] * len(self.data_model.headers))
+                    self.data_model.rows.append([""] * len(self.data_model.headers))
                     logger.info("添加默认行数据")
-                
-                # 确保最后一行首列是"Sample size"
-                if len(self.data_model.rows) > 0:
-                    while len(self.data_model.rows) < 3:  # 确保至少有3行
-                        self.data_model.rows.insert(-1, [""] * len(self.data_model.headers))
-                    self.data_model.rows[-1][0] = "Sample size"
-                    logger.info("确保最后一行首列为'Sample size'")
 
                 # 对数据进行处理，类似VBA代码中的ProcessRows逻辑
                 self._process_rows()
-                
-                # 插入默认的测试方法、条件和要求列
-                self._insert_default_columns()
                 
                 # 检查重复值
                 self._check_duplicate_values()
@@ -233,56 +191,19 @@ class MatrixService:
         except Exception as e:
             logger.error(f"处理行数据时出错: {e}", exc_info=True)
             
-    def _insert_default_columns(self):
-        """
-        在第2列后插入测试方法、条件和要求列，并设置表头
-        类似于VBA中的InsertColumnsAndheaders函数
-        """
-        try:
-            logger.info("开始插入默认列")
-            # 确保至少有5列
-            while len(self.data_model.headers) < 5:
-                self.data_model.headers.append("")
-                for row in self.data_model.rows:
-                    row.append("")
-                logger.info(f"列数不足，添加空列，当前列数: {len(self.data_model.headers)}")
-            
-            # 插入3列（测试方法、条件、要求）
-            # 在位置2插入3列（即在第3列位置插入）
-            for _ in range(3):
-                self.data_model.headers.insert(2, "")
-                for row in self.data_model.rows:
-                    row.insert(2, "")
-            logger.info("插入3个默认列")
-            
-            # 设置新列的表头
-            if len(self.data_model.headers) > 1:
-                self.data_model.headers[1] = "Test Item"  # 第2列
-            if len(self.data_model.headers) > 2:
-                self.data_model.headers[2] = "Test Method"  # 第3列
-            if len(self.data_model.headers) > 3:
-                self.data_model.headers[3] = "Condition"  # 第4列
-            if len(self.data_model.headers) > 4:
-                self.data_model.headers[4] = "Requirement"  # 第5列
-                
-            logger.info(f"更新默认列表头: {self.data_model.headers[:6]}")
-            logger.info("插入默认列并设置表头完成")
-        except Exception as e:
-            logger.error(f"插入默认列时出错: {e}", exc_info=True)
-            
     def _check_duplicate_values(self):
         """
-        检查重复值，从第6列到最后一列，从第2行到倒数第二行
+        检查重复值，从第1列到最后一列，从第1行到倒数第二行
         类似于VBA中的CheckDuplicateValues函数
         """
         try:
             logger.info("开始检查重复值")
-            # 从第6列到最后一列（索引5到len-1）
-            for col_index in range(5, len(self.data_model.headers)):
+            # 从第1列到最后一列
+            for col_index in range(len(self.data_model.headers)):
                 # 用于存储已见过的值
                 seen_values = set()
-                # 从第2行到倒数第二行（索引1到len-2）
-                for row_index in range(1, len(self.data_model.rows) - 1):
+                # 从第1行到倒数第二行
+                for row_index in range(len(self.data_model.rows) - 1):
                     if row_index < len(self.data_model.rows) and col_index < len(self.data_model.rows[row_index]):
                         cell_value = self.data_model.rows[row_index][col_index]
                         # 如果值不为空且已经见过，则标记为重复
