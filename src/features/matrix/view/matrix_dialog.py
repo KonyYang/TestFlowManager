@@ -212,7 +212,7 @@ class MatrixDialog(QDialog):
                 self.split_cell_action = None
                 
                 # 显示成功消息
-                logger.info(f"成功合并 {row_count}x{col_count} 区域")
+                # logger.info(f"成功合并 {row_count}x{col_count} 区域")
                 QMessageBox.information(self, "成功", f"成功合并 {row_count}x{col_count} 区域")
             else:
                 logger.warning("合并失败 - 请选择多个单元格进行合并")
@@ -249,7 +249,7 @@ class MatrixDialog(QDialog):
                 self.merge_cells_action = None
                 self.split_cell_action = None
                 
-                QMessageBox.information(self, "成功", "成功拆分单元格")
+                # QMessageBox.information(self, "成功", "成功拆分单元格")
             else:
                 logger.warning("拆分失败 - 选中的单元格未被合并")
                 QMessageBox.warning(self, "操作失败", "选中的单元格未被合并")
