@@ -113,6 +113,13 @@ class MatrixData:
             return True
         return False
 
+    def adjust_spans_for_row_removal(self, removed_row_index):
+        """
+        调整由于行删除而受影响的单元格跨度
+        """
+        # 这个方法将在视图层处理，因为需要访问QTableWidget的特定方法
+        pass
+
     def move_row(self, from_index, to_index):
         """移动行 - Model层业务规则"""
         # 检查索引是否有效

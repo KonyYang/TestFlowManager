@@ -68,6 +68,9 @@ class MatrixDialog(QDialog):
         self.table_widget.horizontalHeader().customContextMenuRequested.connect(self._show_col_context_menu)
         # 连接选择变化信号以更新菜单状态
         self.table_widget.itemSelectionChanged.connect(self._on_item_selection_changed)
+        # 设置选择模式为连续选择
+        self.table_widget.setSelectionMode(QTableWidget.ContiguousSelection)
+        self.table_widget.setSelectionBehavior(QTableWidget.SelectItems)
 
         # 设置表格初始状态
         self._update_table()
@@ -82,14 +85,13 @@ class MatrixDialog(QDialog):
         self.setLayout(layout)
         
         # 存储菜单项引用以便动态更新
-        self.merge_cells_action = None
-        self.split_cell_action = None
+        self.merge_or_split_action = None
 
     def _on_item_selection_changed(self):
         """当选择项改变时更新菜单状态"""
         logger.debug("选择项发生变化")
         # 如果菜单项存在，则更新它们的状态
-        if self.merge_cells_action or self.split_cell_action:
+        if self.merge_or_split_action:
             self._update_cell_menu_actions()
 
     def _update_cell_menu_actions(self):
@@ -97,164 +99,65 @@ class MatrixDialog(QDialog):
         selected_ranges = self.table_widget.selectedRanges()
         logger.debug(f"更新菜单状态，当前选中区域数: {len(selected_ranges)}")
         
-        # 更新合并单元格菜单项状态
-        if self.merge_cells_action:
-            if len(selected_ranges) == 0 or (selected_ranges[0].rowCount() == 1 and selected_ranges[0].columnCount() == 1):
-                logger.debug("禁用合并单元格菜单项")
-                self.merge_cells_action.setEnabled(False)
-            else:
-                logger.debug("启用合并单元格菜单项")
-                self.merge_cells_action.setEnabled(True)
-            
-        # 更新拆分单元格菜单项状态
-        if self.split_cell_action:
-            # 只检查第一个选中区域
-            if len(selected_ranges) >= 1:
-                range_ = selected_ranges[0]
-                logger.debug(f"检查第一个选中区域: {range_.rowCount()}x{range_.columnCount()} 从({range_.topRow()},{range_.leftColumn()})到({range_.bottomRow()},{range_.rightColumn()})")
-                if range_.rowCount() == 1 and range_.columnCount() == 1:
-                    row = range_.topRow()
-                    col = range_.leftColumn()
-                    # 检查单元格是否是合并的
-                    row_span = self.table_widget.rowSpan(row, col)
-                    col_span = self.table_widget.columnSpan(row, col)
-                    logger.debug(f"检查单元格({row},{col})是否合并: rowSpan={row_span}, colSpan={col_span}")
-                    if row_span > 1 or col_span > 1:
-                        logger.debug("启用拆分单元格菜单项")
-                        self.split_cell_action.setEnabled(True)
-                    else:
-                        logger.debug("禁用拆分单元格菜单项 - 单元格未合并")
-                        self.split_cell_action.setEnabled(False)
-                else:
-                    logger.debug("禁用拆分单元格菜单项 - 选中多个单元格")
-                    self.split_cell_action.setEnabled(False)
-            else:
-                logger.debug(f"禁用拆分单元格菜单项 - 没有选中区域: {len(selected_ranges)}")
-                self.split_cell_action.setEnabled(False)
+        # 调试：打印所有选中区域的详细信息
+        for i, range_ in enumerate(selected_ranges):
+            logger.debug(f"选中区域 {i}: {range_.rowCount()}x{range_.columnCount()} "
+                        f"从({range_.topRow()},{range_.leftColumn()})到({range_.bottomRow()},{range_.rightColumn()})")
+        
+        # 更新合并或拆分菜单项状态
+        if self.merge_or_split_action:
+            self.merge_or_split_action.setEnabled(len(selected_ranges) > 0)
 
     def _show_cell_context_menu(self, position):
         """显示单元格右键菜单"""
         logger.debug(f"显示单元格右键菜单，位置: {position}")
-        # 获取点击的单元格位置
-        cell_pos = self.table_widget.itemAt(position)
         
         # 创建单元格菜单
         menu = QMenu()
         
         # 添加单元格相关菜单项
-        self.merge_cells_action = QAction("合并单元格", self)
-        self.split_cell_action = QAction("拆分单元格", self)
+        merge_or_split_action = QAction("合并或拆分单元格", self)
+        
+        # 如果可以撤销或重做，添加相应的菜单项
+        if self.service.can_undo_cell_operation():
+            undo_action = QAction(f"撤销 {self.service.get_undo_cell_operation_text()}", self)
+            undo_action.triggered.connect(self._undo_cell_operation)
+            menu.addAction(undo_action)
+            
+        if self.service.can_redo_cell_operation():
+            redo_action = QAction(f"重做 {self.service.get_redo_cell_operation_text()}", self)
+            redo_action.triggered.connect(self._redo_cell_operation)
+            menu.addAction(redo_action)
+            
+        if self.service.can_undo_cell_operation() or self.service.can_redo_cell_operation():
+            menu.addSeparator()
         
         # 连接动作到处理函数
-        self.merge_cells_action.triggered.connect(self._merge_cells)
-        self.split_cell_action.triggered.connect(self._split_cell)
+        merge_or_split_action.triggered.connect(self._merge_or_split_cells)
         
-        # 更新菜单项状态
-        self._update_cell_menu_actions()
+        # 保存菜单项引用以便动态更新
+        self.merge_or_split_action = merge_or_split_action
         
         # 添加动作到菜单
-        menu.addAction(self.merge_cells_action)
-        menu.addAction(self.split_cell_action)
+        menu.addAction(merge_or_split_action)
         
         # 在鼠标位置显示菜单
         menu.exec_(QCursor.pos())
 
-    def _merge_cells(self):
-        """合并选中的单元格"""
-        selected_ranges = self.table_widget.selectedRanges()
-        logger.debug(f"执行合并单元格操作，选中区域数: {len(selected_ranges)}")
-        if len(selected_ranges) > 0:
-            range_ = selected_ranges[0]
-            # 获取选中区域的行数和列数
-            row_count = range_.rowCount()
-            col_count = range_.columnCount()
-            logger.debug(f"选中区域范围: {row_count}x{col_count}")
-            
-            if row_count > 1 or col_count > 1:
-                # 合并单元格
-                top_row = range_.topRow()
-                left_col = range_.leftColumn()
-                bottom_row = range_.bottomRow()
-                right_col = range_.rightColumn()
-                logger.debug(f"合并区域: 从({top_row},{left_col})到({bottom_row},{right_col})")
-                
-                # 获取合并区域第一个单元格的文本
-                first_cell_text = ""
-                first_item = self.table_widget.item(top_row, left_col)
-                if first_item:
-                    first_cell_text = first_item.text()
-                logger.debug(f"合并区域第一个单元格文本: '{first_cell_text}'")
-                
-                # 设置第一个单元格的跨度
-                self.table_widget.setSpan(top_row, left_col, row_count, col_count)
-                logger.debug(f"设置单元格({top_row},{left_col})的跨度为 {row_count}x{col_count}")
-                
-                # 更新第一个单元格的文本
-                if first_item:
-                    first_item.setText(first_cell_text)
-                    first_item.setTextAlignment(Qt.AlignCenter)
-                
-                # 清除其他单元格的内容（这些单元格在视觉上被合并了，但实际仍存在）
-                for row in range(top_row, bottom_row + 1):
-                    for col in range(left_col, right_col + 1):
-                        if row != top_row or col != left_col:
-                            item = self.table_widget.item(row, col)
-                            if item:
-                                item.setText("")
-                
-                # 重新选择合并后的单元格区域 - 只选择左上角单元格
-                selection_model = self.table_widget.selectionModel()
-                cell_index = self.table_widget.model().index(top_row, left_col)
-                selection_model.select(cell_index, QItemSelectionModel.ClearAndSelect)
-                
-                # 更新菜单项引用为None，避免引用失效
-                self.merge_cells_action = None
-                self.split_cell_action = None
-                
-                # 显示成功消息
-                # logger.info(f"成功合并 {row_count}x{col_count} 区域")
-                QMessageBox.information(self, "成功", f"成功合并 {row_count}x{col_count} 区域")
-            else:
-                logger.warning("合并失败 - 请选择多个单元格进行合并")
-                QMessageBox.warning(self, "操作失败", "请选择多个单元格进行合并")
-        else:
-            logger.warning("合并失败 - 没有选中任何区域")
+    def _merge_or_split_cells(self):
+        """根据选中单元格的状态执行合并或拆分操作"""
+        logger.debug("执行合并或拆分单元格操作")
+        self.service.merge_or_split_cells(self.table_widget)
 
-    def _split_cell(self):
-        """拆分合并的单元格"""
-        selected_ranges = self.table_widget.selectedRanges()
-        logger.debug(f"执行拆分单元格操作，选中区域数: {len(selected_ranges)}")
-        if len(selected_ranges) > 0:
-            range_ = selected_ranges[0]
-            row = range_.topRow()
-            col = range_.leftColumn()
-            logger.debug(f"选中单元格位置: ({row},{col})")
-            
-            # 获取当前单元格的跨度
-            row_span = self.table_widget.rowSpan(row, col)
-            col_span = self.table_widget.columnSpan(row, col)
-            logger.debug(f"单元格({row},{col})当前跨度: {row_span}x{col_span}")
-            
-            if row_span > 1 or col_span > 1:
-                # 拆分单元格
-                self.table_widget.setSpan(row, col, 1, 1)
-                logger.info(f"成功拆分单元格({row},{col})，原跨度: {row_span}x{col_span}")
-                
-                # 重新选择单元格
-                selection_model = self.table_widget.selectionModel()
-                cell_index = self.table_widget.model().index(row, col)
-                selection_model.select(cell_index, QItemSelectionModel.ClearAndSelect)
-                
-                # 更新菜单项引用为None，避免引用失效
-                self.merge_cells_action = None
-                self.split_cell_action = None
-                
-                # QMessageBox.information(self, "成功", "成功拆分单元格")
-            else:
-                logger.warning("拆分失败 - 选中的单元格未被合并")
-                QMessageBox.warning(self, "操作失败", "选中的单元格未被合并")
-        else:
-            logger.warning("拆分失败 - 没有选中任何区域")
+    def _undo_cell_operation(self):
+        """撤销单元格操作"""
+        logger.debug("执行撤销单元格操作")
+        self.service.undo_cell_operation()
+
+    def _redo_cell_operation(self):
+        """重做单元格操作"""
+        logger.debug("执行重做单元格操作")
+        self.service.redo_cell_operation()
 
     def _show_row_context_menu(self, position):
         """显示行右键菜单"""
@@ -501,6 +404,9 @@ class MatrixDialog(QDialog):
         """删除列 - View层事件触发"""
         column_index = self.table_widget.currentColumn()
         if column_index >= 0:
+            # 在删除列之前，先处理可能影响的合并单元格
+            self._handle_spans_before_column_removal(column_index)
+            
             # 同步表格数据到模型
             self._sync_table_to_model()
             # 触发Controller层处理
@@ -510,6 +416,14 @@ class MatrixDialog(QDialog):
             self._update_table()
         else:
             QMessageBox.warning(self, "操作失败", "请选择要删除的列")
+            
+    def _handle_spans_before_column_removal(self, col_index):
+        """
+        在删除列之前处理可能受影响的合并单元格
+        """
+        # 使用服务层的方法来清理与合并单元格相关的跨度信息
+        # 这里我们直接操作table_widget，因为这是视图层特定的逻辑
+        self.service.cell_service.clear_spans_for_column(self.table_widget, col_index)
 
     def _add_row(self):
         """添加行 - View层事件触发"""
@@ -597,6 +511,9 @@ class MatrixDialog(QDialog):
         """删除行 - View层事件触发"""
         row_index = self.table_widget.currentRow()
         if row_index >= 0:
+            # 在删除行之前，先处理可能影响的合并单元格
+            self._handle_spans_before_row_removal(row_index)
+            
             # 同步表格数据到模型
             self._sync_table_to_model()
             # 触发Controller层处理
@@ -606,6 +523,14 @@ class MatrixDialog(QDialog):
             self._update_table()
         else:
             QMessageBox.warning(self, "操作失败", "请选择要删除的行")
+            
+    def _handle_spans_before_row_removal(self, row_index):
+        """
+        在删除行之前处理可能受影响的合并单元格
+        """
+        # 使用服务层的方法来清理与合并单元格相关的跨度信息
+        # 这里我们直接操作table_widget，因为这是视图层特定的逻辑
+        self.service.cell_service.clear_spans_for_row(self.table_widget, row_index)
 
     def _find_content(self):
         """查找内容 - View层事件触发"""
@@ -651,19 +576,4 @@ class MatrixDialog(QDialog):
                 self._update_table()
             else:
                 print("Spec数据导入失败")
-                QMessageBox.warning(self, "错误", "导入失败")
-
-    def _import_from_excel(self):
-        """从Excel导入数据 - View层事件触发"""
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "选择Excel文件", "", "Excel Files (*.xlsx)"
-        )
-        if file_path:
-            # 同步表格数据到模型
-            self._sync_table_to_model()
-            # 触发Controller层处理
-            if self.service.import_from_excel(file_path):
-                QMessageBox.information(self, "成功", "数据已成功导入")
-                self._update_table()
-            else:
                 QMessageBox.warning(self, "错误", "导入失败")

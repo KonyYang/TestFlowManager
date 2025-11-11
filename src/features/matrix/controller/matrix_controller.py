@@ -30,6 +30,26 @@ class MatrixController:
     def import_from_spec(self, file_path):
         """从Spec导入数据 - Controller层业务流程"""
         return self.service.import_from_spec(file_path)
+        
+    def merge_or_split_cells(self, table_widget):
+        """合并或拆分单元格 - Controller层业务流程"""
+        return self.service.merge_or_split_cells(table_widget)
+        
+    def can_undo_cell_operation(self):
+        """检查是否可以撤销单元格操作 - Controller层业务流程"""
+        return self.service.can_undo_cell_operation()
+        
+    def can_redo_cell_operation(self):
+        """检查是否可以重做单元格操作 - Controller层业务流程"""
+        return self.service.can_redo_cell_operation()
+        
+    def undo_cell_operation(self):
+        """撤销单元格操作 - Controller层业务流程"""
+        return self.service.undo_cell_operation()
+        
+    def redo_cell_operation(self):
+        """重做单元格操作 - Controller层业务流程"""
+        return self.service.redo_cell_operation()
 
     def show_test_group_selector(self):
         """显示测试组选择器 - Controller层协调"""

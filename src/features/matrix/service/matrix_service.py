@@ -1,6 +1,7 @@
 # src/features/matrix/service/matrix_service.py
 from src.core import logger
 from src.features.matrix.model.matrix_data import MatrixData
+from src.features.matrix.service.matrix_cell_service import MatrixCellService
 from src.utils.excel_utils import save_to_excel
 
 class MatrixService:
@@ -8,6 +9,7 @@ class MatrixService:
 
     def __init__(self):
         self.data_model = MatrixData()
+        self.cell_service = MatrixCellService()
 
     def add_column(self, column_name="", position=None):
         """添加新列 - Service层业务逻辑"""
@@ -68,6 +70,34 @@ class MatrixService:
     def find_by_content(self, search_text):
         """通过内容查找单元格 - Service层查询功能"""
         return self.data_model.find_by_content(search_text)
+
+    def merge_or_split_cells(self, table_widget):
+        """合并或拆分单元格 - Service层业务逻辑"""
+        return self.cell_service.merge_or_split_cells(table_widget)
+        
+    def can_undo_cell_operation(self):
+        """检查是否可以撤销单元格操作"""
+        return self.cell_service.can_undo()
+        
+    def can_redo_cell_operation(self):
+        """检查是否可以重做单元格操作"""
+        return self.cell_service.can_redo()
+        
+    def undo_cell_operation(self):
+        """撤销单元格操作"""
+        return self.cell_service.undo()
+        
+    def redo_cell_operation(self):
+        """重做单元格操作"""
+        return self.cell_service.redo()
+        
+    def get_undo_cell_operation_text(self):
+        """获取撤销单元格操作的文本描述"""
+        return self.cell_service.undo_text()
+        
+    def get_redo_cell_operation_text(self):
+        """获取重做单元格操作的文本描述"""
+        return self.cell_service.redo_text()
 
     def export_to_excel(self, file_path):
         """导出到Excel - Service层持久化功能"""
