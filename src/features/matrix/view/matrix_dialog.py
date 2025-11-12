@@ -553,11 +553,40 @@ class MatrixDialog(QDialog):
         if file_path:
             # 同步表格数据到模型
             self._sync_table_to_model()
+            # 导出前先保存合并单元格信息
+            self._save_merged_cells_info()
             # 触发Controller层处理
             if self.service.export_to_excel(file_path):
                 QMessageBox.information(self, "成功", "数据已成功导出到Excel")
             else:
                 QMessageBox.warning(self, "错误", "导出失败")
+                
+    def _save_merged_cells_info(self):
+        """
+        保存合并单元格信息到数据模型中，以便导出时能够恢复
+        """
+        # 收集所有合并单元格的信息
+        merged_cells_info = []
+        
+        # 遍历表格中的所有单元格
+        for row in range(self.table_widget.rowCount()):
+            for col in range(self.table_widget.columnCount()):
+                row_span = self.table_widget.rowSpan(row, col)
+                col_span = self.table_widget.columnSpan(row, col)
+                
+                # 如果这是一个合并单元格的起始点
+                if row_span > 1 or col_span > 1:
+                    merged_cells_info.append({
+                        'top_row': row,
+                        'left_col': col,
+                        'row_count': row_span,
+                        'col_count': col_span
+                    })
+        
+        # 将合并单元格信息保存到服务层或模型中
+        # 这里我们可以通过某种方式将信息传递给导出功能
+        # 由于当前架构限制，我们暂时将信息保存在服务层的一个临时属性中
+        self.service.merged_cells_info = merged_cells_info
 
     def _import_from_spec(self):
         """从Spec导入数据 - View层事件触发"""

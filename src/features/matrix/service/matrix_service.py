@@ -2,7 +2,9 @@
 from src.core import logger
 from src.features.matrix.model.matrix_data import MatrixData
 from src.features.matrix.service.matrix_cell_service import MatrixCellService
-from src.utils.excel_utils import save_to_excel
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+
 
 class MatrixService:
     """Matrix服务层 - Service层"""
@@ -10,6 +12,8 @@ class MatrixService:
     def __init__(self):
         self.data_model = MatrixData()
         self.cell_service = MatrixCellService()
+        # 临时存储合并单元格信息
+        self.merged_cells_info = []
 
     def add_column(self, column_name="", position=None):
         """添加新列 - Service层业务逻辑"""
@@ -102,15 +106,33 @@ class MatrixService:
     def export_to_excel(self, file_path):
         """导出到Excel - Service层持久化功能"""
         try:
-            # 使用现有的excel_utils工具
-            data = []
-            # 添加表头
-            data.append(self.data_model.headers)
-            # 添加数据行
-            for row in self.data_model.rows:
-                data.append(row)
+            # 创建工作簿
+            wb = Workbook()
+            ws = wb.active
 
-            return save_to_excel(file_path, data)
+            # 添加数据行（不包括表头）
+            for row_idx, row_data in enumerate(self.data_model.rows):
+                for col_idx, cell_value in enumerate(row_data):
+                    ws.cell(row=row_idx + 1, column=col_idx + 1, value=cell_value)
+
+            # 应用合并单元格
+            for merge_info in self.merged_cells_info:
+                top_row = merge_info['top_row'] + 1  # +1 because of 1-based indexing (no header row)
+                left_col = merge_info['left_col'] + 1  # +1 because of 1-based indexing
+                bottom_row = top_row + merge_info['row_count'] - 1
+                right_col = left_col + merge_info['col_count'] - 1
+                
+                # 合并单元格
+                ws.merge_cells(
+                    start_row=top_row, 
+                    start_column=left_col, 
+                    end_row=bottom_row, 
+                    end_column=right_col
+                )
+
+            # 保存文件
+            wb.save(file_path)
+            return True
         except Exception as e:
             logger.error(f"导出Excel失败: {e}")
             return False
@@ -193,11 +215,7 @@ class MatrixService:
                     self.data_model.rows.append([""] * len(self.data_model.headers))
                     logger.info("添加默认行数据")
 
-                # 对数据进行处理，类似VBA代码中的ProcessRows逻辑
-                self._process_rows()
-                
-                # 检查重复值
-                self._check_duplicate_values()
+
                 
                 logger.info("Spec数据导入完成")
                 return True
