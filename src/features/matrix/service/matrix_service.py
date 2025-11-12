@@ -59,10 +59,6 @@ class MatrixService:
         """粘贴列 - Service层业务逻辑"""
         return self.data_model.paste_column(col_index, column_data)
 
-    def rename_column(self, col_index, new_name):
-        """重命名列 - Service层业务逻辑"""
-        return self.data_model.rename_column(col_index, new_name)
-
     def get_cell_value(self, row_index, col_index):
         """获取单元格值 - Service层数据访问"""
         return self.data_model.get_cell_value(row_index, col_index)
@@ -171,7 +167,7 @@ class MatrixService:
             logger.error(f"导入Excel失败: {e}")
             return False
 
-    def import_from_spec(self, file_path):
+    def import_from_spec(self, file_path, page_number=None, keyword=None):
         """从Spec导入数据 - Service层持久化功能"""
         try:
             logger.info(f"开始从Spec导入数据: {file_path}")
@@ -180,7 +176,8 @@ class MatrixService:
             # 调用spec_extractor来处理不同格式的文件
             from src.features.matrix.service.spec_extractor import SpecExtractor
             extractor = SpecExtractor()
-            data = extractor.extract_from_document(file_path)
+            # 传递页码和关键字参数
+            data = extractor.extract_from_document(file_path, page_number, keyword)
             
             # 如果成功提取数据，则更新数据模型
             if data is not None:

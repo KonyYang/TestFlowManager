@@ -27,9 +27,9 @@ class MatrixController:
         """从Excel导入数据 - Controller层业务流程"""
         return self.service.import_from_excel(file_path)
 
-    def import_from_spec(self, file_path):
+    def import_from_spec(self, file_path, page_number=None, keyword=None):
         """从Spec导入数据 - Controller层业务流程"""
-        return self.service.import_from_spec(file_path)
+        return self.service.import_from_spec(file_path, page_number, keyword)
         
     def merge_or_split_cells(self, table_widget):
         """合并或拆分单元格 - Controller层业务流程"""

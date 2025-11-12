@@ -8,6 +8,8 @@ from PyQt5.QtGui import QCursor
 
 from src.features.matrix.service.matrix_service import MatrixService
 from src.core.logger import logger
+# 导入筛选对话框
+from src.features.matrix.view.matrix_filter_dialog import MatrixFilterDialog
 
 
 class MatrixDialog(QDialog):
@@ -531,14 +533,22 @@ class MatrixDialog(QDialog):
         )
         if file_path:
             print(f"选择的文件路径: {file_path}")
-            # 同步表格数据到模型
-            self._sync_table_to_model()
-            # 触发Controller层处理
-            print("开始导入Spec数据...")
-            if self.service.import_from_spec(file_path):
-                print("Spec数据导入成功")
-                # 静默更新，不显示成功消息框
-                self._update_table()
-            else:
-                print("Spec数据导入失败")
-                QMessageBox.warning(self, "错误", "导入失败")
+            
+            # 显示筛选对话框
+            filter_dialog = MatrixFilterDialog(self)
+            if filter_dialog.exec_() == MatrixFilterDialog.Accepted:
+                filter_params = filter_dialog.get_filter_params()
+                page_number = filter_params['page']
+                keyword = filter_params['keyword']
+                
+                # 同步表格数据到模型
+                self._sync_table_to_model()
+                # 触发Controller层处理，传递筛选参数
+                print("开始导入Spec数据...")
+                if self.service.import_from_spec(file_path, page_number, keyword):
+                    print("Spec数据导入成功")
+                    # 静默更新，不显示成功消息框
+                    self._update_table()
+                else:
+                    print("Spec数据导入失败")
+                    QMessageBox.warning(self, "错误", "导入失败")
