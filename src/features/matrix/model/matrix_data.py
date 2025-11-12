@@ -1,4 +1,4 @@
-# src/features/matrix/model/matrix_data.py
+# src/features/matrix/model\matrix_data.py
 class MatrixData:
     """Matrix数据模型 - Model层"""
 
@@ -31,11 +31,17 @@ class MatrixData:
         else:
             return f"Col{index}"
 
+    def _reorder_all_columns(self):
+        """重新排列所有列的标签"""
+        # 重新计算所有列的标签（A, B, C, ...）
+        for i in range(len(self.headers)):
+            self.headers[i] = self._column_index_to_letter(i)
+
     def add_column(self, column_name="", position=None):
         """添加新列 - Model层业务规则"""
         if not column_name:
             # 使用字母标识作为默认列名
-            column_name = self._column_index_to_letter(self.column_count)
+            column_name = self._column_index_to_letter(len(self.headers))
         
         # 如果没有指定位置，则添加到末尾
         if position is None:
@@ -55,6 +61,8 @@ class MatrixData:
                 row.insert(position, "")
                 
         self.column_count += 1
+        # 重新排列所有列标签
+        self._reorder_all_columns()
         return True
 
     def move_column(self, from_index, to_index):
@@ -73,6 +81,8 @@ class MatrixData:
             cell_value = row.pop(from_index)
             row.insert(to_index, cell_value)
             
+        # 重新排列所有列标签
+        self._reorder_all_columns()
         return True
 
     def remove_column(self, column_index):
@@ -83,6 +93,8 @@ class MatrixData:
                 if column_index < len(row):
                     row.pop(column_index)
             self.column_count -= 1
+            # 重新排列所有列标签
+            self._reorder_all_columns()
             return True
         return False
 
@@ -182,16 +194,6 @@ class MatrixData:
         # 更新列数据
         for i in range(len(column_data)):
             self.rows[i][col_index] = column_data[i]
-        return True
-
-    def rename_column(self, col_index, new_name):
-        """重命名列 - Model层业务规则"""
-        # 检查索引是否有效
-        if col_index < 0 or col_index >= len(self.headers):
-            return False
-            
-        # 更新列标题
-        self.headers[col_index] = new_name
         return True
 
     def get_cell_value(self, row_index, col_index):

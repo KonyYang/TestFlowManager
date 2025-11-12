@@ -42,13 +42,13 @@ class MatrixDialog(QDialog):
 
         # 添加按钮区域
         button_layout = QHBoxLayout()
+        self.import_btn = QPushButton("导入Matrix")
         self.find_btn = QPushButton("查找")
         self.export_btn = QPushButton("导出Excel")
-        self.import_btn = QPushButton("导入Spec")
 
+        button_layout.addWidget(self.import_btn)
         button_layout.addWidget(self.find_btn)
         button_layout.addWidget(self.export_btn)
-        button_layout.addWidget(self.import_btn)
 
         # 表格区域
         self.table_widget = QTableWidget()
@@ -224,20 +224,18 @@ class MatrixDialog(QDialog):
         # 创建列菜单
         menu = QMenu()
         
-        # 添加列相关菜单项
+        # 添加列相关菜单项（移除了重命名列）
         add_col_action = QAction("添加列", self)
         insert_col_action = QAction("插入列", self)
         move_col_action = QAction("移动列", self)
-        rename_col_action = QAction("重命名列", self)
         copy_col_action = QAction("复制列", self)
         paste_col_action = QAction("粘贴列", self)
         remove_col_action = QAction("删除列", self)
         
         # 连接动作到处理函数
         add_col_action.triggered.connect(self._add_column)
-        insert_col_action.triggered.connect(self._insert_column)
+        insert_col_action.triggered.connect(lambda: self._insert_column_at(col))
         move_col_action.triggered.connect(lambda: self._move_column_at(col))
-        rename_col_action.triggered.connect(lambda: self._rename_column(col))
         copy_col_action.triggered.connect(lambda: self._copy_column(col))
         paste_col_action.triggered.connect(lambda: self._paste_column(col))
         remove_col_action.triggered.connect(self._remove_column)
@@ -250,7 +248,6 @@ class MatrixDialog(QDialog):
         menu.addAction(add_col_action)
         menu.addAction(insert_col_action)
         menu.addAction(move_col_action)
-        menu.addAction(rename_col_action)
         menu.addAction(copy_col_action)
         menu.addAction(paste_col_action)
         menu.addAction(remove_col_action)
@@ -300,45 +297,21 @@ class MatrixDialog(QDialog):
 
     def _add_column(self):
         """添加列 - View层事件触发"""
-        column_name, ok = QInputDialog.getText(self, "添加列", "请输入列名:")
-        if ok and column_name:
+        # 同步表格数据到模型
+        self._sync_table_to_model()
+        # 触发Controller层处理，不使用输入的列名
+        self.service.add_column()
+        self._update_table()
+
+    def _insert_column_at(self, col):
+        """在指定位置插入列 - View层事件触发"""
+        if col >= 0:
             # 同步表格数据到模型
             self._sync_table_to_model()
-            # 触发Controller层处理
-            self.service.add_column(column_name)
+            # 在当前选中列之后插入新列
+            insert_position = col + 1
+            self.service.add_column(position=insert_position)
             self._update_table()
-
-    def _insert_column(self):
-        """插入列 - View层事件触发"""
-        current_col = self.table_widget.currentColumn()
-        if current_col >= 0:
-            column_name, ok = QInputDialog.getText(self, "插入列", "请输入列名:")
-            if ok and column_name:
-                # 同步表格数据到模型
-                self._sync_table_to_model()
-                # 在当前选中列之后插入新列
-                insert_position = current_col + 1
-                self.service.add_column(column_name, insert_position)
-                self._update_table()
-        else:
-            QMessageBox.warning(self, "操作失败", "请先选择一列")
-
-    def _move_column(self):
-        """移动列 - View层事件触发"""
-        current_col = self.table_widget.currentColumn()
-        if current_col >= 0:
-            # 同步表格数据到模型
-            self._sync_table_to_model()
-            # 询问要移动到的位置
-            new_position, ok = QInputDialog.getInt(
-                self, "移动列", "请输入目标列位置(从0开始):", 
-                current_col, 0, len(self.service.data_model.headers)-1)
-            if ok and new_position != current_col:
-                if self.service.move_column(current_col, new_position):
-                    self._update_table()
-                    QMessageBox.information(self, "成功", "列移动成功")
-                else:
-                    QMessageBox.warning(self, "操作失败", "列移动失败")
         else:
             QMessageBox.warning(self, "操作失败", "请先选择一列")
 
@@ -354,7 +327,7 @@ class MatrixDialog(QDialog):
             if ok and new_position != col:
                 if self.service.move_column(col, new_position):
                     self._update_table()
-                    QMessageBox.information(self, "成功", "列移动成功")
+                    # 移除了成功消息框
                 else:
                     QMessageBox.warning(self, "操作失败", "列移动失败")
         else:
@@ -381,24 +354,6 @@ class MatrixDialog(QDialog):
             if result:
                 self._update_table()
         # 不再弹出提醒菜单
-
-    def _rename_column(self, col):
-        """重命名列 - View层事件触发"""
-        if col >= 0:
-            # 获取新列名
-            current_name = self.service.data_model.headers[col]
-            new_name, ok = QInputDialog.getText(self, "重命名列", "请输入新列名:", text=current_name)
-            if ok and new_name:
-                # 同步表格数据到模型
-                self._sync_table_to_model()
-                # 调用服务层重命名列
-                result = self.service.rename_column(col, new_name)
-                if result:
-                    self._update_table()
-                else:
-                    QMessageBox.warning(self, "操作失败", "列重命名失败")
-        else:
-            QMessageBox.warning(self, "操作失败", "请选择要重命名的列")
 
     def _remove_column(self):
         """删除列 - View层事件触发"""
@@ -448,25 +403,6 @@ class MatrixDialog(QDialog):
         else:
             QMessageBox.warning(self, "操作失败", "请选择要在其前插入新行的位置")
 
-    def _move_row(self):
-        """移动行 - View层事件触发"""
-        current_row = self.table_widget.currentRow()
-        if current_row >= 0:
-            # 同步表格数据到模型
-            self._sync_table_to_model()
-            # 询问要移动到的位置
-            new_position, ok = QInputDialog.getInt(
-                self, "移动行", "请输入目标行位置(从0开始):", 
-                current_row, 0, len(self.service.data_model.rows)-1)
-            if ok and new_position != current_row:
-                if self.service.move_row(current_row, new_position):
-                    self._update_table()
-                    QMessageBox.information(self, "成功", "行移动成功")
-                else:
-                    QMessageBox.warning(self, "操作失败", "行移动失败")
-        else:
-            QMessageBox.warning(self, "操作失败", "请先选择一行")
-
     def _move_row_at(self, row):
         """在指定行移动行 - View层事件触发"""
         if row >= 0:
@@ -479,7 +415,7 @@ class MatrixDialog(QDialog):
             if ok and new_position != row:
                 if self.service.move_row(row, new_position):
                     self._update_table()
-                    QMessageBox.information(self, "成功", "行移动成功")
+                    # 移除了成功消息框
                 else:
                     QMessageBox.warning(self, "操作失败", "行移动失败")
         else:
