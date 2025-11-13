@@ -551,4 +551,5 @@ class MatrixDialog(QDialog):
                     self._update_table()
                 else:
                     print("Spec数据导入失败")
-                    QMessageBox.warning(self, "错误", "导入失败")
+                    # 不再显示错误消息框，保持原有数据不变
+                    pass

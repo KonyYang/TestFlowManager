@@ -217,8 +217,8 @@ class MatrixService:
                 logger.info("Spec数据导入完成")
                 return True
             else:
-                logger.warning("未能从Spec文档提取数据")
-                return False
+                logger.warning("未能从Spec文档提取数据，保持原有数据不变")
+                return True  # 返回True以保持对话框正常关闭
         except Exception as e:
             logger.error(f"导入Spec失败: {e}")
             return False

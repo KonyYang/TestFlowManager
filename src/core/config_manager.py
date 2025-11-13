@@ -174,7 +174,7 @@ class ConfigManager:
                 "position_y": 100
             },
             "logging": {
-                "level": "INFO",
+                "level": "DEBUG",
                 "file": "logs/testflow.log"
             }
         }
