@@ -284,6 +284,20 @@ class MatrixDialog(QDialog):
                 logger.debug(f"第{i+1}行: {row[:5] if len(row) > 5 else row}...")
                 print(f"第{i+1}行: {row[:5] if len(row) > 5 else row}...")
         
+        # 应用合并单元格信息（如果存在）
+        if hasattr(self.service, 'merged_cells_info') and self.service.merged_cells_info:
+            for merge_info in self.service.merged_cells_info:
+                top_row = merge_info['top_row']
+                left_col = merge_info['left_col']
+                row_count = merge_info['row_count']
+                col_count = merge_info['col_count']
+                
+                # 确保合并范围在有效范围内
+                if (top_row >= 0 and left_col >= 0 and 
+                    top_row + row_count <= self.table_widget.rowCount() and 
+                    left_col + col_count <= self.table_widget.columnCount()):
+                    self.table_widget.setSpan(top_row, left_col, row_count, col_count)
+        
         # 根据内容自动调整行高
         self.table_widget.resizeRowsToContents()
 
@@ -497,7 +511,23 @@ class MatrixDialog(QDialog):
             if self.service.export_to_excel(file_path):
                 QMessageBox.information(self, "成功", "数据已成功导出到Excel")
             else:
-                QMessageBox.warning(self, "错误", "导出失败")
+                # 检查文件是否被占用
+                import os
+                try:
+                    # 尝试以独占模式打开文件
+                    with open(file_path, 'r+b') as f:
+                        pass
+                    # 如果能打开，说明是其他问题
+                    QMessageBox.warning(self, "错误", "导出失败，请检查文件路径或权限")
+                except PermissionError:
+                    # 文件被其他程序占用
+                    QMessageBox.warning(self, "错误", "导出失败，文件已被其他程序占用（可能已在Excel中打开），请关闭文件后重试")
+                except FileNotFoundError:
+                    # 文件不存在，应该是其他问题
+                    QMessageBox.warning(self, "错误", "导出失败，请检查文件路径是否正确")
+                except Exception:
+                    # 其他未知错误
+                    QMessageBox.warning(self, "错误", "导出失败，发生未知错误")
                 
     def _save_merged_cells_info(self):
         """
@@ -505,10 +535,15 @@ class MatrixDialog(QDialog):
         """
         # 收集所有合并单元格的信息
         merged_cells_info = []
+        processed_cells = set()  # 记录已处理的单元格，避免重复
         
         # 遍历表格中的所有单元格
         for row in range(self.table_widget.rowCount()):
             for col in range(self.table_widget.columnCount()):
+                # 检查是否已经处理过这个单元格
+                if (row, col) in processed_cells:
+                    continue
+                    
                 row_span = self.table_widget.rowSpan(row, col)
                 col_span = self.table_widget.columnSpan(row, col)
                 
@@ -520,7 +555,14 @@ class MatrixDialog(QDialog):
                         'row_count': row_span,
                         'col_count': col_span
                     })
+                    logger.debug(f"收集合并单元格信息: row={row}, col={col}, row_span={row_span}, col_span={col_span}")
+                    
+                    # 标记这个合并区域内的所有单元格为已处理
+                    for r in range(row, row + row_span):
+                        for c in range(col, col + col_span):
+                            processed_cells.add((r, c))
         
+        logger.debug(f"总共收集到 {len(merged_cells_info)} 个合并单元格信息")
         # 将合并单元格信息保存到服务层或模型中
         # 这里我们可以通过某种方式将信息传递给导出功能
         # 由于当前架构限制，我们暂时将信息保存在服务层的一个临时属性中
@@ -534,22 +576,48 @@ class MatrixDialog(QDialog):
         if file_path:
             print(f"选择的文件路径: {file_path}")
             
-            # 显示筛选对话框
-            filter_dialog = MatrixFilterDialog(self)
-            if filter_dialog.exec_() == MatrixFilterDialog.Accepted:
-                filter_params = filter_dialog.get_filter_params()
-                page_number = filter_params['page']
-                keyword = filter_params['keyword']
-                
-                # 同步表格数据到模型
-                self._sync_table_to_model()
-                # 触发Controller层处理，传递筛选参数
-                print("开始导入Spec数据...")
-                if self.service.import_from_spec(file_path, page_number, keyword):
-                    print("Spec数据导入成功")
-                    # 静默更新，不显示成功消息框
-                    self._update_table()
-                else:
-                    print("Spec数据导入失败")
-                    # 不再显示错误消息框，保持原有数据不变
-                    pass
+            # 根据文件扩展名选择不同的处理方式
+            if file_path.lower().endswith(('.xls', '.xlsx')):
+                # 对于Excel文件，显示工作表选择对话框
+                from src.features.matrix.view.excel_sheet_dialog import ExcelSheetDialog
+                sheet_dialog = ExcelSheetDialog(file_path, self)
+                if sheet_dialog.exec_() == ExcelSheetDialog.Accepted:
+                    sheet_name = sheet_dialog.get_selected_sheet()
+                    
+                    # 同步表格数据到模型
+                    self._sync_table_to_model()
+                    # 触发Controller层处理，传递工作表名称参数
+                    print("开始导入Excel数据...")
+                    if self.service.import_from_excel_with_sheet(file_path, sheet_name):
+                        print("Excel数据导入成功")
+                        # 静默更新，不显示成功消息框
+                        self._update_table()
+                    else:
+                        print("Excel数据导入失败")
+                        # 显示错误消息框，提醒用户导入失败
+                        QMessageBox.warning(self, "导入失败", "从Excel文件导入数据失败，请检查文件格式或内容。")
+            else:
+                # 对于Word和PDF文件，显示原有的筛选对话框
+                filter_dialog = MatrixFilterDialog(self)
+                if filter_dialog.exec_() == MatrixFilterDialog.Accepted:
+                    filter_params = filter_dialog.get_filter_params()
+                    page_number = filter_params['page']
+                    keyword = filter_params['keyword']
+                    keep_open = filter_params['keep_open']  # 获取是否保持打开的选项
+                    
+                    # 同步表格数据到模型
+                    self._sync_table_to_model()
+                    # 触发Controller层处理，传递筛选参数
+                    print("开始导入Spec数据...")
+                    if self.service.import_from_spec(file_path, page_number, keyword):
+                        print("Spec数据导入成功")
+                        # 静默更新，不显示成功消息框
+                        self._update_table()
+                        
+                        # 如果用户选择保持打开，则显示提示信息
+                        if keep_open:
+                            QMessageBox.information(self, "导入完成", "数据导入完成，文档已在Word中打开供您查看。")
+                    else:
+                        print("Spec数据导入失败")
+                        # 显示错误消息框，提醒用户导入失败
+                        QMessageBox.warning(self, "导入失败", "从Spec文件导入数据失败，请检查页码或内容。")

@@ -103,20 +103,36 @@ class MatrixService:
         """导出到Excel - Service层持久化功能"""
         try:
             # 创建工作簿
+            from openpyxl import Workbook
             wb = Workbook()
             ws = wb.active
 
-            # 添加数据行（不包括表头）
+            # 先添加数据行（不包括表头）
             for row_idx, row_data in enumerate(self.data_model.rows):
                 for col_idx, cell_value in enumerate(row_data):
                     ws.cell(row=row_idx + 1, column=col_idx + 1, value=cell_value)
-
+            
             # 应用合并单元格
+            logger.debug(f"准备导出 {len(self.merged_cells_info)} 个合并单元格")
             for merge_info in self.merged_cells_info:
-                top_row = merge_info['top_row'] + 1  # +1 because of 1-based indexing (no header row)
+                top_row = merge_info['top_row'] + 1  # +1 because of 1-based indexing
                 left_col = merge_info['left_col'] + 1  # +1 because of 1-based indexing
                 bottom_row = top_row + merge_info['row_count'] - 1
                 right_col = left_col + merge_info['col_count'] - 1
+                
+                logger.debug(f"处理合并单元格: top_row={top_row}, left_col={left_col}, "
+                           f"bottom_row={bottom_row}, right_col={right_col}")
+                
+                # 先保存合并区域左上角单元格的值
+                top_left_value = ws.cell(row=top_row, column=left_col).value
+                
+                # 清空整个合并区域的值
+                for row in range(top_row, bottom_row + 1):
+                    for col in range(left_col, right_col + 1):
+                        ws.cell(row=row, column=col, value=None)
+                
+                # 将原值设置回合并区域的左上角单元格
+                ws.cell(row=top_row, column=left_col, value=top_left_value)
                 
                 # 合并单元格
                 ws.merge_cells(
@@ -129,6 +145,10 @@ class MatrixService:
             # 保存文件
             wb.save(file_path)
             return True
+        except PermissionError:
+            # 文件被其他程序占用（如Excel）
+            logger.error(f"导出Excel失败: 文件被占用，可能已在Excel中打开")
+            return False
         except Exception as e:
             logger.error(f"导出Excel失败: {e}")
             return False
@@ -167,6 +187,73 @@ class MatrixService:
             logger.error(f"导入Excel失败: {e}")
             return False
 
+    def import_from_excel_with_sheet(self, file_path, sheet_name=None):
+        """从Excel导入数据（指定工作表） - Service层持久化功能"""
+        try:
+            logger.info(f"开始从Excel导入数据: {file_path}，工作表: {sheet_name}")
+            
+            # 使用ExcelParser解析文档
+            from src.features.matrix.service.document_parsers.excel_parser import ExcelParser
+            parser = ExcelParser()
+            result = parser.parse(file_path, sheet_name)
+            data = result['data']
+            merged_cells = result['merged_cells']
+            
+            # 如果成功提取数据，则更新数据模型
+            if data is not None and len(data) > 0:
+                logger.info(f"成功从Excel文档提取数据，数据行数: {len(data)}")
+                if len(data) > 0:
+                    logger.info(f"数据列数: {len(data[0])}")
+                    logger.info(f"表头内容: {data[0][:5]}...")  # 只显示前5列
+                
+                # 清空现有数据
+                self.data_model.headers = []
+                self.data_model.rows = []
+                
+                # 处理表头（使用字母标识）
+                if len(data) > 0:
+                    for i in range(len(data[0])):  # 根据数据列数创建表头
+                        self.data_model.headers.append(self.data_model._column_index_to_letter(i))
+                    logger.info(f"设置表头，列数: {len(self.data_model.headers)}")
+                    
+                # 处理数据行
+                if len(data) > 0:
+                    self.data_model.rows = data  # 数据行就是所有提取的数据
+                    logger.info(f"设置数据行，行数: {len(self.data_model.rows)}")
+                
+                # 确保有默认列数
+                while len(self.data_model.headers) < 8:
+                    self.data_model.headers.append(self.data_model._column_index_to_letter(len(self.data_model.headers)))
+                
+                # 确保有默认行
+                if len(self.data_model.rows) == 0:
+                    # 添加默认行
+                    self.data_model.rows.append([""] * len(self.data_model.headers))
+                    self.data_model.rows.append([""] * len(self.data_model.headers))
+                    logger.info("添加默认行数据")
+
+                # 保存合并单元格信息，以便在更新表格显示时使用
+                self.merged_cells_info = []
+                for merged_cell in merged_cells:
+                    self.merged_cells_info.append({
+                        'top_row': merged_cell['min_row'],
+                        'left_col': merged_cell['min_col'],
+                        'row_count': merged_cell['max_row'] - merged_cell['min_row'] + 1,
+                        'col_count': merged_cell['max_col'] - merged_cell['min_col'] + 1
+                    })
+                    logger.debug(f"导入合并单元格信息: top_row={merged_cell['min_row']}, left_col={merged_cell['min_col']}, "
+                               f"row_count={merged_cell['max_row'] - merged_cell['min_row'] + 1}, "
+                               f"col_count={merged_cell['max_col'] - merged_cell['min_col'] + 1}")
+
+                logger.info("Excel数据导入完成")
+                return True
+            else:
+                logger.warning("未能从Excel文档提取数据，保持原有数据不变")
+                return False
+        except Exception as e:
+            logger.error(f"导入Excel失败: {e}")
+            return False
+
     def import_from_spec(self, file_path, page_number=None, keyword=None):
         """从Spec导入数据 - Service层持久化功能"""
         try:
@@ -176,11 +263,21 @@ class MatrixService:
             # 调用spec_extractor来处理不同格式的文件
             from src.features.matrix.service.spec_extractor import SpecExtractor
             extractor = SpecExtractor()
-            # 传递页码和关键字参数
-            data = extractor.extract_from_document(file_path, page_number, keyword)
+            # 传递页码和关键字参数（注意：keep_open参数在View层处理）
+            data_result = extractor.extract_from_document(file_path, page_number, keyword)
             
             # 如果成功提取数据，则更新数据模型
-            if data is not None:
+            if data_result is not None:
+                # 处理不同的返回格式
+                if isinstance(data_result, dict) and 'data' in data_result:
+                    # 包含合并单元格信息的格式
+                    data = data_result['data']
+                    merged_cells = data_result.get('merged_cells', [])
+                else:
+                    # 旧格式或仅数据格式
+                    data = data_result
+                    merged_cells = []
+                
                 logger.info(f"成功从Spec文档提取数据，数据行数: {len(data)}")
                 if len(data) > 0:
                     logger.info(f"数据列数: {len(data[0])}")
@@ -212,8 +309,16 @@ class MatrixService:
                     self.data_model.rows.append([""] * len(self.data_model.headers))
                     logger.info("添加默认行数据")
 
+                # 保存合并单元格信息
+                self.merged_cells_info = []
+                for merged_cell in merged_cells:
+                    self.merged_cells_info.append({
+                        'top_row': merged_cell['min_row'],
+                        'left_col': merged_cell['min_col'],
+                        'row_count': merged_cell['max_row'] - merged_cell['min_row'] + 1,
+                        'col_count': merged_cell['max_col'] - merged_cell['min_col'] + 1
+                    })
 
-                
                 logger.info("Spec数据导入完成")
                 return True
             else:
