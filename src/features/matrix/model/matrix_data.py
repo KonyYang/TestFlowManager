@@ -14,6 +14,8 @@ class MatrixData:
             ["Visual Examination", "", "EIA-364-18B", "10x min magnification", "No detrimental condition", "", "", ""],  # 原来的第一行数据
             ["", "", "", "", "", "", "", ""],  # 新增的空白行
             ["Sample size", "", "", "", "", "5", "5", ""],    # 原来的第二行数据
+            ["Time", "", "", "", "", "", "", ""],  # Time行
+            ["Fee", "", "", "", "", "", "", ""],   # Fee行
         ]
         self.column_count = 8  # 初始列数
         self.protected_columns = 0  # 没有保护列
