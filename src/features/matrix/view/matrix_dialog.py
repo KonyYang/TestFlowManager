@@ -44,13 +44,13 @@ class MatrixDialog(QDialog):
 
         # 添加按钮区域
         button_layout = QHBoxLayout()
-        self.init_btn = QPushButton("初始化Matrix")
         self.import_btn = QPushButton("导入Matrix")
+        self.init_btn = QPushButton("标准化Matrix")
         self.find_btn = QPushButton("查找")
         self.export_btn = QPushButton("导出Excel")
 
-        button_layout.addWidget(self.init_btn)
         button_layout.addWidget(self.import_btn)
+        button_layout.addWidget(self.init_btn)
         button_layout.addWidget(self.find_btn)
         button_layout.addWidget(self.export_btn)
 

@@ -5,19 +5,18 @@ class MatrixData:
     def __init__(self):
         # 使用字母标识作为列标题
         self.headers = []
-        for i in range(8):  # 8列使用字母标识A-H
+        for i in range(7):  # 7列使用字母标识A-G
             self.headers.append(self._column_index_to_letter(i))
         
-        # 数据行，第一行是原来的表头内容，包含Remark
+        # 数据行，第一行是原来的表头内容
         self.rows = [
-            ["Test Item", "Section", "Test Method", "Condition", "Requirement", "1", "2", "Remark"],  # 原来的表头作为第一行数据
-            ["Visual Examination", "", "EIA-364-18B", "10x min magnification", "No detrimental condition", "", "", ""],  # 原来的第一行数据
-            ["", "", "", "", "", "", "", ""],  # 新增的空白行
-            ["Sample size", "", "", "", "", "5", "5", ""],    # 原来的第二行数据
-            ["Time", "", "", "", "", "", "", ""],  # Time行
-            ["Fee", "", "", "", "", "", "", ""],   # Fee行
+            ["Test Item", "Section", "Test Method", "Condition", "Requirement", "1", "Remark"],  # 表头行
+            ["Visual Examination", "", "EIA-364-18B", "10x min magnification", "No detrimental condition", "", ""],  # 数据行1
+            ["Sample size", "", "", "", "", "5", ""],    # 数据行2
+            ["Time", "", "", "", "", "", ""],  # Time行
+            ["Fee", "", "", "", "", "", ""],   # Fee行
         ]
-        self.column_count = 8  # 初始列数
+        self.column_count = 7  # 初始列数为7列
         self.protected_columns = 0  # 没有保护列
         self.protected_rows = []  # 没有保护行
 
