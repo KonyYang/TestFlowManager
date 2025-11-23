@@ -418,35 +418,39 @@ class MatrixService:
                     if len(self.data_model.rows[row_index]) > 0:
                         test_item = self.data_model.rows[row_index][0]
                     
+                    logger.debug(f"处理第{row_index}行，Test Item: '{test_item}'")
+                    
                     # 处理Test Method列
                     if test_method_col_index < len(self.data_model.rows[row_index]):
+                        current_test_method = self.data_model.rows[row_index][test_method_col_index]
+                        logger.debug(f"第{row_index}行当前Test Method列值: '{current_test_method}'")
+                        
                         # 如果这一行有提取到的测试方法，则使用提取到的
                         if row_index in test_methods and test_methods[row_index]:
                             test_method = test_methods[row_index]
                             self.data_model.rows[row_index][test_method_col_index] = test_method
                             updated_count += 1
                             logger.debug(f"更新第{row_index}行的测试方法为: {test_method}")
-                        # 如果Test Item是"Examination"且Test Method列为空，则设置默认值
-                        elif test_item and test_item.lower().strip() == "examination":
-                            if not self.data_model.rows[row_index][test_method_col_index]:
+                        # 如果Test Item包含"Examination"且Test Method列为空，则设置默认值
+                        elif test_item and "examination" in test_item.lower().strip():
+                            logger.debug(f"检测到包含Examination的项目，检查Test Method列是否为空")
+                            if not current_test_method or not current_test_method.strip():
                                 self.data_model.rows[row_index][test_method_col_index] = "EIA-364-18"
                                 updated_count += 1
                                 logger.debug(f"为第{row_index}行的Examination设置默认测试方法: EIA-364-18")
+                            else:
+                                logger.debug(f"第{row_index}行的Test Method列已有值: '{current_test_method}'，不设置默认值")
+                        else:
+                            logger.debug(f"第{row_index}行不包含Examination或已有测试方法，Test Item: '{test_item}'")
                     
                     # 根据Test Item填充Condition和Requirement
                     if test_item:
-                        # 查找匹配的模板
-                        condition, requirement = self._find_template_match(test_item, templates, aliases)
-                        if condition and requirement:
-                            # 填充Condition列
-                            if condition_col_index < len(self.data_model.rows[row_index]):
-                                self.data_model.rows[row_index][condition_col_index] = condition
-                            
-                            # 填充Requirement列
-                            if requirement_col_index < len(self.data_model.rows[row_index]):
-                                self.data_model.rows[row_index][requirement_col_index] = requirement
-                            
-                            logger.debug(f"为第{row_index}行填充模板数据: {test_item} -> ({condition}, {requirement})")
+                        logger.debug(f"为第{row_index}行填充Condition和Requirement模板数据")
+                        self._fill_condition_requirement_templates(
+                            row_index, test_item, templates, aliases,
+                            condition_col_index, requirement_col_index)
+                    else:
+                        logger.debug(f"第{row_index}行没有Test Item，跳过模板填充")
                 else:
                     logger.warning(f"无法更新第{row_index}行的测试方法，行索引或列索引超出范围")
             
@@ -456,6 +460,42 @@ class MatrixService:
         except Exception as e:
             logger.error(f"从规格书提取测试方法时出错: {e}", exc_info=True)
             return False
+
+    def _fill_condition_requirement_templates(self, row_index, test_item, templates, aliases, 
+                                            condition_col_index, requirement_col_index):
+        """
+        根据测试项目填充Condition和Requirement模板数据
+        
+        Args:
+            row_index: 行索引
+            test_item: 测试项目名称
+            templates: 模板数据字典
+            aliases: 别名字典
+            condition_col_index: Condition列索引
+            requirement_col_index: Requirement列索引
+        """
+        logger.debug(f"开始为第{row_index}行填充模板数据，Test Item: '{test_item}'")
+        
+        # 查找匹配的模板
+        condition, requirement = self._find_template_match(test_item, templates, aliases)
+        if condition and requirement:
+            # 填充Condition列
+            if condition_col_index < len(self.data_model.rows[row_index]):
+                self.data_model.rows[row_index][condition_col_index] = condition
+                logger.debug(f"为第{row_index}行填充Condition: '{condition}'")
+            else:
+                logger.warning(f"Condition列索引超出范围，无法填充第{row_index}行")
+            
+            # 填充Requirement列
+            if requirement_col_index < len(self.data_model.rows[row_index]):
+                self.data_model.rows[row_index][requirement_col_index] = requirement
+                logger.debug(f"为第{row_index}行填充Requirement: '{requirement}'")
+            else:
+                logger.warning(f"Requirement列索引超出范围，无法填充第{row_index}行")
+            
+            logger.debug(f"为第{row_index}行填充模板数据完成: {test_item} -> ({condition}, {requirement})")
+        else:
+            logger.debug(f"未找到第{row_index}行Test Item '{test_item}' 的匹配模板")
 
     def _find_template_match(self, test_item, templates, aliases):
         """
@@ -470,10 +510,12 @@ class MatrixService:
             tuple: (condition, requirement) 或 (None, None)
         """
         test_item_lower = test_item.lower().strip()
+        logger.debug(f"查找模板匹配: '{test_item}' (标准化为: '{test_item_lower}')")
         
         # 直接匹配
         for key, (condition, requirement) in templates.items():
             if key.lower() == test_item_lower:
+                logger.debug(f"直接匹配成功: '{test_item}' -> '{key}'")
                 return condition, requirement
         
         # 别名匹配
@@ -481,13 +523,16 @@ class MatrixService:
             if main_key in templates:
                 for alias in alias_list:
                     if alias.lower() in test_item_lower or test_item_lower in alias.lower():
+                        logger.debug(f"别名匹配成功: '{test_item}' -> '{main_key}' (通过别名: '{alias}')")
                         return templates[main_key]
         
         # 模糊匹配
         for key, (condition, requirement) in templates.items():
             if key.lower() in test_item_lower or test_item_lower in key.lower():
+                logger.debug(f"模糊匹配成功: '{test_item}' -> '{key}'")
                 return condition, requirement
-                
+        
+        logger.debug(f"未找到匹配的模板: '{test_item}'")
         return None, None
 
     def _process_rows(self):
