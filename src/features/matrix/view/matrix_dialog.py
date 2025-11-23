@@ -48,11 +48,13 @@ class MatrixDialog(QDialog):
         self.init_btn = QPushButton("标准化Matrix")
         self.find_btn = QPushButton("查找")
         self.export_btn = QPushButton("导出Excel")
+        self.extract_test_methods_btn = QPushButton("填充测试规格")
 
         button_layout.addWidget(self.import_btn)
         button_layout.addWidget(self.init_btn)
         button_layout.addWidget(self.find_btn)
         button_layout.addWidget(self.export_btn)
+        button_layout.addWidget(self.extract_test_methods_btn)
 
         # 表格区域
         self.table_widget = QTableWidget()
@@ -84,6 +86,7 @@ class MatrixDialog(QDialog):
         self.find_btn.clicked.connect(self._find_content)
         self.export_btn.clicked.connect(self._export_to_excel)
         self.import_btn.clicked.connect(self._import_from_spec)
+        self.extract_test_methods_btn.clicked.connect(self._extract_test_methods_from_spec)
 
         layout.addLayout(button_layout)
         layout.addWidget(self.table_widget)
@@ -266,6 +269,11 @@ class MatrixDialog(QDialog):
         self.table_widget.setRowCount(len(self.service.data_model.rows))
         self.table_widget.setColumnCount(len(self.service.data_model.headers))
         self.table_widget.setHorizontalHeaderLabels(self.service.data_model.headers)
+        
+        # 设置表头样式 - 灰色背景
+        header_style = "QHeaderView::section { background-color: lightgray; }"
+        self.table_widget.horizontalHeader().setStyleSheet(header_style)
+        self.table_widget.verticalHeader().setStyleSheet(header_style)
         
         # 添加日志信息
         logger.debug(f"更新表格显示: {len(self.service.data_model.rows)} 行, {len(self.service.data_model.headers)} 列")
@@ -584,54 +592,95 @@ class MatrixDialog(QDialog):
 
     def _import_from_spec(self):
         """从Spec导入数据 - View层事件触发"""
+        # 弹出文件选择对话框
         file_path, _ = QFileDialog.getOpenFileName(
             self, "选择Spec文件", "", "Spec Files (*.pdf *.doc *.docx *.xls *.xlsx)"
         )
         if file_path:
-            print(f"选择的文件路径: {file_path}")
-            
-            # 根据文件扩展名选择不同的处理方式
-            if file_path.lower().endswith(('.xls', '.xlsx')):
-                # 对于Excel文件，显示工作表选择对话框
-                from src.features.matrix.view.excel_sheet_dialog import ExcelSheetDialog
-                sheet_dialog = ExcelSheetDialog(file_path, self)
-                if sheet_dialog.exec_() == ExcelSheetDialog.Accepted:
-                    sheet_name = sheet_dialog.get_selected_sheet()
+            # 弹出筛选对话框
+            filter_dialog = MatrixFilterDialog(self)
+            if filter_dialog.exec_() == QDialog.Accepted:
+                # 获取筛选参数
+                filter_params = filter_dialog.get_filter_params()
+                page_number = filter_params['page']
+                keyword = filter_params['keyword']
+                
+                try:
+                    logger.info(f"开始从Spec导入数据: {file_path}")
+                    logger.info(f"筛选参数: 页码={page_number}, 关键字='{keyword}'")
                     
-                    # 同步表格数据到模型
-                    self._sync_table_to_model()
-                    # 触发Controller层处理，传递工作表名称参数
-                    print("开始导入Excel数据...")
-                    if self.service.import_from_excel_with_sheet(file_path, sheet_name):
-                        print("Excel数据导入成功")
-                        # 静默更新，不显示成功消息框
+                    # 调用服务层导入数据
+                    success = self.service.import_from_spec(file_path, page_number, keyword)
+                    
+                    if success:
+                        # 更新表格显示
                         self._update_table()
                     else:
-                        print("Excel数据导入失败")
-                        # 显示错误消息框，提醒用户导入失败
-                        QMessageBox.warning(self, "导入失败", "从Excel文件导入数据失败，请检查文件格式或内容。")
-            else:
-                # 对于Word和PDF文件，显示原有的筛选对话框
-                filter_dialog = MatrixFilterDialog(self)
-                if filter_dialog.exec_() == MatrixFilterDialog.Accepted:
-                    filter_params = filter_dialog.get_filter_params()
-                    page_number = filter_params['page']
-                    keyword = filter_params['keyword']
-                    keep_open = filter_params['keep_open']  # 获取是否保持打开的选项
-                    
-                    # 同步表格数据到模型
-                    self._sync_table_to_model()
-                    # 触发Controller层处理，传递筛选参数
-                    print("开始导入Spec数据...")
-                    if self.service.import_from_spec(file_path, page_number, keyword):
-                        print("Spec数据导入成功")
-                        # 静默更新，不显示成功消息框
-                        self._update_table()
-                        
-                        # 如果用户选择保持打开，则显示提示信息
-                        if keep_open:
-                            QMessageBox.information(self, "导入完成", "数据导入完成，文档已在Word中打开供您查看。")
-                    else:
-                        print("Spec数据导入失败")
+                        logger.error("Spec数据导入失败")
                         # 显示错误消息框，提醒用户导入失败
                         QMessageBox.warning(self, "导入失败", "从Spec文件导入数据失败，请检查页码或内容。")
+                except Exception as e:
+                    logger.error(f"导入Spec时出错: {e}", exc_info=True)
+                    QMessageBox.warning(self, "错误", f"导入Spec时出错: {str(e)}")
+
+    def _extract_test_methods_from_spec(self):
+        """从规格书提取测试方法 - View层事件触发"""
+        try:
+            logger.info("开始提取测试方法")
+            
+            # 检查是否有导入的规格书文件
+            if not self.service.last_imported_spec_path:
+                # 如果没有已导入的规格书文件，提示用户选择文件
+                reply = QMessageBox.question(
+                    self, 
+                    "选择规格书文件", 
+                    "未检测到已导入的规格书文件，是否现在选择文件进行测试方法提取？", 
+                    QMessageBox.Yes | QMessageBox.No, 
+                    QMessageBox.Yes
+                )
+                
+                if reply == QMessageBox.Yes:
+                    # 弹出文件选择对话框
+                    file_path, _ = QFileDialog.getOpenFileName(
+                        self, 
+                        "选择规格书文件", 
+                        "", 
+                        "Spec Files (*.pdf *.doc *.docx *.xls *.xlsx)"
+                    )
+                    
+                    if file_path:
+                        # 保存文件路径
+                        self.service.last_imported_spec_path = file_path
+                        logger.info(f"用户选择的规格书文件: {file_path}")
+                    else:
+                        # 用户取消了文件选择
+                        logger.info("用户取消了文件选择")
+                        return
+                else:
+                    # 用户选择不选择文件
+                    logger.info("用户选择不选择文件")
+                    return
+            
+            # 同步表格数据到模型
+            self._sync_table_to_model()
+            
+            # 调用服务层提取测试方法
+            success = self.service.extract_test_methods_from_spec()
+            
+            if success:
+                # 更新表格显示
+                self._update_table()
+                QMessageBox.information(self, "成功", "测试方法提取完成")
+                logger.info("测试方法提取完成")
+            else:
+                QMessageBox.warning(self, "失败", "测试方法提取失败或未找到匹配项")
+                logger.warning("测试方法提取失败或未找到匹配项")
+                # 添加更多调试信息
+                logger.info(f"当前Matrix数据行数: {len(self.service.data_model.rows)}")
+                if len(self.service.data_model.rows) > 0:
+                    logger.info(f"Matrix表头: {self.service.data_model.headers}")
+                    logger.info(f"第一行数据: {self.service.data_model.rows[0]}")
+                
+        except Exception as e:
+            logger.error(f"提取测试方法时出错: {e}", exc_info=True)
+            QMessageBox.warning(self, "错误", f"提取测试方法时出错: {str(e)}")

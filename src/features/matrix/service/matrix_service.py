@@ -16,6 +16,8 @@ class MatrixService:
         self.initializer = MatrixInitializer(self.data_model)
         # 临时存储合并单元格信息
         self.merged_cells_info = []
+        # 存储最近导入的规格书文件路径
+        self.last_imported_spec_path = None
 
     def add_column(self, column_name="", position=None):
         """添加新列 - Service层业务逻辑"""
@@ -265,11 +267,14 @@ class MatrixService:
         try:
             logger.info(f"开始从Spec导入数据: {file_path}")
             
+            # 保存导入的规格书文件路径
+            self.last_imported_spec_path = file_path
+            
             # 实现Spec文件导入逻辑
             # 调用spec_extractor来处理不同格式的文件
             from src.features.matrix.service.spec_extractor import SpecExtractor
             extractor = SpecExtractor()
-            # 传递页码和关键字参数（注意：keep_open参数在View层处理）
+            # 传递页码和关键字参数
             data_result = extractor.extract_from_document(file_path, page_number, keyword)
             
             # 如果成功提取数据，则更新数据模型
@@ -280,27 +285,24 @@ class MatrixService:
                     data = data_result['data']
                     merged_cells = data_result.get('merged_cells', [])
                 else:
-                    # 旧格式或仅数据格式
+                    # 简单数据格式
                     data = data_result
                     merged_cells = []
-                
-                logger.info(f"成功从Spec文档提取数据，数据行数: {len(data)}")
-                if len(data) > 0:
-                    logger.info(f"数据列数: {len(data[0])}")
-                    logger.info(f"表头内容: {data[0][:5]}...")  # 只显示前5列
                 
                 # 清空现有数据
                 self.data_model.headers = []
                 self.data_model.rows = []
                 
-                # 处理表头（使用字母标识）
+                # 设置表头（如果有数据）
                 if len(data) > 0:
-                    for i in range(len(data[0])):  # 根据数据列数创建表头
-                        self.data_model.headers.append(self.data_model._column_index_to_letter(i))
-                    logger.info(f"设置表头，列数: {len(self.data_model.headers)}")
-                    
-                # 处理数据行
-                if len(data) > 0:
+                    self.data_model.headers = data[0]  # 第一行作为表头
+                    logger.info(f"设置表头: {self.data_model.headers}")
+                
+                # 设置数据行（如果有数据）
+                if len(data) > 1:
+                    self.data_model.rows = data[1:]  # 除第一行外的其余行作为数据行
+                    logger.info(f"设置数据行，行数: {len(self.data_model.rows)}")
+                elif len(data) > 0:
                     self.data_model.rows = data  # 数据行就是所有提取的数据
                     logger.info(f"设置数据行，行数: {len(self.data_model.rows)}")
                 
@@ -329,11 +331,92 @@ class MatrixService:
                 return True
             else:
                 logger.warning("未能从Spec文档提取数据，保持原有数据不变")
-                return True  # 返回True以保持对话框正常关闭
+                return False
         except Exception as e:
             logger.error(f"导入Spec失败: {e}")
             return False
             
+    def extract_test_methods_from_spec(self):
+        """
+        从已导入的规格书中提取测试方法标准并填充到Matrix中
+        
+        Returns:
+            bool: 是否成功提取并填充测试方法
+        """
+        try:
+            logger.info("开始从规格书提取测试方法标准")
+            
+            # 检查是否已导入规格书
+            if not self.last_imported_spec_path:
+                logger.warning("未找到已导入的规格书文件")
+                return False
+                
+            logger.info(f"使用规格书文件路径: {self.last_imported_spec_path}")
+            
+            # 直接使用第二列作为Section列（索引为1）
+            section_col_index = 1
+            # Test Method列通常在第三列（索引为2）
+            test_method_col_index = 2
+            
+            logger.info(f"使用第 {section_col_index + 1} 列作为'Section'列")
+            logger.info(f"使用第 {test_method_col_index + 1} 列作为'Test Method'列")
+            
+            # 构建章节号映射 {row_index: chapter_number}
+            chapter_mappings = {}
+            # 跳过前两行（表头和列名行）
+            for row_index in range(2, len(self.data_model.rows)):
+                row = self.data_model.rows[row_index]
+                # 获取章节号
+                if section_col_index < len(row):
+                    chapter_number = row[section_col_index]
+                    if chapter_number and str(chapter_number).strip():
+                        # 确保这不是列名本身
+                        if str(chapter_number).strip().lower() not in ["section", "test method"]:
+                            chapter_mappings[row_index] = str(chapter_number).strip()
+            
+            if not chapter_mappings:
+                logger.warning("未找到有效的章节号")
+                logger.info(f"数据行数: {len(self.data_model.rows)}")
+                if len(self.data_model.rows) > 0:
+                    logger.info(f"表头: {self.data_model.headers}")
+                    if len(self.data_model.rows) > 0:
+                        logger.info(f"第一行数据: {self.data_model.rows[0]}")
+                    if len(self.data_model.rows) > 1:
+                        logger.info(f"第二行数据: {self.data_model.rows[1]}")
+                    # 显示几行数据用于调试
+                    for i in range(2, min(5, len(self.data_model.rows))):
+                        if section_col_index < len(self.data_model.rows[i]):
+                            logger.info(f"第{i+1}行Section列内容: {self.data_model.rows[i][section_col_index]}")
+                return False
+            
+            logger.info(f"找到 {len(chapter_mappings)} 个章节号需要处理")
+            logger.debug(f"章节号映射: {chapter_mappings}")
+            
+            # 从规格书中提取测试方法
+            from src.features.matrix.service.spec_extractor import SpecExtractor
+            extractor = SpecExtractor()
+            test_methods = extractor.extract_test_methods(self.last_imported_spec_path, chapter_mappings)
+            
+            logger.info(f"从规格书中提取到 {len(test_methods)} 个测试方法")
+            logger.debug(f"提取的测试方法: {test_methods}")
+            
+            # 将提取的测试方法填充到Matrix中
+            updated_count = 0
+            for row_index, test_method in test_methods.items():
+                if row_index < len(self.data_model.rows) and test_method_col_index < len(self.data_model.rows[row_index]):
+                    self.data_model.rows[row_index][test_method_col_index] = test_method
+                    updated_count += 1
+                    logger.debug(f"更新第{row_index}行的测试方法为: {test_method}")
+                else:
+                    logger.warning(f"无法更新第{row_index}行的测试方法，行索引或列索引超出范围")
+            
+            logger.info(f"成功更新 {updated_count} 行的测试方法")
+            return updated_count > 0
+            
+        except Exception as e:
+            logger.error(f"从规格书提取测试方法时出错: {e}", exc_info=True)
+            return False
+
     def _process_rows(self):
         """
         处理行数据，类似于VBA中的ProcessRows函数
