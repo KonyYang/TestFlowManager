@@ -351,6 +351,16 @@ class MatrixService:
                 
             logger.info(f"使用规格书文件路径: {self.last_imported_spec_path}")
             
+            # 检查表头结构是否正确
+            if len(self.data_model.rows) > 0:
+                header_row = self.data_model.rows[0]
+                # 检查第3、4、5列（索引为2、3、4）是否为"Test Method"、"Condition"、"Requirement"
+                if (len(header_row) <= 2 or header_row[2] != "Test Method" or 
+                    len(header_row) <= 3 or header_row[3] != "Condition" or 
+                    len(header_row) <= 4 or header_row[4] != "Requirement"):
+                    logger.warning("表头结构不正确，第3、4、5列应分别为'Test Method'、'Condition'、'Requirement'")
+                    return False
+            
             # 直接使用第二列作为Section列（索引为1）
             section_col_index = 1
             # Test Method列通常在第三列（索引为2）

@@ -673,7 +673,15 @@ class MatrixDialog(QDialog):
                 QMessageBox.information(self, "成功", "测试方法提取完成")
                 logger.info("测试方法提取完成")
             else:
-                QMessageBox.warning(self, "失败", "测试方法提取失败或未找到匹配项")
+                # 检查是否是因为表头结构不正确导致的失败
+                if (len(self.service.data_model.rows) > 0 and len(self.service.data_model.rows[0]) > 4 and 
+                    (self.service.data_model.rows[0][2] != "Test Method" or 
+                     self.service.data_model.rows[0][3] != "Condition" or 
+                     self.service.data_model.rows[0][4] != "Requirement")):
+                    QMessageBox.warning(self, "表头结构错误", 
+                        "表头结构不正确，第3、4、5列应分别为'Test Method'、'Condition'、'Requirement'，请添加或移动到正确位置后再试。")
+                else:
+                    QMessageBox.warning(self, "失败", "测试方法提取失败或未找到匹配项")
                 logger.warning("测试方法提取失败或未找到匹配项")
                 # 添加更多调试信息
                 logger.info(f"当前Matrix数据行数: {len(self.service.data_model.rows)}")
@@ -684,3 +692,5 @@ class MatrixDialog(QDialog):
         except Exception as e:
             logger.error(f"提取测试方法时出错: {e}", exc_info=True)
             QMessageBox.warning(self, "错误", f"提取测试方法时出错: {str(e)}")
+        finally:
+            pass  # 占位符，确保try语句正确闭合
