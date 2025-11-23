@@ -218,13 +218,13 @@ class MatrixService:
                 self.data_model.headers = []
                 self.data_model.rows = []
                 
-                # 处理表头（使用字母标识）
+                # 处理表头（使用字母标识，而不是使用第一行数据作为表头）
                 if len(data) > 0:
                     for i in range(len(data[0])):  # 根据数据列数创建表头
                         self.data_model.headers.append(self.data_model._column_index_to_letter(i))
                     logger.info(f"设置表头，列数: {len(self.data_model.headers)}")
                     
-                # 处理数据行
+                # 处理数据行（所有原始数据行都作为数据行）
                 if len(data) > 0:
                     self.data_model.rows = data  # 数据行就是所有提取的数据
                     logger.info(f"设置数据行，行数: {len(self.data_model.rows)}")
@@ -293,16 +293,14 @@ class MatrixService:
                 self.data_model.headers = []
                 self.data_model.rows = []
                 
-                # 设置表头（如果有数据）
+                # 设置表头（使用字母标识，而不是使用第一行数据作为表头）
                 if len(data) > 0:
-                    self.data_model.headers = data[0]  # 第一行作为表头
-                    logger.info(f"设置表头: {self.data_model.headers}")
+                    for i in range(len(data[0])):  # 根据数据列数创建表头
+                        self.data_model.headers.append(self.data_model._column_index_to_letter(i))
+                    logger.info(f"设置表头，列数: {len(self.data_model.headers)}")
                 
-                # 设置数据行（如果有数据）
-                if len(data) > 1:
-                    self.data_model.rows = data[1:]  # 除第一行外的其余行作为数据行
-                    logger.info(f"设置数据行，行数: {len(self.data_model.rows)}")
-                elif len(data) > 0:
+                # 设置数据行（所有原始数据行都作为数据行）
+                if len(data) > 0:
                     self.data_model.rows = data  # 数据行就是所有提取的数据
                     logger.info(f"设置数据行，行数: {len(self.data_model.rows)}")
                 
@@ -357,9 +355,15 @@ class MatrixService:
             section_col_index = 1
             # Test Method列通常在第三列（索引为2）
             test_method_col_index = 2
+            # Condition列通常在第四列（索引为3）
+            condition_col_index = 3
+            # Requirement列通常在第五列（索引为4）
+            requirement_col_index = 4
             
             logger.info(f"使用第 {section_col_index + 1} 列作为'Section'列")
             logger.info(f"使用第 {test_method_col_index + 1} 列作为'Test Method'列")
+            logger.info(f"使用第 {condition_col_index + 1} 列作为'Condition'列")
+            logger.info(f"使用第 {requirement_col_index + 1} 列作为'Requirement'列")
             
             # 构建章节号映射 {row_index: chapter_number}
             chapter_mappings = {}
@@ -400,22 +404,91 @@ class MatrixService:
             logger.info(f"从规格书中提取到 {len(test_methods)} 个测试方法")
             logger.debug(f"提取的测试方法: {test_methods}")
             
-            # 将提取的测试方法填充到Matrix中
+            # 获取模板数据
+            from src.utils.template_data import get_condition_requirement_templates, get_template_aliases
+            templates = get_condition_requirement_templates()
+            aliases = get_template_aliases()
+            
+            # 将提取的测试方法填充到Matrix中，并根据Test Item列填充Condition和Requirement
             updated_count = 0
-            for row_index, test_method in test_methods.items():
-                if row_index < len(self.data_model.rows) and test_method_col_index < len(self.data_model.rows[row_index]):
-                    self.data_model.rows[row_index][test_method_col_index] = test_method
-                    updated_count += 1
-                    logger.debug(f"更新第{row_index}行的测试方法为: {test_method}")
+            for row_index in range(2, len(self.data_model.rows)):  # 从第3行开始处理（跳过表头）
+                if row_index < len(self.data_model.rows):
+                    # 获取Test Item（第一列）
+                    test_item = ""
+                    if len(self.data_model.rows[row_index]) > 0:
+                        test_item = self.data_model.rows[row_index][0]
+                    
+                    # 处理Test Method列
+                    if test_method_col_index < len(self.data_model.rows[row_index]):
+                        # 如果这一行有提取到的测试方法，则使用提取到的
+                        if row_index in test_methods and test_methods[row_index]:
+                            test_method = test_methods[row_index]
+                            self.data_model.rows[row_index][test_method_col_index] = test_method
+                            updated_count += 1
+                            logger.debug(f"更新第{row_index}行的测试方法为: {test_method}")
+                        # 如果Test Item是"Examination"且Test Method列为空，则设置默认值
+                        elif test_item and test_item.lower().strip() == "examination":
+                            if not self.data_model.rows[row_index][test_method_col_index]:
+                                self.data_model.rows[row_index][test_method_col_index] = "EIA-364-18"
+                                updated_count += 1
+                                logger.debug(f"为第{row_index}行的Examination设置默认测试方法: EIA-364-18")
+                    
+                    # 根据Test Item填充Condition和Requirement
+                    if test_item:
+                        # 查找匹配的模板
+                        condition, requirement = self._find_template_match(test_item, templates, aliases)
+                        if condition and requirement:
+                            # 填充Condition列
+                            if condition_col_index < len(self.data_model.rows[row_index]):
+                                self.data_model.rows[row_index][condition_col_index] = condition
+                            
+                            # 填充Requirement列
+                            if requirement_col_index < len(self.data_model.rows[row_index]):
+                                self.data_model.rows[row_index][requirement_col_index] = requirement
+                            
+                            logger.debug(f"为第{row_index}行填充模板数据: {test_item} -> ({condition}, {requirement})")
                 else:
                     logger.warning(f"无法更新第{row_index}行的测试方法，行索引或列索引超出范围")
             
-            logger.info(f"成功更新 {updated_count} 行的测试方法")
+            logger.info(f"成功更新 {updated_count} 行的测试方法和模板数据")
             return updated_count > 0
             
         except Exception as e:
             logger.error(f"从规格书提取测试方法时出错: {e}", exc_info=True)
             return False
+
+    def _find_template_match(self, test_item, templates, aliases):
+        """
+        根据测试项目查找匹配的模板数据
+        
+        Args:
+            test_item: 测试项目名称
+            templates: 模板数据字典
+            aliases: 别名字典
+            
+        Returns:
+            tuple: (condition, requirement) 或 (None, None)
+        """
+        test_item_lower = test_item.lower().strip()
+        
+        # 直接匹配
+        for key, (condition, requirement) in templates.items():
+            if key.lower() == test_item_lower:
+                return condition, requirement
+        
+        # 别名匹配
+        for main_key, alias_list in aliases.items():
+            if main_key in templates:
+                for alias in alias_list:
+                    if alias.lower() in test_item_lower or test_item_lower in alias.lower():
+                        return templates[main_key]
+        
+        # 模糊匹配
+        for key, (condition, requirement) in templates.items():
+            if key.lower() in test_item_lower or test_item_lower in key.lower():
+                return condition, requirement
+                
+        return None, None
 
     def _process_rows(self):
         """

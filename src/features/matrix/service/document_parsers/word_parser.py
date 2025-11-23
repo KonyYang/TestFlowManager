@@ -34,7 +34,7 @@ class WordParser:
         # 检查文件扩展名以决定使用哪种解析方法
         if file_path.lower().endswith('.doc'):
             # 对于.doc文件，使用COM接口
-            return self._parse_doc_via_com(file_path, page_number, keyword, False)
+            return self._parse_doc_via_com(file_path, page_number, keyword)
         elif file_path.lower().endswith('.docx'):
             # 对于.docx文件，使用python-docx库
             return self._parse_docx(file_path, page_number, keyword)
