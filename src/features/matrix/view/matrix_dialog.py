@@ -45,18 +45,16 @@ class MatrixDialog(QDialog):
         # 添加按钮区域
         button_layout = QHBoxLayout()
         self.import_btn = QPushButton("导入Matrix")
-        self.init_btn = QPushButton("标准化Matrix")
+        self.standardize_and_fill_btn = QPushButton("标准化填充Matrix")
         self.find_btn = QPushButton("查找")
         self.export_btn = QPushButton("导出Excel")
-        self.extract_test_methods_btn = QPushButton("填充测试规格")
         # 添加更新标准版本按钮
         self.update_standard_versions_btn = QPushButton("更新标准版本")
 
         button_layout.addWidget(self.import_btn)
-        button_layout.addWidget(self.init_btn)
+        button_layout.addWidget(self.standardize_and_fill_btn)
         button_layout.addWidget(self.find_btn)
         button_layout.addWidget(self.export_btn)
-        button_layout.addWidget(self.extract_test_methods_btn)
         button_layout.addWidget(self.update_standard_versions_btn)
 
         # 表格区域
@@ -85,11 +83,10 @@ class MatrixDialog(QDialog):
         self._update_table()
 
         # 连接信号
-        self.init_btn.clicked.connect(self._initialize_matrix)
+        self.import_btn.clicked.connect(self._import_from_spec)
+        self.standardize_and_fill_btn.clicked.connect(self._standardize_and_fill_matrix)
         self.find_btn.clicked.connect(self._find_content)
         self.export_btn.clicked.connect(self._export_to_excel)
-        self.import_btn.clicked.connect(self._import_from_spec)
-        self.extract_test_methods_btn.clicked.connect(self._extract_test_methods_from_spec)
         # 连接更新标准版本按钮
         self.update_standard_versions_btn.clicked.connect(self._update_standard_versions)
 
@@ -326,17 +323,6 @@ class MatrixDialog(QDialog):
                         item = self.table_widget.item(row_idx, col_idx)
                         if item:
                             self.service.data_model.rows[row_idx][col_idx] = item.text()
-
-    def _initialize_matrix(self):
-        """初始化Matrix - View层事件触发"""
-        # 同步表格数据到模型
-        self._sync_table_to_model()
-        # 调用服务层初始化Matrix
-        if self.service.initialize_matrix():
-            self._update_table()
-            QMessageBox.information(self, "成功", "Matrix初始化完成")
-        else:
-            QMessageBox.warning(self, "失败", "Matrix初始化失败")
 
     def _add_column(self):
         """添加列 - View层事件触发"""
@@ -675,7 +661,8 @@ class MatrixDialog(QDialog):
             if success:
                 # 更新表格显示
                 self._update_table()
-                QMessageBox.information(self, "成功", "测试方法提取完成")
+                # 成功时不再弹出提示窗口
+                # QMessageBox.information(self, "成功", "测试方法提取完成")
                 logger.info("测试方法提取完成")
             else:
                 # 检查是否是因为表头结构不正确导致的失败
@@ -748,3 +735,87 @@ class MatrixDialog(QDialog):
         except Exception as e:
             logger.error(f"更新标准版本号时出错: {e}", exc_info=True)
             QMessageBox.warning(self, "错误", f"更新标准版本号时出错: {str(e)}")
+
+    def _standardize_and_fill_matrix(self):
+        """
+        标准化填充Matrix - 集成功能，执行标准化Matrix、填充测试规格和更新标准版本
+        """
+        try:
+            logger.info("开始执行标准化填充Matrix集成功能")
+            
+            # 1. 标准化Matrix
+            logger.info("步骤1: 执行标准化Matrix")
+            self._sync_table_to_model()
+            if not self.service.initialize_matrix():
+                QMessageBox.warning(self, "失败", "Matrix标准化失败")
+                logger.warning("Matrix标准化失败")
+                return
+            self._update_table()
+            
+            # 2. 填充测试规格
+            logger.info("步骤2: 执行填充测试规格")
+            self._sync_table_to_model()
+            success = self.service.extract_test_methods_from_spec()
+            if not success:
+                # 检查是否是因为表头结构不正确导致的失败
+                if (len(self.service.data_model.rows) > 0 and len(self.service.data_model.rows[0]) > 4 and 
+                    (self.service.data_model.rows[0][2] != "Test Method" or 
+                     self.service.data_model.rows[0][3] != "Condition" or 
+                     self.service.data_model.rows[0][4] != "Requirement")):
+                    QMessageBox.warning(self, "表头结构错误", 
+                        "表头结构不正确，第3、4、5列应分别为'Test Method'、'Condition'、'Requirement'，请添加或移动到正确位置后再试。")
+                else:
+                    QMessageBox.warning(self, "失败", "测试方法提取失败或未找到匹配项")
+                logger.warning("测试方法提取失败或未找到匹配项")
+                # 添加更多调试信息
+                logger.info(f"当前Matrix数据行数: {len(self.service.data_model.rows)}")
+                if len(self.service.data_model.rows) > 0:
+                    logger.info(f"Matrix表头: {self.service.data_model.headers}")
+                    logger.info(f"第一行数据: {self.service.data_model.rows[0]}")
+                return
+            self._update_table()
+            
+            # 3. 更新标准版本
+            logger.info("步骤3: 执行更新标准版本")
+            self._sync_table_to_model()
+            result = self.service.update_standard_versions()
+            if result["success"]:
+                self._update_table()
+                
+                # 显示更新详情
+                details = result["details"]
+                if details:
+                    details_msg = "\n".join([f"第{detail['row']}行: {detail['old_method']} -> {detail['new_method']}" 
+                                               for detail in details])
+                    msg = f"标准版本号更新完成，共更新{result['updated_count']}项:\n{details_msg}"
+                    # 创建自定义消息框以支持更宽的窗口
+                    msg_box = QMessageBox(self)
+                    msg_box.setWindowTitle("成功")
+                    msg_box.setText(msg)
+                    msg_box.setStandardButtons(QMessageBox.Ok)
+                    msg_box.setIcon(QMessageBox.Information)
+                    # 设置消息框宽度，以便完整显示更新信息
+                    msg_box.setStyleSheet("QLabel{min-width: 600px;}")
+                    msg_box.exec_()
+                else:
+                    # 没有需要更新的项，但不是失败
+                    QMessageBox.information(self, "成功", "标准版本号更新完成，没有需要更新的项")
+                    logger.info("标准版本号更新完成")
+            else:
+                # 失败情况，只有在真正失败时才显示错误消息
+                if "error" in result:
+                    QMessageBox.warning(self, "失败", f"标准版本号更新出错: {result['error']}")
+                    logger.error(f"标准版本号更新出错: {result['error']}")
+                else:
+                    # 没有找到需要更新的项，但不是错误
+                    QMessageBox.information(self, "成功", "标准版本号更新完成，没有需要更新的项")
+                    logger.info("标准版本号更新完成，没有需要更新的项")
+            
+            # 全部完成
+            logger.info("标准化填充Matrix集成功能执行完成")
+            # 集成操作成功时不弹出提示窗口
+            # QMessageBox.information(self, "完成", "标准化填充Matrix集成功能执行完成")
+            
+        except Exception as e:
+            logger.error(f"标准化填充Matrix时出错: {e}", exc_info=True)
+            QMessageBox.warning(self, "错误", f"标准化填充Matrix时出错: {str(e)}")
