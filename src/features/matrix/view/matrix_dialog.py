@@ -721,11 +721,17 @@ class MatrixDialog(QDialog):
                 details = result["details"]
                 if details:
                     details_msg = "\n".join([f"第{detail['row']}行: {detail['old_method']} -> {detail['new_method']}" 
-                                               for detail in details[:10]])  # 只显示前10个
-                    if len(details) > 10:
-                        details_msg += f"\n...还有{len(details) - 10}个更新"
-                    QMessageBox.information(self, "成功", 
-                                      f"标准版本号更新完成，共更新{result['updated_count']}项:\n{details_msg}")
+                                               for detail in details])
+                    msg = f"标准版本号更新完成，共更新{result['updated_count']}项:\n{details_msg}"
+                    # 创建自定义消息框以支持更宽的窗口
+                    msg_box = QMessageBox(self)
+                    msg_box.setWindowTitle("成功")
+                    msg_box.setText(msg)
+                    msg_box.setStandardButtons(QMessageBox.Ok)
+                    msg_box.setIcon(QMessageBox.Information)
+                    # 设置消息框宽度，以便完整显示更新信息
+                    msg_box.setStyleSheet("QLabel{min-width: 600px;}")
+                    msg_box.exec_()
                 else:
                     # 没有需要更新的项，但不是失败
                     QMessageBox.information(self, "成功", "标准版本号更新完成，没有需要更新的项")
