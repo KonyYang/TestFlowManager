@@ -63,9 +63,11 @@ class ConfigManager:
         try:
             import configparser
             paths_path = self._get_resource_path(paths_file)
+            # print(f"[DEBUG] Loading paths config from: {paths_path}")
             if os.path.exists(paths_path):
                 paths_config = configparser.ConfigParser()
                 paths_config.read(paths_path, encoding='utf-8')
+                # print(f"[DEBUG] Loaded sections: {paths_config.sections()}")
 
                 # 将INI配置转换为内部配置格式
                 if 'Paths' in paths_config:
@@ -73,6 +75,14 @@ class ConfigManager:
                         # 只加载ltr_file配置，其他路径配置从settings.json获取
                         if key.lower() == 'ltr_file':
                             self.set(f"paths.{key.lower()}", value)
+                            
+                # 加载标准文件配置
+                if 'STANDARD_FILES' in paths_config:
+                    # print(f"[DEBUG] Loading STANDARD_FILES section")
+                    for key, value in paths_config['STANDARD_FILES'].items():
+                        # print(f"[DEBUG] STANDARD_FILES key: '{key}', value: '{value}'")
+                        self.set(f"standard_files.{key}", value)
+                        # print(f"[DEBUG] Set config key: standard_files.{key}")
 
                 # 加载密码配置
                 if 'Passwords' in paths_config:
@@ -83,8 +93,12 @@ class ConfigManager:
                 if 'Defaults' in paths_config:
                     for key, value in paths_config['Defaults'].items():
                         self.set(f"defaults.{key.lower()}", value)
+            else:
+                print(f"[DEBUG] Paths config file not found: {paths_path}")
         except Exception as e:
             print(f"Failed to load paths config from {paths_file}: {e}")
+            import traceback
+            traceback.print_exc()
 
     def _get_resource_path(self, relative_path: str) -> str:
         """

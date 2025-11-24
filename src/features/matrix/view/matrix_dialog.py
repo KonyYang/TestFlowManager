@@ -49,12 +49,15 @@ class MatrixDialog(QDialog):
         self.find_btn = QPushButton("查找")
         self.export_btn = QPushButton("导出Excel")
         self.extract_test_methods_btn = QPushButton("填充测试规格")
+        # 添加更新标准版本按钮
+        self.update_standard_versions_btn = QPushButton("更新标准版本")
 
         button_layout.addWidget(self.import_btn)
         button_layout.addWidget(self.init_btn)
         button_layout.addWidget(self.find_btn)
         button_layout.addWidget(self.export_btn)
         button_layout.addWidget(self.extract_test_methods_btn)
+        button_layout.addWidget(self.update_standard_versions_btn)
 
         # 表格区域
         self.table_widget = QTableWidget()
@@ -87,6 +90,8 @@ class MatrixDialog(QDialog):
         self.export_btn.clicked.connect(self._export_to_excel)
         self.import_btn.clicked.connect(self._import_from_spec)
         self.extract_test_methods_btn.clicked.connect(self._extract_test_methods_from_spec)
+        # 连接更新标准版本按钮
+        self.update_standard_versions_btn.clicked.connect(self._update_standard_versions)
 
         layout.addLayout(button_layout)
         layout.addWidget(self.table_widget)
@@ -694,3 +699,46 @@ class MatrixDialog(QDialog):
             QMessageBox.warning(self, "错误", f"提取测试方法时出错: {str(e)}")
         finally:
             pass  # 占位符，确保try语句正确闭合
+
+    def _update_standard_versions(self):
+        """
+        更新标准版本号 - View层事件触发
+        """
+        try:
+            logger.info("开始更新标准版本号")
+            
+            # 同步表格数据到模型
+            self._sync_table_to_model()
+            
+            # 调用服务层更新标准版本号
+            result = self.service.update_standard_versions()
+            
+            if result["success"]:
+                # 更新表格显示
+                self._update_table()
+                
+                # 显示更新详情
+                details = result["details"]
+                if details:
+                    details_msg = "\n".join([f"第{detail['row']}行: {detail['old_method']} -> {detail['new_method']}" 
+                                               for detail in details[:10]])  # 只显示前10个
+                    if len(details) > 10:
+                        details_msg += f"\n...还有{len(details) - 10}个更新"
+                    QMessageBox.information(self, "成功", 
+                                      f"标准版本号更新完成，共更新{result['updated_count']}项:\n{details_msg}")
+                else:
+                    # 没有需要更新的项，但不是失败
+                    QMessageBox.information(self, "成功", "标准版本号更新完成，没有需要更新的项")
+                    logger.info("标准版本号更新完成")
+            else:
+                # 失败情况，只有在真正失败时才显示错误消息
+                if "error" in result:
+                    QMessageBox.warning(self, "失败", f"标准版本号更新出错: {result['error']}")
+                    logger.error(f"标准版本号更新出错: {result['error']}")
+                else:
+                    # 没有找到需要更新的项，但不是错误
+                    QMessageBox.information(self, "成功", "标准版本号更新完成，没有需要更新的项")
+                    logger.info("标准版本号更新完成，没有需要更新的项")
+        except Exception as e:
+            logger.error(f"更新标准版本号时出错: {e}", exc_info=True)
+            QMessageBox.warning(self, "错误", f"更新标准版本号时出错: {str(e)}")

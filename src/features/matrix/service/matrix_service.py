@@ -5,6 +5,8 @@ from src.features.matrix.service.matrix_cell_service import MatrixCellService
 from src.features.matrix.service.matrix_initializer import MatrixInitializer
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
+# 添加标准版本更新工具的导入
+from src.utils.standard_version_updater import update_test_method_versions
 
 
 class MatrixService:
@@ -333,6 +335,30 @@ class MatrixService:
         except Exception as e:
             logger.error(f"导入Spec失败: {e}")
             return False
+            
+    def update_standard_versions(self):
+        """
+        更新测试方法的标准版本号
+        
+        Returns:
+            dict: 更新结果，包含是否成功更新以及更新详情
+        """
+        try:
+            logger.info("开始更新测试方法标准版本号")
+            
+            # 调用标准版本更新工具
+            result = update_test_method_versions(self.data_model.rows)
+            
+            if result["updated_count"] > 0:
+                logger.info(f"成功更新 {result['updated_count']} 个测试方法的版本号")
+                return {"success": True, "updated_count": result["updated_count"], "details": result["details"]}
+            else:
+                logger.info("未找到需要更新的测试方法版本号")
+                return {"success": False, "updated_count": 0, "details": []}
+                
+        except Exception as e:
+            logger.error(f"更新标准版本号时出错: {e}", exc_info=True)
+            return {"success": False, "updated_count": 0, "details": [], "error": str(e)}
             
     def extract_test_methods_from_spec(self):
         """

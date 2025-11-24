@@ -65,7 +65,7 @@ class MatrixFilterDialog(QDialog):
         """获取筛选参数"""
         # 获取页码，确保是有效数字
         page_text = self.page_line_edit.text()
-        page_number = 1  # 默认值
+        page_number = 8  # 默认值
         if page_text.isdigit() and int(page_text) > 0:
             page_number = int(page_text)
         
