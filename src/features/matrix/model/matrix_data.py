@@ -3,6 +3,7 @@ class MatrixData:
     """Matrix数据模型 - Model层"""
 
     def __init__(self):
+        self.merged_cells_info = []
         # 使用字母标识作为列标题
         self.headers = []
         for i in range(7):  # 7列使用字母标识A-G
@@ -10,8 +11,8 @@ class MatrixData:
         
         # 数据行，第一行是原来的表头内容
         self.rows = [
-            ["Test Item", "Section", "Test Method", "Condition", "Requirement", "1", "Remark"],  # 表头行
-            ["Visual Examination", "", "EIA-364-18B", "10x min magnification", "No detrimental condition", "", ""],  # 数据行1
+            ["Test Item", "Section", "Test Method", "Condition", "Requirement", "1", "Notes"],  # 表头行
+            ["Visual Examination", "", "EIA-364-18B", "10x min magnification", "No detrimental condition", "1", ""],  # 数据行1
             ["Sample size", "", "", "", "", "5", ""],    # 数据行2
             ["Time", "", "", "", "", "", ""],  # Time行
             ["Fee", "", "", "", "", "", ""],   # Fee行

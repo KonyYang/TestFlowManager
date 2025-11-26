@@ -7,6 +7,9 @@ Test Record生成控制器
 from src.features.test_record_generator.service.test_record_service import TestRecordService
 from src.features.test_record_generator.view.test_record_dialog import TestRecordDialog
 from src.core.logger import logger
+from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
+from PyQt5.QtWidgets import QMessageBox
+import os
 
 
 class TestRecordController:
@@ -29,31 +32,50 @@ class TestRecordController:
             是否成功生成
         """
         try:
-            # 显示对话框
-            dialog = TestRecordDialog(parent)
-            if dialog.exec_() == TestRecordDialog.Accepted:
-                output_path = dialog.get_output_path()
-                if output_path:
-                    # 获取Matrix数据
-                    if self.matrix_service:
-                        matrix_data = self.matrix_service.data_model.rows
-                                    
-                        # 先提取测试数据
-                        extracted_data = self.service.extract_test_data(matrix_data)
-                        logger.info(f"提取的测试数据: {extracted_data}")
-                                    
-                        # 调用服务生成文档
-                        success = self.service.generate_test_record(matrix_data, output_path)
-                        return success
-                    else:
-                        logger.error("Matrix service not available")
-                        return False
-                else:
-                    logger.warning("Output path not specified")
-                    QMessageBox.warning(parent, "警告", "请选择输出路径")
-                    return False
+            # 直接使用固定路径生成Test Record文档
+            output_path = r"D:\outfile\testrecord.docx"
+            
+            # 确保输出目录存在
+            output_dir = os.path.dirname(output_path)
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            
+            # 获取Matrix数据
+            if self.matrix_service:
+                matrix_data = self.matrix_service.data_model.rows
+                
+                # 创建MatrixDataStructure实例来解析数据
+                matrix_structure = MatrixDataStructure()
+                warnings = matrix_structure.update_from_matrix(matrix_data)
+                
+                # 如果有警告信息，显示给用户并询问是否继续
+                if warnings:
+                    warning_text = "\n".join(warnings)
+                    logger.warning(f"Matrix数据验证警告:\n{warning_text}")
+                    
+                    # 显示警告对话框
+                    if parent:
+                        reply = QMessageBox.warning(
+                            parent, 
+                            "数据验证警告", 
+                            f"发现以下数据问题：\n\n{warning_text}\n\n是否仍要继续生成Test Record？", 
+                            QMessageBox.Yes | QMessageBox.No, 
+                            QMessageBox.No
+                        )
+                        
+                        if reply == QMessageBox.No:
+                            logger.info("用户选择取消生成Test Record")
+                            return False
+                
+                logger.info("Matrix数据结构已更新")
+                logger.info(f"组别步骤: {matrix_structure.group_steps}")
+                logger.info(f"样品数量: {matrix_structure.group_sample_sizes}")
+                
+                # 调用服务生成文档
+                success = self.service.generate_test_record(matrix_data, output_path)
+                return success
             else:
-                # 用户取消操作
+                logger.error("Matrix service not available")
                 return False
                 
         except Exception as e:

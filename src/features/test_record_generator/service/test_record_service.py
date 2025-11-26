@@ -10,6 +10,7 @@ from typing import Dict, Any, List, Optional
 from src.core.logger import logger
 from src.core.config_manager import config_manager
 from src.utils.word_utils import get_shared_word_app, release_word_app, open_word_file
+from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 
 
 class TestRecordService:
@@ -191,108 +192,7 @@ class TestRecordService:
         except Exception as e:
             logger.error(f"Error filling record table: {e}")
 
-    def extract_test_data(self, matrix_data: List[List[str]]) -> Dict[str, Any]:
-        """
-        提取测试数据
-        
-        Args:
-            matrix_data: Matrix数据
-        
-        Returns:
-            包含提取信息的字典
-        """
-        try:
-            logger.info(f"开始提取测试数据，Matrix数据行数: {len(matrix_data)}")
-            
-            # 初始化数据结构
-            group_steps = {}
-            group_sample_sizes = {}
-            group_col_indices = {}
-            
-            # 获取表头行
-            header_row = matrix_data[0] if matrix_data else []
-            
-            # 从第6列开始查找组别列（"1", "2", "3", ...），直到遇到"Remark"列
-            start_col_index = 5  # 第6列（F列）开始
-            
-            # 查找所有组别列
-            for col_index in range(start_col_index, len(header_row)):
-                col_header = header_row[col_index] if col_index < len(header_row) else ""
-                if col_header.lower() == "remark":
-                    # 遇到Remark列，停止查找
-                    break
-                    
-                # 检查是否为组别列（数字）
-                if col_header.isdigit():
-                    group_col_indices[col_header] = col_index
-                    group_steps[col_header] = []
-                    logger.info(f"发现组别列: {col_header} (列索引: {col_index})")
-            
-            logger.info(f"共找到 {len(group_col_indices)} 个组别列: {list(group_col_indices.keys())}")
-            
-            # 遍历所有行，提取每个组别的测试项
-            for row_idx, row in enumerate(matrix_data):
-                # 跳过表头行
-                if row_idx == 0:
-                    continue
-                
-                # 遇到Sample size行就停止处理
-                first_col_value = row[0] if len(row) > 0 else ""
-                if first_col_value.lower() == "sample size":
-                    logger.info("遇到Sample size行，停止处理")
-                    break
-                
-                test_item = row[0] if len(row) > 0 else ""
-                sample_size = row[5] if len(row) > 5 else ""  # F列通常是样品数量列
-                
-                # 遍历所有组别列
-                for group_name, col_index in group_col_indices.items():
-                    if col_index < len(row):
-                        group_step = row[col_index]
-                        
-                        # 如果组别步骤不为空，则添加到对应组别中
-                        if group_step and group_step.strip():
-                            # 清理组别步骤数字 - 保留数字和逗号或空格
-                            cleaned_group_step = re.sub(r'[^0-9, ]', '', group_step)
-                            # 多个空格只保留一个
-                            cleaned_group_step = re.sub(r' +', ' ', cleaned_group_step)
-                            
-                            # 将步骤号拆分为多个
-                            step_numbers = [s.strip() for s in cleaned_group_step.split(',') if s.strip()]
-                            
-                            # 如果组别步骤不存在于字典中，则创建新的列表
-                            if group_name not in group_steps:
-                                group_steps[group_name] = []
-                                group_sample_sizes[group_name] = sample_size
-                                logger.info(f"发现新组别: {group_name}, 样品数量: {sample_size}")
-                            
-                            # 添加测试项目信息
-                            for step_number in step_numbers:
-                                step_info = {
-                                    "StepNumber": step_number,
-                                    "Test": test_item,
-                                    "TestMethod": row[2] if len(row) > 2 else "",
-                                    "Condition": row[3] if len(row) > 3 else "",
-                                    "Requirement": row[4] if len(row) > 4 else ""
-                                }
-                                group_steps[group_name].append(step_info)
-                                
-                                logger.debug(f"向组别{group_name}添加测试项: {test_item}, 步骤号: {step_number}")
-            
-            # 对每组内的步骤按键（步骤号，数值）升序排序
-            for group_name in group_steps.keys():
-                group_steps[group_name].sort(key=lambda x: int(x['StepNumber']))
-                logger.info(f"组别 {group_name} 的步骤已按步骤号排序")
-            
-            # 返回提取的数据
-            return {
-                "group_steps": group_steps,
-                "group_sample_sizes": group_sample_sizes,
-                "group_col_indices": group_col_indices
-            }
-        except Exception as e:
-            logger.error(f"Error extracting test data: {e}")
-            return {}
+    def generate_test_record(self, matrix_data: List[List[str]], output_path: str) -> bool:
         """
         根据Matrix数据生成Test Record文档
         
@@ -306,15 +206,9 @@ class TestRecordService:
         try:
             logger.info(f"开始生成Test Record文档，Matrix数据行数: {len(matrix_data)}")
             
-            # 从Matrix服务获取提取的数据
-            matrix_service = MatrixService()
-            extracted_data = matrix_service.extracted_data
-            if extracted_data is None:
-                # 如果没有提取的数据，则提取
-                extracted_data = self.extract_test_data(matrix_data)
-                logger.info(f"提取的测试数据: {extracted_data}")
-            else:
-                logger.info(f"使用已提取的测试数据: {extracted_data}")
+            # 使用MatrixDataStructure解析数据
+            matrix_structure = MatrixDataStructure()
+            matrix_structure.update_from_matrix(matrix_data)
             
             # 查找模板文件
             template_path = self._find_template_file()
@@ -349,77 +243,9 @@ class TestRecordService:
             # 关闭模板文档
             template_doc.Close(SaveChanges=False)
 
-            # 解析Matrix数据并填充文档
-            # 1. 提取组别信息 - 按列处理而不是按行处理
-            group_steps = {}
-            group_sample_sizes = {}
-            
-            logger.info("开始解析Matrix数据")
-            
-            # 获取表头行
-            header_row = matrix_data[0] if matrix_data else []
-            
-            # 从第6列开始查找组别列（"1", "2", "3", ...），直到遇到"Remark"列
-            start_col_index = 5  # 第6列（F列）开始
-            group_col_indices = {}
-            
-            # 查找所有组别列
-            for col_index in range(start_col_index, len(header_row)):
-                col_header = header_row[col_index] if col_index < len(header_row) else ""
-                if col_header.lower() == "remark":
-                    # 遇到Remark列，停止查找
-                    break
-                    
-                # 检查是否为组别列（数字）
-                if col_header.isdigit():
-                    group_col_indices[col_header] = col_index
-                    group_steps[col_header] = []
-                    logger.info(f"发现组别列: {col_header} (列索引: {col_index})")
-            
-            logger.info(f"共找到 {len(group_col_indices)} 个组别列: {list(group_col_indices.keys())}")
-            
-            # 遍历所有行，提取每个组别的测试项
-            for row_idx, row in enumerate(matrix_data):
-                # 跳过表头行
-                if row_idx == 0:
-                    continue
-                
-                # 遇到Sample size行就停止处理
-                first_col_value = row[0] if len(row) > 0 else ""
-                if first_col_value.lower() == "sample size":
-                    logger.info("遇到Sample size行，停止处理")
-                    break
-                
-                test_item = row[0] if len(row) > 0 else ""
-                sample_size = row[5] if len(row) > 5 else ""  # F列通常是样品数量列
-                
-                # 遍历所有组别列
-                for group_name, col_index in group_col_indices.items():
-                    if col_index < len(row):
-                        group_step = row[col_index]
-                        
-                        # 如果组别步骤不为空，则添加到对应组别中
-                        if group_step and group_step.strip():
-                            # 清理组别步骤数字
-                            cleaned_group_step = re.sub(r'[^0-9]', '', group_step)
-                            
-                            # 如果组别步骤不存在于字典中，则创建新的列表
-                            if group_name not in group_steps:
-                                group_steps[group_name] = []
-                                group_sample_sizes[group_name] = sample_size
-                                logger.info(f"发现新组别: {group_name}, 样品数量: {sample_size}")
-                            
-                            # 添加测试项目信息
-                            step_info = {
-                                "StepNumber": cleaned_group_step,
-                                "Test": test_item,
-                                "TestMethod": row[2] if len(row) > 2 else "",
-                                "Condition": row[3] if len(row) > 3 else "",
-                                "Requirement": row[4] if len(row) > 4 else ""
-                            }
-                            group_steps[group_name].append(step_info)
-                            
-                            logger.debug(f"向组别{group_name}添加测试项: {test_item}")
+            # 从MatrixDataStructure获取解析好的数据
+            group_steps = matrix_structure.group_steps
+            group_sample_sizes = matrix_structure.group_sample_sizes
 
             logger.info(f"Matrix数据解析完成，共找到 {len(group_steps)} 个组别")
 

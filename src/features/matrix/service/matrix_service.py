@@ -625,7 +625,13 @@ class MatrixService:
         try:
             logger.debug("开始更新提取的数据")
             # 使用Matrix数据更新数据结构
-            self.data_structure.update_from_matrix(self.data_model.rows)
+            warnings = self.data_structure.update_from_matrix(self.data_model.rows)
+            
+            # 记录警告信息
+            if warnings:
+                for warning in warnings:
+                    logger.warning(warning)
+                    
             logger.debug("提取的数据更新完成")
         except Exception as e:
             logger.error(f"更新提取数据时出错: {e}", exc_info=True)
