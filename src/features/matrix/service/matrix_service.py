@@ -21,6 +21,10 @@ class MatrixService:
         # 存储最近导入的规格书文件路径
         self.last_imported_spec_path = None
 
+        # 创建数据结构实例
+        from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
+        self.data_structure = MatrixDataStructure()
+
     def add_column(self, column_name="", position=None):
         """添加新列 - Service层业务逻辑"""
         return self.data_model.add_column(column_name, position)
@@ -112,6 +116,9 @@ class MatrixService:
     def export_to_excel(self, file_path):
         """导出到Excel - Service层持久化功能"""
         try:
+            # 在导出前更新提取的数据
+            self._update_extracted_data()
+            
             # 创建工作簿
             from openpyxl import Workbook
             wb = Workbook()
@@ -351,6 +358,8 @@ class MatrixService:
             
             if result["updated_count"] > 0:
                 logger.info(f"成功更新 {result['updated_count']} 个测试方法的版本号")
+                # 更新提取的数据
+                self._update_extracted_data()
                 return {"success": True, "updated_count": result["updated_count"], "details": result["details"]}
             else:
                 logger.info("未找到需要更新的测试方法版本号")
@@ -608,3 +617,15 @@ class MatrixService:
             logger.info("重复值检查完成")
         except Exception as e:
             logger.error(f"检查重复值时出错: {e}", exc_info=True)
+            
+    def _update_extracted_data(self):
+        """
+        更新提取的数据到统一数据结构中
+        """
+        try:
+            logger.debug("开始更新提取的数据")
+            # 使用Matrix数据更新数据结构
+            self.data_structure.update_from_matrix(self.data_model.rows)
+            logger.debug("提取的数据更新完成")
+        except Exception as e:
+            logger.error(f"更新提取数据时出错: {e}", exc_info=True)

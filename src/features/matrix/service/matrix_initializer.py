@@ -8,7 +8,7 @@ class MatrixInitializer:
     def __init__(self, data_model):
         self.data_model = data_model
 
-    def initialize_matrix(self):
+    def initialize_matrix(self, extract_data=False):
         """初始化Matrix - 插入指定的列和行"""
         try:
             # 检查是否需要处理列
@@ -184,6 +184,10 @@ class MatrixInitializer:
             # 从第1列开始重新编号为数据列（A, B, C...）
             for i in range(len(self.data_model.headers)):
                 self.data_model.headers[i] = self.data_model._column_index_to_letter(i)
+            
+            # 如果需要提取数据，则进行提取
+            if extract_data:
+                self._extract_and_store_data()
             
             return True
         except Exception as e:

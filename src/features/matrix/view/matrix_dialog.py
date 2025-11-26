@@ -10,6 +10,8 @@ from src.features.matrix.service.matrix_service import MatrixService
 from src.core.logger import logger
 # 导入筛选对话框
 from src.features.matrix.view.matrix_filter_dialog import MatrixFilterDialog
+# 导入Test Record生成控制器
+from src.features.test_record_generator.controller.test_record_controller import TestRecordController
 
 
 class MatrixDialog(QDialog):
@@ -50,12 +52,15 @@ class MatrixDialog(QDialog):
         self.export_btn = QPushButton("导出Excel")
         # 添加更新标准版本按钮
         self.update_standard_versions_btn = QPushButton("更新标准版本")
+        # 添加生成Test Record按钮
+        self.generate_test_record_btn = QPushButton("生成Test Record")
 
         button_layout.addWidget(self.import_btn)
         button_layout.addWidget(self.standardize_and_fill_btn)
         button_layout.addWidget(self.find_btn)
         button_layout.addWidget(self.export_btn)
         button_layout.addWidget(self.update_standard_versions_btn)
+        button_layout.addWidget(self.generate_test_record_btn)
 
         # 表格区域
         self.table_widget = QTableWidget()
@@ -89,6 +94,8 @@ class MatrixDialog(QDialog):
         self.export_btn.clicked.connect(self._export_to_excel)
         # 连接更新标准版本按钮
         self.update_standard_versions_btn.clicked.connect(self._update_standard_versions)
+        # 连接生成Test Record按钮
+        self.generate_test_record_btn.clicked.connect(self._generate_test_record)
 
         layout.addLayout(button_layout)
         layout.addWidget(self.table_widget)
@@ -819,3 +826,28 @@ class MatrixDialog(QDialog):
         except Exception as e:
             logger.error(f"标准化填充Matrix时出错: {e}", exc_info=True)
             QMessageBox.warning(self, "错误", f"标准化填充Matrix时出错: {str(e)}")
+
+    def _generate_test_record(self):
+        """生成Test Record文档 - View层事件触发"""
+        try:
+            logger.info("开始生成Test Record文档")
+            
+            # 同步表格数据到模型
+            self._sync_table_to_model()
+            
+            # 创建Test Record控制器实例
+            controller = TestRecordController(matrix_service=self.service)
+            
+            # 调用控制器生成Test Record
+            success = controller.generate_test_record(parent=self)
+            
+            if success:
+                QMessageBox.information(self, "成功", "Test Record文档生成完成")
+                logger.info("Test Record文档生成成功")
+            else:
+                # 错误信息已经在controller中处理过了，这里不需要额外提示
+                logger.warning("Test Record文档生成失败或被取消")
+                
+        except Exception as e:
+            logger.error(f"生成Test Record时出错: {e}", exc_info=True)
+            QMessageBox.warning(self, "错误", f"生成Test Record时出错: {str(e)}")
