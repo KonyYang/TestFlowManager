@@ -219,7 +219,8 @@ class TestRecordService:
         try:
             # 模板默认有2个组别（2个段落和2个表格）
             default_groups = 2
-            groups_to_add = needed_groups - default_groups
+            # 如果有n个组别，实际上需要复制n-1次（因为模板已经有1份）
+            groups_to_add = needed_groups - 1
             
             logger.info(f"检查是否需要复制模板段落和表格: 当前组别数={needed_groups}, 默认组别数={default_groups}, 需要添加={groups_to_add}")
             
@@ -229,7 +230,7 @@ class TestRecordService:
             
             logger.info(f"需要复制 {groups_to_add} 个额外的段落和表格")
             logger.info(f"复制前文档表格数量: {doc.Tables.Count}")
-            
+
             # 选择整个文档内容进行复制（所有正文）
             # 获取文档的整个范围
             entire_range = doc.Range()
@@ -246,7 +247,7 @@ class TestRecordService:
             for i in range(groups_to_add):
                 logger.debug(f"开始第 {i+1} 次粘贴")
                 # 粘贴到文档末尾
-                end_range.Paste()
+                doc.Application.Selection.PasteAndFormat(0)  # 0 表示保持源格式
                 end_range.Collapse(0)  # 重新定位到末尾
                 logger.debug(f"第 {i+1} 次粘贴完成")
                     
@@ -297,6 +298,12 @@ class TestRecordService:
                 return False
             
             logger.info(f"找到模板文件: {template_path}")
+            
+            # 检查模板文件是否存在
+            import os
+            if not os.path.exists(template_path):
+                logger.error(f"模板文件不存在: {template_path}")
+                return False
 
             # 初始化Word应用
             word_app = get_shared_word_app()
@@ -316,74 +323,74 @@ class TestRecordService:
             # 创建新文档作为副本
             new_doc = word_app.Documents.Add()
             
-            # 复制模板内容到新文档
+            # 复制模板内容到新文档并保持源格式
             template_doc.Range().Copy()
-            new_doc.Range().Paste()
+            # 使用wdPasteDataType.wdPasteFormatOriginalFormatting (16) 参数确保保持原始格式
+            new_doc.Range().PasteSpecial(DataType=16)  # 保持源格式粘贴
             
             # 关闭模板文档
             template_doc.Close(SaveChanges=False)
             
-            # 记录初始表格数量
-            initial_table_count = new_doc.Tables.Count
-            logger.info(f"初始文档表格数量: {initial_table_count}")
-
-            # 从MatrixDataStructure获取解析好的数据
-            group_steps = matrix_structure.group_steps
-            group_sample_sizes = matrix_structure.group_sample_sizes
-            
-            # 获取组别数量
-            group_count = len(group_steps)
-            if group_count == 0:
-                logger.warning("没有找到任何组别数据")
-                return False
-
-            # 如果组别数量超过2个，需要复制模板中的段落和表格
-            if group_count > 2:
-                logger.info(f"检测到 {group_count} 个组别，超过默认的2个，开始复制模板段落和表格")
-                self._duplicate_template_sections(new_doc, group_count)
-                logger.info(f"复制完成后文档表格数量: {new_doc.Tables.Count}")
-            else:
-                logger.info(f"组别数量 {group_count} 未超过默认值2，无需复制模板")
-
-            logger.info(f"Matrix数据解析完成，共找到 {group_count} 个组别")
-
-            # 填充文档
-            # 按照组别顺序处理
-            logger.info("开始将数据填入Word模板")
-            logger.info(f"填充前文档表格数量: {new_doc.Tables.Count}")
-            
-            group_index = 1
-            for group_name in sorted(group_steps.keys()):
-                logger.info(f"处理组别 {group_name}，包含 {len(group_steps[group_name])} 个测试项")
-                
-                # 更新组别标题
-                table_no = group_index * 2 - 1  # 奇数编号的表格 (1, 3, 5, ...)
-                logger.debug(f"组别 {group_name} 对应的表格编号: {table_no}，当前文档总表格数: {new_doc.Tables.Count}")
-                
-                if table_no <= new_doc.Tables.Count:
-                    success = self._update_group_title(new_doc, table_no, group_name, group_sample_sizes.get(group_name, ""))
-                    if success:
-                        logger.debug(f"成功更新组别 {group_name} 的标题")
-                    else:
-                        logger.warning(f"更新组别 {group_name} 的标题失败")
-                    
-                    # 确保表格有足够的行数
-                    steps_count = len(group_steps[group_name])
-                    logger.debug(f"组别 {group_name} 需要 {steps_count} 行数据")
-                    self._ensure_table_has_enough_rows(new_doc.Tables(table_no), steps_count + 1)
-                    
-                    # 填充表格内容
-                    self._fill_record_table_from_dict(new_doc.Tables(table_no), {i: step for i, step in enumerate(group_steps[group_name])})
-                    
-                    logger.info(f"组别 {group_name} 数据已填入表格 {table_no}")
-                else:
-                    logger.warning(f"表格编号 {table_no} 超出文档表格数量 {new_doc.Tables.Count}")
-                
-                group_index += 1
+            # # 从MatrixDataStructure获取解析好的数据
+            # group_steps = matrix_structure.group_steps
+            # group_sample_sizes = matrix_structure.group_sample_sizes
+            #
+            # # 获取组别数量
+            # group_count = len(group_steps)
+            # if group_count == 0:
+            #     logger.warning("没有找到任何组别数据")
+            #     return False
+            #
+            # # 如果组别数量超过2个，需要复制模板中的段落和表格
+            # if group_count > 2:
+            #     logger.info(f"检测到 {group_count} 个组别，超过默认的2个，开始复制模板段落和表格")
+            #     self._duplicate_template_sections(new_doc, group_count)
+            #     logger.info(f"复制完成后文档表格数量: {new_doc.Tables.Count}")
+            # else:
+            #     logger.info(f"组别数量 {group_count} 未超过默认值2，无需复制模板")
+            #
+            # logger.info(f"Matrix数据解析完成，共找到 {group_count} 个组别")
+            #
+            # # 填充文档
+            # # 按照组别顺序处理
+            # logger.info("开始将数据填入Word模板")
+            # logger.info(f"填充前文档表格数量: {new_doc.Tables.Count}")
+            #
+            # group_index = 1
+            # for group_name in sorted(group_steps.keys()):
+            #     logger.info(f"处理组别 {group_name}，包含 {len(group_steps[group_name])} 个测试项")
+            #
+            #     # 更新组别标题
+            #     table_no = group_index * 2 - 1  # 奇数编号的表格 (1, 3, 5, ...)
+            #     logger.debug(f"组别 {group_name} 对应的表格编号: {table_no}，当前文档总表格数: {new_doc.Tables.Count}")
+            #
+            #     if table_no <= new_doc.Tables.Count:
+            #         success = self._update_group_title(new_doc, table_no, group_name, group_sample_sizes.get(group_name, ""))
+            #         if success:
+            #             logger.debug(f"成功更新组别 {group_name} 的标题")
+            #         else:
+            #             logger.warning(f"更新组别 {group_name} 的标题失败")
+            #
+            #         # 确保表格有足够的行数
+            #         steps_count = len(group_steps[group_name])
+            #         logger.debug(f"组别 {group_name} 需要 {steps_count} 行数据")
+            #         self._ensure_table_has_enough_rows(new_doc.Tables(table_no), steps_count + 1)
+            #
+            #         # 填充表格内容
+            #         self._fill_record_table_from_dict(new_doc.Tables(table_no), {i: step for i, step in enumerate(group_steps[group_name])})
+            #
+            #         logger.info(f"组别 {group_name} 数据已填入表格 {table_no}")
+            #     else:
+            #         logger.warning(f"表格编号 {table_no} 超出文档表格数量 {new_doc.Tables.Count}")
+            #
+            #     group_index += 1
 
             # 保存文档
+            logger.info(f"准备保存文档到: {output_path}")
+
             new_doc.SaveAs2(output_path)
             new_doc.Close(SaveChanges=False)
+            logger.info("文档已保存并关闭")
             
             logger.info(f"Test Record document generated successfully: {output_path}")
             return True

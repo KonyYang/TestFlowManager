@@ -49,8 +49,9 @@ def get_template_aliases() -> Dict[str, List[str]]:
     return {
         "Examination": [
             "visual examination",
-            "external examination",
-            "mechanical examination"
+            "Examination of Product",
+            "visual inspection",
+            "visual check",
         ],
         "LLCR": [
             "low level contact resistance",
