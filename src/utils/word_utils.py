@@ -16,6 +16,18 @@ def get_shared_word_app():
     """获取共享的Word应用实例"""
     global _shared_word_app, _word_instance_count, _word_initialized
 
+    # 检查Word应用是否仍然可用
+    if _shared_word_app is not None:
+        try:
+            # 尝试访问Word应用的一个基本属性来检查它是否仍然响应
+            _shared_word_app.Name
+        except:
+            # Word应用似乎已经关闭或无响应，需要重新创建
+            _shared_word_app = None
+            _word_instance_count = 0
+            _word_initialized = False
+            logger.debug("Previous Word application instance was not responsive, will create a new one")
+
     if _shared_word_app is None:
         try:
             import pythoncom
@@ -42,7 +54,27 @@ def release_word_app():
     _word_instance_count -= 1
     logger.debug(f"Word instance count decreased to {_word_instance_count}")
 
+    # 不再主动关闭Word应用，让它保持运行以提高性能
+    # 只有在应用退出时才彻底清理资源
     if _word_instance_count <= 0 and _shared_word_app:
+        try:
+            # 只关闭所有文档，但保持Word应用运行
+            if _shared_word_app.Documents:
+                for document in _shared_word_app.Documents:
+                    try:
+                        document.Close(SaveChanges=False)
+                    except:
+                        pass
+            logger.debug("Closed all documents but kept Word application running")
+        except Exception as e:
+            logger.error(f"Error while closing documents: {e}")
+
+
+def cleanup_word_resources():
+    """彻底清理Word资源，在应用退出时调用"""
+    global _shared_word_app, _word_instance_count, _word_initialized
+
+    if _shared_word_app:
         try:
             # 关闭所有文档
             if _shared_word_app.Documents:
@@ -60,15 +92,15 @@ def release_word_app():
         finally:
             _shared_word_app = None
 
-        # 反初始化COM
-        if _word_initialized:
-            try:
-                import pythoncom
-                pythoncom.CoUninitialize()
-                _word_initialized = False
-                logger.debug("COM library uninitialized")
-            except Exception as e:
-                logger.error(f"Error while uninitializing COM library: {e}")
+    # 反初始化COM
+    if _word_initialized:
+        try:
+            import pythoncom
+            pythoncom.CoUninitialize()
+            _word_initialized = False
+            logger.debug("COM library uninitialized")
+        except Exception as e:
+            logger.error(f"Error while uninitializing COM library: {e}")
 
 
 def is_word_closed(word_app: Any) -> bool:

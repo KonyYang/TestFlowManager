@@ -48,31 +48,29 @@ class TestRecordController:
                 matrix_structure = MatrixDataStructure()
                 warnings = matrix_structure.update_from_matrix(matrix_data)
                 
-                # 如果有警告信息，显示给用户并询问是否继续
+                # 如果有警告信息，显示给用户并阻止继续
                 if warnings:
                     warning_text = "\n".join(warnings)
                     logger.warning(f"Matrix数据验证警告:\n{warning_text}")
                     
-                    # 显示警告对话框
+                    # 显示警告对话框，只用一个确认按钮
                     if parent:
-                        reply = QMessageBox.warning(
-                            parent, 
-                            "数据验证警告", 
-                            f"发现以下数据问题：\n\n{warning_text}\n\n是否仍要继续生成Test Record？", 
-                            QMessageBox.Yes | QMessageBox.No, 
-                            QMessageBox.No
-                        )
+                        msg_box = QMessageBox(parent)
+                        msg_box.setIcon(QMessageBox.Warning)
+                        msg_box.setWindowTitle("数据验证警告")
+                        msg_box.setText(f"发现以下数据问题：\n\n{warning_text}")
+                        msg_box.setStandardButtons(QMessageBox.Ok)
+                        msg_box.exec_()
                         
-                        if reply == QMessageBox.No:
-                            logger.info("用户选择取消生成Test Record")
-                            return False
+                        logger.info("用户已确认警告信息，返回Matrix编辑界面")
+                        return False  # 阻止继续生成Test Record
                 
                 logger.info("Matrix数据结构已更新")
                 logger.info(f"组别步骤: {matrix_structure.group_steps}")
                 logger.info(f"样品数量: {matrix_structure.group_sample_sizes}")
                 
-                # 调用服务生成文档
-                success = self.service.generate_test_record(matrix_data, output_path)
+                # 调用服务生成文档，传入已解析的数据结构
+                success = self.service.generate_test_record_with_structure(matrix_structure, output_path)
                 return success
             else:
                 logger.error("Matrix service not available")

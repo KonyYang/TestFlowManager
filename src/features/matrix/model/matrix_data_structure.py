@@ -114,19 +114,14 @@ class MatrixDataStructure:
             
             logger.info(f"共找到 {len(self.group_col_indices)} 个组别列: {list(self.group_col_indices.keys())}")
             
+            # 查找Sample size行索引
+            sample_size_row_index = self._find_sample_size_row(matrix_data)
+            
             # 遍历所有行，提取每个组别的测试项
-            sample_size_row_index = -1
             for row_idx, row in enumerate(matrix_data):
                 # 跳过表头行
                 if row_idx == 0:
                     continue
-                
-                # 检查是否为Sample size行
-                first_col_value = row[0] if len(row) > 0 else ""
-                if first_col_value.lower() == "sample size":
-                    sample_size_row_index = row_idx
-                    logger.info("遇到Sample size行，记录行索引")
-                    # 不在这里break，继续处理完所有行
                 
                 test_item = row[0] if len(row) > 0 else ""
                 
@@ -158,7 +153,8 @@ class MatrixDataStructure:
             all_steps = {}  # 用于验证连续性
             for group_name in self.group_steps.keys():
                 self.group_steps[group_name].sort(key=lambda x: int(x['StepNumber']))
-                logger.info(f"组别 {group_name} 的步骤已按步骤号排序")
+                sorted_step_numbers = [step['StepNumber'] for step in self.group_steps[group_name]]
+                logger.info(f"组别 {group_name} 的步骤已按步骤号排序，排序后的步骤号: {sorted_step_numbers}")
                 
                 # 收集所有步骤信息用于验证
                 all_steps[group_name] = self.group_steps[group_name]
@@ -176,13 +172,54 @@ class MatrixDataStructure:
                         sample_size = sample_size_row[col_index]
                         self.group_sample_sizes[group_name] = sample_size
                         logger.info(f"组别 {group_name} 的样品数量: {sample_size}")
+            elif len(matrix_data) >= 3:  # 至少要有3行才能检查倒数第三行
+                # 如果没有找到Sample size行，添加警告信息
+                warnings.append("未找到样品数量行（应包含'sample'关键字且位于表格末尾几行），请检查数据格式")
             
         except Exception as e:
             logger.error(f"Error extracting test data: {e}")
             warnings.append(f"数据提取过程中发生错误: {e}")
             
         return warnings
+
+    def _find_sample_size_row(self, matrix_data: List[List[str]]) -> int:
+        """
+        查找Sample size行索引
+        
+        Args:
+            matrix_data: Matrix数据
             
+        Returns:
+            Sample size行索引，如果未找到则返回-1
+        """
+        sample_size_row_index = -1
+        
+        # 优先查找严格匹配"sample size"的行
+        for row_idx, row in enumerate(matrix_data):
+            if row_idx == 0:  # 跳过表头行
+                continue
+            first_col_value = row[0] if len(row) > 0 else ""
+            if first_col_value.lower() == "sample size":
+                sample_size_row_index = row_idx
+                logger.info(f"找到严格匹配的Sample size行，索引: {row_idx}")
+                return sample_size_row_index
+        
+        # 如果没有找到严格匹配的，查找包含"sample"关键字且位于末尾几行的行
+        # 检查倒数第一、二、三行
+        for i in range(1, min(4, len(matrix_data))):  # 检查最多前3行（倒数第1、2、3行）
+            row_idx = len(matrix_data) - i
+            if row_idx > 0 and row_idx < len(matrix_data):  # 确保不是表头行
+                row = matrix_data[row_idx]
+                first_col_value = row[0] if len(row) > 0 else ""
+                # 检查是否包含"sample"关键字（不区分大小写）
+                if "sample" in first_col_value.lower():
+                    sample_size_row_index = row_idx
+                    logger.info(f"找到包含'sample'关键字的行（倒数第{i}行），索引: {row_idx}")
+                    return sample_size_row_index
+        
+        logger.info("未找到Sample size行")
+        return sample_size_row_index
+    
     def get_group_steps(self, group_name: str) -> List[Dict[str, Any]]:
         """
         获取指定组别的步骤信息

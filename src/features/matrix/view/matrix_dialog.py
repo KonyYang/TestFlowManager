@@ -134,6 +134,8 @@ class MatrixDialog(QDialog):
         
         # 添加单元格相关菜单项
         merge_or_split_action = QAction("合并或拆分单元格", self)
+        copy_cells_action = QAction("复制单元格", self)
+        paste_cells_action = QAction("粘贴单元格", self)
         
         # 如果可以撤销或重做，添加相应的菜单项
         if self.service.can_undo_cell_operation():
@@ -151,12 +153,21 @@ class MatrixDialog(QDialog):
         
         # 连接动作到处理函数
         merge_or_split_action.triggered.connect(self._merge_or_split_cells)
+        copy_cells_action.triggered.connect(self._copy_cells)
+        paste_cells_action.triggered.connect(self._paste_cells)
         
         # 保存菜单项引用以便动态更新
         self.merge_or_split_action = merge_or_split_action
         
         # 添加动作到菜单
         menu.addAction(merge_or_split_action)
+        menu.addSeparator()
+        menu.addAction(copy_cells_action)
+        menu.addAction(paste_cells_action)
+        
+        # 检查是否有复制的数据，如果没有则禁用粘贴功能
+        if not hasattr(self, '_copied_cells_data') or self._copied_cells_data is None:
+            paste_cells_action.setEnabled(False)
         
         # 在鼠标位置显示菜单
         menu.exec_(QCursor.pos())
@@ -519,29 +530,25 @@ class MatrixDialog(QDialog):
             self, "选择规格书文件", "", "Documents (*.pdf *.doc *.docx *.xls *.xlsx)"
         )
         if file_path:
-            # 弹出输入对话框让用户选择页码
-            page_number, ok = QInputDialog.getInt(
-                self, "输入页码", "请输入要提取的页码(从1开始，0表示全部页面):", 0, 0, 10000)
-            if not ok:
-                return
+            # 弹出筛选对话框让用户输入页码和关键字
+            filter_dialog = MatrixFilterDialog(self, page_number=8, keyword="Test")
+            if filter_dialog.exec_() == QDialog.Accepted:
+                # 获取筛选参数
+                filter_params = filter_dialog.get_filter_params()
+                page_number = filter_params['page']
+                keyword = filter_params['keyword']
                 
-            # 弹出输入对话框让用户输入关键字
-            keyword, ok = QInputDialog.getText(
-                self, "输入关键字", "请输入筛选关键字(留空表示不过滤):")
-            if not ok:
-                return
-                
-            # 同步表格数据到模型
-            self._sync_table_to_model()
-            # 触发Controller层处理
-            success = self.service.import_from_spec(file_path, page_number if page_number > 0 else None, 
-                                                  keyword if keyword else None)
-            if success:
-                # 更新表格显示
-                self._update_table()
-                QMessageBox.information(self, "成功", "数据导入成功")
-            else:
-                QMessageBox.warning(self, "失败", "数据导入失败")
+                # 同步表格数据到模型
+                self._sync_table_to_model()
+                # 触发Controller层处理
+                success = self.service.import_from_spec(file_path, page_number if page_number > 0 else None, 
+                                                    keyword if keyword else None)
+                if success:
+                    # 更新表格显示
+                    self._update_table()
+                    QMessageBox.information(self, "成功", "数据导入成功")
+                else:
+                    QMessageBox.warning(self, "失败", "数据导入失败")
 
     def _standardize_and_fill_matrix(self):
         """标准化填充Matrix - 集成功能，执行标准化Matrix、填充测试规格和更新标准版本"""
@@ -784,3 +791,57 @@ class MatrixDialog(QDialog):
         except Exception as e:
             logger.error(f"生成Test Record时出错: {e}", exc_info=True)
             QMessageBox.warning(self, "错误", f"生成Test Record时出错: {str(e)}")
+
+    def _copy_cells(self):
+        """复制选中的单元格"""
+        selected_ranges = self.table_widget.selectedRanges()
+        if not selected_ranges:
+            return
+            
+        # 只处理第一个选区
+        range_ = selected_ranges[0]
+        
+        # 保存选区的行列数和数据
+        self._copied_cells_data = {
+            'rows': range_.rowCount(),
+            'cols': range_.columnCount(),
+            'data': []
+        }
+        
+        # 提取选区数据
+        for row in range(range_.rowCount()):
+            row_data = []
+            for col in range(range_.columnCount()):
+                item = self.table_widget.item(range_.topRow() + row, range_.leftColumn() + col)
+                row_data.append(item.text() if item else "")
+            self._copied_cells_data['data'].append(row_data)
+        
+        logger.debug(f"已复制 {range_.rowCount()}x{range_.columnCount()} 单元格区域")
+
+    def _paste_cells(self):
+        """粘贴单元格数据到当前选区"""
+        # 检查是否有复制的数据
+        if not hasattr(self, '_copied_cells_data') or self._copied_cells_data is None:
+            return
+            
+        selected_ranges = self.table_widget.selectedRanges()
+        if not selected_ranges:
+            return
+            
+        # 只处理第一个选区
+        range_ = selected_ranges[0]
+        
+        # 检查选区大小是否与复制的数据大小一致
+        if (range_.rowCount() != self._copied_cells_data['rows'] or 
+            range_.columnCount() != self._copied_cells_data['cols']):
+            QMessageBox.warning(self, "粘贴失败", 
+                f"选择区域大小({range_.rowCount()}x{range_.columnCount()})与复制数据大小({self._copied_cells_data['rows']}x{self._copied_cells_data['cols']})不匹配")
+            return
+        
+        # 粘贴数据
+        for row in range(range_.rowCount()):
+            for col in range(range_.columnCount()):
+                item = QTableWidgetItem(self._copied_cells_data['data'][row][col])
+                self.table_widget.setItem(range_.topRow() + row, range_.leftColumn() + col, item)
+        
+        logger.debug(f"已粘贴 {range_.rowCount()}x{range_.columnCount()} 单元格区域")

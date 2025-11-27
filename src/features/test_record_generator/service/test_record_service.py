@@ -192,24 +192,19 @@ class TestRecordService:
         except Exception as e:
             logger.error(f"Error filling record table: {e}")
 
-    def generate_test_record(self, matrix_data: List[List[str]], output_path: str) -> bool:
+    def generate_test_record_with_structure(self, matrix_structure: MatrixDataStructure, output_path: str) -> bool:
         """
-        根据Matrix数据生成Test Record文档
+        根据已解析的Matrix数据结构生成Test Record文档
         
         Args:
-            matrix_data: Matrix数据
+            matrix_structure: 已解析的Matrix数据结构
             output_path: 输出文件路径
             
         Returns:
             是否成功生成
         """
+        word_app = None
         try:
-            logger.info(f"开始生成Test Record文档，Matrix数据行数: {len(matrix_data)}")
-            
-            # 使用MatrixDataStructure解析数据
-            matrix_structure = MatrixDataStructure()
-            matrix_structure.update_from_matrix(matrix_data)
-            
             # 查找模板文件
             template_path = self._find_template_file()
             if not template_path:
@@ -219,13 +214,13 @@ class TestRecordService:
             logger.info(f"找到模板文件: {template_path}")
 
             # 初始化Word应用
-            self.word_app = get_shared_word_app()
-            if not self.word_app:
+            word_app = get_shared_word_app()
+            if not word_app:
                 logger.error("Failed to initialize Word application")
                 return False
 
-            self.word_app.Visible = False
-            self.word_app.DisplayAlerts = False
+            word_app.Visible = False
+            word_app.DisplayAlerts = False
 
             # 打开模板文档
             template_doc = open_word_file(template_path, read_only=True)
@@ -234,7 +229,7 @@ class TestRecordService:
                 return False
 
             # 创建新文档作为副本
-            new_doc = self.word_app.Documents.Add()
+            new_doc = word_app.Documents.Add()
             
             # 复制模板内容到新文档
             template_doc.Range().Copy()
@@ -284,5 +279,5 @@ class TestRecordService:
             return False
         finally:
             # 清理资源
-            if self.word_app:
+            if word_app:
                 release_word_app()

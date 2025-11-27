@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
         # print(f"[DEBUG] Setting main window size: {width}x{height}")
 
         # 应用全局字体
-        global_font = FontUtils.get_scaled_font(10)
+        global_font = FontUtils.get_scaled_font(9)  # 使用更小的基础字体大小
         self.setFont(global_font)
 
         # 创建中央部件
@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
         welcome_label = QLabel("欢迎使用 TestFlow Manager")
         welcome_label.setAlignment(Qt.AlignCenter)
         welcome_label.setStyleSheet("font-weight: bold; margin: 20px;")
-        welcome_label.setFont(FontUtils.get_scaled_font(14))  # 特定大小的字体
+        welcome_label.setFont(FontUtils.get_scaled_font(12))  # 使用更小的字体大小
 
         layout.addWidget(welcome_label)
         central_widget.setLayout(layout)
@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
     def _setup_menu(self) -> None:
         """设置菜单栏"""
         # 应用全局字体
-        global_font = FontUtils.get_scaled_font(9)
+        global_font = FontUtils.get_scaled_font(8)  # 使用更小的基础字体大小
 
         # 创建菜单栏
         menubar = self.menuBar()
@@ -156,7 +156,7 @@ class MainWindow(QMainWindow):
         toolbar = self.addToolBar("主工具栏")
 
         # 获取缩放字体
-        button_font = FontUtils.get_scaled_font(10)
+        button_font = FontUtils.get_scaled_font(8)  # 使用更小的基础字体大小
 
         new_button = QPushButton("新建")
         new_button.clicked.connect(self._on_new_file)
@@ -181,7 +181,7 @@ class MainWindow(QMainWindow):
     def _setup_status_bar(self) -> None:
         """设置状态栏"""
         self.status_bar = QStatusBar()
-        status_font = FontUtils.get_scaled_font(9)
+        status_font = FontUtils.get_scaled_font(8)  # 使用更小的基础字体大小
         self.status_bar.setFont(status_font)
         self.setStatusBar(self.status_bar)
 

@@ -12,14 +12,14 @@ class MatrixFilterDialog(QDialog):
     不会影响用户正在进行的编辑工作。
     """
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, page_number=8, keyword="test"):
         super().__init__(parent)
         self.setWindowTitle("筛选表格")
         self.setModal(True)
         self.resize(300, 150)
         
-        self.page_number = 1
-        self.keyword = "test"
+        self.page_number = page_number
+        self.keyword = keyword
         
         self._setup_ui()
         
@@ -65,13 +65,13 @@ class MatrixFilterDialog(QDialog):
         """获取筛选参数"""
         # 获取页码，确保是有效数字
         page_text = self.page_line_edit.text()
-        page_number = 8  # 默认值
+        page_number = 8  # 默认值改为8
         if page_text.isdigit() and int(page_text) > 0:
             page_number = int(page_text)
         
         return {
             'page': page_number,
-            'keyword': self.keyword_edit.text()
+            'keyword': self.keyword_edit.text() if self.keyword_edit.text() else "test"  # 默认关键字改为"test"
         }
         
     def _on_ok_clicked(self):
