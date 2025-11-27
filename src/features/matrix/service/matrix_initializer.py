@@ -124,18 +124,18 @@ class MatrixInitializer:
                     for row_idx, (row, data) in enumerate(zip(self.data_model.rows, requirement_data)):
                         row.insert(4, data)
             
-            # 检查是否已经存在Remark列（检查第一行的最后一列）
+            # 检查是否已经存在Notes列（检查第一行的最后一列）
             has_remark = False
-            if len(first_row) > 0 and first_row[-1] == "Remark":
+            if len(first_row) > 0 and first_row[-1] == "Notes":
                 has_remark = True
             
-            # 只有当Remark列不存在时才添加
+            # 只有当Notes列不存在时才添加
             if not has_remark:
-                # 添加"Remark"列到末尾
-                self.data_model.headers.append("Remark")
+                # 添加"Notes"列到末尾
+                self.data_model.headers.append("Notes")
                 for row_idx, row in enumerate(self.data_model.rows):
                     if row_idx == 0:  # 首行填充列名
-                        row.append("Remark")
+                        row.append("Notes")
                     else:  # 其他行插入空值
                         row.append("")
             

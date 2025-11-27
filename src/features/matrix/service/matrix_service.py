@@ -381,9 +381,9 @@ class MatrixService:
             
             # 检查是否已导入规格书
             if not self.last_imported_spec_path:
-                logger.warning("未找到已导入的规格书文件")
-                return False
-                
+                logger.info("未找到已导入的规格书文件，将继续执行模板填充功能")
+                # 注意：这里不再直接返回False，而是继续执行模板填充部分
+            
             logger.info(f"使用规格书文件路径: {self.last_imported_spec_path}")
             
             # 检查表头结构是否正确
@@ -412,8 +412,8 @@ class MatrixService:
             
             # 构建章节号映射 {row_index: chapter_number}
             chapter_mappings = {}
-            # 跳过前两行（表头和列名行）
-            for row_index in range(2, len(self.data_model.rows)):
+            # 跳过第一行（表头），从第二行开始处理数据行（索引为1）
+            for row_index in range(1, len(self.data_model.rows)):
                 row = self.data_model.rows[row_index]
                 # 获取章节号
                 if section_col_index < len(row):
@@ -423,31 +423,38 @@ class MatrixService:
                         if str(chapter_number).strip().lower() not in ["section", "test method"]:
                             chapter_mappings[row_index] = str(chapter_number).strip()
             
-            if not chapter_mappings:
-                logger.warning("未找到有效的章节号")
-                logger.info(f"数据行数: {len(self.data_model.rows)}")
-                if len(self.data_model.rows) > 0:
-                    logger.info(f"表头: {self.data_model.headers}")
+            # 初始化测试方法字典
+            test_methods = {}
+            
+            # 只有在有导入的规格书路径时才尝试提取测试方法
+            if self.last_imported_spec_path:
+                if not chapter_mappings:
+                    logger.warning("未找到有效的章节号")
+                    logger.info(f"数据行数: {len(self.data_model.rows)}")
                     if len(self.data_model.rows) > 0:
-                        logger.info(f"第一行数据: {self.data_model.rows[0]}")
-                    if len(self.data_model.rows) > 1:
-                        logger.info(f"第二行数据: {self.data_model.rows[1]}")
-                    # 显示几行数据用于调试
-                    for i in range(2, min(5, len(self.data_model.rows))):
-                        if section_col_index < len(self.data_model.rows[i]):
-                            logger.info(f"第{i+1}行Section列内容: {self.data_model.rows[i][section_col_index]}")
-                return False
-            
-            logger.info(f"找到 {len(chapter_mappings)} 个章节号需要处理")
-            logger.debug(f"章节号映射: {chapter_mappings}")
-            
-            # 从规格书中提取测试方法
-            from src.features.matrix.service.spec_extractor import SpecExtractor
-            extractor = SpecExtractor()
-            test_methods = extractor.extract_test_methods(self.last_imported_spec_path, chapter_mappings)
-            
-            logger.info(f"从规格书中提取到 {len(test_methods)} 个测试方法")
-            logger.debug(f"提取的测试方法: {test_methods}")
+                        logger.info(f"表头: {self.data_model.headers}")
+                        if len(self.data_model.rows) > 0:
+                            logger.info(f"第一行数据: {self.data_model.rows[0]}")
+                        if len(self.data_model.rows) > 1:
+                            logger.info(f"第二行数据: {self.data_model.rows[1]}")
+                        # 显示几行数据用于调试
+                        for i in range(1, min(5, len(self.data_model.rows))):
+                            if section_col_index < len(self.data_model.rows[i]):
+                                logger.info(f"第{i+1}行Section列内容: {self.data_model.rows[i][section_col_index]}")
+                    # 即使没有章节号也继续执行模板填充功能
+                else:
+                    logger.info(f"找到 {len(chapter_mappings)} 个章节号需要处理")
+                    logger.debug(f"章节号映射: {chapter_mappings}")
+                    
+                    # 从规格书中提取测试方法
+                    from src.features.matrix.service.spec_extractor import SpecExtractor
+                    extractor = SpecExtractor()
+                    test_methods = extractor.extract_test_methods(self.last_imported_spec_path, chapter_mappings)
+                    
+                    logger.info(f"从规格书中提取到 {len(test_methods)} 个测试方法")
+                    logger.debug(f"提取的测试方法: {test_methods}")
+            else:
+                logger.info("没有导入规格书文件，跳过测试方法提取")
             
             # 获取模板数据
             from src.utils.template_data import get_condition_requirement_templates, get_template_aliases
@@ -456,7 +463,7 @@ class MatrixService:
             
             # 将提取的测试方法填充到Matrix中，并根据Test Item列填充Condition和Requirement
             updated_count = 0
-            for row_index in range(2, len(self.data_model.rows)):  # 从第3行开始处理（跳过表头）
+            for row_index in range(1, len(self.data_model.rows)):  # 从第2行开始处理（跳过表头）
                 if row_index < len(self.data_model.rows):
                     # 获取Test Item（第一列）
                     test_item = ""
@@ -465,8 +472,8 @@ class MatrixService:
                     
                     logger.debug(f"处理第{row_index}行，Test Item: '{test_item}'")
                     
-                    # 处理Test Method列
-                    if test_method_col_index < len(self.data_model.rows[row_index]):
+                    # 处理Test Method列（仅在有导入规格书且有提取到测试方法时才更新）
+                    if self.last_imported_spec_path and test_methods and test_method_col_index < len(self.data_model.rows[row_index]):
                         current_test_method = self.data_model.rows[row_index][test_method_col_index]
                         logger.debug(f"第{row_index}行当前Test Method列值: '{current_test_method}'")
                         
@@ -487,8 +494,19 @@ class MatrixService:
                                 logger.debug(f"第{row_index}行的Test Method列已有值: '{current_test_method}'，不设置默认值")
                         else:
                             logger.debug(f"第{row_index}行不包含Examination或已有测试方法，Test Item: '{test_item}'")
+                    # 如果没有导入规格书，但仍需处理Examination类型的测试项
+                    elif not self.last_imported_spec_path and test_item and "examination" in test_item.lower().strip() and test_method_col_index < len(self.data_model.rows[row_index]):
+                        current_test_method = self.data_model.rows[row_index][test_method_col_index]
+                        logger.debug(f"第{row_index}行当前Test Method列值: '{current_test_method}'")
+                        # 如果Test Item包含"Examination"且Test Method列为空，则设置默认值
+                        if not current_test_method or not current_test_method.strip():
+                            self.data_model.rows[row_index][test_method_col_index] = "EIA-364-18"
+                            updated_count += 1
+                            logger.debug(f"为第{row_index}行的Examination设置默认测试方法: EIA-364-18")
+                        else:
+                            logger.debug(f"第{row_index}行的Test Method列已有值: '{current_test_method}'，不设置默认值")
                     
-                    # 根据Test Item填充Condition和Requirement
+                    # 根据Test Item填充Condition和Requirement（这部分总是执行）
                     if test_item:
                         logger.debug(f"为第{row_index}行填充Condition和Requirement模板数据")
                         self._fill_condition_requirement_templates(
@@ -500,7 +518,8 @@ class MatrixService:
                     logger.warning(f"无法更新第{row_index}行的测试方法，行索引或列索引超出范围")
             
             logger.info(f"成功更新 {updated_count} 行的测试方法和模板数据")
-            return updated_count > 0
+            # 即使没有更新任何测试方法，也返回True，因为我们完成了模板填充
+            return True
             
         except Exception as e:
             logger.error(f"从规格书提取测试方法时出错: {e}", exc_info=True)

@@ -126,14 +126,14 @@ class MatrixDataStructure:
             # 获取表头行
             header_row = matrix_data[0] if matrix_data else []
             
-            # 从第6列开始查找组别列（"1", "2", "3", ...），直到遇到"Remark"或"Notes"列
+            # 从第6列开始查找组别列（"1", "2", "3", ...），直到遇到"Notes"列
             start_col_index = 5  # 第6列（F列）开始
             
             # 查找所有组别列
             for col_index in range(start_col_index, len(header_row)):
                 col_header = header_row[col_index] if col_index < len(header_row) else ""
-                if col_header.lower() in ["remark", "notes"]:
-                    # 遇到Remark或Notes列，停止查找
+                if col_header.lower() in ["notes"]:
+                    # 遇到Notes列，停止查找
                     break
                     
                 # 清理组别名称
