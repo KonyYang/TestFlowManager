@@ -43,10 +43,15 @@ class TestRecordController:
             # 获取Matrix数据
             if self.matrix_service:
                 matrix_data = self.matrix_service.data_model.rows
+                logger.info(f"获取到Matrix数据，共 {len(matrix_data)} 行")
                 
                 # 创建MatrixDataStructure实例来解析数据
                 matrix_structure = MatrixDataStructure()
                 warnings = matrix_structure.update_from_matrix(matrix_data)
+                
+                # 记录解析结果
+                group_count = len(matrix_structure.group_steps)
+                logger.info(f"解析完成，共找到 {group_count} 个组别: {list(matrix_structure.group_steps.keys())}")
                 
                 # 如果有警告信息，显示给用户并阻止继续
                 if warnings:
@@ -66,11 +71,18 @@ class TestRecordController:
                         return False  # 阻止继续生成Test Record
                 
                 logger.info("Matrix数据结构已更新")
-                logger.info(f"组别步骤: {matrix_structure.group_steps}")
-                logger.info(f"样品数量: {matrix_structure.group_sample_sizes}")
+                logger.debug(f"组别步骤详情: {matrix_structure.group_steps}")
+                logger.debug(f"样品数量详情: {matrix_structure.group_sample_sizes}")
                 
                 # 调用服务生成文档，传入已解析的数据结构
+                logger.info("开始调用Test Record服务生成文档")
                 success = self.service.generate_test_record_with_structure(matrix_structure, output_path)
+                
+                if success:
+                    logger.info("Test Record文档生成成功")
+                else:
+                    logger.error("Test Record文档生成失败")
+                    
                 return success
             else:
                 logger.error("Matrix service not available")

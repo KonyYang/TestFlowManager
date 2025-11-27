@@ -80,6 +80,36 @@ class MatrixDataStructure:
             
         return len(warnings) == 0, warnings
     
+    def _clean_group_name(self, group_header: str) -> str:
+        """
+        清理组别名称，去除前后非数字或字母的符号，处理Group前缀
+        
+        Args:
+            group_header: 原始组别表头
+            
+        Returns:
+            清理后的组别名称
+        """
+        if not group_header or not group_header.strip():
+            return ""
+            
+        # 去除前后空格
+        cleaned = group_header.strip()
+        
+        # 如果以Group开头（不区分大小写），则去除Group前缀
+        if cleaned.lower().startswith("group"):
+            # 提取Group后的部分
+            cleaned = cleaned[5:].strip()  # 去掉"Group"前缀（5个字符）
+            
+        # 去除前后的非字母数字字符
+        # 使用正则表达式提取中间的字母数字组合
+        match = re.search(r'[a-zA-Z0-9]+', cleaned)
+        if match:
+            cleaned = match.group(0)
+            
+        logger.info(f"组别表头清理: '{group_header}' -> '{cleaned}'")
+        return cleaned
+    
     def update_from_matrix(self, matrix_data: List[List[str]]) -> List[str]:
         """
         从Matrix数据中更新所有重要信息
@@ -106,13 +136,29 @@ class MatrixDataStructure:
                     # 遇到Remark或Notes列，停止查找
                     break
                     
-                # 检查是否为组别列（数字）
-                if col_header.isdigit():
-                    self.group_col_indices[col_header] = col_index
-                    self.group_steps[col_header] = []
-                    logger.info(f"发现组别列: {col_header} (列索引: {col_index})")
+                # 清理组别名称
+                cleaned_group_name = self._clean_group_name(col_header)
+                
+                # 检查是否为有效组别列（数字或字母）
+                if cleaned_group_name and (cleaned_group_name.isdigit() or cleaned_group_name.isalnum()):
+                    self.group_col_indices[cleaned_group_name] = col_index
+                    self.group_steps[cleaned_group_name] = []
+                    logger.info(f"发现组别列: '{col_header}' -> '{cleaned_group_name}' (列索引: {col_index})")
             
             logger.info(f"共找到 {len(self.group_col_indices)} 个组别列: {list(self.group_col_indices.keys())}")
+            
+            # 验证组别名称是否有重复
+            group_names = list(self.group_col_indices.keys())
+            seen_groups = set()
+            duplicate_groups = set()
+            for group_name in group_names:
+                if group_name in seen_groups:
+                    duplicate_groups.add(group_name)
+                else:
+                    seen_groups.add(group_name)
+            
+            if duplicate_groups:
+                warnings.append(f"存在重复的组别名称: {', '.join(sorted(duplicate_groups))}")
             
             # 查找Sample size行索引
             sample_size_row_index = self._find_sample_size_row(matrix_data)
@@ -127,8 +173,10 @@ class MatrixDataStructure:
                 
                 # 遍历所有组别列
                 for group_name, col_index in self.group_col_indices.items():
-                    if col_index < len(row):
-                        group_step = row[col_index]
+                    # 获取原始列头用于查找
+                    original_col_index = self.group_col_indices[group_name]
+                    if original_col_index < len(row):
+                        group_step = row[original_col_index]
                         
                         # 如果不是Sample size行且组别步骤不为空，则添加到对应组别中
                         if (row_idx != sample_size_row_index and 
