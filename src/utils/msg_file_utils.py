@@ -7,6 +7,8 @@ import os
 import tempfile
 import shutil
 import win32com.client
+import pythoncom
+import traceback
 from typing import List, Dict, Any, Optional
 from src.core.logger import logger
 
@@ -21,6 +23,13 @@ def process_msg_file(file_path: str) -> Dict[str, Any]:
     Returns:
         包含邮件信息和附件的字典
     """
+    # 初始化COM库
+    logger.debug("初始化COM库")
+    pythoncom.CoInitialize()
+    
+    outlook = None
+    msg = None
+    
     try:
         if not os.path.exists(file_path):
             logger.error(f"MSG文件不存在: {file_path}")
@@ -30,6 +39,7 @@ def process_msg_file(file_path: str) -> Dict[str, Any]:
 
         # 创建临时文件夹用于存储附件
         temp_folder = tempfile.mkdtemp()
+        logger.debug(f"创建临时文件夹: {temp_folder}")
         
         success_count = 0
         error_messages = []
@@ -37,12 +47,17 @@ def process_msg_file(file_path: str) -> Dict[str, Any]:
 
         try:
             # 创建Outlook应用程序对象
+            logger.debug("创建Outlook应用程序对象")
             outlook = win32com.client.Dispatch("Outlook.Application")
+            logger.debug("Outlook应用程序对象创建成功")
 
             # 打开.msg文件
+            logger.debug(f"打开.msg文件: {file_path}")
             msg = outlook.CreateItemFromTemplate(file_path)
+            logger.debug(".msg文件打开成功")
 
             # 提取邮件基本信息
+            logger.debug("提取邮件基本信息")
             email_info = {
                 'subject': getattr(msg, 'Subject', '') or '',
                 'sender': getattr(msg, 'SenderName', '') or '',
@@ -50,21 +65,27 @@ def process_msg_file(file_path: str) -> Dict[str, Any]:
                 'body': getattr(msg, 'Body', '') or '',
                 'attachments': []
             }
+            logger.debug(f"邮件主题: {email_info['subject']}")
+            logger.debug(f"发件人: {email_info['sender']}")
 
             # 获取附件集合
+            logger.debug("获取附件集合")
             attachments = msg.Attachments
             total_count = attachments.Count
-
             logger.info(f"找到 {total_count} 个附件")
 
             # 遍历所有附件
+            logger.debug("遍历所有附件")
             for i in range(1, total_count + 1):
                 try:
+                    logger.debug(f"处理第 {i} 个附件")
                     attachment = attachments.Item(i)
                     attachment_name = attachment.FileName
+                    logger.debug(f"附件名称: {attachment_name}")
 
                     # 构建完整的保存路径
                     save_path = os.path.join(temp_folder, attachment_name)
+                    logger.debug(f"附件保存路径: {save_path}")
 
                     # 处理文件名冲突
                     counter = 1
@@ -75,11 +96,15 @@ def process_msg_file(file_path: str) -> Dict[str, Any]:
                         counter += 1
 
                     # 保存附件
+                    logger.debug(f"保存附件到: {save_path}")
                     attachment.SaveAsFile(save_path)
+                    logger.debug("附件保存完成")
                     
                     # 读取附件内容
+                    logger.debug("读取附件内容")
                     with open(save_path, 'rb') as f:
                         attachment_data = f.read()
+                    logger.debug(f"附件内容读取完成，大小: {len(attachment_data)} 字节")
                     
                     attachment_info = {
                         'filename': os.path.basename(save_path),
@@ -96,20 +121,15 @@ def process_msg_file(file_path: str) -> Dict[str, Any]:
                     error_msg = f"提取附件 {i} 时出错: {str(e)}"
                     error_messages.append(error_msg)
                     logger.warning(error_msg)
-
-            # 清理COM对象
-            msg = None
-            outlook = None
+                    logger.debug(traceback.format_exc())
 
         except Exception as e:
             error_messages.append(f"处理文件时出错: {str(e)}")
             logger.error(f"处理MSG文件时出错: {e}")
+            logger.debug(traceback.format_exc())
             # 清理临时文件夹
             shutil.rmtree(temp_folder, ignore_errors=True)
             return {"success": False, "error": f"处理文件时出错: {str(e)}"}
-
-        # 清理临时文件夹
-        shutil.rmtree(temp_folder, ignore_errors=True)
 
         logger.info(f"成功处理MSG文件，提取到 {success_count}/{total_count} 个附件")
         return {"success": True, "email_data": email_info}
@@ -122,7 +142,41 @@ def process_msg_file(file_path: str) -> Dict[str, Any]:
         return {"success": False, "error": f"没有权限访问文件: {file_path}"}
     except Exception as e:
         logger.error(f"处理MSG文件时出错: {e}")
+        logger.debug(traceback.format_exc())
         return {"success": False, "error": f"处理文件时出错: {str(e)}"}
+    finally:
+        # 确保正确清理COM对象
+        logger.debug("清理COM对象")
+        try:
+            if msg:
+                msg = None
+                logger.debug("msg对象清理完成")
+        except Exception as e:
+            logger.warning(f"清理msg对象时出错: {e}")
+            
+        try:
+            if outlook:
+                outlook = None
+                logger.debug("outlook对象清理完成")
+        except Exception as e:
+            logger.warning(f"清理outlook对象时出错: {e}")
+            
+        # 清理临时文件夹
+        try:
+            if 'temp_folder' in locals():
+                logger.debug(f"清理临时文件夹: {temp_folder}")
+                shutil.rmtree(temp_folder, ignore_errors=True)
+                logger.debug("临时文件夹清理完成")
+        except Exception as e:
+            logger.warning(f"清理临时文件夹时出错: {e}")
+            
+        # 反初始化COM库
+        try:
+            logger.debug("反初始化COM库")
+            pythoncom.CoUninitialize()
+            logger.debug("COM库反初始化完成")
+        except Exception as e:
+            logger.warning(f"反初始化COM库时出错: {e}")
 
 
 def validate_msg_file(file_path: str) -> Dict[str, Any]:
@@ -153,4 +207,5 @@ def validate_msg_file(file_path: str) -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"验证MSG文件时出错: {e}")
+        logger.debug(traceback.format_exc())
         return {"success": False, "error": str(e)}

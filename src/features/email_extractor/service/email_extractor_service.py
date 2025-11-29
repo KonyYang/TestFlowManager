@@ -6,6 +6,8 @@
 import os
 import tempfile
 import shutil
+import pythoncom
+import traceback
 from datetime import datetime
 from typing import List, Dict, Optional, Any
 from src.core.logger import logger
@@ -48,6 +50,7 @@ class EmailExtractorService:
             return success
         except Exception as e:
             logger.error(f"连接邮件服务器时发生错误: {e}")
+            logger.debug(traceback.format_exc())
             return False
 
     def load_email_list(self, limit: int = 50) -> List[Dict]:
@@ -68,6 +71,7 @@ class EmailExtractorService:
             return email_list
         except Exception as e:
             logger.error(f"加载邮件列表时发生错误: {e}")
+            logger.debug(traceback.format_exc())
             return []
 
     def select_email(self, email_id: str) -> bool:
@@ -99,6 +103,7 @@ class EmailExtractorService:
                 return False
         except Exception as e:
             logger.error(f"选择邮件时发生错误: {e}")
+            logger.debug(traceback.format_exc())
             return False
 
     def load_email_attachments(self, email_id: str) -> List[Dict]:
@@ -124,6 +129,7 @@ class EmailExtractorService:
             return attachments
         except Exception as e:
             logger.error(f"加载邮件附件时发生错误: {e}")
+            logger.debug(traceback.format_exc())
             return []
 
     def select_attachment(self, attachment_info: Dict) -> bool:
@@ -143,6 +149,7 @@ class EmailExtractorService:
             return True
         except Exception as e:
             logger.error(f"选择附件时发生错误: {e}")
+            logger.debug(traceback.format_exc())
             return False
 
     def save_selected_attachment(self, save_path: str) -> bool:
@@ -174,6 +181,7 @@ class EmailExtractorService:
                         return True
                     except Exception as e:
                         logger.error(f"保存附件内容失败: {e}")
+                        logger.debug(traceback.format_exc())
                         return False
                 else:
                     logger.error("附件对象无效")
@@ -187,6 +195,7 @@ class EmailExtractorService:
             return success
         except Exception as e:
             logger.error(f"保存附件时发生错误: {e}")
+            logger.debug(traceback.format_exc())
             return False
 
     def cleanup_all_temp_folders(self) -> bool:
@@ -213,10 +222,12 @@ class EmailExtractorService:
                         logger.info(f"已清理邮件附件临时文件夹: {item_path}")
                     except Exception as e:
                         logger.error(f"清理邮件附件临时文件夹失败: {item_path}, 错误: {e}")
+                        logger.debug(traceback.format_exc())
             
             return True
         except Exception as e:
             logger.error(f"清理所有临时文件夹时发生错误: {e}")
+            logger.debug(traceback.format_exc())
             return False
 
     def process_msg_file(self, file_path: str) -> Dict[str, Any]:
@@ -235,7 +246,14 @@ class EmailExtractorService:
             # 在处理新邮件前，清理旧的临时文件夹
             self.cleanup_temp_folder()
             
+            # 初始化COM库
+            logger.debug("初始化COM库")
+            pythoncom.CoInitialize()
+            
+            logger.debug("调用process_msg_file函数处理MSG文件")
             result = process_msg_file(file_path)
+            logger.debug(f"process_msg_file函数返回结果: {result.get('success')}")
+            
             if result.get("success"):
                 email_data = result.get("email_data", {})
                 self.data_model.set_msg_file_data(file_path, email_data)
@@ -244,6 +262,7 @@ class EmailExtractorService:
                 # 创建包含附件的临时文件夹
                 attachments = email_data.get("attachments", [])
                 if attachments:
+                    logger.debug("开始创建包含附件的临时文件夹")
                     self.temp_folder = self.create_temp_folder_with_attachments(attachments, file_path)
                     if self.temp_folder:
                         logger.info(f"已创建包含附件的临时文件夹: {self.temp_folder}")
@@ -255,8 +274,18 @@ class EmailExtractorService:
         except Exception as e:
             # 即使出现异常，也要确保清理临时文件夹
             logger.error(f"处理MSG文件时发生错误: {e}")
+            logger.debug(traceback.format_exc())
             self.cleanup_temp_folder()
             return {"success": False, "error": str(e)}
+        finally:
+            # 反初始化COM库
+            try:
+                logger.debug("反初始化COM库")
+                pythoncom.CoUninitialize()
+                logger.debug("COM库反初始化完成")
+            except Exception as e:
+                logger.warning(f"反初始化COM库时出错: {e}")
+                logger.debug(traceback.format_exc())
 
     def create_temp_folder_with_attachments(self, attachments: List[Dict], msg_file_path: str) -> Optional[str]:
         """
@@ -302,6 +331,7 @@ class EmailExtractorService:
                         logger.info(f"附件已保存到临时文件夹: {file_path}")
                     except Exception as e:
                         logger.error(f"保存附件到临时文件夹失败: {e}")
+                        logger.debug(traceback.format_exc())
 
             # 同时复制.msg文件到临时文件夹
             if msg_file_path and os.path.exists(msg_file_path):
@@ -312,10 +342,12 @@ class EmailExtractorService:
                     logger.info(f"MSG文件已复制到临时文件夹: {temp_msg_path}")
                 except Exception as e:
                     logger.error(f"复制MSG文件到临时文件夹失败: {e}")
+                    logger.debug(traceback.format_exc())
 
             return self.temp_folder
         except Exception as e:
             logger.error(f"创建包含附件的临时文件夹失败: {e}")
+            logger.debug(traceback.format_exc())
             return None
 
     def get_temp_folder(self) -> Optional[str]:
@@ -342,6 +374,7 @@ class EmailExtractorService:
                 return True
             except Exception as e:
                 logger.error(f"清理临时文件夹失败: {e}")
+                logger.debug(traceback.format_exc())
                 return False
         return True
 
@@ -353,6 +386,7 @@ class EmailExtractorService:
             logger.info("已断开邮件服务器连接")
         except Exception as e:
             logger.error(f"断开邮件服务器连接时发生错误: {e}")
+            logger.debug(traceback.format_exc())
 
     def clear_selection(self) -> None:
         """清空选择"""
@@ -364,3 +398,4 @@ class EmailExtractorService:
             logger.info("已清空选择")
         except Exception as e:
             logger.error(f"清空选择时发生错误: {e}")
+            logger.debug(traceback.format_exc())

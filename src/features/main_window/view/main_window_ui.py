@@ -110,6 +110,13 @@ class MainWindow(QMainWindow):
         open_action.setFont(global_font)
         file_menu.addAction(open_action)
 
+        # 添加打开项目菜单项
+        open_project_action = QAction("打开项目", self)
+        open_project_action.setShortcut("Ctrl+Shift+O")
+        open_project_action.triggered.connect(self._on_open_project)
+        open_project_action.setFont(global_font)
+        file_menu.addAction(open_project_action)
+
         save_action = QAction("保存", self)
         save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self._on_save_file)
@@ -168,6 +175,12 @@ class MainWindow(QMainWindow):
         open_button.setFont(button_font)
         toolbar.addWidget(open_button)
 
+        # 添加打开项目按钮
+        open_project_button = QPushButton("打开项目")
+        open_project_button.clicked.connect(self._on_open_project)
+        open_project_button.setFont(button_font)
+        toolbar.addWidget(open_project_button)
+
         save_button = QPushButton("保存")
         save_button.clicked.connect(self._on_save_file)
         save_button.setFont(button_font)
@@ -209,6 +222,12 @@ class MainWindow(QMainWindow):
         # 这里只是一个示例，实际应该打开文件选择对话框
         file_path = "example.txt"  # 示例文件路径
         if self.controller.handle_open_file(file_path):
+            self._update_status()
+
+    def _on_open_project(self) -> None:
+        """处理打开项目事件"""
+        logger.debug("Open project action triggered")
+        if self.controller.handle_open_project():
             self._update_status()
 
     def _on_save_file(self) -> None:

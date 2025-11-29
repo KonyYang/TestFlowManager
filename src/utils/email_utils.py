@@ -1,8 +1,3 @@
-"""
-邮件工具模块
-提供底层的邮件操作工具函数
-"""
-
 import win32com.client
 import pythoncom
 from typing import List, Dict, Any, Optional
@@ -12,7 +7,7 @@ from src.core.logger import logger
 class EmailUtils:
     """
     邮件工具类
-    提供与Outlook交互的功能
+    提供邮件相关的工具功能
     """
 
     def __init__(self):
@@ -22,14 +17,24 @@ class EmailUtils:
 
     def connect_to_outlook(self) -> bool:
         """
-        连接到Outlook应用程序
+        连接到Outlook
 
         Returns:
-            bool: 连接是否成功
+            是否成功连接
         """
         try:
+            # 初始化COM库
             pythoncom.CoInitialize()
-            self.outlook = win32com.client.Dispatch("Outlook.Application")
+            
+            # 尝试获取已运行的Outlook实例
+            try:
+                self.outlook = win32com.client.GetActiveObject("Outlook.Application")
+                logger.info("成功连接到已运行的Outlook实例")
+            except:
+                # 如果没有运行的实例，则创建新的
+                self.outlook = win32com.client.Dispatch("Outlook.Application")
+                logger.info("成功创建新的Outlook实例")
+
             self.namespace = self.outlook.GetNamespace("MAPI")
             logger.info("成功连接到Outlook")
             return True
@@ -39,13 +44,13 @@ class EmailUtils:
 
     def get_inbox_messages(self, limit: int = 50) -> List[Dict[str, Any]]:
         """
-        获取收件箱中的邮件列表
+        获取收件箱邮件
 
         Args:
-            limit (int): 获取邮件的最大数量
+            limit: 获取邮件的最大数量
 
         Returns:
-            List[Dict[str, Any]]: 邮件信息列表
+            邮件信息列表
         """
         messages = []
         try:
@@ -54,27 +59,31 @@ class EmailUtils:
                 return messages
 
             inbox = self.namespace.GetDefaultFolder(6)  # 6代表收件箱
-            message_count = min(inbox.Items.Count, limit)
+            items = inbox.Items
 
-            # 按时间倒序排列获取最新的邮件
-            for i in range(message_count):
+            # 按接收时间排序
+            items.Sort("[ReceivedTime]", True)
+
+            count = 0
+            for item in items:
+                if count >= limit:
+                    break
+
                 try:
-                    # Outlook的索引从1开始
-                    item = inbox.Items(inbox.Items.Count - i)
+                    # 获取邮件基本信息
                     message_info = {
-                        'subject': item.Subject,
-                        'sender': item.SenderName,
-                        'received_time': item.ReceivedTime,
                         'entry_id': item.EntryID,
-                        'has_attachments': item.Attachments.Count > 0,
-                        'attachment_count': item.Attachments.Count
+                        'subject': getattr(item, 'Subject', '') or '',
+                        'sender_name': getattr(item, 'SenderName', '') or '',
+                        'received_time': getattr(item, 'ReceivedTime', '') or '',
+                        'size': getattr(item, 'Size', 0) or 0
                     }
                     messages.append(message_info)
+                    count += 1
                 except Exception as e:
-                    logger.warning(f"获取邮件信息时出错: {e}")
+                    logger.warning(f"获取邮件信息失败: {e}")
                     continue
 
-            logger.info(f"成功获取 {len(messages)} 封邮件")
         except Exception as e:
             logger.error(f"获取收件箱邮件失败: {e}")
 
@@ -150,6 +159,7 @@ class EmailUtils:
         try:
             if self.outlook:
                 del self.outlook
+            # 反初始化COM库
             pythoncom.CoUninitialize()
             logger.info("已断开与Outlook的连接")
         except Exception as e:

@@ -1,13 +1,16 @@
-"""
-项目创建控制器模块
-处理项目创建流程，包括邮件提取、文档解析等
-"""
+# src/features/project_creator/controller/project_creator_controller.py
 from PyQt5.QtWidgets import QDialog, QMessageBox
 from src.core.logger import logger
 from src.features.project_creator.service.project_creator_service import ProjectCreatorService
 from src.features.project_creator.model.project_creator_data import EmailData, EmailAttachment, ProjectCreationContext
 from src.features.email_extractor.view.email_selector_dialog import EmailSelectorDialog
 from src.features.email_extractor.controller.email_extractor_controller import EmailExtractorController
+# 添加LTR项目集成服务
+from src.features.project_creator.service.ltr_project_integration_service import LTRProjectIntegrationService
+# 添加Matrix项目控制器
+from src.features.matrix.controller.matrix_project_controller import MatrixProjectController
+# 添加事件调度器
+from src.core.event_dispatcher import event_dispatcher
 
 
 class ProjectCreatorController:
@@ -27,6 +30,12 @@ class ProjectCreatorController:
         self.context = ProjectCreationContext()
         self.email_extractor_controller = None  # 添加这一行来保存controller引用
         self.selected_attachment = None  # 用于存储选中的附件
+        # 添加LTR项目集成服务
+        self.ltr_integration_service = LTRProjectIntegrationService()
+        # 添加Matrix项目控制器
+        self.matrix_project_controller = MatrixProjectController(parent_view)
+        # 订阅LTR申请处理完成事件
+        event_dispatcher.subscribe("ltr.application.processed", self._on_ltr_application_processed)
 
     def handle_create_new_project(self) -> bool:
         """
@@ -63,12 +72,14 @@ class ProjectCreatorController:
             是否成功获取邮件数据
         """
         try:
+            logger.info("正在初始化邮件提取控制器...")
             # 创建邮件选择对话框
             dialog = EmailSelectorDialog(self.parent_view)
             controller = EmailExtractorController(dialog)
 
             # 初始化控制器
             if controller.initialize():
+                logger.info("邮件提取控制器初始化成功")
                 # 显示对话框
                 result = dialog.exec_()
 
@@ -377,3 +388,61 @@ class ProjectCreatorController:
             logger.error(f"重新选择附件时发生错误: {e}")
             from PyQt5.QtWidgets import QMessageBox
             QMessageBox.critical(self.parent_view, "错误", f"重新选择附件时发生错误: {str(e)}")
+            
+    def set_project_path(self, project_path):
+        """
+        设置项目路径并加载LTR项目数据
+        
+        Args:
+            project_path (str): 项目路径
+        """
+        # 加载LTR项目数据
+        self.ltr_integration_service.load_ltr_project(project_path)
+        
+        # 设置Matrix项目控制器中的LTR集成服务
+        self.matrix_project_controller.set_ltr_integration_service(self.ltr_integration_service)
+        
+    def open_matrix_editor(self):
+        """
+        打开Matrix编辑器
+        
+        Returns:
+            bool: 是否成功打开
+        """
+        return self.matrix_project_controller.open_matrix_dialog()
+        
+    def _on_ltr_application_processed(self, data):
+        """
+        处理LTR申请单处理完成事件，打开Matrix编辑器窗口
+        
+        Args:
+            data: 事件数据，包含处理结果
+        """
+        dl_number = data.get("dl_number")
+        status = data.get("status")
+
+        if status == "success":
+            logger.info(f"LTR application processed successfully: {dl_number}")
+            # 在LTR申请成功后，打开Matrix编辑器窗口并显示LTR编号
+            self._open_matrix_editor_with_ltr_number(dl_number)
+        else:
+            logger.error(f"LTR application processing failed: {dl_number}")
+
+    def _open_matrix_editor_with_ltr_number(self, dl_number):
+        """
+        打开带有LTR编号标题的Matrix编辑器窗口
+        
+        Args:
+            dl_number: LTR编号
+        """
+        try:
+            # 设置LTR编号到Matrix控制器
+            if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
+                self.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
+                
+            # 打开Matrix编辑器
+            if self.matrix_project_controller:
+                self.matrix_project_controller.open_matrix_dialog()
+                logger.info(f"Opened Matrix editor for LTR: {dl_number}")
+        except Exception as e:
+            logger.error(f"Error opening Matrix editor with LTR number: {e}")

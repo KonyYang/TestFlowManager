@@ -1,4 +1,3 @@
-# src/features/matrix/model\matrix_data.py
 class MatrixData:
     """Matrix数据模型 - Model层"""
 
@@ -66,6 +65,10 @@ class MatrixData:
         # 重新排列所有列标签
         self._reorder_all_columns()
         return True
+
+    def insert_column(self, column_index, column_name=""):
+        """在指定位置插入新列 - Model层业务规则"""
+        return self.add_column(column_name, column_index)
 
     def move_column(self, from_index, to_index):
         """移动列 - Model层业务规则"""

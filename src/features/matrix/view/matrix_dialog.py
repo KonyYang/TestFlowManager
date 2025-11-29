@@ -12,14 +12,20 @@ from src.core.logger import logger
 from src.features.matrix.view.matrix_filter_dialog import MatrixFilterDialog
 # 导入Test Record生成控制器
 from src.features.test_record_generator.controller.test_record_controller import TestRecordController
+# 导入导出对话框
+from src.features.matrix.service.export.view.export_dialog import ExportDialog
 
 
 class MatrixDialog(QDialog):
     """Matrix视图 - View层"""
 
-    def __init__(self, parent=None, service=None):
+    def __init__(self, parent=None, service=None, ltr_number=None):
         super().__init__(parent)
-        self.setWindowTitle("Matrix编辑器")
+        self.ltr_number = ltr_number
+        if ltr_number:
+            self.setWindowTitle(f"Matrix编辑器 - LTR: {ltr_number}")
+        else:
+            self.setWindowTitle("Matrix编辑器")
         # 设置窗口标志，允许窗口最大化和调整大小
         self.setWindowFlags(Qt.Window)
         # 设置默认为最大化状态
@@ -652,35 +658,40 @@ class MatrixDialog(QDialog):
 
     def _export_to_excel(self):
         """导出到Excel - View层事件触发"""
-        file_path, _ = QFileDialog.getSaveFileName(
-            self, "保存Excel文件", "", "Excel Files (*.xlsx)"
-        )
-        if file_path:
-            # 同步表格数据到模型
-            self._sync_table_to_model()
-            # 导出前先保存合并单元格信息
-            self._save_merged_cells_info()
-            # 触发Controller层处理
-            if self.service.export_to_excel(file_path):
-                QMessageBox.information(self, "成功", "数据已成功导出到Excel")
-            else:
-                # 检查文件是否被占用
-                import os
-                try:
-                    # 尝试以独占模式打开文件
-                    with open(file_path, 'r+b') as f:
-                        pass
-                    # 如果能打开，说明是其他问题
-                    QMessageBox.warning(self, "错误", "导出失败，请检查文件路径或权限")
-                except PermissionError:
-                    # 文件被其他程序占用
-                    QMessageBox.warning(self, "错误", "导出失败，文件已被其他程序占用（可能已在Excel中打开），请关闭文件后重试")
-                except FileNotFoundError:
-                    # 文件不存在，应该是其他问题
-                    QMessageBox.warning(self, "错误", "导出失败，请检查文件路径是否正确")
-                except Exception:
-                    # 其他未知错误
-                    QMessageBox.warning(self, "错误", "导出失败，发生未知错误")
+        # 显示导出类型选择对话框
+        export_dialog = ExportDialog(self)
+        if export_dialog.exec_() == QDialog.Accepted:
+            export_type = export_dialog.get_selected_export_type()
+            if export_type:
+                file_path, _ = QFileDialog.getSaveFileName(
+                    self, "保存Excel文件", "", "Excel Files (*.xlsx)"
+                )
+                if file_path:
+                    # 同步表格数据到模型
+                    self._sync_table_to_model()
+                    # 导出前先保存合并单元格信息
+                    self._save_merged_cells_info()
+                    # 触发Controller层处理
+                    if self.service.export_to_excel(file_path):
+                        QMessageBox.information(self, "成功", "数据已成功导出到Excel")
+                    else:
+                        # 检查文件是否被占用
+                        import os
+                        try:
+                            # 尝试以独占模式打开文件
+                            with open(file_path, 'r+b') as f:
+                                pass
+                            # 如果能打开，说明是其他问题
+                            QMessageBox.warning(self, "错误", "导出失败，请检查文件路径或权限")
+                        except PermissionError:
+                            # 文件被其他程序占用
+                            QMessageBox.warning(self, "错误", "导出失败，文件已被其他程序占用（可能已在Excel中打开），请关闭文件后重试")
+                        except FileNotFoundError:
+                            # 文件不存在，应该是其他问题
+                            QMessageBox.warning(self, "错误", "导出失败，请检查文件路径是否正确")
+                        except Exception:
+                            # 其他未知错误
+                            QMessageBox.warning(self, "错误", "导出失败，发生未知错误")
                 
     def _save_merged_cells_info(self):
         """

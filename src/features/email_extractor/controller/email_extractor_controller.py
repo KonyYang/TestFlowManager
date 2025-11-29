@@ -4,6 +4,7 @@
 """
 
 import os
+import traceback
 from PyQt5.QtWidgets import QMessageBox
 from src.core.logger import logger
 from src.core.base_controller import BaseController
@@ -44,6 +45,8 @@ class EmailExtractorController(BaseController):
             logger.info("邮件提取控制器初始化成功")
             return True
         except Exception as e:
+            logger.error(f"初始化邮件提取控制器失败: {e}")
+            logger.debug(traceback.format_exc())
             return self.handle_error(e, "初始化邮件提取控制器失败")
 
     def _on_msg_file_selected(self, file_path: str):
@@ -55,9 +58,19 @@ class EmailExtractorController(BaseController):
         """
         try:
             logger.info(f"选中MSG文件: {file_path}")
+            
+            # 记录文件信息
+            if os.path.exists(file_path):
+                file_size = os.path.getsize(file_path)
+                logger.info(f"MSG文件大小: {file_size} 字节")
+            else:
+                logger.warning(f"MSG文件不存在: {file_path}")
 
             # 通过服务处理MSG文件
+            logger.debug("开始调用服务处理MSG文件")
             result = self.service.process_msg_file(file_path)
+            logger.debug(f"服务处理MSG文件完成，结果: {result.get('success')}")
+            
             if not result.get("success"):
                 error_msg = result.get("error", "未知错误")
                 logger.error(f"处理MSG文件失败: {error_msg}")
@@ -74,11 +87,20 @@ class EmailExtractorController(BaseController):
             attachments = email_data.get("attachments", [])
             self.view.update_email_info(info_text, attachments)
             
-            logger.debug(f"MSG file processed successfully, attachments count: {len(attachments)}")
+            logger.debug(f"MSG文件处理成功，附件数量: {len(attachments)}")
+            
+            # 记录附件信息
+            if attachments:
+                logger.info(f"提取到 {len(attachments)} 个附件:")
+                for i, attachment in enumerate(attachments):
+                    filename = attachment.get('filename', '未知文件名')
+                    size = attachment.get('size', 0)
+                    logger.info(f"  附件 {i+1}: {filename} ({size} 字节)")
 
             return True
         except Exception as e:
             logger.error(f"处理MSG文件选中事件失败: {e}", exc_info=True)
+            logger.debug(traceback.format_exc())
             return self.handle_error(e, "处理MSG文件选中事件失败")
 
     def handle_msg_file_selection(self, file_path: str):

@@ -1,0 +1,64 @@
+from src.features.matrix.model.matrix_data import MatrixData
+from src.core.logger import logger
+
+
+class MatrixEditorExcelExportService:
+    """Matrix编辑器Excel导出服务 - 处理Matrix编辑器内容导出到Excel的功能"""
+
+    def __init__(self, data_model: MatrixData):
+        self.data_model = data_model
+        self.merged_cells_info = []
+
+    def export_matrix_to_excel(self, file_path):
+        """将Matrix编辑器内容导出到Excel - Service层持久化功能"""
+        try:
+            # 创建工作簿
+            from openpyxl import Workbook
+            wb = Workbook()
+            ws = wb.active
+
+            # 先添加数据行（不包括表头）
+            for row_idx, row_data in enumerate(self.data_model.get_rows()):
+                for col_idx, cell_value in enumerate(row_data):
+                    ws.cell(row=row_idx + 1, column=col_idx + 1, value=cell_value)
+            
+            # 应用合并单元格
+            logger.debug(f"准备导出 {len(self.data_model.merged_cells_info)} 个合并单元格")
+            for merge_info in self.data_model.merged_cells_info:
+                top_row = merge_info['top_row'] + 1  # +1 because of 1-based indexing
+                left_col = merge_info['left_col'] + 1  # +1 because of 1-based indexing
+                bottom_row = top_row + merge_info['row_count'] - 1
+                right_col = left_col + merge_info['col_count'] - 1
+                
+                logger.debug(f"处理合并单元格: top_row={top_row}, left_col={left_col}, "
+                           f"bottom_row={bottom_row}, right_col={right_col}")
+                
+                # 先保存合并区域左上角单元格的值
+                top_left_value = ws.cell(row=top_row, column=left_col).value
+                
+                # 清空整个合并区域的值
+                for row in range(top_row, bottom_row + 1):
+                    for col in range(left_col, right_col + 1):
+                        ws.cell(row=row, column=col, value=None)
+                
+                # 将原值设置回合并区域的左上角单元格
+                ws.cell(row=top_row, column=left_col, value=top_left_value)
+                
+                # 合并单元格
+                ws.merge_cells(
+                    start_row=top_row, 
+                    start_column=left_col, 
+                    end_row=bottom_row, 
+                    end_column=right_col
+                )
+
+            # 保存文件
+            wb.save(file_path)
+            return True
+        except PermissionError:
+            # 文件被其他程序占用（如Excel）
+            logger.error(f"导出Excel失败: 文件被占用，可能已在Excel中打开")
+            return False
+        except Exception as e:
+            logger.error(f"导出Excel失败: {e}")
+            return False

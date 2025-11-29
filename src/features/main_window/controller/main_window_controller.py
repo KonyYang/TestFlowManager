@@ -3,8 +3,9 @@
 处理主窗口的业务逻辑和事件
 """
 import os
+import json
 from typing import List, Optional
-from PyQt5.QtWidgets import QWidget, QMessageBox, QDialog
+from PyQt5.QtWidgets import QWidget, QMessageBox, QDialog, QFileDialog
 from src.core.logger import logger
 from src.core.event_dispatcher import event_dispatcher
 from src.features.ltr_manager.controller.ltr_editor_controller import LTREditorController
@@ -270,6 +271,83 @@ class MainWindowController:
         except Exception as e:
             logger.error(f"Failed to create new project: {e}")
             self.service.update_status("创建新项目失败")
+            return False
+
+    def handle_open_project(self) -> bool:
+        """
+        处理打开项目事件
+
+        Returns:
+            是否处理成功
+        """
+        try:
+            logger.debug("Handling open project request")
+
+            # 显示文件夹选择对话框
+            project_path = QFileDialog.getExistingDirectory(
+                self.view,
+                "选择项目文件夹",
+                "",  # 初始目录
+                QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
+            )
+
+            if not project_path:  # 用户取消了选择
+                return False
+
+            # 检查项目文件夹是否包含必要的文件
+            json_files = [f for f in os.listdir(project_path) if f.endswith('.json')]
+            if not json_files:
+                QMessageBox.warning(
+                    self.view,
+                    "无效项目",
+                    "所选文件夹不包含有效的项目文件（缺少JSON文件）"
+                )
+                return False
+
+            # 读取JSON文件以获取项目信息（特别是DL编号）
+            dl_number = None
+            try:
+                json_file_path = os.path.join(project_path, json_files[0])
+                with open(json_file_path, 'r', encoding='utf-8') as f:
+                    project_data = json.load(f)
+                    # 尝试从项目数据中获取DL编号
+                    dl_number = project_data.get('DL', None)
+                    if not dl_number:
+                        # 如果DL字段不存在，尝试从文件名中提取
+                        dl_number = os.path.basename(project_path)
+            except Exception as e:
+                logger.warning(f"读取项目JSON文件时出错: {e}")
+                # 如果无法读取JSON文件，使用文件夹名称作为DL编号
+                dl_number = os.path.basename(project_path)
+
+            # 创建项目创建控制器并设置项目路径
+            from src.features.project_creator.controller.project_creator_controller import ProjectCreatorController
+            project_creator = ProjectCreatorController(self.view)
+            project_creator.set_project_path(project_path)
+            
+            # 设置Matrix控制器中的LTR编号
+            if dl_number:
+                project_creator.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
+            
+            # 保存当前项目路径到状态
+            from src.core.state_manager import state_manager
+            state_manager.set_state("current_project", project_path)
+
+            # 显示Matrix编辑器
+            success = project_creator.open_matrix_editor()
+
+            if success:
+                self.service.update_status(f"已打开项目: {os.path.basename(project_path)}")
+                logger.info(f"Project opened successfully: {project_path}")
+            else:
+                self.service.update_status(f"打开项目失败: {os.path.basename(project_path)}")
+                logger.error(f"Failed to open project: {project_path}")
+
+            return success
+        except Exception as e:
+            logger.error(f"Failed to open project: {e}")
+            self.service.update_status("打开项目失败")
+            QMessageBox.critical(self.view, "错误", f"打开项目失败: {str(e)}")
             return False
 
     def handle_about(self) -> None:
