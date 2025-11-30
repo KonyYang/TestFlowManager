@@ -70,10 +70,10 @@ class LTRApplicationDialog(QDialog):
         """设置用户界面"""
         self.setWindowTitle(f"LTR申请单: {self.dl_number}" if self.dl_number else "新LTR申请单")
         # 设置更小的最小尺寸并根据DPI进行适配
-        min_width, min_height = WindowUtils.get_scaled_window_size(600, 400)
+        min_width, min_height = WindowUtils.get_scaled_window_size(1000, 1000)
         self.setMinimumSize(min_width, min_height)
         # 设置更小的初始尺寸并根据DPI进行适配
-        init_width, init_height = WindowUtils.get_scaled_window_size(700, 500)
+        init_width, init_height = WindowUtils.get_scaled_window_size(1000, 1400)
         self.resize(init_width, init_height)
 
         # 创建主布局

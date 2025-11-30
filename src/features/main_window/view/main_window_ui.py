@@ -40,8 +40,8 @@ class MainWindow(QMainWindow):
         # 根据DPI调整窗口尺寸，使用更小的默认尺寸
         from src.core.config_manager import config_manager
         # print(f"[DEBUG] All config: {config_manager.get_all()}")
-        base_width = config_manager.get("window.width", 300)
-        base_height = config_manager.get("window.height", 200)
+        base_width = config_manager.get("window.width", 800)
+        base_height = config_manager.get("window.height", 600)
         # print(f"[DEBUG] Base window size from config: {base_width}x{base_height}")
         
         width = WindowUtils.get_scaled_size(base_width)
@@ -98,17 +98,11 @@ class MainWindow(QMainWindow):
         file_menu = menubar.addMenu("文件")
         file_menu.setFont(global_font)
 
-        new_action = QAction("新建", self)
+        new_action = QAction("新建项目", self)
         new_action.setShortcut("Ctrl+N")
         new_action.triggered.connect(self._on_new_file)
         new_action.setFont(global_font)
         file_menu.addAction(new_action)
-
-        open_action = QAction("打开", self)
-        open_action.setShortcut("Ctrl+O")
-        open_action.triggered.connect(self._on_open_file)
-        open_action.setFont(global_font)
-        file_menu.addAction(open_action)
 
         # 添加打开项目菜单项
         open_project_action = QAction("打开项目", self)
@@ -116,6 +110,12 @@ class MainWindow(QMainWindow):
         open_project_action.triggered.connect(self._on_open_project)
         open_project_action.setFont(global_font)
         file_menu.addAction(open_project_action)
+
+        open_action = QAction("打开", self)
+        open_action.setShortcut("Ctrl+O")
+        open_action.triggered.connect(self._on_open_file)
+        open_action.setFont(global_font)
+        file_menu.addAction(open_action)
 
         save_action = QAction("保存", self)
         save_action.setShortcut("Ctrl+S")
@@ -165,21 +165,21 @@ class MainWindow(QMainWindow):
         # 获取缩放字体
         button_font = FontUtils.get_scaled_font(8)  # 使用更小的基础字体大小
 
-        new_button = QPushButton("新建")
+        new_button = QPushButton("新建项目")
         new_button.clicked.connect(self._on_new_file)
         new_button.setFont(button_font)
         toolbar.addWidget(new_button)
-
-        open_button = QPushButton("打开")
-        open_button.clicked.connect(self._on_open_file)
-        open_button.setFont(button_font)
-        toolbar.addWidget(open_button)
 
         # 添加打开项目按钮
         open_project_button = QPushButton("打开项目")
         open_project_button.clicked.connect(self._on_open_project)
         open_project_button.setFont(button_font)
         toolbar.addWidget(open_project_button)
+
+        open_button = QPushButton("打开")
+        open_button.clicked.connect(self._on_open_file)
+        open_button.setFont(button_font)
+        toolbar.addWidget(open_button)
 
         save_button = QPushButton("保存")
         save_button.clicked.connect(self._on_save_file)

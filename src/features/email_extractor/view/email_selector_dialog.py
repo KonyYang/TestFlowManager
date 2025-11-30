@@ -45,16 +45,16 @@ class EmailSelectorDialog(QDialog):
         """设置用户界面"""
         self.setWindowTitle("选择邮件文件")
         self.setModal(True)
-        # 根据DPI调整窗口尺寸，使用更小的默认尺寸
-        width, height = WindowUtils.get_scaled_window_size(500, 350)
+        # 根据DPI调整窗口尺寸，使用更合适的默认尺寸
+        width, height = WindowUtils.get_scaled_window_size(800, 600)  # 增加窗口尺寸
         self.resize(width, height)
 
         layout = QVBoxLayout()
 
         # 文件选择区域
         file_select_layout = QHBoxLayout()
-        # 使用动态字体
-        font = FontUtils.get_scaled_font(10)  # 基础字号10pt
+        # 使用动态字体，减小基础字号以适应不同DPI设置
+        font = FontUtils.get_scaled_font(9)  # 减小基础字号从10到9
 
         self.select_msg_file_button = QPushButton("选择.msg邮件文件")
         self.select_msg_file_button.setFont(font)
@@ -77,8 +77,8 @@ class EmailSelectorDialog(QDialog):
             padding: 8px;
             border-radius: 4px;
         """)
-        # 根据DPI调整高度
-        label_height = WindowUtils.get_scaled_size(70)
+        # 根据DPI调整高度，使用较小的固定高度
+        label_height = WindowUtils.get_scaled_size(60)  # 减小高度从70到60
         self.email_info_label.setFixedHeight(label_height)
         self.email_info_label.setWordWrap(True)
         self.email_info_label.setFont(font)
@@ -93,8 +93,8 @@ class EmailSelectorDialog(QDialog):
         self.attachment_table.setHorizontalHeaderLabels(["文件名", "大小"])
         self.attachment_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.attachment_table.setSelectionMode(QTableWidget.SingleSelection)
-        # 根据DPI调整最小高度
-        min_height = WindowUtils.get_scaled_size(150)
+        # 根据DPI调整最小高度，减小高度以适应整体布局
+        min_height = WindowUtils.get_scaled_size(120)  # 减小最小高度从150到120
         self.attachment_table.setMinimumHeight(min_height)
         self.attachment_table.setFont(font)
 

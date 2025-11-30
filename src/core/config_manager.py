@@ -182,8 +182,8 @@ class ConfigManager:
                 "debug": False
             },
             "window": {
-                "width": 200,
-                "height": 125,
+                "width": 800,
+                "height": 600,
                 "position_x": 100,
                 "position_y": 100
             },

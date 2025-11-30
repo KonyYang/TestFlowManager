@@ -5,8 +5,8 @@
         "debug": false
     },
     "window": {
-        "width": 500,
-        "height": 400,
+        "width": 800,
+        "height": 600,
         "position_x": 100,
         "position_y": 100
     },
