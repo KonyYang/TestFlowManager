@@ -32,12 +32,16 @@ class MatrixProjectController:
         Args:
             ltr_integration_service: LTR项目集成服务实例
         """
-        logger.info(f"Setting LTR integration service: {ltr_integration_service is not None}")
-        if ltr_integration_service:
-            logger.info(f"LTR integration service project data file path: {getattr(ltr_integration_service, 'project_data_file_path', 'Not available')}")
-        self.ltr_integration_service = ltr_integration_service
-        # 同时设置到Matrix控制器中
-        self.matrix_controller.set_ltr_integration_service(ltr_integration_service)
+        # 只在服务实例发生变化时才进行设置
+        if self.ltr_integration_service != ltr_integration_service:
+            logger.info(f"Setting LTR integration service: {ltr_integration_service is not None}")
+            if ltr_integration_service:
+                logger.info(f"LTR integration service project data file path: {getattr(ltr_integration_service, 'project_data_file_path', 'Not available')}")
+            self.ltr_integration_service = ltr_integration_service
+            # 同时设置到Matrix控制器中
+            self.matrix_controller.set_ltr_integration_service(ltr_integration_service)
+        else:
+            logger.debug("LTR integration service unchanged, skipping update")
 
     def open_matrix_dialog(self):
         """

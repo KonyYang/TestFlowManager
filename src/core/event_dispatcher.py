@@ -29,6 +29,7 @@ class EventDispatcher:
             if event_name not in self._events:
                 self._events[event_name] = []
             self._events[event_name].append(callback)
+            print(f"DEBUG: Subscribed to event '{event_name}', total subscribers: {len(self._events[event_name])}")
 
     def unsubscribe(self, event_name: str, callback: Callable) -> None:
         """
@@ -42,7 +43,9 @@ class EventDispatcher:
             if event_name in self._events:
                 try:
                     self._events[event_name].remove(callback)
+                    print(f"DEBUG: Unsubscribed from event '{event_name}', remaining subscribers: {len(self._events[event_name])}")
                 except ValueError:
+                    print(f"DEBUG: Callback not found in event '{event_name}' subscribers")
                     pass  # 回调函数不在列表中
 
     def dispatch(self, event_name: str, *args, **kwargs) -> None:
@@ -54,6 +57,7 @@ class EventDispatcher:
             *args: 传递给回调函数的位置参数
             **kwargs: 传递给回调函数的关键字参数
         """
+        print(f"DEBUG: Dispatching event '{event_name}' with args: {args}, kwargs: {kwargs}")
         with self._lock:
             if event_name in self._events:
                 for callback in self._events[event_name][:]:  # 使用副本防止在回调中修改列表

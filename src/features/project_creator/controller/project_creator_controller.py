@@ -38,8 +38,26 @@ class ProjectCreatorController:
         self.ltr_integration_service = LTRProjectIntegrationService()
         # 添加Matrix项目控制器
         self.matrix_project_controller = MatrixProjectController(parent_view)
+        # 添加标志以避免重复订阅事件
+        self._event_subscribed = False
         # 订阅LTR申请处理完成事件
-        event_dispatcher.subscribe("ltr.application.processed", self._on_ltr_application_processed)
+        self._subscribe_to_events()
+
+    def _subscribe_to_events(self):
+        """订阅事件，确保不会重复订阅"""
+        if not self._event_subscribed:
+            event_dispatcher.subscribe("ltr.application.processed", self._on_ltr_application_processed)
+            self._event_subscribed = True
+            logger.info("Subscribed to ltr.application.processed event")
+        else:
+            logger.warning("Already subscribed to ltr.application.processed event, skipping subscription")
+
+    def cleanup(self):
+        """清理资源，取消事件订阅"""
+        if self._event_subscribed:
+            event_dispatcher.unsubscribe("ltr.application.processed", self._on_ltr_application_processed)
+            self._event_subscribed = False
+            logger.info("Unsubscribed from ltr.application.processed event")
 
     def handle_create_new_project(self) -> bool:
         """
@@ -403,14 +421,22 @@ class ProjectCreatorController:
         # 加载LTR项目数据
         self.ltr_integration_service.load_ltr_project(project_path)
         
-        # 设置Matrix项目控制器中的LTR集成服务
-        self.matrix_project_controller.set_ltr_integration_service(self.ltr_integration_service)
+        # 只在LTR集成服务未设置或需要更新时才设置
+        if self.matrix_project_controller.ltr_integration_service != self.ltr_integration_service:
+            # 设置Matrix项目控制器中的LTR集成服务
+            self.matrix_project_controller.set_ltr_integration_service(self.ltr_integration_service)
         
         # 将项目数据文件路径传递给Matrix服务
         project_data_file_path = self.ltr_integration_service.project_data_file_path
-        if project_data_file_path and hasattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path'):
+        if (project_data_file_path and 
+            hasattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path') and
+            getattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path', None) != project_data_file_path):
             self.matrix_project_controller.matrix_controller.service.project_data_file_path = project_data_file_path
             logger.info(f"已设置Matrix服务的项目数据文件路径: {project_data_file_path}")
+        elif not project_data_file_path:
+            logger.warning("未能设置Matrix服务的项目数据文件路径: 路径为空")
+        else:
+            logger.debug("Matrix服务的项目数据文件路径已正确设置，跳过")
         
     def open_matrix_editor(self):
         """
@@ -432,6 +458,11 @@ class ProjectCreatorController:
         status = data.get("status")
         project_path = data.get("project_path")  # 获取项目路径
 
+        # 如果没有DL编号，不执行任何操作
+        if not dl_number:
+            logger.warning("LTR application processed but no DL number provided, skipping Matrix editor opening")
+            return
+
         if status == "success":
             logger.info(f"LTR application processed successfully: {dl_number}")
             # 使用QTimer延迟执行UI操作，避免在事件处理中直接操作UI
@@ -450,7 +481,6 @@ class ProjectCreatorController:
         """
         try:
             logger.info(f"Attempting to open Matrix editor for LTR: {dl_number}")
-            logger.info(f"Project path provided: {project_path}")
             
             # 设置LTR编号到Matrix控制器
             if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
@@ -484,17 +514,24 @@ class ProjectCreatorController:
                 else:
                     logger.warning(f"No JSON files found in constructed path: {project_root_path}")
                 
-                self.matrix_project_controller.set_ltr_integration_service(self.ltr_integration_service)
+                # 只在LTR集成服务未设置或需要更新时才设置
+                if self.matrix_project_controller.ltr_integration_service != self.ltr_integration_service:
+                    self.matrix_project_controller.set_ltr_integration_service(self.ltr_integration_service)
                 
                 # 将项目数据文件路径传递给Matrix服务（与打开项目时保持一致）
                 project_data_file_path = self.ltr_integration_service.project_data_file_path
                 logger.info(f"Project data file path to set: {project_data_file_path}")
                 
-                if project_data_file_path and hasattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path'):
+                # 只在路径存在且服务属性未设置时才设置
+                if (project_data_file_path and 
+                    hasattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path') and
+                    getattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path', None) != project_data_file_path):
                     self.matrix_project_controller.matrix_controller.service.project_data_file_path = project_data_file_path
                     logger.info(f"Set project data file path {project_data_file_path} to Matrix service")
+                elif not project_data_file_path:
+                    logger.warning("Failed to set project data file path. Path is None or empty")
                 else:
-                    logger.warning(f"Failed to set project data file path. Path exists: {project_data_file_path is not None}, Service has attribute: {hasattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path')}")
+                    logger.debug("Project data file path already set correctly, skipping")
                 
                 logger.debug(f"Set project path {project_path} to Matrix controller via LTR integration service")
             else:

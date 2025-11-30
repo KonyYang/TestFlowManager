@@ -261,6 +261,9 @@ class MainWindowController:
             # 创建项目创建控制器并处理新建项目请求
             project_creator = ProjectCreatorController(self.view)
             success = project_creator.handle_create_new_project()
+            
+            # 清理资源
+            project_creator.cleanup()
 
             if success:
                 self.service.update_status("已创建新项目")

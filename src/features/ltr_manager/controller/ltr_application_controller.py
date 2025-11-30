@@ -227,35 +227,47 @@ class LTRApplicationController:
                         logger.info(f"完整项目结构创建成功: {project_result}")
                         QMessageBox.information(parent, "成功", f"项目文件夹已成功创建！\n路径: {project_result}")
                         
-                        # 发布事件通知项目创建成功，携带项目路径信息
-                        event_dispatcher.dispatch("ltr.application.processed", {
-                            "dl_number": result['ltr_number'],
-                            "status": "success",
-                            "project_path": project_result,  # 添加项目路径
-                            "application_data": application_data
-                        })
+                        # 只有在有有效的LTR编号时才发布事件
+                        if result.get('ltr_number'):
+                            # 发布事件通知项目创建成功，携带项目路径信息
+                            event_dispatcher.dispatch("ltr.application.processed", {
+                                "dl_number": result['ltr_number'],
+                                "status": "success",
+                                "project_path": project_result,  # 添加项目路径
+                                "application_data": application_data
+                            })
+                        else:
+                            logger.warning("LTR number is empty, not dispatching success event")
                     else:
                         logger.error("完整项目结构创建失败")
                         QMessageBox.warning(parent, "警告", "项目文件夹创建失败")
                         
-                        # 发布事件通知项目创建失败
-                        event_dispatcher.dispatch("ltr.application.processed", {
-                            "dl_number": result['ltr_number'],
-                            "status": "failed",
-                            "error": "项目文件夹创建失败"
-                        })
-
+                        # 只有在有有效的LTR编号时才发布事件
+                        if result.get('ltr_number'):
+                            # 发布事件通知项目创建失败
+                            event_dispatcher.dispatch("ltr.application.processed", {
+                                "dl_number": result['ltr_number'],
+                                "status": "failed",
+                                "error": "项目文件夹创建失败"
+                            })
+                        else:
+                            logger.warning("LTR number is empty, not dispatching failure event")
             return result
 
         except Exception as e:
             import traceback
             logger.error(f"处理LTR编号申请时发生错误: {e}", exc_info=True)
-            # 发布事件通知项目创建失败
-            event_dispatcher.dispatch("ltr.application.processed", {
-                "dl_number": form_data.get("dl_number", ""),
-                "status": "failed",
-                "error": str(e)
-            })
+            # 只有在有有效的DL编号时才发布事件
+            dl_number = form_data.get("dl_number", "")
+            if dl_number:
+                # 发布事件通知项目创建失败
+                event_dispatcher.dispatch("ltr.application.processed", {
+                    "dl_number": dl_number,
+                    "status": "failed",
+                    "error": str(e)
+                })
+            else:
+                logger.warning("DL number is empty, not dispatching error event")
             return {"success": False, "error": f"处理申请时发生错误: {str(e)}"}
 
     def _process_application_data(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
