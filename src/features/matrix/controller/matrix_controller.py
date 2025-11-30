@@ -1,6 +1,7 @@
 # src/features/matrix/controller/matrix_controller.py
 from src.features.matrix.service.matrix_service import MatrixService
 from src.features.matrix.view.matrix_dialog import MatrixDialog
+from src.core.logger import logger
 
 
 class MatrixController:
@@ -16,8 +17,16 @@ class MatrixController:
 
     def show_matrix_dialog(self):
         """显示Matrix编辑对话框 - Controller层协调"""
-        dialog = MatrixDialog(self.parent_view, self.service, self.ltr_number)
-        dialog.exec_()
+        try:
+            logger.info("Creating MatrixDialog instance")
+            dialog = MatrixDialog(self.parent_view, self.service, self.ltr_number)
+            logger.debug("MatrixDialog instance created successfully")
+            logger.info("Executing MatrixDialog")
+            dialog.exec_()
+            logger.info("MatrixDialog execution completed")
+        except Exception as e:
+            logger.error(f"Error showing matrix dialog: {e}", exc_info=True)
+            raise
 
     def get_matrix_data(self):
         """获取Matrix数据 - Controller层数据提供"""
@@ -67,6 +76,9 @@ class MatrixController:
         Args:
             ltr_integration_service: LTR项目集成服务实例
         """
+        logger.info(f"MatrixController: Setting LTR integration service: {ltr_integration_service is not None}")
+        if ltr_integration_service:
+            logger.info(f"MatrixController: LTR integration service project data file path: {getattr(ltr_integration_service, 'project_data_file_path', 'Not available')}")
         self.ltr_integration_service = ltr_integration_service
         
     def initialize_with_ltr_data(self):

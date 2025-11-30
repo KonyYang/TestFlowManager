@@ -32,6 +32,9 @@ class MatrixProjectController:
         Args:
             ltr_integration_service: LTR项目集成服务实例
         """
+        logger.info(f"Setting LTR integration service: {ltr_integration_service is not None}")
+        if ltr_integration_service:
+            logger.info(f"LTR integration service project data file path: {getattr(ltr_integration_service, 'project_data_file_path', 'Not available')}")
         self.ltr_integration_service = ltr_integration_service
         # 同时设置到Matrix控制器中
         self.matrix_controller.set_ltr_integration_service(ltr_integration_service)
@@ -44,16 +47,21 @@ class MatrixProjectController:
             bool: 是否成功打开
         """
         try:
+            logger.info("Opening Matrix dialog")
+            
             # 如果有LTR项目数据，先初始化Matrix
             if self.ltr_integration_service and self.ltr_integration_service.is_project_loaded():
+                logger.debug("Initializing Matrix with LTR data")
                 self.matrix_controller.initialize_with_ltr_data()
             
             # 显示Matrix对话框
+            logger.debug("Showing Matrix dialog")
             self.matrix_controller.show_matrix_dialog()
+            logger.info("Matrix dialog opened successfully")
             return True
             
         except Exception as e:
-            logger.error(f"Failed to open matrix dialog: {e}")
+            logger.error(f"Failed to open matrix dialog: {e}", exc_info=True)
             return False
 
     def get_available_spec_files(self):

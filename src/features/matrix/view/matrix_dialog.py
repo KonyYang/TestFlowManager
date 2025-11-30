@@ -794,7 +794,6 @@ class MatrixDialog(QDialog):
             success = controller.generate_test_record(parent=self)
             
             if success:
-                QMessageBox.information(self, "成功", "Test Record文档已生成到 D:\\outfile\\testrecord.docx")
                 logger.info("Test Record文档生成成功")
             else:
                 # 错误信息已经在controller中处理过了，这里不需要额外提示

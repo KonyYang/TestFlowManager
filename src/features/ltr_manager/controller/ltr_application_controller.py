@@ -11,6 +11,8 @@ from src.features.ltr_manager.service.ltr_application_service import LTRApplicat
 from src.features.ltr_manager.view.ltr_application_dialog import LTRApplicationDialog
 from src.features.folder_manager.controller.folder_manager_controller import FolderManagerController
 from src.utils.ltr_data_manager import LTRDataManager
+# 添加事件调度器
+from src.core.event_dispatcher import event_dispatcher
 
 
 class LTRApplicationController:
@@ -34,7 +36,6 @@ class LTRApplicationController:
         # 添加LTR数据管理器
         self.ltr_data_manager = LTRDataManager()
         # 添加事件订阅
-        from src.core.event_dispatcher import event_dispatcher
         event_dispatcher.subscribe("ltr.application.processed", self._on_ltr_application_processed)
         # 添加属性来存储选中的文件名
         self.selected_filename = None
@@ -138,7 +139,6 @@ class LTRApplicationController:
                 logger.info("User accepted the application dialog")
 
                 # 发布事件而不是直接返回数据
-                from src.core.event_dispatcher import event_dispatcher
                 event_dispatcher.dispatch("ltr.application.confirmed", {
                     "dl_number": self.application_data.dl_number,
                     "data": processed_data,
@@ -226,15 +226,36 @@ class LTRApplicationController:
                         self.ltr_data_manager.save_to_project_file(result['ltr_number'], application_data)
                         logger.info(f"完整项目结构创建成功: {project_result}")
                         QMessageBox.information(parent, "成功", f"项目文件夹已成功创建！\n路径: {project_result}")
+                        
+                        # 发布事件通知项目创建成功，携带项目路径信息
+                        event_dispatcher.dispatch("ltr.application.processed", {
+                            "dl_number": result['ltr_number'],
+                            "status": "success",
+                            "project_path": project_result,  # 添加项目路径
+                            "application_data": application_data
+                        })
                     else:
                         logger.error("完整项目结构创建失败")
                         QMessageBox.warning(parent, "警告", "项目文件夹创建失败")
+                        
+                        # 发布事件通知项目创建失败
+                        event_dispatcher.dispatch("ltr.application.processed", {
+                            "dl_number": result['ltr_number'],
+                            "status": "failed",
+                            "error": "项目文件夹创建失败"
+                        })
 
             return result
 
         except Exception as e:
             import traceback
             logger.error(f"处理LTR编号申请时发生错误: {e}", exc_info=True)
+            # 发布事件通知项目创建失败
+            event_dispatcher.dispatch("ltr.application.processed", {
+                "dl_number": form_data.get("dl_number", ""),
+                "status": "failed",
+                "error": str(e)
+            })
             return {"success": False, "error": f"处理申请时发生错误: {str(e)}"}
 
     def _process_application_data(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:

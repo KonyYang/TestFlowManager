@@ -50,6 +50,7 @@ class MatrixService:
         self.project_controller = None
         # 添加项目数据文件路径
         self.project_data_file_path = None
+        logger.info("MatrixService initialized with project_data_file_path attribute")
 
     def add_column(self, column_name="", position=None):
         """添加新列 - Service层业务逻辑"""

@@ -5,10 +5,9 @@ Test Record生成控制器
 """
 
 from src.features.test_record_generator.service.test_record_service import TestRecordService
-from src.features.test_record_generator.view.test_record_dialog import TestRecordDialog
 from src.core.logger import logger
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
-from PyQt5.QtWidgets import QMessageBox, QDialog
+from PyQt5.QtWidgets import QMessageBox, QFileDialog
 import os
 import re
 
@@ -118,17 +117,39 @@ class TestRecordController:
                 logger.info(f"设置项目数据文件路径: {project_data_file_path}")
                 
                 # 根据项目路径和DL编号生成默认输出路径
-                output_path = self._get_default_output_path(dl_number, project_data_file_path)
-                logger.info(f"使用输出路径: {output_path}")
+                default_output_path = self._get_default_output_path(dl_number, project_data_file_path)
+                logger.info(f"默认输出路径: {default_output_path}")
                 
-                # 显示对话框让用户确认或修改输出路径
-                dialog = TestRecordDialog(parent, output_path)
-                if dialog.exec_() != QDialog.Accepted:
-                    logger.info("用户取消了Test Record生成操作")
-                    return False
+                # 检查默认路径是否有效
+                default_dir = os.path.dirname(default_output_path)
+                if not os.path.exists(default_dir):
+                    # 如果默认路径无效，显示警告并让用户选择路径
+                    msg_box = QMessageBox(parent)
+                    msg_box.setIcon(QMessageBox.Warning)
+                    msg_box.setWindowTitle("路径问题")
+                    msg_box.setText(f"无法找到正确的项目文件夹，无法自动保存Test Record文档。\n\n默认路径: {default_output_path}\n\n请手动选择保存位置。")
+                    msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+                    result = msg_box.exec_()
+                    
+                    if result == QMessageBox.Cancel:
+                        logger.info("用户取消了Test Record生成操作")
+                        return False
+                    
+                    # 让用户选择保存路径
+                    output_path, _ = QFileDialog.getSaveFileName(
+                        parent, 
+                        "保存Test Record文档", 
+                        f"{dl_number} Test Record.docx", 
+                        "Word文档 (*.docx)"
+                    )
+                    
+                    if not output_path:
+                        logger.info("用户未选择保存路径，取消Test Record生成操作")
+                        return False
+                else:
+                    # 使用默认路径
+                    output_path = default_output_path
                 
-                # 获取用户选择的输出路径
-                output_path = dialog.get_output_path()
                 # 标准化路径分隔符
                 output_path = os.path.normpath(output_path)
                 

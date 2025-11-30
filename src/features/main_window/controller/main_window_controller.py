@@ -14,6 +14,8 @@ from src.features.main_window.service.main_window_service import MainWindowServi
 from src.features.ltr_manager.controller.ltr_viewer_controller import LTRViewerController
 from src.features.main_window.view.dialogs.dl_input_dialog import DLInputDialog
 from src.features.project_creator.controller import ProjectCreatorController
+# 添加状态管理器
+from src.core.state_manager import state_manager
 
 
 class MainWindowController:
@@ -283,11 +285,19 @@ class MainWindowController:
         try:
             logger.debug("Handling open project request")
 
+            # 获取默认项目路径
+            from src.core.config_manager import config_manager
+            default_project_path = config_manager.get("paths.default_project_path", "")
+            
+            # 确保路径存在，如果不存在则使用空字符串（系统默认路径）
+            if not os.path.exists(default_project_path):
+                default_project_path = ""
+
             # 显示文件夹选择对话框
             project_path = QFileDialog.getExistingDirectory(
                 self.view,
                 "选择项目文件夹",
-                "",  # 初始目录
+                default_project_path,  # 使用配置的默认路径作为初始目录
                 QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
             )
 
@@ -330,7 +340,6 @@ class MainWindowController:
                 project_creator.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
             
             # 保存当前项目路径到状态
-            from src.core.state_manager import state_manager
             state_manager.set_state("current_project", project_path)
 
             # 显示Matrix编辑器

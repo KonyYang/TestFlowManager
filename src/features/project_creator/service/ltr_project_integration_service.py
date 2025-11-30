@@ -29,8 +29,10 @@ class LTRProjectIntegrationService:
             dict: LTR项目数据
         """
         try:
+            logger.info(f"Loading LTR project from path: {project_path}")
             # 查找项目中的JSON文件
             json_files = [f for f in os.listdir(project_path) if f.endswith('.json')]
+            logger.info(f"Found JSON files: {json_files}")
             
             if not json_files:
                 logger.warning(f"No JSON file found in project path: {project_path}")
@@ -39,6 +41,7 @@ class LTRProjectIntegrationService:
             # 假设只有一个JSON文件，或者使用第一个JSON文件
             json_file = json_files[0]
             json_path = os.path.join(project_path, json_file)
+            logger.info(f"Using JSON file: {json_path}")
             
             # 读取JSON文件
             with open(json_path, 'r', encoding='utf-8') as f:
@@ -49,6 +52,7 @@ class LTRProjectIntegrationService:
             self.project_data_file_path = json_path
             
             logger.info(f"Successfully loaded LTR project data from: {json_path}")
+            logger.info(f"Project data file path set to: {self.project_data_file_path}")
             return ltr_data
             
         except Exception as e:

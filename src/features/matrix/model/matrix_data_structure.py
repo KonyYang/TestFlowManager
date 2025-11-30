@@ -14,6 +14,9 @@ class MatrixDataStructure:
         self.dl_number: str = "DL-UNKNOWN"
         self.project_data_file_path: str = None
         
+    def __str__(self):
+        return f"MatrixDataStructure(dl_number={self.dl_number}, project_data_file_path={self.project_data_file_path})"
+    
     def _clean_step_numbers(self, step_str: str) -> List[str]:
         """
         清理并提取步骤号，支持各种格式
