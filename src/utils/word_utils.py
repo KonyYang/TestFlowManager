@@ -76,19 +76,26 @@ def cleanup_word_resources():
 
     if _shared_word_app:
         try:
-            # 关闭所有文档
-            if _shared_word_app.Documents:
-                for document in _shared_word_app.Documents:
-                    try:
-                        document.Close(SaveChanges=False)
-                    except:
-                        pass
+            # 检查Word应用是否仍然可用
+            try:
+                _shared_word_app.Name  # 测试连接
+                # 只有在Word可用时才尝试关闭文档和退出
+                # 关闭所有文档
+                if _shared_word_app.Documents:
+                    for document in _shared_word_app.Documents:
+                        try:
+                            document.Close(SaveChanges=False)
+                        except:
+                            pass
 
-            # 退出Word应用
-            _shared_word_app.Quit()
-            logger.debug("Word application quit successfully")
+                # 退出Word应用
+                _shared_word_app.Quit()
+                logger.debug("Word application quit successfully")
+            except:
+                # Word应用已经关闭或无响应，直接清理引用
+                logger.debug("Word application was already closed or unresponsive")
         except Exception as e:
-            logger.error(f"Error while quitting Word application: {e}")
+            logger.error(f"Error while cleaning up Word resources: {e}")
         finally:
             _shared_word_app = None
 
@@ -101,7 +108,6 @@ def cleanup_word_resources():
             logger.debug("COM library uninitialized")
         except Exception as e:
             logger.error(f"Error while uninitializing COM library: {e}")
-
 
 def is_word_closed(word_app: Any) -> bool:
     """

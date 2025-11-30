@@ -11,6 +11,8 @@ from src.core.logger import logger
 from src.core.config_manager import config_manager
 from src.utils.word_utils import get_shared_word_app, release_word_app, open_word_file
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
+import json
+import shutil
 
 
 class TestRecordService:
@@ -279,6 +281,89 @@ class TestRecordService:
             logger.error(f"无法找到第 {group_index} 个组别的表格 (表格编号: {table_no})")
             return None
 
+    def _fill_header_info(self, doc: Any, project_data_file_path: str) -> bool:
+        """
+        填充页眉信息
+        
+        Args:
+            doc: Word文档对象
+            project_data_file_path: 项目数据文件路径
+            
+        Returns:
+            是否成功填充页眉
+        """
+        try:
+            logger.info(f"开始填充页眉信息，项目数据文件路径: {project_data_file_path}")
+            
+            # 检查数据文件是否存在
+            if not os.path.exists(project_data_file_path):
+                logger.error(f"项目数据文件不存在: {project_data_file_path}")
+                return False
+            
+            # 读取JSON数据文件
+            with open(project_data_file_path, 'r', encoding='utf-8') as f:
+                project_data = json.load(f)
+            
+            # 获取需要的信息
+            dl_number = project_data.get("DL", "DL-UNKNOWN")
+            product_description = project_data.get("product_description", "").strip()
+            applicable_specifications = project_data.get("applicable_specifications", "").strip()
+            
+            logger.info(f"从JSON文件中读取到DL编号: '{dl_number}'")
+            logger.info(f"从JSON文件中读取到产品描述: '{product_description}'")
+            logger.info(f"从JSON文件中读取到适用标准: '{applicable_specifications}'")
+            
+            # 获取页眉部分
+            header_section = doc.Sections(1)  # 页眉在第一个节中
+            header_range = header_section.Headers(1).Range  # wdHeaderFooterPrimary = 1
+
+            # 检查页眉中是否有表格
+            if header_range.Tables.Count < 2:
+                logger.error("页眉中未找到至少两个表格")
+                return False
+
+            # 获取页眉中的第一个表格
+            header_table = header_range.Tables(1)
+            
+            # 检查表格行列数是否符合要求
+            if header_table.Rows.Count < 1 or header_table.Columns.Count < 3:
+                logger.error("页眉第一个表格行列数不足")
+                return False
+            
+            # 在第一个表格的(1,3)单元格，添加项目编号
+            cell_range = header_table.Cell(1, 3).Range
+            # 确保至少存在4个段落（空行+两个标题+预留空行）
+            while cell_range.Paragraphs.Count < 4:
+                cell_range.InsertParagraphAfter()  # 追加缺失的段落
+            
+            # 定位并替换第三个段落（保留前两行标题）
+            cell_range.Paragraphs(4).Range.Text = dl_number
+            logger.info(f"已在页眉第一个表格(1,3)单元格中填入DL编号: {dl_number}")
+
+            # 获取页眉中的第二个表格
+            if header_range.Tables.Count >= 2:
+                header_table = header_range.Tables(2)
+                # 检查表格是否有足够的行和列
+                if header_table.Rows.Count >= 1 and header_table.Columns.Count >= 4:
+                    # 填充页眉第二个表格的 (1,2) 和 (1,4) 单元格
+                    header_table.Cell(1, 2).Range.Text = product_description
+                    header_table.Cell(1, 4).Range.Text = applicable_specifications
+                    logger.info(f"已在页眉第二个表格(1,2)单元格中填入产品描述: {product_description}")
+                    logger.info(f"已在页眉第二个表格(1,4)单元格中填入适用标准: {applicable_specifications}")
+                else:
+                    logger.error("页眉表格的行列数量不足")
+                    return False
+            else:
+                logger.error("页眉中未找到第二个表格")
+                return False
+                
+            logger.info("页眉信息填充完成")
+            return True
+            
+        except Exception as e:
+            logger.error(f"填充页眉信息时发生错误: {e}")
+            return False
+
     def generate_test_record_with_structure(self, matrix_structure: MatrixDataStructure, output_path: str) -> bool:
         """
         根据已解析的Matrix数据结构生成Test Record文档
@@ -301,11 +386,13 @@ class TestRecordService:
             logger.info(f"找到模板文件: {template_path}")
             
             # 检查模板文件是否存在
-            import os
             if not os.path.exists(template_path):
                 logger.error(f"模板文件不存在: {template_path}")
                 return False
 
+            # 标准化输出路径
+            output_path = os.path.normpath(output_path)
+            
             # 确保输出目录存在
             output_dir = os.path.dirname(output_path)
             if not os.path.exists(output_dir):
@@ -313,7 +400,6 @@ class TestRecordService:
                 logger.info(f"已创建输出目录: {output_dir}")
 
             # 直接复制模板文件到目标位置
-            import shutil
             shutil.copy2(template_path, output_path)
             logger.info(f"成功复制模板文件到: {output_path}")
 
@@ -351,6 +437,16 @@ class TestRecordService:
                 logger.info(f"组别数量 {group_count} 未超过默认值2，无需复制模板")
 
             logger.info(f"Matrix数据解析完成，共找到 {group_count} 个组别")
+
+            # 填充页眉信息
+            # 获取项目数据文件路径
+            project_data_file_path = getattr(matrix_structure, 'project_data_file_path', None)
+            if project_data_file_path and os.path.exists(project_data_file_path):
+                logger.info(f"从MatrixDataStructure获取到项目数据文件路径: {project_data_file_path}")
+                if not self._fill_header_info(new_doc, project_data_file_path):
+                    logger.warning("页眉信息填充失败，但继续生成文档")
+            else:
+                logger.warning("未提供有效的项目数据文件路径，跳过页眉信息填充")
 
             # 填充文档
             # 按照组别顺序处理

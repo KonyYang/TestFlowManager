@@ -11,6 +11,8 @@ class MatrixDataStructure:
         self.group_steps: Dict[str, List[Dict[str, Any]]] = {}
         self.group_sample_sizes: Dict[str, str] = {}
         self.group_col_indices: Dict[str, int] = {}
+        self.dl_number: str = "DL-UNKNOWN"
+        self.project_data_file_path: str = None
         
     def _clean_step_numbers(self, step_str: str) -> List[str]:
         """

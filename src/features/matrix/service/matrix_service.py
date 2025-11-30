@@ -46,6 +46,10 @@ class MatrixService:
         self.merged_cells_info = []
         # 存储最近导入的规格书文件路径
         self.last_imported_spec_path = self.spec_processing_service.last_imported_spec_path
+        # 添加项目控制器引用
+        self.project_controller = None
+        # 添加项目数据文件路径
+        self.project_data_file_path = None
 
     def add_column(self, column_name="", position=None):
         """添加新列 - Service层业务逻辑"""

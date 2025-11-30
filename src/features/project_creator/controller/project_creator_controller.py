@@ -402,6 +402,12 @@ class ProjectCreatorController:
         # 设置Matrix项目控制器中的LTR集成服务
         self.matrix_project_controller.set_ltr_integration_service(self.ltr_integration_service)
         
+        # 将项目数据文件路径传递给Matrix服务
+        project_data_file_path = self.ltr_integration_service.project_data_file_path
+        if project_data_file_path and hasattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path'):
+            self.matrix_project_controller.matrix_controller.service.project_data_file_path = project_data_file_path
+            logger.info(f"已设置Matrix服务的项目数据文件路径: {project_data_file_path}")
+        
     def open_matrix_editor(self):
         """
         打开Matrix编辑器

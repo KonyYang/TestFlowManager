@@ -16,6 +16,7 @@ class LTRProjectIntegrationService:
     def __init__(self):
         self.current_ltr_data = None
         self.current_ltr_path = None
+        self.project_data_file_path = None
     
     def load_ltr_project(self, project_path):
         """
@@ -45,6 +46,7 @@ class LTRProjectIntegrationService:
                 
             self.current_ltr_data = ltr_data
             self.current_ltr_path = project_path
+            self.project_data_file_path = json_path
             
             logger.info(f"Successfully loaded LTR project data from: {json_path}")
             return ltr_data
