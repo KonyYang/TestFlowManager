@@ -12,10 +12,35 @@ from src.core.logger import logger
 from src.core.config_manager import config_manager
 from src.utils import word_utils
 
+def initialize_numpy():
+    """
+    初始化NumPy以防止在PyInstaller打包的应用程序中出现重复初始化错误
+    """
+    try:
+        # 在应用程序启动时设置环境变量，防止NumPy重复初始化
+        os.environ['OPENBLAS_NUM_THREADS'] = '1'
+        os.environ['MKL_NUM_THREADS'] = '1'
+        os.environ['NUMEXPR_NUM_THREADS'] = '1'
+        os.environ['OMP_NUM_THREADS'] = '1'
+        os.environ['NPY_DISABLE_CPU_FEATURES'] = '1'
+        
+        # 尝试预先导入numpy相关模块
+        try:
+            import numpy
+            logger.info(f"NumPy版本: {numpy.__version__}")
+        except Exception as e:
+            # 这里我们忽略NumPy初始化警告，因为它不影响应用程序的基本功能
+            logger.debug(f"NumPy预导入警告（可忽略）: {e}")
+            
+    except Exception as e:
+        logger.warning(f"NumPy初始化处理失败: {e}")
 
 def main():
     """主函数"""
     try:
+        # 在应用程序启动时初始化NumPy
+        initialize_numpy()
+        
         # 设置应用程序属性
         app = QApplication(sys.argv)
         app.setApplicationName("TestFlowManager")

@@ -35,7 +35,7 @@ class LTRFieldConfigLoader:
             # 在开发环境中
             config_file_path = os.path.join(
                 os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
-                "app", "config", "ltr_fields.json"
+                "src", "app", "config", "ltr_fields.json"
             )
             
         logger.debug(f"配置文件路径: {config_file_path}")
@@ -63,7 +63,15 @@ class LTRFieldConfigLoader:
             
             if not os.path.exists(config_file_path):
                 logger.error(f"LTR字段配置文件未找到: {config_file_path}")
-                return []
+                # 尝试备用路径
+                if getattr(sys, 'frozen', False):
+                    # 在可执行文件环境中尝试另一种路径
+                    config_file_path = os.path.join(os.path.dirname(sys.executable), "src", "app", "config", "ltr_fields.json")
+                    if not os.path.exists(config_file_path):
+                        logger.error(f"备用LTR字段配置文件路径也未找到: {config_file_path}")
+                        return []
+                else:
+                    return []
 
             # 读取并解析JSON配置文件
             with open(config_file_path, 'r', encoding='utf-8') as f:
@@ -97,7 +105,15 @@ class LTRFieldConfigLoader:
             
             if not os.path.exists(config_file_path):
                 logger.error(f"LTR字段配置文件未找到: {config_file_path}")
-                return []
+                # 尝试备用路径
+                if getattr(sys, 'frozen', False):
+                    # 在可执行文件环境中尝试另一种路径
+                    config_file_path = os.path.join(os.path.dirname(sys.executable), "src", "app", "config", "ltr_fields.json")
+                    if not os.path.exists(config_file_path):
+                        logger.error(f"备用LTR字段配置文件路径也未找到: {config_file_path}")
+                        return []
+                else:
+                    return []
 
             # 读取并解析JSON配置文件
             with open(config_file_path, 'r', encoding='utf-8') as f:

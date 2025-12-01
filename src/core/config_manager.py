@@ -213,6 +213,15 @@ class ConfigManager:
                 value = value[k]
             return value
         except (KeyError, TypeError):
+            # 特殊处理标准文件路径和普通路径，在可执行文件模式下转换为绝对路径
+            # 仅对配置中定义的路径进行处理，不处理其他配置项
+            if (key.startswith("standard_files.") or key.startswith("paths.")) and isinstance(default, str):
+                if getattr(sys, 'frozen', False):
+                    # 在可执行文件模式下，将相对路径转换为绝对路径
+                    if not os.path.isabs(default):
+                        base_path = os.path.dirname(sys.executable)
+                        abs_path = os.path.join(base_path, default)
+                        return abs_path
             return default
 
     def set(self, key: str, value: Any) -> None:

@@ -5,6 +5,7 @@
 
 import re
 import os
+import sys
 from src.core.config_manager import config_manager
 from src.core.logger import logger
 
@@ -96,6 +97,7 @@ def load_standard_data(file_path: str) -> dict:
             logger.warning(f"标准文件不存在: {file_path}")
             return standards
             
+        logger.info(f"准备加载标准文件: {file_path}")
         # 根据文件扩展名选择合适的解析器
         if file_path.endswith('.xls') or file_path.endswith('.xlsx'):
             standards = _load_excel_standards(file_path)
@@ -104,6 +106,8 @@ def load_standard_data(file_path: str) -> dict:
             
     except Exception as e:
         logger.error(f"加载标准文件时出错: {e}")
+        import traceback
+        logger.error(f"详细错误信息: {traceback.format_exc()}")
         
     return standards
 
@@ -115,19 +119,63 @@ def _load_excel_standards(file_path: str) -> dict:
     Args:
         file_path (str): Excel文件路径
 
-    Returns:
         dict: 标准数据字典
     """
     standards = {}
     
     try:
-        import pandas as pd
-        
+        # 在函数内部导入pandas，避免在PyInstaller打包的可执行文件中出现初始化冲突
+        # 使用try-except块处理导入问题
+        try:
+            import pandas as pd
+        except ImportError as e:
+            logger.error(f"无法导入pandas库: {e}")
+            return standards
+        except RuntimeError as e:
+            if "CPU dispatcher tracer already initlized" in str(e):
+                logger.warning("检测到NumPy初始化冲突，尝试重新导入")
+                try:
+                    # 尝试重新导入
+                    import importlib
+                    import sys
+                    # 清理可能存在的模块
+                    modules_to_remove = [mod for mod in sys.modules.keys() if mod.startswith('numpy') or mod.startswith('pandas')]
+                    for mod in modules_to_remove:
+                        if mod in sys.modules:
+                            del sys.modules[mod]
+                    # 重新导入
+                    import pandas as pd
+                except Exception as reimport_error:
+                    logger.error(f"重新导入pandas库失败: {reimport_error}")
+                    # 尝试使用xlrd直接读取Excel文件作为备选方案
+                    try:
+                        logger.info("尝试使用xlrd作为备选方案读取Excel文件")
+                        import xlrd
+                        standards = _load_excel_with_xlrd(file_path)
+                        return standards
+                    except Exception as xlrd_error:
+                        logger.error(f"使用xlrd读取Excel文件失败: {xlrd_error}")
+                    return standards
+            else:
+                logger.error(f"导入pandas库时出现运行时错误: {e}")
+                return standards
+        except Exception as general_error:
+            logger.error(f"导入pandas时出现未知错误: {general_error}")
+            return standards
+            
         # 从配置中获取工作表名称
         sheet_name = config_manager.get("standard_files.standard_version_sheet_name", "认可标准")
+        logger.info(f"准备读取Excel文件: {file_path}, 工作表: {sheet_name}")
+        logger.info(f"文件是否存在: {os.path.exists(file_path)}")
         
+        # 检查文件是否存在
+        if not os.path.exists(file_path):
+            logger.error(f"标准文件不存在: {file_path}")
+            return standards
+            
         # 读取Excel文件中的指定工作表
         df = pd.read_excel(file_path, sheet_name=sheet_name, header=None)
+        logger.info(f"成功读取Excel文件，数据形状: {df.shape}")
         
         # 从第3行开始遍历（索引为2），第2列（索引为1）是文件编号列
         for index in range(2, len(df)):  # 从第3行开始（索引2）
@@ -140,9 +188,59 @@ def _load_excel_standards(file_path: str) -> dict:
                     if core_method:
                         # 只存储核心标准号，而不是完整单元格内容
                         standards[core_method] = file_number_str
+                        logger.debug(f"加载标准: {core_method} -> {file_number_str}")
+        
+        logger.info(f"总共加载了 {len(standards)} 个标准")
                         
     except Exception as e:
         logger.error(f"解析Excel标准文件时出错: {e}")
+        import traceback
+        logger.error(f"详细错误信息: {traceback.format_exc()}")
+        
+    return standards
+
+
+def _load_excel_with_xlrd(file_path: str) -> dict:
+    """
+    使用xlrd库加载Excel文件作为备选方案
+
+    Args:
+        file_path (str): Excel文件路径
+
+    Returns:
+        dict: 标准数据字典
+    """
+    standards = {}
+    try:
+        import xlrd
+        # 从配置中获取工作表名称
+        sheet_name = config_manager.get("standard_files.standard_version_sheet_name", "认可标准")
+        
+        # 打开工作簿
+        workbook = xlrd.open_workbook(file_path)
+        # 获取工作表
+        worksheet = workbook.sheet_by_name(sheet_name)
+        
+        logger.info(f"使用xlrd成功打开Excel文件，行列数: ({worksheet.nrows}, {worksheet.ncols})")
+        
+        # 从第3行开始遍历（索引为2），第2列（索引为1）是文件编号列
+        for row_index in range(2, worksheet.nrows):
+            # 获取第2列（索引为1）的值
+            cell_value = worksheet.cell_value(row_index, 1)
+            if cell_value:
+                file_number_str = str(cell_value).strip()
+                # 提取核心方法标识
+                core_method = extract_core_method(file_number_str)
+                if core_method:
+                    # 只存储核心标准号，而不是完整单元格内容
+                    standards[core_method] = file_number_str
+                    logger.debug(f"使用xlrd加载标准: {core_method} -> {file_number_str}")
+        
+        logger.info(f"使用xlrd总共加载了 {len(standards)} 个标准")
+    except Exception as e:
+        logger.error(f"使用xlrd解析Excel标准文件时出错: {e}")
+        import traceback
+        logger.error(f"详细错误信息: {traceback.format_exc()}")
         
     return standards
 
@@ -227,6 +325,26 @@ def update_test_method_versions(matrix_data: list) -> dict:
         # 获取工作表名称
         sheet_name = config_manager.get("standard_files.standard_version_sheet_name", "认可标准")
         logger.info(f"使用的Sheet名称: {sheet_name}")
+        
+        # 添加调试信息，检查配置管理器中的所有配置
+        all_config = config_manager.get_all()
+        logger.info(f"完整配置信息: {all_config}")
+        if "standard_files" in all_config:
+            logger.info(f"标准文件配置: {all_config['standard_files']}")
+        
+        # 检查是否在可执行文件环境中，如果是，则尝试使用相对路径
+        if getattr(sys, 'frozen', False):
+            # 在可执行文件环境中，尝试使用相对路径
+            if standard_file_path and not os.path.exists(standard_file_path):
+                # 尝试在可执行文件目录下查找标准文件
+                exe_dir = os.path.dirname(sys.executable)
+                relative_standard_file_path = os.path.join(exe_dir, standard_file_path)
+                logger.info(f"尝试使用可执行文件目录下的相对路径: {relative_standard_file_path}")
+                if os.path.exists(relative_standard_file_path):
+                    standard_file_path = relative_standard_file_path
+                    logger.info(f"使用相对路径成功找到标准文件: {standard_file_path}")
+                else:
+                    logger.warning(f"相对路径下也未找到标准文件: {relative_standard_file_path}")
         
         if not standard_file_path:
             logger.warning("未配置标准文件路径")
