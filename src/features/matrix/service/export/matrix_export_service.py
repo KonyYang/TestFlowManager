@@ -1,5 +1,7 @@
 from src.features.matrix.model.matrix_data import MatrixData
 from src.core.logger import logger
+# 导入Excel格式化服务
+from src.features.matrix.service.export.service.excel_formatting_service import ExcelFormattingService
 
 
 class MatrixEditorExcelExportService:
@@ -8,6 +10,8 @@ class MatrixEditorExcelExportService:
     def __init__(self, data_model: MatrixData):
         self.data_model = data_model
         self.merged_cells_info = []
+        # 创建格式化服务实例
+        self.formatting_service = ExcelFormattingService()
 
     def export_matrix_to_excel(self, file_path):
         """将Matrix编辑器内容导出到Excel - Service层持久化功能"""
@@ -51,6 +55,21 @@ class MatrixEditorExcelExportService:
                     end_row=bottom_row, 
                     end_column=right_col
                 )
+
+            # 应用Matrix个性化格式化
+            # 定义Matrix表格的列宽设置
+            matrix_column_widths = {
+                1: 20,  # 第1列（Test Item）要宽些
+                2: 8,  # 第2列（PARA）要窄些
+                4: 20,  # 第4列（Condition）要宽些
+                5: 20   # 第5列（Requirement）要宽些
+            }
+            
+            # 使用自定义列宽格式化工作表
+            self.formatting_service.format_worksheet_with_custom_widths(ws, matrix_column_widths)
+            
+            # 为首行和首列应用灰色背景
+            self.formatting_service.apply_background_fill(ws, rows=[1], cols=[1])
 
             # 保存文件
             wb.save(file_path)

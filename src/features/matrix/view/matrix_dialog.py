@@ -14,6 +14,9 @@ from src.features.matrix.view.matrix_filter_dialog import MatrixFilterDialog
 from src.features.test_record_generator.controller.test_record_controller import TestRecordController
 # 导入导出对话框
 from src.features.matrix.service.export.view.export_dialog import ExportDialog
+# 导入状态管理器
+from src.core.state_manager import state_manager
+import os
 
 
 class MatrixDialog(QDialog):
@@ -45,6 +48,9 @@ class MatrixDialog(QDialog):
             self.service = service
 
         self._setup_ui()
+        
+        # 在初始化后自动导入项目中的matrix.xlsx文件（如果存在）
+        self._auto_import_matrix_from_project()
 
     def _setup_ui(self):
         """设置用户界面 - View层渲染"""
@@ -611,9 +617,10 @@ class MatrixDialog(QDialog):
                     msg_box.setWindowTitle("成功")
                     msg_box.setText(msg)
                     msg_box.setStandardButtons(QMessageBox.Ok)
-                    msg_box.setIcon(QMessageBox.Information)
-                    # 设置消息框宽度，以便完整显示更新信息
-                    msg_box.setStyleSheet("QLabel{min-width: 600px;}")
+                    # 移除图标
+                    msg_box.setIcon(QMessageBox.NoIcon)
+                    # 设置消息框宽度和内容靠左显示
+                    msg_box.setStyleSheet("QLabel{min-width: 450px; text-align: left;}")
                     msg_box.exec_()
                 else:
                     # 没有需要更新的项，但不是失败
@@ -758,9 +765,9 @@ class MatrixDialog(QDialog):
                     msg_box.setWindowTitle("成功")
                     msg_box.setText(msg)
                     msg_box.setStandardButtons(QMessageBox.Ok)
-                    msg_box.setIcon(QMessageBox.Information)
-                    # 设置消息框宽度，以便完整显示更新信息
-                    msg_box.setStyleSheet("QLabel{min-width: 600px;}")
+                    msg_box.setIcon(QMessageBox.NoIcon)
+                    # 设置消息框宽度和内容靠左显示
+                    msg_box.setStyleSheet("QLabel{min-width: 450px; text-align: left;}")
                     msg_box.exec_()
                 else:
                     # 没有需要更新的项，但不是失败
@@ -855,3 +862,84 @@ class MatrixDialog(QDialog):
                 self.table_widget.setItem(range_.topRow() + row, range_.leftColumn() + col, item)
         
         logger.debug(f"已粘贴 {range_.rowCount()}x{range_.columnCount()} 单元格区域")
+
+    def _auto_import_matrix_from_project(self):
+        """
+        自动从项目中导入matrix.xlsx文件（如果存在）
+        """
+        try:
+            # 获取当前项目路径
+            current_project = state_manager.get_state("current_project")
+            if not current_project:
+                logger.debug("没有当前项目，跳过自动导入")
+                return
+                
+            # 构造matrix.xlsx文件路径
+            matrix_file_path = os.path.join(current_project, "matrix.xlsx")
+            
+            # 检查文件是否存在
+            if os.path.exists(matrix_file_path):
+                logger.info(f"发现项目中的matrix.xlsx文件: {matrix_file_path}")
+                
+                # 导入文件
+                from src.features.matrix.service.document_parsers.excel_parser import ExcelParser
+                parser = ExcelParser()
+                result = parser.parse(matrix_file_path)
+                
+                if result and 'data' in result and result['data']:
+                    # 更新数据模型
+                    self.service.data_model.rows = result['data']
+                    if 'headers' in result and result['headers']:
+                        self.service.data_model.headers = result['headers']
+                    else:
+                        # 如果没有提供表头，使用默认的字母标识
+                        self.service.data_model.headers = [self.service.data_model._column_index_to_letter(i) 
+                                                        for i in range(len(result['data'][0]) if result['data'] else 7)]
+                    
+                    # 更新合并单元格信息
+                    if 'merged_cells' in result:
+                        self.service.data_model.merged_cells_info = result['merged_cells']
+                        
+                    # 更新表格显示
+                    self._update_table()
+                    logger.info("成功自动导入项目中的matrix.xlsx文件")
+                else:
+                    logger.warning("matrix.xlsx文件中没有有效数据")
+            else:
+                logger.debug(f"项目中没有matrix.xlsx文件: {matrix_file_path}")
+        except Exception as e:
+            logger.error(f"自动导入matrix.xlsx文件时出错: {e}")
+
+    def closeEvent(self, event):
+        """
+        处理窗口关闭事件，自动导出数据到项目文件夹
+        """
+        try:
+            logger.info("Matrix窗口正在关闭，准备自动导出数据")
+            
+            # 获取当前项目路径
+            current_project = state_manager.get_state("current_project")
+            if current_project:
+                # 构造matrix.xlsx文件路径
+                matrix_file_path = os.path.join(current_project, "matrix.xlsx")
+                logger.info(f"将自动导出Matrix数据到: {matrix_file_path}")
+                
+                # 同步表格数据到模型
+                self._sync_table_to_model()
+                
+                # 导出前先保存合并单元格信息
+                self._save_merged_cells_info()
+                
+                # 执行导出操作
+                if self.service.export_to_excel(matrix_file_path):
+                    logger.info("Matrix数据已成功自动导出到项目文件夹")
+                else:
+                    logger.error("自动导出Matrix数据失败")
+            else:
+                logger.debug("没有当前项目，跳过自动导出")
+                
+        except Exception as e:
+            logger.error(f"关闭Matrix窗口时自动导出数据出错: {e}")
+        finally:
+            # 接受关闭事件
+            event.accept()
