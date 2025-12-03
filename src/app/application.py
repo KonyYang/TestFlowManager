@@ -74,10 +74,23 @@ def main():
         word_utils.cleanup_word_resources()
         logger.info("Word资源清理完成")
         
+        # 应用程序退出前清理Excel资源
+        logger.info("清理Excel资源")
+        try:
+            from src.utils import excel_utils
+            excel_utils.release_excel_app()
+            logger.info("Excel资源清理完成")
+        except Exception as e:
+            logger.error(f"清理Excel资源时出错: {e}")
+        
         sys.exit(exit_code)
         
     except Exception as e:
         logger.error(f"Application error: {e}", exc_info=True)
+        # 添加额外的错误信息输出到控制台，便于调试
+        print(f"严重错误: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 

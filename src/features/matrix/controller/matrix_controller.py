@@ -32,9 +32,9 @@ class MatrixController:
         """获取Matrix数据 - Controller层数据提供"""
         return self.service.data_model
 
-    def export_to_excel(self, file_path):
+    def export_to_excel(self, file_path, export_type="matrix_excel"):
         """导出到Excel - Controller层业务流程"""
-        return self.service.export_to_excel(file_path)
+        return self.service.export_to_excel(file_path, export_type)
 
     def import_from_excel(self, file_path):
         """从Excel导入数据 - Controller层业务流程"""

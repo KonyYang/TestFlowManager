@@ -23,6 +23,7 @@ class ExportDialog(QDialog):
         self.type_combo = QComboBox()
         # 添加各种导出类型选项
         self.type_combo.addItem("Matrix Excel", "matrix_excel")
+        self.type_combo.addItem("Test Status表", "test_status")
         self.type_combo.addItem("LLCR", "llcr")
         self.type_combo.addItem("CR", "cr")
         self.type_combo.addItem("Mating/Unmating", "mating_unmating")

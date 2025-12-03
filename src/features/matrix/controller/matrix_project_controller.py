@@ -40,9 +40,14 @@ class MatrixProjectController:
             self.ltr_integration_service = ltr_integration_service
             # 同时设置到Matrix控制器中
             self.matrix_controller.set_ltr_integration_service(ltr_integration_service)
+            # 设置LTR数据到Matrix服务中
+            if ltr_integration_service and ltr_integration_service.current_ltr_data:
+                from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
+                ltr_data = LTRApplicationData.from_dict(ltr_integration_service.current_ltr_data)
+                self.matrix_controller.service.set_ltr_data(ltr_data)
         else:
             logger.debug("LTR integration service unchanged, skipping update")
-
+            
     def open_matrix_dialog(self):
         """
         打开Matrix对话框

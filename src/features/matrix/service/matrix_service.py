@@ -144,12 +144,12 @@ class MatrixService:
         """初始化Matrix - Service层业务逻辑"""
         return self.initializer.initialize_matrix()
 
-    def export_to_excel(self, file_path):
+    def export_to_excel(self, file_path, export_type="matrix_excel"):
         """导出到Excel - Service层持久化功能"""
         # 在导出前更新提取的数据
         self._update_extracted_data()
         # 使用导出控制器执行导出
-        return self.export_controller.export_by_type(file_path, "matrix_excel")
+        return self.export_controller.export_by_type(file_path, export_type)
 
     def import_from_spec(self, file_path, page_number=None, keyword=None):
         """从Spec导入数据 - Service层持久化功能"""
@@ -201,3 +201,12 @@ class MatrixService:
         更新提取的数据到统一数据结构中
         """
         return self.data_structure_service.update_extracted_data()
+        
+    def set_ltr_data(self, ltr_data):
+        """
+        设置LTR数据
+        
+        Args:
+            ltr_data: LTR申请单数据
+        """
+        self.export_controller.set_ltr_data(ltr_data)
