@@ -483,7 +483,7 @@ class MatrixDialog(QDialog):
 
     def _update_table(self):
         """更新表格显示 - View层渲染"""
-        logger.debug("更新表格显示")
+        # 移除更新表格显示的详细日志
         # 断开信号连接以避免在更新过程中触发事件
         try:
             self.table_widget.itemChanged.disconnect(self._on_item_changed)
@@ -543,7 +543,7 @@ class MatrixDialog(QDialog):
 
     def _sync_table_to_model(self):
         """同步表格数据到数据模型"""
-        logger.debug("同步表格数据到数据模型")
+        # 移除同步表格数据的详细日志
         for row in range(self.table_widget.rowCount()):
             for col in range(self.table_widget.columnCount()):
                 item = self.table_widget.item(row, col)
@@ -633,64 +633,61 @@ class MatrixDialog(QDialog):
                 QMessageBox.information(self, "查找结果", "未找到匹配项")
 
     def _export_to_excel(self):
-        """导出到Excel - View层事件触发"""
-        logger.debug("开始执行导出到Excel操作")
+        """导出Test Status表到Excel - View层事件触发"""
+        logger.debug("开始执行导出Test Status表到Excel操作")
         try:
-            # 显示导出类型选择对话框
-            export_dialog = ExportDialog(self)
-            if export_dialog.exec_() == QDialog.Accepted:
-                export_type = export_dialog.get_selected_export_type()
-                logger.debug(f"选择了导出类型: {export_type}")
-                if export_type:
-                    # 如果是test_status类型，使用LTR编号作为文件名的一部分
-                    if export_type == "test_status" and self.ltr_number:
-                        default_filename = f"{self.ltr_number} test status.xlsx"
-                    else:
-                        default_filename = "matrix.xlsx"
-                        
-                    # 获取当前项目路径作为默认保存路径
-                    current_project = state_manager.get_state("current_project")
-                    logger.debug(f"当前项目路径: {current_project}")
-                    import os
-                    if current_project and os.path.exists(current_project):
-                        default_path = os.path.join(current_project, default_filename)
-                        logger.debug(f"构建默认路径: {default_path}")
-                    else:
-                        default_path = default_filename
-                        logger.debug(f"使用默认文件名: {default_path}")
-                        
-                    file_path, _ = QFileDialog.getSaveFileName(
-                        self, "保存Excel文件", default_path, "Excel Files (*.xlsx)"
-                    )
-                    if file_path:
-                        logger.debug(f"选择的文件路径: {file_path}")
-                        # 同步表格数据到模型
-                        self._sync_table_to_model()
-                        # 导出前先保存合并单元格信息
-                        self._save_merged_cells_info()
-                        # 触发Controller层处理
-                        logger.debug("开始调用服务层导出方法")
-                        result = self.service.export_to_excel(file_path, export_type)
-                        logger.debug(f"服务层导出方法返回结果: {result}")
-                        if result:
-                            QMessageBox.information(self, "成功", "数据已成功导出到Excel")
-                        else:
-                            # 检查文件是否被占用
-                            try:
-                                # 尝试以独占模式打开文件
-                                with open(file_path, 'r+b') as f:
-                                    pass
-                                # 如果能打开，说明是其他问题
-                                QMessageBox.warning(self, "错误", "导出失败，请检查文件路径或权限")
-                            except PermissionError:
-                                # 文件被其他程序占用
-                                QMessageBox.warning(self, "错误", "导出失败，文件已被其他程序占用（可能已在Excel中打开），请关闭文件后重试")
-                            except FileNotFoundError:
-                                # 文件不存在，应该是其他问题
-                                QMessageBox.warning(self, "错误", "导出失败，请检查文件路径是否正确")
-                            except Exception:
-                                # 其他未知错误
-                                QMessageBox.warning(self, "错误", "导出失败，发生未知错误")
+            # 直接设置导出类型为test_status
+            export_type = "test_status"
+            
+            # 使用LTR编号作为文件名的一部分
+            if self.ltr_number:
+                default_filename = f"{self.ltr_number} test status.xlsx"
+            else:
+                default_filename = "test status.xlsx"
+                
+            # 获取当前项目路径作为默认保存路径
+            current_project = state_manager.get_state("current_project")
+            logger.debug(f"当前项目路径: {current_project}")
+            import os
+            if current_project and os.path.exists(current_project):
+                default_path = os.path.join(current_project, default_filename)
+                logger.debug(f"构建默认路径: {default_path}")
+            else:
+                default_path = default_filename
+                logger.debug(f"使用默认文件名: {default_path}")
+                
+            file_path, _ = QFileDialog.getSaveFileName(
+                self, "保存Test Status表", default_path, "Excel Files (*.xlsx)"
+            )
+            if file_path:
+                logger.debug(f"选择的文件路径: {file_path}")
+                # 同步表格数据到模型
+                self._sync_table_to_model()
+                # 导出前先保存合并单元格信息
+                self._save_merged_cells_info()
+                # 触发Controller层处理
+                logger.debug("开始调用服务层导出方法")
+                result = self.service.export_to_excel(file_path, export_type)
+                logger.debug(f"服务层导出方法返回结果: {result}")
+                if result:
+                    QMessageBox.information(self, "成功", "Test Status表已成功导出到Excel")
+                else:
+                    # 检查文件是否被占用
+                    try:
+                        # 尝试以独占模式打开文件
+                        with open(file_path, 'r+b') as f:
+                            pass
+                        # 如果能打开，说明是其他问题
+                        QMessageBox.warning(self, "错误", "导出失败，请检查文件路径或权限")
+                    except PermissionError:
+                        # 文件被其他程序占用
+                        QMessageBox.warning(self, "错误", "导出失败，文件已被其他程序占用（可能已在Excel中打开），请关闭文件后重试")
+                    except FileNotFoundError:
+                        # 文件不存在，应该是其他问题
+                        QMessageBox.warning(self, "错误", "导出失败，请检查文件路径是否正确")
+                    except Exception:
+                        # 其他未知错误
+                        QMessageBox.warning(self, "错误", "导出失败，发生未知错误")
         except Exception as e:
             logger.error(f"导出过程中发生异常: {e}", exc_info=True)
             QMessageBox.warning(self, "错误", f"导出过程中发生异常: {str(e)}")
@@ -730,7 +727,7 @@ class MatrixDialog(QDialog):
                             
         # 更新数据模型中的合并单元格信息
         self.service.data_model.merged_cells_info = merged_cells_info
-        logger.debug(f"保存了 {len(merged_cells_info)} 个合并单元格信息")
+        # 移除合并单元格信息保存的详细日志
 
     def _update_standard_versions(self):
         """
@@ -918,7 +915,7 @@ class MatrixDialog(QDialog):
         处理窗口关闭事件，自动导出数据到项目文件夹
         """
         try:
-            logger.info("Matrix窗口正在关闭，准备自动导出数据")
+            logger.debug("Matrix窗口正在关闭，准备自动导出数据")
             
             # 获取当前项目路径
             current_project = state_manager.get_state("current_project")

@@ -86,7 +86,7 @@ class TestRecordController:
             # 获取Matrix数据
             if self.matrix_service:
                 matrix_data = self.matrix_service.data_model.rows
-                logger.info(f"获取到Matrix数据，共 {len(matrix_data)} 行")
+                logger.debug(f"获取到Matrix数据，共 {len(matrix_data)} 行")
                 
                 # 创建MatrixDataStructure实例来解析数据
                 matrix_structure = MatrixDataStructure()
@@ -98,7 +98,7 @@ class TestRecordController:
                 # 从Matrix服务获取项目数据文件路径
                 if hasattr(self.matrix_service, 'project_data_file_path') and self.matrix_service.project_data_file_path:
                     project_data_file_path = self.matrix_service.project_data_file_path
-                    logger.info(f"从Matrix服务获取到项目数据文件路径: {project_data_file_path}")
+                    logger.debug(f"从Matrix服务获取到项目数据文件路径: {project_data_file_path}")
                     
                     # 从项目数据文件中提取DL编号
                     if os.path.exists(project_data_file_path):
@@ -107,18 +107,18 @@ class TestRecordController:
                             with open(project_data_file_path, 'r', encoding='utf-8') as f:
                                 project_data = json.load(f)
                                 dl_number = project_data.get("DL", dl_number)
-                                logger.info(f"从项目数据文件中提取到DL编号: {dl_number}")
+                                logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
                         except Exception as e:
                             logger.error(f"读取项目数据文件时出错: {e}")
                 
                 matrix_structure.dl_number = dl_number
                 matrix_structure.project_data_file_path = project_data_file_path
-                logger.info(f"设置DL编号: {dl_number}")
-                logger.info(f"设置项目数据文件路径: {project_data_file_path}")
+                logger.debug(f"设置DL编号: {dl_number}")
+                logger.debug(f"设置项目数据文件路径: {project_data_file_path}")
                 
                 # 根据项目路径和DL编号生成默认输出路径
                 default_output_path = self._get_default_output_path(dl_number, project_data_file_path)
-                logger.info(f"默认输出路径: {default_output_path}")
+                logger.debug(f"默认输出路径: {default_output_path}")
                 
                 # 检查默认路径是否有效
                 default_dir = os.path.dirname(default_output_path)
@@ -162,7 +162,7 @@ class TestRecordController:
                 
                 # 记录解析结果
                 group_count = len(matrix_structure.group_steps)
-                logger.info(f"解析完成，共找到 {group_count} 个组别: {list(matrix_structure.group_steps.keys())}")
+                logger.debug(f"解析完成，共找到 {group_count} 个组别")
                 
                 # 如果有警告信息，显示给用户并阻止继续
                 if warnings:
@@ -178,15 +178,13 @@ class TestRecordController:
                         msg_box.setStandardButtons(QMessageBox.Ok)
                         msg_box.exec_()
                         
-                        logger.info("用户已确认警告信息，返回Matrix编辑界面")
+                        logger.debug("用户已确认警告信息，返回Matrix编辑界面")
                         return False  # 阻止继续生成Test Record
                 
-                logger.info("Matrix数据结构已更新")
-                logger.debug(f"组别步骤详情: {matrix_structure.group_steps}")
-                logger.debug(f"样品数量详情: {matrix_structure.group_sample_sizes}")
+                logger.debug("Matrix数据结构已更新")
                 
                 # 调用服务生成文档，传入已解析的数据结构
-                logger.info("开始调用Test Record服务生成文档")
+                logger.debug("开始调用Test Record服务生成文档")
                 success = self.service.generate_test_record_with_structure(matrix_structure, output_path)
                 
                 if success:

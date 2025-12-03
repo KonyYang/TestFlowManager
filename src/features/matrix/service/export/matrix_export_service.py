@@ -27,7 +27,7 @@ class MatrixEditorExcelExportService:
                     ws.cell(row=row_idx + 1, column=col_idx + 1, value=cell_value)
             
             # 应用合并单元格
-            logger.debug(f"准备导出 {len(self.data_model.merged_cells_info)} 个合并单元格")
+            # 移除合并单元格导出的详细日志
             for merge_info in self.data_model.merged_cells_info:
                 top_row = merge_info['top_row'] + 1  # +1 because of 1-based indexing
                 left_col = merge_info['left_col'] + 1  # +1 because of 1-based indexing

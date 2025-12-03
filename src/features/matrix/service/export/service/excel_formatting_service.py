@@ -55,7 +55,7 @@ class ExcelFormattingService:
                     cell = worksheet.cell(row=row, column=col)
                     cell.border = self.thin_border
                     
-            logger.debug(f"已为范围 {start_row}:{end_row}, {start_col}:{end_col} 添加边框")
+            # 移除添加边框的详细日志
         except Exception as e:
             logger.error(f"添加边框时出错: {e}")
 
@@ -104,7 +104,7 @@ class ExcelFormattingService:
                 if col in column_widths:
                     worksheet.column_dimensions[column_letter].width = column_widths[col]
                     
-            logger.debug("已完成自定义列宽调整")
+            # 移除自定义列宽调整的详细日志
         except Exception as e:
             logger.error(f"自定义列宽调整时出错: {e}")
 
@@ -127,7 +127,7 @@ class ExcelFormattingService:
                 # 设置行高，基于行中最多行数的单元格
                 worksheet.row_dimensions[row[0].row].height = base_height * max_lines
                 
-            logger.debug("已完成行高自动调整")
+            # 移除行高自动调整的详细日志
         except Exception as e:
             logger.error(f"自动调整行高时出错: {e}")
 
@@ -153,7 +153,7 @@ class ExcelFormattingService:
                     cell = worksheet.cell(row=row, column=col)
                     cell.alignment = self.wrap_alignment
                     
-            logger.debug(f"已为范围 {start_row}:{end_row}, {start_col}:{end_col} 应用文本换行和居中对齐")
+            # 移除文本换行和居中对齐的详细日志
         except Exception as e:
             logger.error(f"应用文本换行和居中对齐时出错: {e}")
 
@@ -188,7 +188,7 @@ class ExcelFormattingService:
                             cell = worksheet.cell(row=row, column=col)
                             cell.fill = fill_style
                 
-            logger.debug(f"已为行 {rows} 和列 {cols} 应用背景填充")
+            # 移除背景填充的详细日志
         except Exception as e:
             logger.error(f"应用背景填充时出错: {e}")
 
@@ -277,7 +277,7 @@ class ExcelFormattingService:
             # 自动调整行高
             self.auto_adjust_row_height(worksheet)
             
-            logger.debug("已完成工作表自定义列宽格式化")
+            # 移除工作表自定义列宽格式化的详细日志
         except Exception as e:
             logger.error(f"工作表自定义列宽格式化时出错: {e}")
 

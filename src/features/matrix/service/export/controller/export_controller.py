@@ -1,5 +1,5 @@
 from src.features.matrix.service.export.matrix_export_service import MatrixEditorExcelExportService
-from src.features.matrix.service.export.test_status_export_service import TestStatusExportService
+from src.features.matrix.service.export.export_teststatus_table import TestStatusTableExportService
 from src.core.logger import logger
 
 
@@ -10,8 +10,8 @@ class ExportController:
         self.data_model = data_model
         self.ltr_data = ltr_data
         self.excel_export_service = MatrixEditorExcelExportService(data_model)
-        self.test_status_export_service = TestStatusExportService(data_model, ltr_data)
-        logger.debug(f"ExportController 初始化完成，ltr_data: {ltr_data}")
+        self.test_status_export_service = TestStatusTableExportService(data_model, ltr_data)
+        # 移除LTR数据的详细日志输出
         
     def export_by_type(self, file_path, export_type):
         """
@@ -25,10 +25,10 @@ class ExportController:
             bool: 是否导出成功
         """
         try:
-            logger.info(f"开始导出操作，类型: {export_type}，路径: {file_path}")
+            logger.debug(f"开始导出操作，类型: {export_type}，路径: {file_path}")
             
             if export_type == "matrix_excel":
-                logger.debug("调用 matrix_excel 导出服务")
+                # 移除调用matrix_excel导出服务的详细日志
                 return self.excel_export_service.export_matrix_to_excel(file_path)
             elif export_type == "test_status":
                 logger.debug("调用 test_status 导出服务")
@@ -51,7 +51,7 @@ class ExportController:
         Args:
             ltr_data: LTR申请单数据
         """
-        logger.debug(f"设置LTR数据: {ltr_data}")
+        # 移除LTR数据的详细日志输出
         self.ltr_data = ltr_data
         # 更新TestStatusExportService中的ltr_data
-        self.test_status_export_service = TestStatusExportService(self.data_model, ltr_data)
+        self.test_status_export_service = TestStatusTableExportService(self.data_model, ltr_data)

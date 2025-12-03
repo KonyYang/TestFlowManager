@@ -112,7 +112,7 @@ class MatrixDataStructure:
         if match:
             cleaned = match.group(0)
             
-        logger.info(f"组别表头清理: '{group_header}' -> '{cleaned}'")
+        # 精简日志输出，移除详细的组别表头清理信息
         return cleaned
     
     def update_from_matrix(self, matrix_data: List[List[str]]) -> List[str]:
@@ -148,9 +148,9 @@ class MatrixDataStructure:
                 if cleaned_group_name and (cleaned_group_name.isdigit() or cleaned_group_name.isalnum()):
                     self.group_col_indices[cleaned_group_name] = col_index
                     self.group_steps[cleaned_group_name] = []
-                    logger.info(f"发现组别列: '{col_header}' -> '{cleaned_group_name}' (列索引: {col_index})")
+                    
             
-            logger.info(f"共找到 {len(self.group_col_indices)} 个组别列: {list(self.group_col_indices.keys())}")
+            logger.debug(f"共找到 {len(self.group_col_indices)} 个组别列")
             
             # 验证组别名称是否有重复
             group_names = list(self.group_col_indices.keys())
@@ -200,14 +200,13 @@ class MatrixDataStructure:
                                 }
                                 self.group_steps[group_name].append(step_info)
                                 
-                                logger.debug(f"向组别{group_name}添加测试项: {test_item}, 步骤号: {step_number}")
+                                # 移除详细的测试项添加日志
             
             # 对每组内的步骤按键（步骤号，数值）升序排序
             all_steps = {}  # 用于验证连续性
             for group_name in self.group_steps.keys():
                 self.group_steps[group_name].sort(key=lambda x: int(x['StepNumber']))
-                sorted_step_numbers = [step['StepNumber'] for step in self.group_steps[group_name]]
-                logger.info(f"组别 {group_name} 的步骤已按步骤号排序，排序后的步骤号: {sorted_step_numbers}")
+                # 移除详细的步骤排序日志
                 
                 # 收集所有步骤信息用于验证
                 all_steps[group_name] = self.group_steps[group_name]
@@ -224,7 +223,7 @@ class MatrixDataStructure:
                     if col_index < len(sample_size_row):
                         sample_size = sample_size_row[col_index]
                         self.group_sample_sizes[group_name] = sample_size
-                        logger.info(f"组别 {group_name} 的样品数量: {sample_size}")
+                        # 移除样品数量的详细日志
             elif len(matrix_data) >= 3:  # 至少要有3行才能检查倒数第三行
                 # 如果没有找到Sample size行，添加警告信息
                 warnings.append("未找到样品数量行（应包含'sample'关键字且位于表格末尾几行），请检查数据格式")
@@ -254,7 +253,7 @@ class MatrixDataStructure:
             first_col_value = row[0] if len(row) > 0 else ""
             if first_col_value.lower() == "sample size":
                 sample_size_row_index = row_idx
-                logger.info(f"找到严格匹配的Sample size行，索引: {row_idx}")
+                # 移除找到严格匹配的Sample size行的详细日志
                 return sample_size_row_index
         
         # 如果没有找到严格匹配的，查找包含"sample"关键字且位于末尾几行的行

@@ -18,12 +18,11 @@ class MatrixController:
     def show_matrix_dialog(self):
         """显示Matrix编辑对话框 - Controller层协调"""
         try:
-            logger.info("Creating MatrixDialog instance")
+            logger.debug("Creating MatrixDialog instance")
             dialog = MatrixDialog(self.parent_view, self.service, self.ltr_number)
-            logger.debug("MatrixDialog instance created successfully")
-            logger.info("Executing MatrixDialog")
+            # 移除MatrixDialog创建和执行的详细日志
             dialog.exec_()
-            logger.info("MatrixDialog execution completed")
+            logger.debug("MatrixDialog execution completed")
         except Exception as e:
             logger.error(f"Error showing matrix dialog: {e}", exc_info=True)
             raise
@@ -78,9 +77,7 @@ class MatrixController:
         """
         # 只在服务实例发生变化时才进行设置
         if self.ltr_integration_service != ltr_integration_service:
-            logger.info(f"MatrixController: Setting LTR integration service: {ltr_integration_service is not None}")
-            if ltr_integration_service:
-                logger.info(f"MatrixController: LTR integration service project data file path: {getattr(ltr_integration_service, 'project_data_file_path', 'Not available')}")
+            logger.debug("MatrixController: Setting LTR integration service")
             self.ltr_integration_service = ltr_integration_service
         else:
             logger.debug("MatrixController: LTR integration service unchanged, skipping update")
