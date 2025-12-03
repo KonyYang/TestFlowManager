@@ -80,11 +80,24 @@ class SpecExtractor:
                 import pythoncom
                 pythoncom.CoInitialize()
                 
-                word_app = win32com.client.Dispatch("Word.Application")
-                word_app.Visible = False
-                doc = word_app.Documents.Open(os.path.abspath(file_path), ReadOnly=True)
+                word_app = None
+                doc = None
+                existing_word_app = False
                 
                 try:
+                    try:
+                        # 尝试连接到现有的Word应用程序实例
+                        word_app = win32com.client.GetActiveObject("Word.Application")
+                        existing_word_app = True
+                        logger.info("连接到现有的Word应用程序实例")
+                    except:
+                        # 如果没有现有的实例，则创建新的实例
+                        word_app = win32com.client.Dispatch("Word.Application")
+                        logger.info("创建新的Word应用程序实例")
+                        
+                    word_app.Visible = False
+                    doc = word_app.Documents.Open(os.path.abspath(file_path), ReadOnly=True)
+                    
                     # 为每个章节号查找测试方法
                     for row_index, chapter_number in chapter_mappings.items():
                         if chapter_number and str(chapter_number).strip():
@@ -98,11 +111,21 @@ class SpecExtractor:
                 finally:
                     # 关闭文档
                     try:
-                        doc.Close()
-                        word_app.Quit()
+                        if doc:
+                            doc.Close()
                     except Exception as e:
                         logger.warning(f"关闭Word文档时出错: {e}")
-                    pythoncom.CoUninitialize()
+                    
+                    try:
+                        if word_app and not existing_word_app:
+                            word_app.Quit()
+                    except Exception as e:
+                        logger.warning(f"退出Word应用程序时出错: {e}")
+                        
+                    try:
+                        pythoncom.CoUninitialize()
+                    except Exception as e:
+                        logger.warning(f"COM反初始化时出错: {e}")
                     
             elif file_path.lower().endswith(('.xls', '.xlsx')):
                 logger.info("检测到Excel文件，跳过测试方法提取")
@@ -158,11 +181,9 @@ class SpecExtractor:
         Returns:
             提取的表格数据
         """
-        word_app = None
-        doc = None
-        existing_word_app = False
         try:
             logger.info(f"开始解析Word文档: {file_path}")
+            logger.info(f"指定页码: {page_number}, 关键字: {keyword}")
             # 使用WordParser解析文档，传递页码和关键字参数
             parser = WordParser()
             tables = parser.parse(file_path, page_number, keyword)
@@ -186,25 +207,6 @@ class SpecExtractor:
             if "is not a Word file" in str(e):
                 logger.error("文件可能已损坏或不是有效的Word文档")
             return None
-        finally:
-            # 确保正确关闭文档和应用
-            try:
-                if doc:
-                    doc.Close()
-            except Exception as e:
-                logger.warning(f"关闭Word文档时出错: {e}")
-            
-            try:
-                if word_app:
-                    word_app.Quit()
-            except Exception as e:
-                logger.warning(f"退出Word应用程序时出错: {e}")
-                
-            try:
-                # 反初始化COM
-                pythoncom.CoUninitialize()
-            except Exception as e:
-                logger.warning(f"COM反初始化时出错: {e}")
 
     def _extract_from_excel(self, file_path: str, page_number=None, keyword=None):
         """
@@ -230,6 +232,7 @@ class SpecExtractor:
             # 如果找到数据，返回它和合并单元格信息
             if tables and len(tables) > 0:
                 logger.info(f"从Excel文档中提取到数据，行数: {len(tables)}")
+                logger.debug(f"合并单元格信息: {merged_cells}")
                 return {
                     'data': tables,
                     'merged_cells': merged_cells

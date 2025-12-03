@@ -153,9 +153,11 @@ class MatrixService:
 
     def import_from_spec(self, file_path, page_number=None, keyword=None):
         """从Spec导入数据 - Service层持久化功能"""
+        logger.debug(f"MatrixService.import_from_spec 被调用，参数: file_path={file_path}, page_number={page_number}, keyword={keyword}")
         result = self.spec_processing_service.import_from_spec(file_path, page_number, keyword)
         # 更新last_imported_spec_path引用
         self.last_imported_spec_path = self.spec_processing_service.last_imported_spec_path
+        logger.debug(f"MatrixService.import_from_spec 完成，返回结果: {result}")
         return result
             
     def update_standard_versions(self):
@@ -198,9 +200,10 @@ class MatrixService:
             
     def _update_extracted_data(self):
         """
-        更新提取的数据到统一数据结构中
+        更新提取的数据
         """
-        return self.data_structure_service.update_extracted_data()
+        # 更新提取的数据
+        self.data_structure_service.update_extracted_data()
         
     def set_ltr_data(self, ltr_data):
         """
@@ -209,4 +212,5 @@ class MatrixService:
         Args:
             ltr_data: LTR申请单数据
         """
+        # 将LTR数据设置到导出控制器中
         self.export_controller.set_ltr_data(ltr_data)

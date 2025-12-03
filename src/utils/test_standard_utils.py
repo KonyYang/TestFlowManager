@@ -308,23 +308,28 @@ class TestStandardExtractor:
         Returns:
             上一级章节号
         """
-        try:
-            # 处理带有特殊字符的章节号（如6.5*）
-            clean_chapter = re.sub(r'[^\d.]', '', chapter_number)  # 移除非数字和点的字符
-            if not clean_chapter:
-                logger.warning(f"无法解析章节号: {chapter_number}")
-                return None
-                
-            parts = clean_chapter.split('.')
-            if len(parts) > 1:
-                # 增加上一级编号，重置最后一级为1
-                upper_part = int(parts[-2])
-                parts[-2] = str(upper_part + 1)
-                parts[-1] = "1"
-            return '.'.join(parts)
-        except Exception as e:
-            logger.error(f"计算上一级章节号时出错: {e}")
-            return None
+        # 根据用户需求，不再查找上一级章节号，直接返回None
+        # 避免在文档中找不到章节时从头开始循环查找
+        return None
+        
+        # 原有逻辑已注释掉
+        # try:
+        #     # 处理带有特殊字符的章节号（如6.5*）
+        #     clean_chapter = re.sub(r'[^\d.]', '', chapter_number)  # 移除非数字和点的字符
+        #     if not clean_chapter:
+        #         logger.warning(f"无法解析章节号: {chapter_number}")
+        #         return None
+        #         
+        #     parts = clean_chapter.split('.')
+        #     if len(parts) > 1:
+        #         # 增加上一级编号，重置最后一级为1
+        #         upper_part = int(parts[-2])
+        #         parts[-2] = str(upper_part + 1)
+        #         parts[-1] = "1"
+        #     return '.'.join(parts)
+        # except Exception as e:
+        #     logger.error(f"计算上一级章节号时出错: {e}")
+        #     return None
     
     def _extract_standard_from_section(self, content: str) -> Optional[str]:
         """

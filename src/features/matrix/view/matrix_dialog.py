@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QDialog, QMessageBox, QFileDialog, QVBoxLayout, QHBoxLayout, QPushButton,
     QTableWidget, QTableWidgetItem, QHeaderView, QInputDialog, QMenu, QAction
 )
-from PyQt5.QtCore import Qt, QItemSelection, QItemSelectionModel
+from PyQt5.QtCore import Qt, QItemSelection, QItemSelectionModel, QTimer
 from PyQt5.QtGui import QCursor
 
 from src.features.matrix.service.matrix_service import MatrixService
@@ -483,6 +483,7 @@ class MatrixDialog(QDialog):
 
     def _update_table(self):
         """更新表格显示 - View层渲染"""
+        logger.debug("开始更新表格显示")
         # 移除更新表格显示的详细日志
         # 断开信号连接以避免在更新过程中触发事件
         try:
@@ -496,94 +497,135 @@ class MatrixDialog(QDialog):
             self.table_widget.clear()
             
             # 设置表头
-            self.table_widget.setColumnCount(len(self.service.data_model.headers))
+            headers_count = len(self.service.data_model.headers)
+            rows_count = len(self.service.data_model.rows)
+            logger.debug(f"准备设置表格，表头数: {headers_count}, 行数: {rows_count}")
+            
+            self.table_widget.setColumnCount(headers_count)
             self.table_widget.setHorizontalHeaderLabels(self.service.data_model.headers)
             
             # 设置行数和数据
-            self.table_widget.setRowCount(len(self.service.data_model.rows))
+            self.table_widget.setRowCount(rows_count)
+            logger.debug("开始填充表格数据")
+            
+            # 分批更新以避免阻塞UI
             for row_idx, row_data in enumerate(self.service.data_model.rows):
                 for col_idx, cell_value in enumerate(row_data):
                     if col_idx < len(row_data):  # 确保不越界
-                        item = QTableWidgetItem(str(cell_value))
-                        self.table_widget.setItem(row_idx, col_idx, item)
+                        try:
+                            item = QTableWidgetItem(str(cell_value) if cell_value is not None else "")
+                            self.table_widget.setItem(row_idx, col_idx, item)
+                        except Exception as e:
+                            logger.error(f"设置单元格[{row_idx},{col_idx}]时出错: {e}")
+                            # 使用空字符串作为后备
+                            item = QTableWidgetItem("")
+                            self.table_widget.setItem(row_idx, col_idx, item)
+            
+            logger.debug("表格数据填充完成")
             
             # 应用合并单元格（如果有）
             self._apply_merged_cells()
+            logger.debug("合并单元格应用完成")
+        except Exception as e:
+            logger.error(f"更新表格显示时出错: {e}", exc_info=True)
+            QMessageBox.warning(self, "错误", f"更新表格显示时出错: {e}")
         finally:
             # 重新连接信号
             self.table_widget.itemChanged.connect(self._on_item_changed)
+            logger.debug("表格更新完成")
 
     def _apply_merged_cells(self):
         """应用合并单元格"""
-        # 清除现有的合并单元格
-        for row in range(self.table_widget.rowCount()):
-            for col in range(self.table_widget.columnCount()):
-                self.table_widget.setSpan(row, col, 1, 1)
-        
-        # 应用存储的合并单元格信息
-        for merge_info in self.service.data_model.merged_cells_info:
-            top_row = merge_info['top_row']
-            left_col = merge_info['left_col']
-            row_count = merge_info['row_count']
-            col_count = merge_info['col_count']
+        try:
+            # 清除现有的合并单元格
+            for row in range(self.table_widget.rowCount()):
+                for col in range(self.table_widget.columnCount()):
+                    self.table_widget.setSpan(row, col, 1, 1)
             
-            # 检查边界
-            if (top_row + row_count <= self.table_widget.rowCount() and 
-                left_col + col_count <= self.table_widget.columnCount()):
-                self.table_widget.setSpan(top_row, left_col, row_count, col_count)
+            # 应用存储的合并单元格信息
+            for merge_info in self.service.data_model.merged_cells_info:
+                top_row = merge_info['top_row']
+                left_col = merge_info['left_col']
+                row_count = merge_info['row_count']
+                col_count = merge_info['col_count']
+                
+                # 检查边界
+                if (top_row + row_count <= self.table_widget.rowCount() and 
+                    left_col + col_count <= self.table_widget.columnCount()):
+                    self.table_widget.setSpan(top_row, left_col, row_count, col_count)
+        except Exception as e:
+            logger.error(f"应用合并单元格时出错: {e}", exc_info=True)
 
     def _on_item_changed(self, item):
         """处理表格项变更事件"""
-        row = item.row()
-        col = item.column()
-        value = item.text()
-        logger.debug(f"表格项变更: [{row},{col}] = '{value}'")
-        # 更新数据模型
-        self.service.set_cell_value(row, col, value)
+        try:
+            row = item.row()
+            col = item.column()
+            value = item.text()
+            logger.debug(f"表格项变更: [{row},{col}] = '{value}'")
+            # 更新数据模型
+            self.service.set_cell_value(row, col, value)
+        except Exception as e:
+            logger.error(f"处理表格项变更时出错: {e}", exc_info=True)
 
     def _sync_table_to_model(self):
         """同步表格数据到数据模型"""
-        # 移除同步表格数据的详细日志
-        for row in range(self.table_widget.rowCount()):
-            for col in range(self.table_widget.columnCount()):
-                item = self.table_widget.item(row, col)
-                if item:
-                    self.service.set_cell_value(row, col, item.text())
-                else:
-                    self.service.set_cell_value(row, col, "")
+        try:
+            # 移除同步表格数据的详细日志
+            for row in range(self.table_widget.rowCount()):
+                for col in range(self.table_widget.columnCount()):
+                    item = self.table_widget.item(row, col)
+                    if item:
+                        self.service.set_cell_value(row, col, item.text())
+                    else:
+                        self.service.set_cell_value(row, col, "")
+        except Exception as e:
+            logger.error(f"同步表格数据到模型时出错: {e}", exc_info=True)
 
     def _import_from_spec(self):
         """从Spec导入数据 - View层事件触发"""
-        # 弹出文件选择对话框
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "选择规格书文件", "", "Word Files (*.docx *.doc);;PDF Files (*.pdf);;All Files (*)"
-        )
-        if file_path:
-            # 检查文件扩展名
-            _, ext = os.path.splitext(file_path.lower())
-            if ext in ['.pdf']:
-                QMessageBox.warning(self, "不支持的格式", "暂不支持PDF格式文件，请选择Word文档(.docx/.doc)")
-                return
-            
-            # 显示筛选对话框，获取页码和关键字
-            filter_dialog = MatrixFilterDialog(self)
-            if filter_dialog.exec_() == QDialog.Accepted:
-                filter_params = filter_dialog.get_filter_params()
-                page_number = filter_params['page']
-                keyword = filter_params['keyword']
+        try:
+            logger.debug("开始执行导入Spec操作")
+            # 弹出文件选择对话框
+            file_path, _ = QFileDialog.getOpenFileName(
+                self, "选择规格书文件", "", "Word Files (*.docx *.doc);;PDF Files (*.pdf);;All Files (*)"
+            )
+            if file_path:
+                logger.debug(f"选择了文件: {file_path}")
+                # 检查文件扩展名
+                _, ext = os.path.splitext(file_path.lower())
+                if ext in ['.pdf']:
+                    QMessageBox.warning(self, "不支持的格式", "暂不支持PDF格式文件，请选择Word文档(.docx/.doc)")
+                    return
                 
-                # 同步表格数据到模型
-                self._sync_table_to_model()
-                
-                # 触发Controller层处理
-                result = self.service.import_from_spec(file_path, page_number, keyword)
-                if result and result.get("success", False):
-                    # 更新表格显示
-                    self._update_table()
-                    QMessageBox.information(self, "成功", "数据已成功导入")
-                else:
-                    error_msg = result.get("error", "导入失败") if result else "导入失败"
-                    QMessageBox.warning(self, "失败", f"数据导入失败: {error_msg}")
+                # 显示筛选对话框，获取页码和关键字
+                filter_dialog = MatrixFilterDialog(self)
+                if filter_dialog.exec_() == QDialog.Accepted:
+                    filter_params = filter_dialog.get_filter_params()
+                    page_number = filter_params['page']
+                    keyword = filter_params['keyword']
+                    
+                    logger.debug(f"筛选参数 - 页码: {page_number}, 关键字: {keyword}")
+                    
+                    # 同步表格数据到模型
+                    logger.debug("同步表格数据到模型")
+                    self._sync_table_to_model()
+                    
+                    # 触发Controller层处理
+                    logger.debug("调用服务层导入方法")
+                    result = self.service.import_from_spec(file_path, page_number, keyword)
+                    logger.debug(f"服务层导入方法返回结果: {result}")
+                    if result and result.get("success", False):
+                        logger.debug("导入成功，准备更新表格显示")
+                        # 使用定时器延迟更新表格显示，避免阻塞UI线程
+                        QTimer.singleShot(100, self._update_table)
+                        QMessageBox.information(self, "成功", "数据已成功导入")
+                    else:
+                        error_msg = result.get("error", "导入失败") if result else "导入失败"
+                        QMessageBox.warning(self, "失败", f"数据导入失败: {error_msg}")
+        except Exception as e:
+            logger.error(f"导入Spec时出错: {e}", exc_info=True)
+            QMessageBox.warning(self, "错误", f"导入过程中发生错误: {e}")
 
     def _standardize_and_fill_matrix(self):
         """标准化填充Matrix - View层事件触发"""
@@ -601,14 +643,22 @@ class MatrixDialog(QDialog):
             
             # 再尝试从已导入的规格书中提取测试方法
             extract_result = self.service.extract_test_methods_from_spec()
-            if extract_result:
-                # 更新表格显示
-                self._update_table()
-                QMessageBox.information(self, "成功", "Matrix已标准化并填充测试方法")
+            
+            # 更新标准版本号
+            update_result = self.service.update_standard_versions()
+            
+            # 更新表格显示
+            self._update_table()
+            
+            # 根据结果给出相应提示
+            if extract_result and update_result["success"]:
+                QMessageBox.information(self, "成功", "Matrix已标准化、填充测试方法并更新标准版本")
+            elif extract_result:
+                QMessageBox.information(self, "部分成功", "Matrix已标准化并填充测试方法，但标准版本更新失败")
+            elif update_result["success"]:
+                QMessageBox.information(self, "部分成功", "Matrix已标准化并更新标准版本，但未从规格书中提取到测试方法")
             else:
-                # 即使没有提取到测试方法，也要更新显示标准化的结果
-                self._update_table()
-                QMessageBox.information(self, "部分成功", "Matrix已标准化，但未从规格书中提取到测试方法")
+                QMessageBox.information(self, "部分成功", "Matrix已标准化，但未提取到测试方法且标准版本更新失败")
                 
         except Exception as e:
             logger.error(f"标准化填充Matrix时出错: {e}", exc_info=True)
@@ -622,7 +672,7 @@ class MatrixDialog(QDialog):
             # 同步表格数据到模型
             self._sync_table_to_model()
             # 调用服务层查找
-            results = self.service.find_content(search_text)
+            results = self.service.find_by_content(search_text)
             if results:
                 # 显示查找结果
                 msg = f"找到 {len(results)} 个匹配项:\n"
@@ -648,7 +698,6 @@ class MatrixDialog(QDialog):
             # 获取当前项目路径作为默认保存路径
             current_project = state_manager.get_state("current_project")
             logger.debug(f"当前项目路径: {current_project}")
-            import os
             if current_project and os.path.exists(current_project):
                 default_path = os.path.join(current_project, default_filename)
                 logger.debug(f"构建默认路径: {default_path}")
@@ -750,7 +799,7 @@ class MatrixDialog(QDialog):
                 details = result["details"]
                 if details:
                     details_msg = "\n".join([f"第{detail['row']}行: {detail['old_method']} -> {detail['new_method']}" 
-                                               for detail in details])
+                                             for detail in details])
                     msg = f"标准版本号更新完成，共更新{result['updated_count']}项:\n{details_msg}"
                     # 创建自定义消息框以支持更宽的窗口
                     msg_box = QMessageBox(self)
@@ -759,7 +808,7 @@ class MatrixDialog(QDialog):
                     msg_box.setStandardButtons(QMessageBox.Ok)
                     msg_box.setIcon(QMessageBox.NoIcon)
                     # 设置消息框宽度和内容靠左显示
-                    msg_box.setStyleSheet("QLabel{min-width: 450px; text-align: left;}")
+                    msg_box.setStyleSheet("QLabel{min-width: 400px; text-align: left;}")
                     msg_box.exec_()
                 else:
                     # 没有需要更新的项，但不是失败

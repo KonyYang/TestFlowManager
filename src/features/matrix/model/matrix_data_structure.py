@@ -169,10 +169,17 @@ class MatrixDataStructure:
             sample_size_row_index = self._find_sample_size_row(matrix_data)
             
             # 遍历所有行，提取每个组别的测试项
+            # 修改：在遇到"Sample"行时停止提取组别步骤
             for row_idx, row in enumerate(matrix_data):
                 # 跳过表头行
                 if row_idx == 0:
                     continue
+                
+                # 检查是否遇到"Sample"行，如果是则停止处理
+                first_col_value = row[0] if len(row) > 0 else ""
+                if first_col_value.lower().startswith("sample"):
+                    # 遇到Sample行，停止提取组别步骤
+                    break
                 
                 test_item = row[0] if len(row) > 0 else ""
                 

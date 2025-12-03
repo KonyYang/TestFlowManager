@@ -29,23 +29,29 @@ class MatrixSpecProcessingService:
             
             # 如果成功提取数据，则更新数据模型
             if data_result is not None:
+                logger.debug("开始处理提取到的数据")
                 # 处理不同的返回格式
                 if isinstance(data_result, dict) and 'data' in data_result:
                     # 包含合并单元格信息的格式
                     data = data_result['data']
                     merged_cells = data_result.get('merged_cells', [])
+                    logger.debug(f"数据格式为字典，包含 {len(data)} 行数据和 {len(merged_cells)} 个合并单元格")
                 else:
                     # 简单数据格式
                     data = data_result
                     merged_cells = []
+                    logger.debug(f"数据格式为简单列表，包含 {len(data) if data else 0} 行数据")
                 
+                logger.debug("清空现有数据")
                 # 清空现有数据
                 self.data_model.headers = []
                 self.data_model.rows = []
                 
                 # 设置表头（使用字母标识，而不是使用第一行数据作为表头）
                 if len(data) > 0:
-                    for i in range(len(data[0])):  # 根据数据列数创建表头
+                    column_count = len(data[0])  # 根据第一行数据的列数创建表头
+                    logger.debug(f"根据数据创建表头，列数: {column_count}")
+                    for i in range(column_count):  # 根据数据列数创建表头
                         self.data_model.headers.append(self.data_model._column_index_to_letter(i))
                     logger.info(f"设置表头，列数: {len(self.data_model.headers)}")
                 
@@ -69,13 +75,13 @@ class MatrixSpecProcessingService:
                 # 注意：这部分可能需要额外处理，取决于具体需求
 
                 logger.info("Spec数据导入完成")
-                return True
+                return {"success": True}
             else:
                 logger.warning("未能从Spec文档提取数据，保持原有数据不变")
-                return False
+                return {"success": False, "error": "未能从Spec文档提取数据"}
         except Exception as e:
-            logger.error(f"导入Spec失败: {e}")
-            return False
+            logger.error(f"导入Spec失败: {e}", exc_info=True)
+            return {"success": False, "error": str(e)}
             
     def update_standard_versions(self):
         """

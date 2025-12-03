@@ -454,7 +454,15 @@ class TestRecordService:
             logger.info(f"填充前文档表格数量: {new_doc.Tables.Count}")
 
             group_index = 1
-            for group_name in sorted(group_steps.keys()):
+            # 修复：使用自然排序（数值排序）而不是字符串排序
+            def natural_sort_key(key):
+                # 将字符串转换为整数用于排序，如果无法转换则保持原样
+                try:
+                    return int(key)
+                except ValueError:
+                    return key
+                    
+            for group_name in sorted(group_steps.keys(), key=natural_sort_key):
                 logger.info(f"处理组别 {group_name}，包含 {len(group_steps[group_name])} 个测试项")
 
                 # 更新组别标题

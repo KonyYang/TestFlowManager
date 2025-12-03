@@ -1,0 +1,1 @@
+# src/features/matrix/view/components/__init__.py

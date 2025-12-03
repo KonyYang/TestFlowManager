@@ -85,6 +85,12 @@ class MatrixTestMethodManager:
             # 跳过第一行（表头），从第二行开始处理数据行（索引为1）
             for row_index in range(1, len(self.data_model.rows)):
                 row = self.data_model.rows[row_index]
+                # 检查是否遇到sample行，如果是则停止处理
+                first_col_value = row[0] if len(row) > 0 else ""
+                if first_col_value and str(first_col_value).strip().lower().startswith("sample"):
+                    logger.info(f"遇到Sample行（第{row_index}行），停止提取测试方法")
+                    break
+                    
                 # 获取章节号
                 if section_col_index < len(row):
                     chapter_number = row[section_col_index]
@@ -129,6 +135,13 @@ class MatrixTestMethodManager:
             # 将提取的测试方法填充到Matrix中，并根据Test Item列填充Condition和Requirement
             updated_count = 0
             for row_index in range(1, len(self.data_model.rows)):  # 从第2行开始处理（跳过表头）
+                # 检查是否遇到sample行，如果是则停止处理
+                if row_index < len(self.data_model.rows):
+                    first_col_value = self.data_model.rows[row_index][0] if len(self.data_model.rows[row_index]) > 0 else ""
+                    if first_col_value and str(first_col_value).strip().lower().startswith("sample"):
+                        logger.info(f"遇到Sample行（第{row_index}行），停止填充测试方法和模板")
+                        break
+                        
                 if row_index < len(self.data_model.rows):
                     # 获取Test Item（第一列）
                     test_item = ""
