@@ -103,6 +103,7 @@ class MatrixEventHandlers:
             current_project = state_manager.get_state("current_project")
             logger.debug(f"当前项目路径: {current_project}")
             if current_project and os.path.exists(current_project):
+                # 直接在项目路径下生成文件，不放在子文件夹中
                 default_path = os.path.join(current_project, default_filename)
                 logger.debug(f"构建默认路径: {default_path}")
             else:
@@ -136,8 +137,33 @@ class MatrixEventHandlers:
                         # 文件被其他程序占用
                         QMessageBox.warning(self.view, "错误", "导出失败，文件已被其他程序占用（可能已在Excel中打开），请关闭文件后重试")
                     except FileNotFoundError:
-                        # 文件不存在，应该是其他问题
-                        QMessageBox.warning(self.view, "错误", "导出失败，请检查文件路径是否正确")
+                        # 文件不存在，检查路径是否有效
+                        # 如果路径不存在，提示用户选择另存为位置或取消
+                        msg_box = QMessageBox(self.view)
+                        msg_box.setIcon(QMessageBox.Warning)
+                        msg_box.setWindowTitle("路径问题")
+                        msg_box.setText(f"无法找到正确的项目文件夹，无法自动保存Test Status表。\n\n默认路径: {file_path}\n\n请手动选择保存位置。")
+                        msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+                        result = msg_box.exec_()
+                        
+                        if result == QMessageBox.Ok:
+                            # 让用户选择保存路径
+                            new_file_path, _ = QFileDialog.getSaveFileName(
+                                self.view, 
+                                "保存Test Status表", 
+                                default_filename, 
+                                "Excel Files (*.xlsx)"
+                            )
+                            
+                            if new_file_path:
+                                # 重新尝试导出
+                                result = self.controller.export_to_excel(new_file_path, export_type)
+                                if result:
+                                    QMessageBox.information(self.view, "成功", "Test Status表已成功导出到Excel")
+                                else:
+                                    QMessageBox.warning(self.view, "错误", "导出失败，发生未知错误")
+                        else:
+                            logger.info("用户取消了导出操作")
                     except Exception:
                         # 其他未知错误
                         QMessageBox.warning(self.view, "错误", "导出失败，发生未知错误")

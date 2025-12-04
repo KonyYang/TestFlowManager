@@ -53,17 +53,9 @@ class TestRecordController:
                 if not dl_subfolder_path:
                     dl_subfolder_path = project_root_dir
                 
-                # 构建提交材料文件夹路径（通常已存在）
-                submitted_material_dir = os.path.join(dl_subfolder_path, "Submitted Material")
-                
-                # 确保提交材料文件夹存在（如果没有才创建）
-                if not os.path.exists(submitted_material_dir):
-                    os.makedirs(submitted_material_dir)
-                    logger.info(f"创建提交材料文件夹: {submitted_material_dir}")
-                
-                # 构建输出文件路径
+                # 直接在DL编号文件夹下生成文件，不再放在子文件夹中
                 output_filename = f"{dl_number} Test Record.docx"
-                output_path = os.path.join(submitted_material_dir, output_filename)
+                output_path = os.path.join(dl_subfolder_path, output_filename)
                 return os.path.normpath(output_path)  # 标准化路径分隔符
             
             # 如果没有项目数据文件路径，则使用默认路径
