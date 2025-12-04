@@ -1,6 +1,6 @@
 # src/features/matrix/view/matrix_dialog.py
 from PyQt5.QtWidgets import (
-    QDialog, QMessageBox, QFileDialog, QVBoxLayout, QHBoxLayout, QPushButton,
+    QWidget, QMessageBox, QFileDialog, QVBoxLayout, QHBoxLayout, QPushButton,
     QTableWidget, QTableWidgetItem, QHeaderView, QInputDialog, QMenu, QAction
 )
 from PyQt5.QtCore import Qt, QItemSelection, QItemSelectionModel, QTimer
@@ -19,8 +19,8 @@ from src.core.state_manager import state_manager
 import os
 
 
-class MatrixDialog(QDialog):
-    """Matrix视图 - View层"""
+class MatrixDialog(QWidget):
+    """Matrix视图 - View层（嵌入式版本）"""
 
     def __init__(self, parent=None, service=None, ltr_number=None):
         super().__init__(parent)
@@ -29,14 +29,6 @@ class MatrixDialog(QDialog):
             self.setWindowTitle(f"Matrix编辑器 - LTR: {ltr_number}")
         else:
             self.setWindowTitle("Matrix编辑器")
-        # 设置窗口标志，允许窗口最大化和调整大小
-        self.setWindowFlags(Qt.Window)
-        # 设置默认为最大化状态
-        self.setWindowState(Qt.WindowMaximized)
-        self.resize(800, 600)  # 设置默认尺寸（在非最大化状态下使用）
-        
-        # 设置窗口最小尺寸
-        self.setMinimumSize(400, 300)
         
         # 复制行/列的数据缓存
         self.copied_row_data = None
@@ -54,7 +46,8 @@ class MatrixDialog(QDialog):
 
     def _setup_ui(self):
         """设置用户界面 - View层渲染"""
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(5, 5, 5, 5)
 
         # 添加按钮区域
         button_layout = QHBoxLayout()
@@ -111,7 +104,6 @@ class MatrixDialog(QDialog):
 
         layout.addLayout(button_layout)
         layout.addWidget(self.table_widget)
-        self.setLayout(layout)
         
         # 存储菜单项引用以便动态更新
         self.merge_or_split_action = None
@@ -977,35 +969,3 @@ class MatrixDialog(QDialog):
                 logger.debug(f"项目中没有matrix.xlsx文件: {matrix_file_path}")
         except Exception as e:
             logger.error(f"自动导入matrix.xlsx文件时出错: {e}")
-
-    def closeEvent(self, event):
-        """
-        处理窗口关闭事件，自动导出数据到项目文件夹
-        """
-        try:
-            logger.debug("Matrix窗口正在关闭，准备自动导出数据")
-            
-            # 获取当前项目路径
-            current_project = state_manager.get_state("current_project")
-            if current_project:
-                # 构造matrix.xlsx文件路径
-                matrix_file_path = os.path.join(current_project, "matrix.xlsx")
-                
-                # 同步表格数据到模型
-                self._sync_table_to_model()
-                
-                # 导出前先保存合并单元格信息
-                self._save_merged_cells_info()
-                
-                # 自动导出到项目文件夹
-                if self.service.export_to_excel(matrix_file_path):
-                    logger.info(f"Matrix数据已自动导出到: {matrix_file_path}")
-                else:
-                    logger.error(f"自动导出Matrix数据失败: {matrix_file_path}")
-            else:
-                logger.debug("没有当前项目，跳过自动导出")
-        except Exception as e:
-            logger.error(f"自动导出Matrix数据时出错: {e}")
-            
-        # 调用父类的closeEvent以确保窗口正常关闭
-        super().closeEvent(event)

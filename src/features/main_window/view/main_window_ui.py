@@ -1,9 +1,5 @@
-"""
-主窗口UI模块
-定义主窗口的用户界面
-"""
-
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMenuBar, QMenu, QAction, QStatusBar, QToolBar
+# src/features/main_window/view/main_window_ui.py
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMenuBar, QMenu, QAction, QStatusBar, QToolBar, QTabWidget
 from PyQt5.QtCore import Qt
 
 from src.core import config_manager
@@ -12,6 +8,11 @@ from src.features.main_window.controller.main_window_controller import MainWindo
 from PyQt5.QtGui import QFont
 from src.core.font_utils import FontUtils
 from src.core.window_utils import WindowUtils  # 导入窗口工具类
+
+# 导入Matrix相关组件
+from src.features.matrix.controller.matrix_project_controller import MatrixProjectController
+from src.features.matrix.view.matrix_dialog import MatrixDialog
+from src.features.matrix.controller.matrix_controller import MatrixController
 
 class MainWindow(QMainWindow):
     """
@@ -22,6 +23,9 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.controller = MainWindowController(self)
+        # 初始化Matrix控制器
+        self.matrix_project_controller = MatrixProjectController(self)
+        self.matrix_controller = MatrixController(self)
         self._setup_ui()
         self._setup_menu()
         self._setup_toolbar()
@@ -39,26 +43,19 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("TestFlow Manager")
         # 根据DPI调整窗口尺寸，使用更小的默认尺寸
         from src.core.config_manager import config_manager
-        # print(f"[DEBUG] All config: {config_manager.get_all()}")
         base_width = config_manager.get("window.width", 800)
         base_height = config_manager.get("window.height", 600)
-        # print(f"[DEBUG] Base window size from config: {base_width}x{base_height}")
         
         width = WindowUtils.get_scaled_size(base_width)
         height = WindowUtils.get_scaled_size(base_height)
-        # print(f"[DEBUG] Scaled window size: {width}x{height}")
         
         self.resize(width, height)
         # 设置更小的最小尺寸限制
         min_width = WindowUtils.get_scaled_size(200)
         min_height = WindowUtils.get_scaled_size(150)
-        # print(f"[DEBUG] Minimum window size: {min_width}x{min_height}")
         self.setMinimumSize(min_width, min_height)
         # 确保窗口不会被设置一个固定的大小
         self.setMaximumSize(16777215, 16777215)  # QWIDGETSIZE_MAX = 16777215
-        
-        # 添加调试信息，显示实际设置的窗口尺寸
-        # print(f"[DEBUG] Setting main window size: {width}x{height}")
 
         # 应用全局字体
         global_font = FontUtils.get_scaled_font(9)  # 使用更小的基础字体大小
@@ -67,23 +64,37 @@ class MainWindow(QMainWindow):
         # 创建中央部件
         central_widget = QWidget()
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)  # 移除边距以最大化利用空间
 
-        # 欢迎标签
-        welcome_label = QLabel("欢迎使用 TestFlow Manager")
-        welcome_label.setAlignment(Qt.AlignCenter)
-        welcome_label.setStyleSheet("font-weight: bold; margin: 20px;")
-        welcome_label.setFont(FontUtils.get_scaled_font(12))  # 使用更小的字体大小
-
-        layout.addWidget(welcome_label)
+        # 创建主内容区域 - 使用标签页组织不同功能模块
+        self.tab_widget = QTabWidget()
+        self.tab_widget.setFont(FontUtils.get_scaled_font(8))
+        
+        # 创建Matrix编辑器标签页
+        self.matrix_tab = QWidget()
+        self._setup_matrix_tab()
+        self.tab_widget.addTab(self.matrix_tab, "Matrix编辑器")
+        
+        # 添加更多标签页用于其他功能...
+        # self.other_tab = QWidget()
+        # self.tab_widget.addTab(self.other_tab, "其他功能")
+        
+        layout.addWidget(self.tab_widget)
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
+        
+    def _setup_matrix_tab(self):
+        """设置Matrix编辑器标签页"""
+        layout = QVBoxLayout(self.matrix_tab)
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        # 创建Matrix对话框实例（嵌入到主窗口中而不是独立窗口）
+        self.matrix_dialog = MatrixDialog(parent=self, service=self.matrix_controller.service)
+        layout.addWidget(self.matrix_dialog)
         
     def showEvent(self, event):
         """窗口显示事件"""
         super().showEvent(event)
-        # 显示实际窗口尺寸
-        # actual_size = self.size()
-        # print(f"[DEBUG] Main window actual size: {actual_size.width()}x{actual_size.height()}")
 
     def _setup_menu(self) -> None:
         """设置菜单栏"""
@@ -165,31 +176,7 @@ class MainWindow(QMainWindow):
         # 获取缩放字体
         button_font = FontUtils.get_scaled_font(8)  # 使用更小的基础字体大小
 
-        new_button = QPushButton("新建项目")
-        new_button.clicked.connect(self._on_new_file)
-        new_button.setFont(button_font)
-        toolbar.addWidget(new_button)
-
-        # 添加打开项目按钮
-        open_project_button = QPushButton("打开项目")
-        open_project_button.clicked.connect(self._on_open_project)
-        open_project_button.setFont(button_font)
-        toolbar.addWidget(open_project_button)
-
-        open_button = QPushButton("打开")
-        open_button.clicked.connect(self._on_open_file)
-        open_button.setFont(button_font)
-        toolbar.addWidget(open_button)
-
-        save_button = QPushButton("保存")
-        save_button.clicked.connect(self._on_save_file)
-        save_button.setFont(button_font)
-        toolbar.addWidget(save_button)
-
-        view_ltr_button = QPushButton("查看LTR")
-        view_ltr_button.clicked.connect(self._on_view_ltr)
-        view_ltr_button.setFont(button_font)
-        toolbar.addWidget(view_ltr_button)
+        # 移除了工具栏上的按钮，按照用户要求全部取消
 
     def _setup_status_bar(self) -> None:
         """设置状态栏"""

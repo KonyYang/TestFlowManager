@@ -6,6 +6,7 @@ import os
 import json
 from typing import List, Optional
 from PyQt5.QtWidgets import QWidget, QMessageBox, QDialog, QFileDialog
+from PyQt5.QtCore import QTimer
 from src.core.logger import logger
 from src.core.event_dispatcher import event_dispatcher
 from src.features.ltr_manager.controller.ltr_editor_controller import LTREditorController
@@ -16,6 +17,8 @@ from src.features.main_window.view.dialogs.dl_input_dialog import DLInputDialog
 from src.features.project_creator.controller import ProjectCreatorController
 # 添加状态管理器
 from src.core.state_manager import state_manager
+# 添加Matrix相关导入
+from src.features.matrix.controller.matrix_project_controller import MatrixProjectController
 
 
 class MainWindowController:
@@ -43,6 +46,9 @@ class MainWindowController:
             self.ltr_controller.data_model,
             self.ltr_controller.service
         )
+        
+        # 初始化Matrix项目控制器
+        self.matrix_project_controller = MatrixProjectController(view)
 
         # 订阅事件
         event_dispatcher.subscribe("ltr.processing.started", self._on_ltr_processing_started)
@@ -81,6 +87,12 @@ class MainWindowController:
 
         if status == "success":
             self.service.update_status(f"LTR申请单处理完成: {dl_number}")
+            # 更新窗口标题显示项目信息
+            self.view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
+            # 设置LTR编号到Matrix控制器
+            if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
+                self.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
+                logger.debug(f"Set LTR number {dl_number} to Matrix controller")
         else:
             self.service.update_status(f"LTR申请单处理失败: {dl_number}")
 
@@ -92,6 +104,10 @@ class MainWindowController:
         # 根据不同的状态键进行相应处理
         if key == "current_project":
             self.service.update_status(f"当前项目: {new_value}")
+            # 更新窗口标题显示项目信息
+            if new_value:
+                project_name = os.path.basename(new_value) if new_value else '无'
+                self.view.setWindowTitle(f"TestFlow Manager - 项目: {project_name}")
         elif key == "application_status":
             self.service.update_status(new_value)
 
@@ -333,29 +349,21 @@ class MainWindowController:
                 # 如果无法读取JSON文件，使用文件夹名称作为DL编号
                 dl_number = os.path.basename(project_path)
 
-            # 创建项目创建控制器并设置项目路径
-            from src.features.project_creator.controller.project_creator_controller import ProjectCreatorController
-            project_creator = ProjectCreatorController(self.view)
-            project_creator.set_project_path(project_path)
-            
-            # 设置Matrix控制器中的LTR编号
-            if dl_number:
-                project_creator.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
-            
             # 保存当前项目路径到状态
             state_manager.set_state("current_project", project_path)
+            
+            # 设置LTR编号到Matrix控制器
+            if dl_number:
+                self.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
+                logger.debug(f"Set LTR number {dl_number} to Matrix controller")
+            
+            # 更新窗口标题显示项目信息
+            self.view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
 
-            # 显示Matrix编辑器
-            success = project_creator.open_matrix_editor()
+            self.service.update_status(f"已打开项目: {os.path.basename(project_path)}")
+            logger.info(f"Project opened successfully: {project_path}")
 
-            if success:
-                self.service.update_status(f"已打开项目: {os.path.basename(project_path)}")
-                logger.info(f"Project opened successfully: {project_path}")
-            else:
-                self.service.update_status(f"打开项目失败: {os.path.basename(project_path)}")
-                logger.error(f"Failed to open project: {project_path}")
-
-            return success
+            return True
         except Exception as e:
             logger.error(f"Failed to open project: {e}")
             self.service.update_status("打开项目失败")
