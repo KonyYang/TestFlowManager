@@ -108,8 +108,21 @@ class MainWindowController:
             if new_value:
                 project_name = os.path.basename(new_value) if new_value else '无'
                 self.view.setWindowTitle(f"TestFlow Manager - 项目: {project_name}")
+                
+            # 触发Matrix自动导入功能
+            QTimer.singleShot(0, self._trigger_matrix_auto_import)
         elif key == "application_status":
             self.service.update_status(new_value)
+
+    def _trigger_matrix_auto_import(self):
+        """触发Matrix编辑器自动导入项目中的matrix.xlsx文件"""
+        try:
+            # 调用Matrix对话框的自动导入方法
+            if hasattr(self.view, 'matrix_dialog') and self.view.matrix_dialog:
+                self.view.matrix_dialog._auto_import_matrix_from_project()
+                logger.debug("Triggered auto import of matrix.xlsx in MatrixDialog")
+        except Exception as e:
+            logger.error(f"Failed to trigger matrix auto import: {e}")
 
     def initialize(self) -> bool:
         """
@@ -362,6 +375,9 @@ class MainWindowController:
 
             self.service.update_status(f"已打开项目: {os.path.basename(project_path)}")
             logger.info(f"Project opened successfully: {project_path}")
+
+            # 触发Matrix自动导入功能
+            QTimer.singleShot(0, self._trigger_matrix_auto_import)
 
             return True
         except Exception as e:
