@@ -791,6 +791,25 @@ class MatrixDialog(QDialog):
             # 调用服务层更新标准版本号
             result = self.service.update_standard_versions()
             
+            # 检查是否因为标准文件缺失而失败
+            if "file_missing" in result and result["file_missing"]:
+                # 标准文件不存在，显示详细错误信息
+                file_path = result.get("file_path", "未知路径")
+                QMessageBox.warning(
+                    self, 
+                    "标准文件不存在", 
+                    f"标准目录文件不存在，请检查文件路径:\n{file_path}"
+                )
+                logger.warning(f"标准文件不存在: {file_path}")
+                return
+            
+            # 检查是否因为没有找到标准数据而失败
+            if "no_standards_found" in result and result["no_standards_found"]:
+                # 没有找到需要更新的标准数据，这是一个正常情况，不显示错误
+                QMessageBox.information(self, "成功", "标准版本号更新完成，没有需要更新的项")
+                logger.info("标准版本号更新完成，没有需要更新的项")
+                return
+            
             if result["success"]:
                 # 更新表格显示
                 self._update_table()

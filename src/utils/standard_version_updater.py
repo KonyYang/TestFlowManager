@@ -95,9 +95,8 @@ def load_standard_data(file_path: str) -> dict:
         # 检查文件是否存在
         if not os.path.exists(file_path):
             logger.warning(f"标准文件不存在: {file_path}")
-            return standards
+            return standards, False  # 返回一个标志，表示文件不存在
             
-        logger.info(f"准备加载标准文件: {file_path}")
         # 根据文件扩展名选择合适的解析器
         if file_path.endswith('.xls') or file_path.endswith('.xlsx'):
             standards = _load_excel_standards(file_path)
@@ -109,7 +108,7 @@ def load_standard_data(file_path: str) -> dict:
         import traceback
         logger.error(f"详细错误信息: {traceback.format_exc()}")
         
-    return standards
+    return standards, True
 
 
 def _load_excel_standards(file_path: str) -> dict:
@@ -165,8 +164,6 @@ def _load_excel_standards(file_path: str) -> dict:
             
         # 从配置中获取工作表名称
         sheet_name = config_manager.get("standard_files.standard_version_sheet_name", "认可标准")
-        logger.info(f"准备读取Excel文件: {file_path}, 工作表: {sheet_name}")
-        logger.info(f"文件是否存在: {os.path.exists(file_path)}")
         
         # 检查文件是否存在
         if not os.path.exists(file_path):
@@ -175,7 +172,6 @@ def _load_excel_standards(file_path: str) -> dict:
             
         # 读取Excel文件中的指定工作表
         df = pd.read_excel(file_path, sheet_name=sheet_name, header=None)
-        logger.info(f"成功读取Excel文件，数据形状: {df.shape}")
         
         # 从第3行开始遍历（索引为2），第2列（索引为1）是文件编号列
         for index in range(2, len(df)):  # 从第3行开始（索引2）
@@ -188,7 +184,6 @@ def _load_excel_standards(file_path: str) -> dict:
                     if core_method:
                         # 只存储核心标准号，而不是完整单元格内容
                         standards[core_method] = file_number_str
-                        logger.debug(f"加载标准: {core_method} -> {file_number_str}")
         
         logger.info(f"总共加载了 {len(standards)} 个标准")
                         
@@ -221,8 +216,6 @@ def _load_excel_with_xlrd(file_path: str) -> dict:
         # 获取工作表
         worksheet = workbook.sheet_by_name(sheet_name)
         
-        logger.info(f"使用xlrd成功打开Excel文件，行列数: ({worksheet.nrows}, {worksheet.ncols})")
-        
         # 从第3行开始遍历（索引为2），第2列（索引为1）是文件编号列
         for row_index in range(2, worksheet.nrows):
             # 获取第2列（索引为1）的值
@@ -234,7 +227,6 @@ def _load_excel_with_xlrd(file_path: str) -> dict:
                 if core_method:
                     # 只存储核心标准号，而不是完整单元格内容
                     standards[core_method] = file_number_str
-                    logger.debug(f"使用xlrd加载标准: {core_method} -> {file_number_str}")
         
         logger.info(f"使用xlrd总共加载了 {len(standards)} 个标准")
     except Exception as e:
@@ -315,22 +307,11 @@ def update_test_method_versions(matrix_data: list) -> dict:
     """
     updated_count = 0
     update_details = []
+    file_exists = True  # 标记文件是否存在
     
     try:
         # 获取测试标准文件路径
-        logger.info("尝试从配置管理器获取标准文件路径")
         standard_file_path = config_manager.get("standard_files.standard_version_info_file")
-        logger.info(f"从配置管理器获取到的标准文件路径: {standard_file_path}")
-        
-        # 获取工作表名称
-        sheet_name = config_manager.get("standard_files.standard_version_sheet_name", "认可标准")
-        logger.info(f"使用的Sheet名称: {sheet_name}")
-        
-        # 添加调试信息，检查配置管理器中的所有配置
-        all_config = config_manager.get_all()
-        logger.info(f"完整配置信息: {all_config}")
-        if "standard_files" in all_config:
-            logger.info(f"标准文件配置: {all_config['standard_files']}")
         
         # 检查是否在可执行文件环境中，如果是，则尝试使用相对路径
         if getattr(sys, 'frozen', False):
@@ -339,33 +320,28 @@ def update_test_method_versions(matrix_data: list) -> dict:
                 # 尝试在可执行文件目录下查找标准文件
                 exe_dir = os.path.dirname(sys.executable)
                 relative_standard_file_path = os.path.join(exe_dir, standard_file_path)
-                logger.info(f"尝试使用可执行文件目录下的相对路径: {relative_standard_file_path}")
                 if os.path.exists(relative_standard_file_path):
                     standard_file_path = relative_standard_file_path
-                    logger.info(f"使用相对路径成功找到标准文件: {standard_file_path}")
                 else:
                     logger.warning(f"相对路径下也未找到标准文件: {relative_standard_file_path}")
         
         if not standard_file_path:
-            logger.warning("未配置标准文件路径")
             # 再次尝试获取，确保没有遗漏
             standard_file_path = config_manager.get("standard_files.standard_version_info_file")
-            logger.info(f"再次尝试获取标准文件路径: {standard_file_path}")
             if not standard_file_path:
-                return {"updated_count": 0, "details": []}
+                return {"updated_count": 0, "details": [], "file_exists": False, "file_path": standard_file_path}
             
         # 加载标准数据
-        logger.info(f"尝试加载标准数据文件: {standard_file_path}")
-        standards = load_standard_data(standard_file_path)
-        logger.info(f"加载到的标准数据数量: {len(standards)}")
+        standards, file_exists = load_standard_data(standard_file_path)
         
+        if not file_exists:
+            return {"updated_count": 0, "details": [], "file_exists": False, "file_path": standard_file_path}
+            
         if not standards:
-            logger.warning("未加载到任何标准数据")
-            return {"updated_count": 0, "details": []}
+            return {"updated_count": 0, "details": [], "file_exists": True, "standards_loaded": False}
             
         # 查找"Test Method"列
         if len(matrix_data) == 0:
-            logger.warning("矩阵数据为空")
             return {"updated_count": 0, "details": []}
             
         # 假设第一行是表头
@@ -378,21 +354,7 @@ def update_test_method_versions(matrix_data: list) -> dict:
                 break
                 
         if test_method_col_index == -1:
-            logger.warning("未找到'Test Method'列")
             return {"updated_count": 0, "details": []}
-            
-        logger.info(f"找到'Test Method'列，索引为: {test_method_col_index}")
-        logger.info(f"矩阵数据总行数: {len(matrix_data)}")
-        
-        # 打印C列的所有内容供调试
-        c_column_contents = []
-        for row_index in range(1, len(matrix_data)):
-            row = matrix_data[row_index]
-            if len(row) > test_method_col_index:
-                c_column_contents.append((row_index, row[test_method_col_index]))
-        
-        logger.info(f"C列(Test Method列)内容: {c_column_contents}")
-        logger.info(f"标准文件路径: {standard_file_path}")
             
         # 遍历数据行（从第2行开始，索引为1）
         for row_index in range(1, len(matrix_data)):
@@ -413,8 +375,6 @@ def update_test_method_versions(matrix_data: list) -> dict:
             if not core_method:
                 continue
                 
-            logger.debug(f"处理第{row_index}行，测试方法: {test_method}，核心标识: {core_method}")
-                
             # 查找匹配的标准
             if core_method in standards:
                 full_standard = standards[core_method]
@@ -428,40 +388,33 @@ def update_test_method_versions(matrix_data: list) -> dict:
                 
                 # 如果标准文件中的版本更高，或者当前没有版本号，则更新
                 should_update = False
-                update_reason = ""
                 
                 # 当前无版本，标准有版本，需要更新
                 if not current_version and standard_version:
                     should_update = True
-                    update_reason = "补充版本号"
                 # 两者都有版本，比较版本高低
                 elif current_version and standard_version:
                     version_comparison = compare_versions(standard_version, current_version)
                     if version_comparison > 0:
                         # 标准版本更高，需要更新（升级）
                         should_update = True
-                        update_reason = "升级版本"
                     elif version_comparison < 0:
                         # 当前版本更高，需要更新（降级）
                         should_update = True
-                        update_reason = "降级版本"
-                    # 如果版本相同，则不更新 (version_comparison == 0)
                 # 当前有版本号，标准无版本号
                 elif current_version and not standard_version:
                     # 检查特殊情况：如果标准文件中包含年份信息，则需要替换为完整标准号
                     if "-" in full_standard and full_standard.count("-") >= 3:
                         should_update = True
-                        update_reason = "补充完整标准号"
                 # 当前无版本号，标准也无版本号
                 elif not current_version and not standard_version:
                     # 检查标准文件中是否包含额外信息（如年份）
                     if "-" in full_standard and full_standard.count("-") >= 3:
                         should_update = True
-                        update_reason = "补充完整标准号"
                 
                 if should_update:
                     # 更新测试方法
-                    if update_reason == "补充完整标准号":
+                    if "-" in full_standard and full_standard.count("-") >= 3:
                         # 特殊情况：使用完整标准号（包含年份）
                         updated_method = extract_standard_identifier(full_standard)
                     else:
@@ -475,29 +428,17 @@ def update_test_method_versions(matrix_data: list) -> dict:
                     update_details.append({
                         "row": row_index,
                         "old_method": test_method,
-                        "new_method": updated_method,
-                        "reason": update_reason
+                        "new_method": updated_method
                     })
                     
                     matrix_data[row_index][test_method_col_index] = updated_method
                     updated_count += 1
-                    logger.info(f"第{row_index}行测试方法更新成功: {test_method} -> {updated_method}")
-                else:
-                    # 版本相同或其他不需要更新的情况
-                    if current_version and standard_version and current_version == standard_version:
-                        logger.debug(f"第{row_index}行无需更新，当前版本与标准版本相同: {current_version}")
-                    else:
-                        logger.debug(f"第{row_index}行无需更新，当前版本已是最新或标准无更高版本")
-            else:
-                logger.debug(f"第{row_index}行未找到匹配标准，核心标识: {core_method}")
-                    
     except Exception as e:
         logger.error(f"更新测试方法版本时出错: {e}")
         import traceback
         logger.error(f"错误详情: {traceback.format_exc()}")
         
-    logger.info(f"总共更新了 {updated_count} 行测试方法")
-    return {"updated_count": updated_count, "details": update_details}
+    return {"updated_count": updated_count, "details": update_details, "file_exists": file_exists}
 
 
 def _extract_version_symbol(full_standard: str, base_method: str) -> str:

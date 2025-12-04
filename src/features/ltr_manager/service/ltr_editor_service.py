@@ -10,6 +10,7 @@ from src.core.logger import logger
 from src.features.ltr_manager.model.ltr_editor_data import LTREditorData
 from src.features.ltr_manager.model.ltr_viewer_data import LTRViewerData
 from src.features.ltr_manager.service.ltr_base_service import LTRBaseService
+import os
 
 
 class LTREditorService(LTRBaseService):
@@ -53,7 +54,23 @@ class LTREditorService(LTRBaseService):
                     QMessageBox.warning(parent, "更新失败", f"DL编号格式无效: {dl_number}")
                 return False
 
-            # 2. 使用密码打开LTR文件（读写模式）
+            # 2. 检查LTR文件是否被占用
+            ltr_file_path = self.get_ltr_file_path()
+            if ltr_file_path and os.path.exists(ltr_file_path):
+                try:
+                    # 尝试以独占模式打开文件来检查是否被占用
+                    with open(ltr_file_path, 'r+b') as test_file:
+                        pass  # 文件可以被打开，没有被独占锁定
+                except PermissionError:
+                    # 文件被其他进程独占锁定
+                    logger.warning(f"LTR文件被占用: {ltr_file_path}")
+                    if parent:
+                        QMessageBox.warning(parent, "文件被占用", "文件已经被占用，请稍后再试。")
+                    return False
+                except Exception as e:
+                    logger.warning(f"检查文件占用状态时出错: {e}")
+
+            # 3. 使用密码打开LTR文件（读写模式）
             workbook = self.open_ltr_file(with_password=True)
             if workbook is None:
                 logger.error("无法以读写模式打开LTR文件")
@@ -67,7 +84,7 @@ class LTREditorService(LTRBaseService):
             excel_app.Visible = False
             excel_app.ScreenUpdating = False  # 暂时关闭屏幕更新
 
-            # 3. 直接使用已解析的年份和后缀信息查找DL编号
+            # 4. 直接使用已解析的年份和后缀信息查找DL编号
             dl_year = parse_result["year"]
             has_suffix = parse_result["has_suffix"]
 
@@ -82,7 +99,7 @@ class LTREditorService(LTRBaseService):
             target_worksheet = find_result["worksheet"]
             target_row = find_result["row"]
 
-            # 4. 准备数据列用于更新
+            # 5. 准备数据列用于更新
             data_columns = [
                 modified_data.get('project_type', ''),
                 modified_data.get('sample_information', ''),
@@ -99,15 +116,15 @@ class LTREditorService(LTRBaseService):
                 modified_data.get('remarks_po', '')
             ]
 
-            # 5. 使用基类的通用更新方法更新数据
+            # 6. 使用基类的通用更新方法更新数据
             if not self.update_worksheet_data(target_worksheet, target_row, data_columns, parent):
                 return False
 
-            # 6. 保存工作簿
+            # 7. 保存工作簿
             workbook.Save()
             logger.info(f"成功更新DL编号 {dl_number} 的数据")
 
-            # 7. 显示成功消息
+            # 8. 显示成功消息
             if parent:
                 QMessageBox.information(parent, "更新成功", f"DL编号 {dl_number} 的数据已成功更新。")
             return True

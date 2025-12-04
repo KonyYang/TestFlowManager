@@ -23,16 +23,33 @@ class MatrixTestMethodManager:
             dict: 更新结果，包含是否成功更新以及更新详情
         """
         try:
-            logger.info("开始更新测试方法标准版本号")
-            
             # 调用标准版本更新工具
             result = update_test_method_versions(self.data_model.rows)
+            
+            # 检查标准文件是否存在
+            if "file_exists" in result and not result["file_exists"]:
+                logger.warning(f"标准文件不存在: {result.get('file_path', '未知路径')}")
+                return {
+                    "success": False, 
+                    "updated_count": 0, 
+                    "details": [],
+                    "file_missing": True,
+                    "file_path": result.get("file_path", "")
+                }
+            
+            # 检查是否加载了标准数据
+            if "standards_loaded" in result and not result["standards_loaded"]:
+                return {
+                    "success": False, 
+                    "updated_count": 0, 
+                    "details": [],
+                    "no_standards_found": True
+                }
             
             if result["updated_count"] > 0:
                 logger.info(f"成功更新 {result['updated_count']} 个测试方法的版本号")
                 return {"success": True, "updated_count": result["updated_count"], "details": result["details"]}
             else:
-                logger.info("未找到需要更新的测试方法版本号")
                 return {"success": False, "updated_count": 0, "details": []}
                 
         except Exception as e:
