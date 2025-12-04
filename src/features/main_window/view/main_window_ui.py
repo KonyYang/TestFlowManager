@@ -1,6 +1,7 @@
 # src/features/main_window/view/main_window_ui.py
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMenuBar, QMenu, QAction, QStatusBar, QToolBar, QTabWidget
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMenuBar, QMenu, QAction, QStatusBar, QToolBar, QTabWidget, QApplication
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QScreen
 
 from src.core import config_manager
 from src.core.logger import logger
@@ -41,22 +42,11 @@ class MainWindow(QMainWindow):
         """设置用户界面"""
         # 设置窗口属性
         self.setWindowTitle("TestFlow Manager")
-        # 根据DPI调整窗口尺寸，使用更小的默认尺寸
-        from src.core.config_manager import config_manager
-        base_width = config_manager.get("window.width", 800)
-        base_height = config_manager.get("window.height", 600)
         
-        width = WindowUtils.get_scaled_size(base_width)
-        height = WindowUtils.get_scaled_size(base_height)
+        # 设置窗口为满屏显示
+        screen_geometry = QScreen.availableGeometry(QApplication.primaryScreen())
+        self.setGeometry(screen_geometry)
         
-        self.resize(width, height)
-        # 设置更小的最小尺寸限制
-        min_width = WindowUtils.get_scaled_size(200)
-        min_height = WindowUtils.get_scaled_size(150)
-        self.setMinimumSize(min_width, min_height)
-        # 确保窗口不会被设置一个固定的大小
-        self.setMaximumSize(16777215, 16777215)  # QWIDGETSIZE_MAX = 16777215
-
         # 应用全局字体
         global_font = FontUtils.get_scaled_font(9)  # 使用更小的基础字体大小
         self.setFont(global_font)
