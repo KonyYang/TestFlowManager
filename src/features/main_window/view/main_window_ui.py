@@ -192,19 +192,14 @@ class MainWindow(QMainWindow):
         open_action.setFont(global_font)
         file_menu.addAction(open_action)
 
-        save_action = QAction("保存", self)
-        save_action.setShortcut("Ctrl+S")
-        save_action.triggered.connect(self._on_save_file)
-        save_action.setFont(global_font)
-        file_menu.addAction(save_action)
-
-        file_menu.addSeparator()
-
         # 添加导出窗口矩阵菜单项
         export_matrix_action = QAction("导出窗口矩阵", self)
+        export_matrix_action.setShortcut("Ctrl+S")  # 将Ctrl+S快捷键分配给导出功能
         export_matrix_action.triggered.connect(self._on_export_matrix)
         export_matrix_action.setFont(global_font)
         file_menu.addAction(export_matrix_action)
+
+        file_menu.addSeparator()
 
         # 添加查看LTR菜单项
         view_ltr_action = QAction("查看LTR", self)
@@ -289,16 +284,10 @@ class MainWindow(QMainWindow):
         if self.controller.handle_open_project():
             self._update_status()
 
-    def _on_save_file(self) -> None:
-        """处理保存文件事件"""
-        logger.debug("Save file action triggered")
-        # 调用控制器的保存方法，传入None表示使用默认保存逻辑
-        if self.controller.handle_save_file(None):
-            self._update_status()
-
     def _on_export_matrix(self) -> None:
         """处理导出窗口矩阵事件"""
         logger.debug("Export matrix action triggered")
+        # 调用matrix控制器，处理才能获取到更新后的数据
         if self.matrix_controller.handle_export_matrix():
             self._update_status()
 

@@ -121,6 +121,45 @@ class MatrixController:
         """
         self.ltr_number = ltr_number
 
+    def auto_export_matrix_on_shutdown(self):
+        """
+        在应用程序关闭时自动导出Matrix数据到项目目录下的matrix.xlsx文件中
+        如果没有获取到项目目录，则不执行保存操作
+        """
+        try:
+            # 获取当前项目路径
+            from src.core.state_manager import state_manager
+            current_project = state_manager.get_state("current_project")
+            
+            # 如果没有项目路径，则直接返回，不执行保存操作
+            if not current_project or not os.path.exists(current_project):
+                logger.debug("没有获取到有效的项目目录，跳过Matrix数据自动保存")
+                return True
+                
+            # 构造默认文件名
+            matrix_file_path = os.path.join(current_project, "matrix.xlsx")
+            
+            # 同步表格数据到模型
+            if self.parent and hasattr(self.parent, 'matrix_dialog'):
+                self.parent.matrix_dialog._sync_table_to_model()
+            
+            # 更新导出控制器的数据模型
+            self.export_controller.update_data_model(self.service.data_model)
+            
+            # 执行导出操作
+            success = self.export_controller.export_by_type(matrix_file_path, "matrix_excel")
+            
+            if success:
+                logger.info(f"成功自动导出Matrix数据到: {matrix_file_path}")
+                return True
+            else:
+                logger.error(f"自动导出Matrix数据失败: {matrix_file_path}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"自动导出Matrix数据时出错: {e}", exc_info=True)
+            return False
+
     def handle_export_matrix(self):
         """
         处理导出窗口矩阵事件
@@ -139,9 +178,9 @@ class MatrixController:
             
             # 构造默认文件名
             if current_project and os.path.exists(current_project):
-                default_filename = os.path.join(current_project, "matrix_export.xlsx")
+                default_filename = os.path.join(current_project, "matrix.xlsx")
             else:
-                default_filename = "matrix_export.xlsx"
+                default_filename = "matrix.xlsx"
                 
             # 弹出文件保存对话框
             file_path, _ = QFileDialog.getSaveFileName(
