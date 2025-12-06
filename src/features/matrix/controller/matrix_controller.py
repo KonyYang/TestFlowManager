@@ -8,7 +8,10 @@ import os
 
 
 class MatrixController:
-    """Matrix控制器 - Controller层"""
+    """Matrix核心控制器
+    
+    负责Matrix功能的核心操作，包括数据导入/导出、显示控制、单元格操作等。
+    这是Matrix功能的主要控制器，直接处理用户的交互和业务逻辑。"""
 
     def __init__(self, parent=None):
         self.parent = parent
@@ -37,7 +40,15 @@ class MatrixController:
         return self.service.data_model
 
     def export_to_excel(self, file_path, export_type="matrix_excel"):
-        """导出到Excel - Controller层业务流程"""
+        """导出Matrix数据到Excel文件
+        
+        Args:
+            file_path (str): 导出文件路径
+            export_type (str): 导出类型，默认为"matrix_excel"
+            
+        Returns:
+            bool: 是否导出成功
+        """
         return self.service.export_to_excel(file_path, export_type)
 
     def import_from_excel(self, file_path):
@@ -45,7 +56,16 @@ class MatrixController:
         return self.service.import_from_excel(file_path)
 
     def import_from_spec(self, file_path, page_number=None, keyword=None):
-        """从Spec导入数据 - Controller层业务流程"""
+        """从规格书文件导入数据到Matrix
+        
+        Args:
+            file_path (str): 规格书文件路径
+            page_number (int, optional): 指定页码
+            keyword (str, optional): 关键词筛选
+            
+        Returns:
+            bool: 是否导入成功
+        """
         return self.service.import_from_spec(file_path, page_number, keyword)
         
     def merge_or_split_cells(self, table_widget):
@@ -121,10 +141,12 @@ class MatrixController:
         """
         self.ltr_number = ltr_number
 
-    def auto_export_matrix_on_shutdown(self):
+    def auto_export_matrix_data_on_shutdown(self):
         """
-        在应用程序关闭时自动导出Matrix数据到项目目录下的matrix.xlsx文件中
-        如果没有获取到项目目录，则不执行保存操作
+        在应用程序关闭时自动导出Matrix数据
+        
+        自动将当前Matrix数据导出到项目目录下的matrix.xlsx文件中，
+        如果没有获取到有效项目目录，则不执行保存操作
         """
         try:
             # 获取当前项目路径
@@ -160,9 +182,11 @@ class MatrixController:
             logger.error(f"自动导出Matrix数据时出错: {e}", exc_info=True)
             return False
 
-    def handle_export_matrix(self):
+    def handle_export_matrix_to_excel(self):
         """
-        处理导出窗口矩阵事件
+        处理导出Matrix到Excel事件
+        
+        显示文件保存对话框并导出当前Matrix数据到Excel文件
         
         Returns:
             bool: 是否导出成功

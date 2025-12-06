@@ -612,7 +612,7 @@ class MainWindowController:
 
             # 在关闭前自动导出Matrix数据
             if self.view and hasattr(self.view, 'matrix_controller'):
-                self.view.matrix_controller.auto_export_matrix_on_shutdown()
+                self.view.matrix_controller.auto_export_matrix_data_on_shutdown()
             
             # 保存应用程序状态
             self.service.save_application_state()

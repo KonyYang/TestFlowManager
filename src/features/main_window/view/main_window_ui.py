@@ -288,7 +288,7 @@ class MainWindow(QMainWindow):
         """处理导出窗口矩阵事件"""
         logger.debug("Export matrix action triggered")
         # 调用matrix控制器，处理才能获取到更新后的数据
-        if self.matrix_controller.handle_export_matrix():
+        if self.matrix_controller.handle_export_matrix_to_excel():
             self._update_status()
 
     def _on_exit(self) -> None:

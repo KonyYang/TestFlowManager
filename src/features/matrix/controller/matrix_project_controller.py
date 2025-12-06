@@ -4,15 +4,16 @@ Matrix项目控制器
 """
 
 from src.features.matrix.controller.matrix_controller import MatrixController
-from src.features.matrix.view.matrix_dialog import MatrixDialog
 from src.core.logger import logger
 
 
 class MatrixProjectController:
     """
     Matrix项目控制器
-    在LTR项目环境中管理和控制Matrix功能
-    """
+    
+    在LTR项目环境中管理和控制Matrix功能，作为Matrix核心功能与LTR项目环境之间的桥梁。
+    负责协调LTR项目数据与Matrix功能的集成，提供项目级别的Matrix功能接口。
+    该控制器内部使用MatrixController来执行具体的功能操作。"""
 
     def __init__(self, parent_view=None):
         """
@@ -72,74 +73,3 @@ class MatrixProjectController:
         except Exception as e:
             logger.error(f"Failed to open matrix dialog: {e}", exc_info=True)
             return False
-
-    def get_available_spec_files(self):
-        """
-        获取可用的规格文件列表
-        
-        Returns:
-            list: 规格文件路径列表
-        """
-        if not self.ltr_integration_service:
-            return []
-            
-        return self.ltr_integration_service.get_specification_files()
-
-    def import_spec_file(self, file_path, page_number=None, keyword=None):
-        """
-        导入规格文件
-        
-        Args:
-            file_path (str): 文件路径
-            page_number (int, optional): 页码
-            keyword (str, optional): 关键词
-            
-        Returns:
-            dict: 导入结果
-        """
-        try:
-            result = self.matrix_controller.import_from_spec(file_path, page_number, keyword)
-            return result
-        except Exception as e:
-            logger.error(f"Failed to import spec file: {e}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-    def update_standard_versions(self):
-        """
-        更新标准版本号
-        
-        Returns:
-            dict: 更新结果
-        """
-        try:
-            result = self.matrix_controller.service.update_standard_versions()
-            return result
-        except Exception as e:
-            logger.error(f"Failed to update standard versions: {e}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-    def export_matrix_to_excel(self, file_path):
-        """
-        导出Matrix到Excel
-        
-        Args:
-            file_path (str): 导出文件路径
-            
-        Returns:
-            dict: 导出结果
-        """
-        try:
-            result = self.matrix_controller.export_to_excel(file_path)
-            return result
-        except Exception as e:
-            logger.error(f"Failed to export matrix to Excel: {e}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
