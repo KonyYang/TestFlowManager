@@ -85,10 +85,14 @@ class MainWindowController:
         dl_number = data.get("dl_number")
         status = data.get("status")
 
+        logger.debug(f"_on_ltr_application_processed in MainWindowController called with dl_number={dl_number}, status={status}")
+
         if status == "success":
             self.service.update_status(f"LTR申请单处理完成: {dl_number}")
             # 更新窗口标题显示项目信息
+            logger.debug(f"Setting main window title in MainWindowController to: TestFlow Manager - 项目: {dl_number}")
             self.view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
+            logger.debug(f"Main window title after setting in MainWindowController: {self.view.windowTitle()}")
             # 设置LTR编号到Matrix控制器
             if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
                 self.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
@@ -268,18 +272,12 @@ class MainWindowController:
             
             # 清理资源
             project_creator.cleanup()
-
-            if success:
-                self.service.update_status("已创建新项目")
-                logger.info("New project created successfully")
-            else:
-                self.service.update_status("创建新项目失败")
-                logger.error("Failed to create new project")
-
+            
+            logger.debug(f"New file handling completed, success: {success}")
             return success
         except Exception as e:
-            logger.error(f"Failed to create new project: {e}")
-            self.service.update_status("创建新项目失败")
+            logger.error(f"Failed to handle new file request: {e}")
+            self.service.update_status("新建项目失败")
             return False
 
     def handle_open_project(self) -> bool:

@@ -43,20 +43,8 @@ class LTRApplicationService:
 
             logger.info(f"LTR application confirmed for DL: {dl_number}")
 
-            # 这里可以添加处理逻辑，如保存数据到数据库或文件
-            # 例如：
-            # self.save_application_data(dl_number, form_data)
-
-            # 发布处理完成事件
-            from src.core.event_dispatcher import event_dispatcher
-            from PyQt5.QtCore import QTimer
-            
-            # 使用QTimer确保事件处理在事件循环中进行
-            QTimer.singleShot(0, lambda: event_dispatcher.dispatch("ltr.application.processed", {
-                "dl_number": dl_number,
-                "data": form_data,
-                "status": "success"
-            }))
+            # 注意：不再在这里发布处理完成事件，避免重复事件
+            # 事件应该在Controller层根据具体业务逻辑决定是否发布
         except Exception as e:
             logger.error(f"Error in _on_ltr_application_confirmed: {e}")
             import traceback

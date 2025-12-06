@@ -458,29 +458,51 @@ class ProjectCreatorController:
         status = data.get("status")
         project_path = data.get("project_path")  # 获取项目路径
 
-        # 如果没有DL编号，不执行任何操作
-        if not dl_number:
-            logger.warning("LTR application processed but no DL number provided, skipping Matrix editor opening")
+        logger.debug(f"_on_ltr_application_processed called with dl_number={dl_number}, status={status}, project_path={project_path}")
+
+        # 如果没有DL编号或状态不是success，不执行任何操作
+        if not dl_number or not dl_number.strip() or status != "success":
+            logger.warning(f"LTR application processed but no valid DL number provided or status not success, dl_number={dl_number}, status={status}")
             return
 
-        if status == "success":
-            logger.info(f"LTR application processed successfully: {dl_number}")
-            # 使用QTimer延迟执行UI操作，避免在事件处理中直接操作UI
-            from PyQt5.QtCore import QTimer
-            QTimer.singleShot(0, lambda: self._open_matrix_editor_with_ltr_number(dl_number, project_path))
-        else:
-            logger.error(f"LTR application processing failed: {dl_number}")
+        logger.info(f"LTR application processed successfully: {dl_number}")
+        # 更新主窗口标题显示项目信息
+        if self.parent_view:
+            logger.debug(f"Setting main window title to: TestFlow Manager - 项目: {dl_number}")
+            self.parent_view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
+            logger.debug(f"Main window title after setting: {self.parent_view.windowTitle()}")
+        # 使用QTimer延迟执行UI操作，避免在事件处理中直接操作UI
+        from PyQt5.QtCore import QTimer
+        QTimer.singleShot(0, lambda: self._open_matrix_editor_with_ltr_number(dl_number, project_path))
 
     def _open_matrix_editor_with_ltr_number(self, dl_number, project_path=None):
         """
-        打开带有LTR编号标题的Matrix编辑器窗口
+        更新Matrix编辑器中的LTR编号和项目数据
         
         Args:
             dl_number: LTR编号
             project_path: 项目路径
         """
         try:
-            logger.info(f"Attempting to open Matrix editor for LTR: {dl_number}")
+            logger.info(f"Updating Matrix editor with LTR number: {dl_number}")
+            logger.debug(f"Received dl_number: {dl_number}, project_path: {project_path}")
+            
+            # 如果dl_number为空，尝试从application_data.json文件中读取
+            if not dl_number and project_path:
+                logger.debug("dl_number is empty, trying to read from application_data.json")
+                try:
+                    # 构造application_data.json文件路径
+                    json_file_path = os.path.join(project_path, "application_data.json")
+                    if os.path.exists(json_file_path):
+                        import json
+                        with open(json_file_path, 'r', encoding='utf-8') as f:
+                            project_data = json.load(f)
+                            dl_number = project_data.get("DL", "")
+                            logger.debug(f"Read dl_number from application_data.json: {dl_number}")
+                    else:
+                        logger.warning(f"application_data.json not found at: {json_file_path}")
+                except Exception as e:
+                    logger.error(f"Error reading dl_number from application_data.json: {e}")
             
             # 设置LTR编号到Matrix控制器
             if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
@@ -489,12 +511,15 @@ class ProjectCreatorController:
                 
             # 如果提供了项目路径，则设置项目路径
             if project_path and dl_number:
+                logger.debug(f"Project path provided: {project_path}")
                 # 设置项目路径到状态管理器
                 state_manager.set_state("current_project", project_path)
                 
                 # 更新主窗口标题显示项目信息
                 if self.parent_view:
+                    logger.debug(f"Setting main window title in _open_matrix_editor_with_ltr_number to: TestFlow Manager - 项目: {dl_number}")
                     self.parent_view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
+                    logger.debug(f"Main window title after setting in _open_matrix_editor_with_ltr_number: {self.parent_view.windowTitle()}")
                 
                 # 根据DL编号构造项目根目录路径
                 from src.core.config_manager import config_manager
@@ -516,7 +541,11 @@ class ProjectCreatorController:
                     logger.info(f"Loaded LTR project data result: {loaded_data is not None}")
                     logger.info(f"Project data file path from LTR service: {self.ltr_integration_service.project_data_file_path}")
                 else:
-                    logger.warning(f"No JSON files found in constructed path: {project_root_path}")
+                    # 直接使用传入的project_path加载项目数据
+                    logger.info(f"No JSON files found in constructed path, using provided project_path: {project_path}")
+                    loaded_data = self.ltr_integration_service.load_ltr_project(project_path)
+                    logger.info(f"Loaded LTR project data result: {loaded_data is not None}")
+                    logger.info(f"Project data file path from LTR service: {self.ltr_integration_service.project_data_file_path}")
                 
                 # 只在LTR集成服务未设置或需要更新时才设置
                 if self.matrix_project_controller.ltr_integration_service != self.ltr_integration_service:
@@ -526,29 +555,41 @@ class ProjectCreatorController:
                 project_data_file_path = self.ltr_integration_service.project_data_file_path
                 logger.info(f"Project data file path to set: {project_data_file_path}")
                 
-                # 只在路径存在且服务属性未设置时才设置
-                if (project_data_file_path and 
-                    hasattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path') and
-                    getattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path', None) != project_data_file_path):
+                # 设置Matrix控制器中的项目数据文件路径
+                if project_data_file_path:
                     self.matrix_project_controller.matrix_controller.service.project_data_file_path = project_data_file_path
                     logger.info(f"Set project data file path {project_data_file_path} to Matrix service")
+                    
+                    # 同时设置Matrix控制器本身的属性，确保在显示基本信息对话框时能正确获取
+                    self.matrix_project_controller.matrix_controller.project_data_file_path = project_data_file_path
+                    logger.info(f"Set project data file path {project_data_file_path} to Matrix controller")
+                    
+                    # 打印调试信息，确保路径正确传递
+                    logger.debug(f"确保Matrix控制器中的项目数据文件路径已正确设置: {self.matrix_project_controller.matrix_controller.project_data_file_path}")
                 elif not project_data_file_path:
                     logger.warning("Failed to set project data file path. Path is None or empty")
                 else:
                     logger.debug("Project data file path already set correctly, skipping")
                 
                 logger.debug(f"Set project path {project_path} to Matrix controller via LTR integration service")
+                
+                # 初始化Matrix数据
+                if self.matrix_project_controller.ltr_integration_service and self.matrix_project_controller.ltr_integration_service.is_project_loaded():
+                    logger.debug("Initializing Matrix with LTR data")
+                    self.matrix_project_controller.matrix_controller.initialize_with_ltr_data()
+                    
+                    # 更新Matrix视图以反映新数据
+                    if (hasattr(self.parent_view, 'matrix_dialog') and 
+                        self.parent_view.matrix_dialog is not None):
+                        self.parent_view.matrix_dialog._update_table()
             else:
                 logger.warning("No project path or DL number provided")
-            
-            # 使用QTimer延迟执行UI操作，确保在事件循环中安全执行
-            from PyQt5.QtCore import QTimer
-            QTimer.singleShot(0, lambda: self._safe_open_matrix_dialog(dl_number))
+                
         except Exception as e:
-            logger.error(f"Error preparing to open Matrix editor with LTR number: {e}", exc_info=True)
+            logger.error(f"Error updating Matrix editor with LTR number: {e}", exc_info=True)
             # 显示错误消息给用户
             if self.parent_view:
-                QMessageBox.critical(self.parent_view, "错误", f"准备打开Matrix编辑器时出错: {str(e)}")
+                QMessageBox.critical(self.parent_view, "错误", f"更新Matrix编辑器时出错: {str(e)}")
 
     def _safe_open_matrix_dialog(self, dl_number):
         """

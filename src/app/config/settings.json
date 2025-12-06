@@ -11,7 +11,7 @@
         "position_y": 100
     },
     "logging": {
-        "level": "DEBUG",
+        "level": "INFO",
         "file": "logs/testflow.log"
     },
     "ltr": {

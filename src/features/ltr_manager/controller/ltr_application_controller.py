@@ -139,8 +139,9 @@ class LTRApplicationController:
                 logger.info("User accepted the application dialog")
 
                 # 发布事件而不是直接返回数据
+                # 注意：对于新申请单，dl_number是空的，因为还没有分配编号
                 event_dispatcher.dispatch("ltr.application.confirmed", {
-                    "dl_number": self.application_data.dl_number,
+                    "dl_number": self.application_data.dl_number,  # 可能为空
                     "data": processed_data,
                     "controller": self
                 })
@@ -228,7 +229,7 @@ class LTRApplicationController:
                         QMessageBox.information(parent, "成功", f"项目文件夹已成功创建！\n路径: {project_result}")
                         
                         # 只有在有有效的LTR编号时才发布事件
-                        if result.get('ltr_number'):
+                        if result.get('ltr_number') and result['ltr_number'].strip():
                             # 发布事件通知项目创建成功，携带项目路径信息
                             event_dispatcher.dispatch("ltr.application.processed", {
                                 "dl_number": result['ltr_number'],
@@ -243,15 +244,27 @@ class LTRApplicationController:
                         QMessageBox.warning(parent, "警告", "项目文件夹创建失败")
                         
                         # 只有在有有效的LTR编号时才发布事件
-                        if result.get('ltr_number'):
+                        if result.get('ltr_number') and result['ltr_number'].strip():
                             # 发布事件通知项目创建失败
                             event_dispatcher.dispatch("ltr.application.processed", {
                                 "dl_number": result['ltr_number'],
                                 "status": "failed",
-                                "error": "项目文件夹创建失败"
+                                "error": "项目文件夹创建失败",
+                                "project_path": None  # 添加project_path字段
                             })
                         else:
                             logger.warning("LTR number is empty, not dispatching failure event")
+            # 只在成功申请LTR编号的情况下返回成功结果
+            elif result.get("success"):
+                # LTR编号申请成功但用户选择不创建项目文件夹
+                # 仍然需要发布事件通知其他组件
+                event_dispatcher.dispatch("ltr.application.processed", {
+                    "dl_number": result.get('ltr_number', ''),
+                    "status": "success",
+                    "application_data": form_data,
+                    "project_path": None  # 添加project_path字段，即使为None
+                })
+                
             return result
 
         except Exception as e:
@@ -259,12 +272,13 @@ class LTRApplicationController:
             logger.error(f"处理LTR编号申请时发生错误: {e}", exc_info=True)
             # 只有在有有效的DL编号时才发布事件
             dl_number = form_data.get("dl_number", "")
-            if dl_number:
+            if dl_number and dl_number.strip():
                 # 发布事件通知项目创建失败
                 event_dispatcher.dispatch("ltr.application.processed", {
                     "dl_number": dl_number,
                     "status": "failed",
-                    "error": str(e)
+                    "error": str(e),
+                    "project_path": None  # 添加project_path字段
                 })
             else:
                 logger.warning("DL number is empty, not dispatching error event")

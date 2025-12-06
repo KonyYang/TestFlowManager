@@ -18,6 +18,12 @@ class MatrixController:
         self.service = MatrixService()
         # 初始化导出控制器
         self.export_controller = ExportController(self.service.data_model)
+        # 初始化LTR集成服务
+        self.ltr_integration_service = None
+        # 初始化parent_view属性
+        self.parent_view = parent
+        # 初始化项目数据文件路径
+        self.project_data_file_path = None
 
     def show_matrix_dialog(self):
         """显示Matrix编辑对话框 - Controller层协调"""
