@@ -1,7 +1,8 @@
 # src/features/matrix/view/matrix_dialog.py
 from PyQt5.QtWidgets import (
     QWidget, QMessageBox, QFileDialog, QVBoxLayout, QHBoxLayout, QPushButton,
-    QTableWidget, QTableWidgetItem, QHeaderView, QInputDialog, QMenu, QAction
+    QTableWidget, QTableWidgetItem, QHeaderView, QInputDialog, QMenu, QAction,
+    QDialog
 )
 from PyQt5.QtCore import Qt, QItemSelection, QItemSelectionModel, QTimer
 from PyQt5.QtGui import QCursor
@@ -44,6 +45,15 @@ class MatrixDialog(QWidget):
         # 在初始化后自动导入项目中的matrix.xlsx文件（如果存在）
         self._auto_import_matrix_from_project()
 
+    # 添加exec_方法以兼容QDialog的使用方式
+    def exec_(self):
+        """
+        兼容QDialog的exec_方法
+        对于QWidget，显示窗口并返回Accepted
+        """
+        self.show()
+        return QDialog.Accepted
+
     def _setup_ui(self):
         """设置用户界面 - View层渲染"""
         layout = QVBoxLayout(self)
@@ -53,17 +63,15 @@ class MatrixDialog(QWidget):
         button_layout = QHBoxLayout()
         self.import_btn = QPushButton("导入Matrix")
         self.standardize_and_fill_btn = QPushButton("标准化填充Matrix")
-        self.find_btn = QPushButton("查找")
-        self.export_btn = QPushButton("生成TestStatus表")
-        # 添加更新标准版本按钮
+        self.basic_info_btn = QPushButton("基本信息")
+        self.generate_test_status_btn = QPushButton("生成Test Status")
         self.update_standard_versions_btn = QPushButton("更新标准版本")
-        # 添加生成Test Record按钮
         self.generate_test_record_btn = QPushButton("生成Test Record")
 
         button_layout.addWidget(self.import_btn)
         button_layout.addWidget(self.standardize_and_fill_btn)
-        button_layout.addWidget(self.find_btn)
-        button_layout.addWidget(self.export_btn)
+        button_layout.addWidget(self.basic_info_btn)
+        button_layout.addWidget(self.generate_test_status_btn)
         button_layout.addWidget(self.update_standard_versions_btn)
         button_layout.addWidget(self.generate_test_record_btn)
 
@@ -95,11 +103,9 @@ class MatrixDialog(QWidget):
         # 连接信号
         self.import_btn.clicked.connect(self._import_from_spec)
         self.standardize_and_fill_btn.clicked.connect(self._standardize_and_fill_matrix)
-        self.find_btn.clicked.connect(self._find_content)
-        self.export_btn.clicked.connect(self._export_to_excel)
-        # 连接更新标准版本按钮
+        self.basic_info_btn.clicked.connect(self._show_basic_info_dialog)
+        self.generate_test_status_btn.clicked.connect(self._generate_test_status)
         self.update_standard_versions_btn.clicked.connect(self._update_standard_versions)
-        # 连接生成Test Record按钮
         self.generate_test_record_btn.clicked.connect(self._generate_test_record)
 
         layout.addLayout(button_layout)
@@ -561,16 +567,48 @@ class MatrixDialog(QWidget):
             logger.error(f"处理表格项变更时出错: {e}", exc_info=True)
 
     def _sync_table_to_model(self):
-        """同步表格数据到数据模型"""
+        """同步表格数据到模型 - View层数据同步"""
         try:
-            # 移除同步表格数据的详细日志
+            logger.debug("开始同步表格数据到模型")
+            # 同步表头
+            headers = []
+            for col in range(self.table_widget.columnCount()):
+                header_item = self.table_widget.horizontalHeaderItem(col)
+                headers.append(header_item.text() if header_item else f"Column {col}")
+            self.service.data_model.headers = headers
+            
+            # 同步数据行
+            rows = []
             for row in range(self.table_widget.rowCount()):
+                row_data = []
                 for col in range(self.table_widget.columnCount()):
                     item = self.table_widget.item(row, col)
-                    if item:
-                        self.service.set_cell_value(row, col, item.text())
-                    else:
-                        self.service.set_cell_value(row, col, "")
+                    row_data.append(item.text() if item else "")
+                rows.append(row_data)
+            self.service.data_model.rows = rows
+            
+            # 同步合并单元格信息
+            self._save_merged_cells_info()
+            
+            # 确保导出数据模型也是最新的
+            self.service._sync_table_to_model()
+            
+            # 添加调试信息，显示同步后的数据概况
+            try:
+                rows = self.service.data_model.rows
+                headers = self.service.data_model.headers
+                logger.debug(f"同步后数据概况 - 表头数量: {len(headers)}, 行数: {len(rows)}")
+                if headers:
+                    logger.debug(f"表头内容: {headers}")
+                if rows:
+                    logger.debug(f"同步后第一行数据: {rows[0][:5] if len(rows[0]) > 5 else rows[0]}")  # 只显示前5个元素
+                    logger.debug(f"同步后前3行:")
+                    for i, row in enumerate(rows[:3]):
+                        logger.debug(f"  第{i+1}行: {row}")
+                    if len(rows) > 3:
+                        logger.debug(f"  ... (还有{len(rows)-3}行)")
+            except Exception as e:
+                logger.error(f"打印数据模型摘要时出错: {e}")
         except Exception as e:
             logger.error(f"同步表格数据到模型时出错: {e}", exc_info=True)
 
@@ -656,26 +694,63 @@ class MatrixDialog(QWidget):
             logger.error(f"标准化填充Matrix时出错: {e}", exc_info=True)
             QMessageBox.warning(self, "错误", f"标准化填充Matrix时出错: {str(e)}")
 
-    def _find_content(self):
-        """查找内容 - View层事件触发"""
-        # 弹出输入对话框让用户输入查找内容
-        search_text, ok = QInputDialog.getText(self, "查找", "请输入要查找的内容:")
-        if ok and search_text:
+    def _show_basic_info_dialog(self):
+        """显示基本信息对话框 - View层事件触发"""
+        try:
+            logger.debug("开始显示基本信息对话框")
             # 同步表格数据到模型
             self._sync_table_to_model()
-            # 调用服务层查找
-            results = self.service.find_by_content(search_text)
-            if results:
-                # 显示查找结果
-                msg = f"找到 {len(results)} 个匹配项:\n"
-                for result in results:
-                    msg += f"第{result['row']+1}行, {result['header']}列: {result['value']}\n"
-                QMessageBox.information(self, "查找结果", msg)
+            
+            # 获取项目数据文件路径
+            project_data_file_path = getattr(self.service, 'project_data_file_path', None)
+            logger.debug(f"从service获取到的项目数据文件路径: {project_data_file_path}")
+            
+            # 如果service中没有项目数据文件路径，则尝试从状态管理器获取当前项目路径并构造文件路径
+            if not project_data_file_path:
+                logger.debug("service中没有项目数据文件路径，尝试从状态管理器获取")
+                current_project = state_manager.get_state("current_project")
+                logger.debug(f"从状态管理器获取到的当前项目路径: {current_project}")
+                
+                if current_project and os.path.exists(current_project):
+                    # 查找项目中的JSON文件
+                    try:
+                        json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
+                        logger.debug(f"在项目目录中找到的JSON文件: {json_files}")
+                        
+                        if json_files:
+                            # 使用第一个JSON文件
+                            project_data_file_path = os.path.join(current_project, json_files[0])
+                            logger.debug(f"构造的项目数据文件路径: {project_data_file_path}")
+                    except Exception as e:
+                        logger.error(f"查找项目中的JSON文件时出错: {e}")
+            
+            # 如果有项目数据文件路径，则读取数据并显示基本信息对话框
+            if project_data_file_path and os.path.exists(project_data_file_path):
+                logger.debug(f"项目数据文件存在: {project_data_file_path}")
+                try:
+                    import json
+                    with open(project_data_file_path, 'r', encoding='utf-8') as f:
+                        project_data = json.load(f)
+                    
+                    logger.debug(f"成功读取项目数据: {project_data}")
+                    # 显示基本信息对话框，同时传入项目数据文件路径
+                    from src.features.main_window.view.basic_info_dialog import BasicInfoDialog
+                    dialog = BasicInfoDialog(project_data, self)
+                    # 将项目数据文件路径设置到dialog对象上
+                    dialog.project_data_file_path = project_data_file_path
+                    dialog.exec_()
+                except Exception as e:
+                    logger.error(f"读取或显示项目基本信息时出错: {e}")
+                    QMessageBox.warning(self, "错误", f"无法读取项目基本信息: {str(e)}")
             else:
-                QMessageBox.information(self, "查找结果", "未找到匹配项")
+                logger.warning(f"未找到项目基本信息文件或项目尚未打开: {project_data_file_path}")
+                QMessageBox.information(self, "提示", "未找到项目基本信息文件或项目尚未打开")
+        except Exception as e:
+            logger.error(f"显示基本信息对话框时出错: {e}")
+            QMessageBox.warning(self, "错误", f"显示基本信息对话框时出错: {str(e)}")
 
-    def _export_to_excel(self):
-        """导出Test Status表到Excel - View层事件触发"""
+    def _generate_test_status(self):
+        """生成Test Status表 - View层事件触发"""
         logger.debug("开始执行导出Test Status表到Excel操作")
         try:
             # 直接设置导出类型为test_status
@@ -969,3 +1044,28 @@ class MatrixDialog(QWidget):
                 logger.debug(f"项目中没有matrix.xlsx文件: {matrix_file_path}")
         except Exception as e:
             logger.error(f"自动导入matrix.xlsx文件时出错: {e}")
+
+    def _export_current_data_as_default(self, matrix_file_path):
+        """
+        将当前Matrix数据导出为默认的matrix.xlsx文件
+        
+        Args:
+            matrix_file_path (str): 要导出的文件路径
+        """
+        try:
+            logger.debug(f"将当前Matrix数据导出为默认文件: {matrix_file_path}")
+            
+            # 确保目录存在
+            directory = os.path.dirname(matrix_file_path)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+                
+            # 导出当前数据
+            success = self.service.export_to_excel(matrix_file_path, "matrix_excel")
+            
+            if success:
+                logger.info(f"成功将当前Matrix数据导出为默认文件: {matrix_file_path}")
+            else:
+                logger.warning(f"导出默认matrix.xlsx文件失败: {matrix_file_path}")
+        except Exception as e:
+            logger.error(f"导出默认matrix.xlsx文件时出错: {e}")

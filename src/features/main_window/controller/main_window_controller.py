@@ -245,7 +245,6 @@ class MainWindowController:
             # 更新状态
             self.service.update_status(f"已打开文件: {file_path}")
 
-            # TODO: 实际的文件打开逻辑
             logger.info(f"File opened successfully: {file_path}")
             return True
         except Exception as e:
@@ -266,7 +265,9 @@ class MainWindowController:
         try:
             logger.debug(f"Handling save file request: {file_path}")
 
-            # TODO: 实际的文件保存逻辑
+            # 执行Matrix数据导出
+            self._export_matrix_on_save()
+
             logger.info(f"File saved successfully: {file_path}")
 
             # 更新状态
@@ -276,6 +277,143 @@ class MainWindowController:
             logger.error(f"Failed to save file '{file_path}': {e}")
             self.service.update_status(f"保存文件失败: {file_path}")
             return False
+
+    def _export_matrix_on_save(self) -> None:
+        """在保存时导出Matrix数据"""
+        try:
+            import time
+            from PyQt5.QtWidgets import QFileDialog
+            
+            # 获取当前项目路径和LTR编号
+            current_project = state_manager.get_state("current_project")
+            ltr_number = None
+            if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
+                ltr_number = self.matrix_project_controller.matrix_controller.ltr_number
+            
+            # 设置默认路径和文件名
+            default_path = ""
+            if current_project and os.path.exists(current_project):
+                # 如果已打开项目，设置默认路径为项目根目录
+                default_path = current_project
+                # 文件名使用LTR编号
+                if ltr_number:
+                    default_filename = f"{ltr_number}_matrix.xlsx"
+                else:
+                    default_filename = "matrix.xlsx"
+            else:
+                # 如果未打开项目，使用时间戳作为文件名
+                timestamp = time.strftime("%Y%m%d_%H%M%S")
+                default_filename = f"matrix_{timestamp}.xlsx"
+            
+            # 构造完整的默认文件路径
+            default_file_path = os.path.join(default_path, default_filename) if default_path else default_filename
+            
+            # 弹出文件保存对话框
+            file_path, _ = QFileDialog.getSaveFileName(
+                self.view, 
+                "保存Matrix文件", 
+                default_file_path, 
+                "Excel Files (*.xlsx)"
+            )
+            
+            if not file_path:
+                logger.info("用户取消了文件保存操作")
+                return
+                
+            # 通过Matrix控制器导出数据
+            if self.matrix_project_controller:
+                logger.debug(f"导出Matrix数据到: {file_path}")
+                # 首先同步视图中的数据到模型
+                if hasattr(self.view, 'matrix_dialog') and self.view.matrix_dialog:
+                    self.view.matrix_dialog._sync_table_to_model()
+                    
+                    # 直接使用MatrixEditorExcelExportService导出，确保使用最新同步的数据
+                    try:
+                        from src.features.matrix.service.export.matrix_export_service import MatrixEditorExcelExportService
+                        
+                        # 获取已同步的数据模型
+                        matrix_service = self.matrix_project_controller.matrix_controller.service
+                        data_model = matrix_service.data_model
+                        
+                        # 打印同步后的实际数据
+                        logger.debug(f"获取已同步的数据模型: headers={data_model.headers}, rows_count={len(data_model.rows)}")
+                        logger.debug(f"同步后的前3行数据: {data_model.rows[:3] if len(data_model.rows) >= 3 else data_model.rows}")
+                        
+                        # 创建导出服务实例并执行导出
+                        export_service = MatrixEditorExcelExportService(data_model)
+                        logger.debug(f"创建导出服务实例并执行导出")
+                        result = export_service.export_to_excel(file_path)
+                        
+                        if result:
+                            logger.info(f"成功导出Matrix数据到: {file_path}")
+                        else:
+                            logger.error(f"导出Matrix数据失败: 未知错误")
+                    except Exception as e:
+                        logger.error(f"导出Matrix数据时出错: {e}", exc_info=True)
+                else:
+                    logger.warning("Matrix对话框不可用，无法导出数据")
+            else:
+                logger.warning("Matrix项目控制器不可用，无法导出数据")
+                
+        except Exception as e:
+            logger.error(f"保存时导出Matrix数据时出错: {e}", exc_info=True)
+
+    def _export_matrix_on_close(self) -> None:
+        """在关闭时导出Matrix数据到项目文件夹"""
+        try:
+            # 获取当前项目路径
+            current_project = state_manager.get_state("current_project")
+            if not current_project:
+                logger.debug("没有当前项目，跳过Matrix导出")
+                return
+                
+            # 检查项目路径是否存在
+            if not os.path.exists(current_project):
+                logger.warning(f"项目路径不存在，无法导出Matrix: {current_project}")
+                return
+                
+            # 构造matrix.xlsx文件路径
+            matrix_file_path = os.path.join(current_project, "matrix.xlsx")
+            
+            # 通过Matrix控制器导出数据
+            if self.matrix_project_controller:
+                logger.debug(f"导出Matrix数据到: {matrix_file_path}")
+                # 首先同步视图中的数据到模型
+                if hasattr(self.view, 'matrix_dialog') and self.view.matrix_dialog:
+                    logger.debug("同步表格数据到模型")
+                    self.view.matrix_dialog._sync_table_to_model()
+                    # 添加调试信息，显示当前模型中的数据概况
+                    try:
+                        data_model = self.matrix_project_controller.matrix_controller.service.data_model
+                        rows = data_model.rows
+                        headers = data_model.headers
+                        logger.debug(f"数据模型概况 - 表头数量: {len(headers)}, 行数: {len(rows)}")
+                        if headers:
+                            logger.debug(f"表头内容: {headers}")
+                        if rows:
+                            logger.debug(f"数据模型前3行:")
+                            for i, row in enumerate(rows[:3]):
+                                logger.debug(f"  第{i+1}行: {row}")
+                            if len(rows) > 3:
+                                logger.debug(f"  ... (还有{len(rows)-3}行)")
+                    except Exception as e:
+                        logger.error(f"获取数据模型信息时出错: {e}")
+                    
+                result = self.matrix_project_controller.export_matrix_to_excel(matrix_file_path)
+                # 检查result是否为字典类型，如果不是则包装成字典
+                if not isinstance(result, dict):
+                    result = {"success": result is True}
+                    
+                if result.get("success", False):
+                    logger.info(f"成功导出Matrix数据到: {matrix_file_path}")
+                else:
+                    error_msg = result.get("error", "未知错误")
+                    logger.error(f"导出Matrix数据失败: {error_msg}")
+            else:
+                logger.warning("Matrix项目控制器不可用，无法导出数据")
+                
+        except Exception as e:
+            logger.error(f"关闭时导出Matrix数据时出错: {e}", exc_info=True)
 
     def handle_new_file(self) -> bool:
         """
@@ -338,13 +476,145 @@ class MainWindowController:
 
             # 检查项目文件夹是否包含必要的文件
             json_files = [f for f in os.listdir(project_path) if f.endswith('.json')]
+            
+            # 如果没有找到JSON文件，则创建一个新的空白JSON文件
             if not json_files:
-                QMessageBox.warning(
-                    self.view,
-                    "无效项目",
-                    "所选文件夹不包含有效的项目文件（缺少JSON文件）"
-                )
-                return False
+                logger.info(f"在项目路径 {project_path} 中未找到JSON文件，开始创建新的application_data.json文件")
+                # 查找项目文件夹名称作为DL编号
+                dl_number = os.path.basename(project_path)
+                logger.info(f"使用文件夹名称作为DL编号: {dl_number}")
+                
+                # 创建空白的application_data.json文件
+                json_file_path = os.path.join(project_path, "application_data.json")
+                
+                # 尝试从"Submitted Material"文件夹中查找包含"test request"关键字的.docx文件
+                # 首先查找以DL编号开头的子文件夹
+                dl_subfolder_path = None
+                # 对目录列表进行排序，确保每次遍历顺序一致
+                items = sorted(os.listdir(project_path))
+                for item in items:
+                    item_path = os.path.join(project_path, item)
+                    if os.path.isdir(item_path) and item.startswith(dl_number):
+                        dl_subfolder_path = item_path
+                        break
+                
+                # 如果找到了以DL编号开头的子文件夹，则在其中查找Submitted Material文件夹
+                submitted_material_path = None
+                if dl_subfolder_path:
+                    submitted_material_path = os.path.join(dl_subfolder_path, "Submitted Material")
+                    # 标准化路径分隔符
+                    submitted_material_path = os.path.normpath(submitted_material_path)
+                
+                # 注意：即使没有找到submitted_material_path，我们也继续执行后续逻辑
+                # 不再回退到项目根目录查找
+                
+                test_request_data = {}
+                
+                if submitted_material_path:
+                    logger.info(f"检查Submitted Material文件夹: {submitted_material_path}")
+                    if os.path.exists(submitted_material_path):
+                        logger.info(f"Submitted Material文件夹存在，开始搜索包含'test request'关键字的.docx文件")
+                        # 查找包含"test request"关键字的.docx文件
+                        # 改进搜索逻辑以匹配更多格式，如"E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx"
+                        docx_files = []
+                        for f in os.listdir(submitted_material_path):
+                            if f.lower().endswith('.docx'):
+                                # 检查文件名是否包含测试请求相关关键词
+                                fname_lower = f.lower()
+                                if 'test' in fname_lower and ('request' in fname_lower or 'test' in fname_lower):
+                                    docx_files.append(f)
+                                elif 'e-3718' in fname_lower and 'request' in fname_lower:
+                                    docx_files.append(f)
+                
+                        if docx_files:
+                            logger.info(f"找到 {len(docx_files)} 个匹配的.docx文件: {docx_files}")
+                            # 从第一个匹配的文件中提取信息
+                            # 使用 os.path.join 确保路径格式正确
+                            docx_file_path = os.path.join(submitted_material_path, docx_files[0])
+                            # 标准化路径分隔符
+                            docx_file_path = os.path.normpath(docx_file_path)
+                            logger.info(f"从文件中提取信息: {docx_file_path}")
+                            test_request_data = self._extract_info_from_test_request(docx_file_path)
+                            logger.info(f"提取到的数据: {test_request_data}")
+                        else:
+                            logger.info("在Submitted Material文件夹中未找到包含'test request'关键字的.docx文件")
+                    else:
+                        logger.info(f"Submitted Material文件夹不存在: {submitted_material_path}")
+                else:
+                    logger.info(f"未找到以DL编号'{dl_number}'开头的子文件夹，跳过查找Submitted Material文件夹并继续后续逻辑")
+                
+                # 加载完整的字段配置
+                from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
+                config_loader = LTRFieldConfigLoader()
+                field_mapping = config_loader.load_application_field_mapping()
+                
+                # 创建完整字段的数据结构
+                application_data = {}
+                
+                # 为每个字段设置默认值或从提取的数据中获取值
+                for field in field_mapping:
+                    key = field['key']
+                    # 特殊处理DL字段
+                    if key == "DL":
+                        application_data[key] = dl_number
+                    # 从提取的数据中获取值，如果没有则设为空字符串
+                    elif key in test_request_data:
+                        application_data[key] = test_request_data[key]
+                    else:
+                        # 默认值处理
+                        if key == "project_leader":
+                            # 从配置中获取默认的project_leader
+                            from src.core.config_manager import config_manager
+                            application_data[key] = config_manager.get("defaults.project_leader", "")
+                        elif key == "sub_contract":
+                            application_data[key] = "Yes"
+                        elif key == "test_result":
+                            application_data[key] = "In progress"
+                        elif key == "test_type":
+                            application_data[key] = "Partial Qualification"
+                        elif key == "lab_performing_the_tests":
+                            application_data[key] = "Dongguan"
+                        elif key == "condition_of_samples_when_received":
+                            application_data[key] = "Acceptable"
+                        elif key == "project_type":
+                            application_data[key] = "NPD"
+                        else:
+                            # 其他字段默认为空字符串
+                            application_data[key] = ""
+                
+                # 设置状态为new
+                application_data["status"] = "new"
+                application_data["error"] = ""
+                
+                # 如果有选中的文件路径，也加入进去
+                if 'selected_filename' in test_request_data:
+                    application_data['selected_filename'] = test_request_data['selected_filename']
+                else:
+                    application_data['selected_filename'] = ""
+                
+                # 确保file_path字段存在
+                application_data['file_path'] = test_request_data.get('file_path', '')
+                
+                # 保存空白JSON文件
+                try:
+                    with open(json_file_path, 'w', encoding='utf-8') as f:
+                        json.dump(application_data, f, ensure_ascii=False, indent=4)
+                    logger.info(f"Created new application_data.json file: {json_file_path}")
+                except Exception as e:
+                    logger.error(f"Failed to create application_data.json: {e}")
+                    QMessageBox.warning(
+                        self.view,
+                        "创建文件失败",
+                        f"无法创建项目数据文件: {str(e)}"
+                    )
+                    return False
+                
+                # 弹出更新基本信息对话框（使用专门的对话框）
+                logger.info("显示基本信息对话框供用户确认和编辑")
+                self._show_basic_info_dialog(application_data, json_file_path)
+                
+                # 重新加载JSON文件列表
+                json_files = ["application_data.json"]
 
             # 读取JSON文件以获取项目信息（特别是DL编号）
             dl_number = None
@@ -385,6 +655,74 @@ class MainWindowController:
             self.service.update_status("打开项目失败")
             QMessageBox.critical(self.view, "错误", f"打开项目失败: {str(e)}")
             return False
+
+    def _extract_info_from_test_request(self, docx_file_path: str) -> dict:
+        """
+        从测试申请文档中提取信息
+        
+        Args:
+            docx_file_path: .docx文件路径
+            
+        Returns:
+            提取的信息字典
+        """
+        try:
+            logger.info(f"开始从测试申请文档中提取信息: {docx_file_path}")
+            # 使用现有的LTRApplicationDataExtractor来提取信息
+            # 这样可以复用现有功能并保持代码一致性
+            from src.features.ltr_manager.service.application_processing.data_extractor import LTRApplicationDataExtractor
+            extractor = LTRApplicationDataExtractor()
+            extracted_data = extractor.extract_application_data(docx_file_path)
+            
+            # 检查是否有错误
+            if "error" in extracted_data:
+                logger.error(f"Failed to extract info from test request document: {extracted_data['error']}")
+                return {}
+            
+            # 移除不需要的字段
+            extracted_data.pop('file_path', None)
+            
+            logger.info(f"成功从测试申请文档中提取数据: {extracted_data}")
+            return extracted_data
+            
+        except Exception as e:
+            logger.error(f"Failed to extract info from test request document: {e}")
+            return {}
+
+    def _show_basic_info_dialog(self, project_data: dict, json_file_path: str):
+        """
+        显示项目基本信息对话框用于更新项目信息
+        
+        Args:
+            project_data: 项目数据
+            json_file_path: JSON文件路径
+        """
+        try:
+            logger.info("开始显示项目基本信息对话框")
+            # 使用项目基本信息对话框来更新项目信息
+            from src.features.main_window.view.basic_info_dialog import BasicInfoDialog
+            
+            # 创建并显示对话框
+            dialog = BasicInfoDialog(project_data, self.view)
+            result = dialog.exec_()
+            
+            # 如果用户确认了更改，保存到JSON文件
+            if result == BasicInfoDialog.Accepted:
+                modified_data = dialog.get_modified_data()
+                logger.info(f"用户确认了修改，准备保存数据到: {json_file_path}")
+                
+                # 保存到JSON文件
+                try:
+                    with open(json_file_path, 'w', encoding='utf-8') as f:
+                        json.dump(modified_data, f, ensure_ascii=False, indent=4)
+                    logger.info(f"Updated application_data.json: {json_file_path}")
+                except Exception as e:
+                    logger.error(f"Failed to update application_data.json: {e}")
+                    QMessageBox.warning(self.view, "保存失败", f"无法保存数据: {str(e)}")
+            
+        except Exception as e:
+            logger.error(f"Failed to show basic info dialog: {e}")
+            QMessageBox.warning(self.view, "错误", f"无法显示更新对话框: {str(e)}")
 
     def handle_about(self) -> None:
         """处理关于事件
@@ -435,6 +773,9 @@ class MainWindowController:
         try:
             logger.info("Shutting down MainWindowController")
 
+            # 在关闭前自动导出Matrix数据
+            self._export_matrix_on_close()
+            
             # 保存应用程序状态
             self.service.save_application_state()
             
@@ -449,3 +790,4 @@ class MainWindowController:
             logger.info("MainWindowController shut down successfully")
         except Exception as e:
             logger.error(f"Error during MainWindowController shutdown: {e}")
+

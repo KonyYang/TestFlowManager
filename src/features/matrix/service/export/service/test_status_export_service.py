@@ -61,7 +61,7 @@ class TestStatusTableExportService(BaseExportService):
 
     def _find_sample_row_index(self):
         """找到第一列包含'Sample'的行索引"""
-        rows = self.data_model.get_rows()
+        rows = self.data_model.rows
         for row_idx, row_data in enumerate(rows):
             if row_data and len(row_data) > 0 and "Sample" in str(row_data[0]):
                 logger.debug(f"在第{row_idx}行找到Sample")
@@ -71,9 +71,9 @@ class TestStatusTableExportService(BaseExportService):
         return len(rows)
 
     def _process_matrix_data(self, cutoff_row_index):
-        """处理矩阵数据，移除指定列并将Status列转换为最后一行"""
+        """处理矩阵数据，移除指定列"""
         # 原始表头
-        original_headers = self.data_model.get_headers()[:]
+        original_headers = self.data_model.headers[:]
         
         # 处理空表头的情况
         if not original_headers:
@@ -94,7 +94,7 @@ class TestStatusTableExportService(BaseExportService):
         
         # 处理数据行
         processed_rows = []
-        rows = self.data_model.get_rows()
+        rows = self.data_model.rows
         
         # 直接处理所有行，从第一行开始（索引0）
         start_row_index = 0

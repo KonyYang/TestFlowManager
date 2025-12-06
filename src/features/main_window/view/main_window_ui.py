@@ -1,7 +1,7 @@
 # src/features/main_window/view/main_window_ui.py
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMenuBar, QMenu, QAction, QStatusBar, QToolBar, QTabWidget, QApplication
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QScreen
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMenuBar, QMenu, QAction, QStatusBar, QToolBar, QTabWidget
+from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtGui import QScreen, QIcon
 
 from src.core import config_manager
 from src.core.logger import logger
@@ -15,6 +15,11 @@ from src.features.matrix.controller.matrix_project_controller import MatrixProje
 from src.features.matrix.view.matrix_dialog import MatrixDialog
 from src.features.matrix.controller.matrix_controller import MatrixController
 
+# 添加QApplication导入
+from PyQt5.QtWidgets import QApplication
+import os
+
+
 class MainWindow(QMainWindow):
     """
     主窗口类
@@ -27,6 +32,10 @@ class MainWindow(QMainWindow):
         # 初始化Matrix控制器
         self.matrix_project_controller = MatrixProjectController(self)
         self.matrix_controller = MatrixController(self)
+        # 保存窗口状态信息
+        self.is_custom_sized = False
+        self.custom_geometry = None
+        self.fullscreen_geometry = None
         self._setup_ui()
         self._setup_menu()
         self._setup_toolbar()
@@ -43,9 +52,13 @@ class MainWindow(QMainWindow):
         # 设置窗口属性
         self.setWindowTitle("TestFlow Manager")
         
+        # 设置窗口图标
+        self._set_window_icon()
+        
         # 设置窗口为满屏显示
         screen_geometry = QScreen.availableGeometry(QApplication.primaryScreen())
         self.setGeometry(screen_geometry)
+        self.fullscreen_geometry = screen_geometry
         
         # 应用全局字体
         global_font = FontUtils.get_scaled_font(9)  # 使用更小的基础字体大小
@@ -73,6 +86,23 @@ class MainWindow(QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
         
+    def _set_window_icon(self):
+        """设置窗口图标"""
+        try:
+            # 获取图标文件路径
+            icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "app", "resources", "icons", "app_icon.ico")
+            icon_path = os.path.normpath(icon_path)
+            
+            # 检查图标文件是否存在
+            if os.path.exists(icon_path):
+                icon = QIcon(icon_path)
+                self.setWindowIcon(icon)
+                logger.debug(f"成功设置窗口图标: {icon_path}")
+            else:
+                logger.warning(f"窗口图标文件不存在: {icon_path}")
+        except Exception as e:
+            logger.error(f"设置窗口图标时出错: {e}")
+        
     def _setup_matrix_tab(self):
         """设置Matrix编辑器标签页"""
         layout = QVBoxLayout(self.matrix_tab)
@@ -85,6 +115,50 @@ class MainWindow(QMainWindow):
     def showEvent(self, event):
         """窗口显示事件"""
         super().showEvent(event)
+
+    def changeEvent(self, event):
+        """处理窗口状态变化事件"""
+        if event.type() == event.WindowStateChange:
+            # 检查窗口状态变化
+            if self.isMaximized() and self.is_custom_sized:
+                # 如果是从自定义大小恢复到最大化状态，重置标志
+                self.is_custom_sized = False
+        super().changeEvent(event)
+
+    def resizeEvent(self, event):
+        """处理窗口大小变化事件"""
+        super().resizeEvent(event)
+        
+    def showNormal(self):
+        """重写showNormal方法，实现自定义窗口大小"""
+        if self.isMaximized():
+            # 如果当前是最大化状态，切换到自定义大小
+            self.is_custom_sized = True
+            if not self.custom_geometry:
+                # 计算30%大小的窗口几何信息
+                screen_geometry = QScreen.availableGeometry(QApplication.primaryScreen())
+                width = int(screen_geometry.width() * 0.3)
+                height = int(screen_geometry.height() * 0.3)
+                x = (screen_geometry.width() - width) // 2
+                y = (screen_geometry.height() - height) // 2
+                self.custom_geometry = QRect(x, y, width, height)
+            
+            # 设置为自定义大小
+            super().showNormal()
+            self.setGeometry(self.custom_geometry)
+        else:
+            # 如果已经是普通窗口状态，则恢复正常
+            super().showNormal()
+            
+    def showMaximized(self):
+        """重写showMaximized方法"""
+        self.is_custom_sized = False
+        super().showMaximized()
+        
+    def showMinimized(self):
+        """重写showMinimized方法"""
+        self.is_custom_sized = False
+        super().showMinimized()
 
     def _setup_menu(self) -> None:
         """设置菜单栏"""
@@ -126,11 +200,19 @@ class MainWindow(QMainWindow):
 
         file_menu.addSeparator()
 
+        # 添加导出窗口矩阵菜单项
+        export_matrix_action = QAction("导出窗口矩阵", self)
+        export_matrix_action.triggered.connect(self._on_export_matrix)
+        export_matrix_action.setFont(global_font)
+        file_menu.addAction(export_matrix_action)
+
         # 添加查看LTR菜单项
         view_ltr_action = QAction("查看LTR", self)
         view_ltr_action.triggered.connect(self._on_view_ltr)
         view_ltr_action.setFont(global_font)
         file_menu.addAction(view_ltr_action)
+
+        file_menu.addSeparator()
 
         exit_action = QAction("退出", self)
         exit_action.setShortcut("Ctrl+Q")
@@ -210,10 +292,14 @@ class MainWindow(QMainWindow):
     def _on_save_file(self) -> None:
         """处理保存文件事件"""
         logger.debug("Save file action triggered")
-        # TODO: 实现文件保存逻辑
-        # 这里只是一个示例，实际应该获取当前文件路径
-        file_path = "example.txt"  # 示例文件路径
-        if self.controller.handle_save_file(file_path):
+        # 调用控制器的保存方法，传入None表示使用默认保存逻辑
+        if self.controller.handle_save_file(None):
+            self._update_status()
+
+    def _on_export_matrix(self) -> None:
+        """处理导出窗口矩阵事件"""
+        logger.debug("Export matrix action triggered")
+        if self.matrix_controller.handle_export_matrix():
             self._update_status()
 
     def _on_exit(self) -> None:
@@ -242,3 +328,4 @@ class MainWindow(QMainWindow):
         logger.info("MainWindow closing")
         self.controller.shutdown()
         event.accept()
+

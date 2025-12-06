@@ -1,27 +1,32 @@
 # src/features/matrix/controller/matrix_controller.py
 from src.features.matrix.service.matrix_service import MatrixService
-from src.features.matrix.view.matrix_dialog import MatrixDialog
+from src.features.matrix.service.export.controller.export_controller import ExportController
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from src.core.logger import logger
+from src.features.matrix.view.matrix_dialog import MatrixDialog
+import os
 
 
 class MatrixController:
     """Matrix控制器 - Controller层"""
 
-    def __init__(self, parent_view):
-        self.parent_view = parent_view
+    def __init__(self, parent=None):
+        self.parent = parent
         self.service = MatrixService()
-        # 添加对LTR项目集成服务的支持
-        self.ltr_integration_service = None
-        # 添加对LTR编号的跟踪
-        self.ltr_number = None
+        # 初始化导出控制器
+        self.export_controller = ExportController(self.service.data_model)
 
     def show_matrix_dialog(self):
         """显示Matrix编辑对话框 - Controller层协调"""
         try:
             logger.debug("Creating MatrixDialog instance")
             dialog = MatrixDialog(self.parent_view, self.service, self.ltr_number)
-            # 移除MatrixDialog创建和执行的详细日志
-            dialog.exec_()
+            # 检查dialog是否具有exec_方法，如果没有则使用show方法
+            if hasattr(dialog, 'exec_'):
+                dialog.exec_()
+            else:
+                # 对于QWidget类型的dialog，使用show方法
+                dialog.show()
             logger.debug("MatrixDialog execution completed")
         except Exception as e:
             logger.error(f"Error showing matrix dialog: {e}", exc_info=True)
@@ -115,3 +120,92 @@ class MatrixController:
             ltr_number (str): LTR编号
         """
         self.ltr_number = ltr_number
+
+    def handle_export_matrix(self):
+        """
+        处理导出窗口矩阵事件
+        
+        Returns:
+            bool: 是否导出成功
+        """
+        try:
+            # 同步表格数据到模型
+            if self.parent and hasattr(self.parent, 'matrix_dialog'):
+                self.parent.matrix_dialog._sync_table_to_model()
+            
+            # 获取当前项目路径作为默认保存路径
+            from src.core.state_manager import state_manager
+            current_project = state_manager.get_state("current_project")
+            
+            # 构造默认文件名
+            if current_project and os.path.exists(current_project):
+                default_filename = os.path.join(current_project, "matrix_export.xlsx")
+            else:
+                default_filename = "matrix_export.xlsx"
+                
+            # 弹出文件保存对话框
+            file_path, _ = QFileDialog.getSaveFileName(
+                self.parent if self.parent else None,
+                "导出窗口矩阵",
+                default_filename,
+                "Excel Files (*.xlsx)"
+            )
+            
+            if file_path:
+                # 更新导出控制器的数据模型
+                self.export_controller.update_data_model(self.service.data_model)
+                
+                # 执行导出操作
+                success = self.export_controller.export_by_type(file_path, "matrix_excel")
+                
+                if success:
+                    QMessageBox.information(
+                        self.parent if self.parent else None,
+                        "成功",
+                        "窗口矩阵已成功导出到Excel"
+                    )
+                    return True
+                else:
+                    # 检查文件是否被占用
+                    try:
+                        # 尝试以独占模式打开文件
+                        with open(file_path, 'r+b') as f:
+                            pass
+                        # 如果能打开，说明是其他问题
+                        QMessageBox.warning(
+                            self.parent if self.parent else None,
+                            "错误",
+                            "导出失败，请检查文件路径或权限"
+                        )
+                    except PermissionError:
+                        # 文件被其他程序占用
+                        QMessageBox.warning(
+                            self.parent if self.parent else None,
+                            "错误",
+                            "导出失败，文件已被其他程序占用（可能已在Excel中打开），请关闭文件后重试"
+                        )
+                    except FileNotFoundError:
+                        # 文件不存在，应该是其他问题
+                        QMessageBox.warning(
+                            self.parent if self.parent else None,
+                            "错误",
+                            "导出失败，请检查文件路径是否正确"
+                        )
+                    except Exception:
+                        # 其他未知错误
+                        QMessageBox.warning(
+                            self.parent if self.parent else None,
+                            "错误",
+                            "导出失败，发生未知错误"
+                        )
+                    
+            return False
+        except Exception as e:
+            from src.core.logger import logger
+            logger.error(f"导出窗口矩阵时出错: {e}", exc_info=True)
+            QMessageBox.warning(
+                self.parent if self.parent else None,
+                "错误",
+                f"导出过程中发生异常: {str(e)}"
+            )
+            return False

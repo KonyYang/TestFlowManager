@@ -492,6 +492,10 @@ class ProjectCreatorController:
                 # 设置项目路径到状态管理器
                 state_manager.set_state("current_project", project_path)
                 
+                # 更新主窗口标题显示项目信息
+                if self.parent_view:
+                    self.parent_view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
+                
                 # 根据DL编号构造项目根目录路径
                 from src.core.config_manager import config_manager
                 default_project_path = config_manager.get("paths.default_project_path", "D:\\TestFlowManager\\Projects")

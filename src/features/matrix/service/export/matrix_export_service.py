@@ -1,28 +1,32 @@
 from src.features.matrix.model.matrix_data import MatrixData
 from src.core.logger import logger
+from src.features.matrix.service.export.service.base_export_service import BaseExportService
 # 导入Excel格式化服务
 from src.features.matrix.service.export.service.excel_formatting_service import ExcelFormattingService
+from openpyxl import Workbook
 
 
-class MatrixEditorExcelExportService:
+class MatrixEditorExcelExportService(BaseExportService):
     """Matrix编辑器Excel导出服务 - 处理Matrix编辑器内容导出到Excel的功能"""
 
     def __init__(self, data_model: MatrixData):
-        self.data_model = data_model
+        super().__init__(data_model)
         self.merged_cells_info = []
         # 创建格式化服务实例
         self.formatting_service = ExcelFormattingService()
 
-    def export_matrix_to_excel(self, file_path):
-        """将Matrix编辑器内容导出到Excel - Service层持久化功能"""
+    def export_to_excel(self, file_path):
+        """
+        将Matrix编辑器内容导出到Excel - Service层持久化功能
+        """
         try:
             # 创建工作簿
-            from openpyxl import Workbook
             wb = Workbook()
             ws = wb.active
 
             # 先添加数据行（不包括表头）
-            for row_idx, row_data in enumerate(self.data_model.get_rows()):
+            # 直接访问MatrixData类的rows属性
+            for row_idx, row_data in enumerate(self.data_model.rows):
                 for col_idx, cell_value in enumerate(row_data):
                     ws.cell(row=row_idx + 1, column=col_idx + 1, value=cell_value)
             
@@ -72,12 +76,7 @@ class MatrixEditorExcelExportService:
             self.formatting_service.apply_background_fill(ws, rows=[1], cols=[1])
 
             # 保存文件
-            wb.save(file_path)
-            return True
-        except PermissionError:
-            # 文件被其他程序占用（如Excel）
-            logger.error(f"导出Excel失败: 文件被占用，可能已在Excel中打开")
-            return False
+            return self._save_workbook_safely(wb, file_path)
         except Exception as e:
             logger.error(f"导出Excel失败: {e}")
             return False

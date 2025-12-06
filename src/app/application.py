@@ -1,3 +1,4 @@
+# src/app/application.py
 """
 主应用程序入口
 负责启动和管理整个应用程序
@@ -7,6 +8,7 @@ import sys
 import os
 import logging
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QIcon
 from src.features.main_window.view.main_window_ui import MainWindow
 from src.core.logger import logger
 from src.core.config_manager import config_manager
@@ -45,6 +47,11 @@ def main():
         app = QApplication(sys.argv)
         app.setApplicationName("TestFlowManager")
         app.setApplicationVersion("1.0.0")
+        
+        # 设置应用程序图标
+        icon_path = os.path.join(os.path.dirname(__file__), "resources", "icons", "app_icon.ico")
+        if os.path.exists(icon_path):
+            app.setWindowIcon(QIcon(icon_path))
 
         # 记录应用程序启动信息
         logger.info("TestFlowManager应用程序启动")
@@ -58,6 +65,11 @@ def main():
 
         # 创建主窗口
         main_window = MainWindow()
+        
+        # 为主窗口设置相同的图标
+        if os.path.exists(icon_path):
+            main_window.setWindowIcon(QIcon(icon_path))
+            
         logger.info("主窗口已创建")
         
         # 显示主窗口

@@ -18,15 +18,15 @@ class MatrixToolbar(QWidget):
         
         self.import_btn = QPushButton("导入Matrix")
         self.standardize_and_fill_btn = QPushButton("标准化填充Matrix")
-        self.find_btn = QPushButton("查找")
-        self.export_btn = QPushButton("生成TestStatus表")
+        self.basic_info_btn = QPushButton("基本信息")
+        self.generate_test_status_btn = QPushButton("生成TestStatus表")
         self.update_standard_versions_btn = QPushButton("更新标准版本")
         self.generate_test_record_btn = QPushButton("生成Test Record")
         
         layout.addWidget(self.import_btn)
         layout.addWidget(self.standardize_and_fill_btn)
-        layout.addWidget(self.find_btn)
-        layout.addWidget(self.export_btn)
+        layout.addWidget(self.basic_info_btn)
+        layout.addWidget(self.generate_test_status_btn)
         layout.addWidget(self.update_standard_versions_btn)
         layout.addWidget(self.generate_test_record_btn)
         
@@ -38,7 +38,7 @@ class MatrixToolbar(QWidget):
         """连接所有信号到处理函数"""
         self.import_btn.clicked.connect(handlers.on_import_clicked)
         self.standardize_and_fill_btn.clicked.connect(handlers.on_standardize_and_fill_clicked)
-        self.find_btn.clicked.connect(handlers.on_find_clicked)
-        self.export_btn.clicked.connect(handlers.on_export_clicked)
+        self.basic_info_btn.clicked.connect(handlers.on_find_clicked)
+        self.generate_test_status_btn.clicked.connect(handlers.on_export_clicked)
         self.update_standard_versions_btn.clicked.connect(handlers.on_update_standards_clicked)
         self.generate_test_record_btn.clicked.connect(handlers.on_generate_test_record_clicked)

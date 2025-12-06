@@ -34,12 +34,12 @@ class LTRApplicationDataExtractor:
         Returns:
             dict: 提取的数据或错误信息
         """
-        logger.info(f"Processing application file: {doc_filepath}")
+        logger.info(f"开始处理申请文件: {doc_filepath}")
         extracted_data = {}
 
         # 检查文件是否存在
         if not os.path.exists(doc_filepath):
-            logger.error(f"File not found: {doc_filepath}")
+            logger.error(f"文件未找到: {doc_filepath}")
             return {"error": f"File not found: {os.path.basename(doc_filepath)}"}
 
         # 使用COM接口打开Word文档
@@ -66,15 +66,18 @@ class LTRApplicationDataExtractor:
             for key, (label, next_row) in fields.items():
                 value = extract_field_value_from_table(doc, label, next_row)
                 extracted_data[key] = value
+                logger.debug(f"提取字段 {key}: {value}")
 
             # 提取测试样品信息
             sample_info = self._extract_test_sample_info(doc)
             extracted_data['sample_information'] = sample_info
+            logger.debug(f"提取样品信息: {sample_info}")
 
             # 提取测试要求信息
             testing_info = self._extract_requested_testing_info(doc)
             extracted_data['tests_to_be_performed'] = testing_info.get('tests_to_be_performed', '')
             extracted_data['applicable_specifications'] = testing_info.get('applicable_specifications', '')
+            logger.debug(f"提取测试要求信息: {testing_info}")
 
             # 填充其他字段
             for field in ['failed_item', 'sample_deposition',
@@ -89,11 +92,11 @@ class LTRApplicationDataExtractor:
             # 添加文件路径字段
             extracted_data['file_path'] = doc_filepath
 
-            logger.info("Successfully processed application file")
+            logger.info(f"成功处理申请文件，提取到的数据: {extracted_data}")
             return extracted_data
 
         except Exception as e:
-            logger.error(f"Error processing application file: {e}", exc_info=True)
+            logger.error(f"处理申请单文件时出错: {e}", exc_info=True)
             return {
                 "error": f"处理申请单文件时出错: {str(e)}",
                 "partial_data": extracted_data
@@ -103,7 +106,7 @@ class LTRApplicationDataExtractor:
             try:
                 doc.Close(SaveChanges=False)
             except Exception as e:
-                logger.warning(f"Failed to close document: {e}")
+                logger.warning(f"关闭文档失败: {e}")
 
     def _extract_requested_testing_info(self, doc) -> Dict[str, str]:
         """
@@ -115,7 +118,7 @@ class LTRApplicationDataExtractor:
         Returns:
             dict: 包含测试信息的字典
         """
-        logger.debug("Extracting requested testing info...")
+        logger.debug("开始提取请求的测试信息...")
         result = {"tests_to_be_performed": "", "applicable_specifications": ""}
 
         try:
@@ -151,11 +154,13 @@ class LTRApplicationDataExtractor:
                                     result["applicable_specifications"] += ","
                                 result["applicable_specifications"] += second_col
 
+                            logger.debug(f"处理测试表格行 {i}: 测试项='{first_col}', 规范='{second_col}'")
                         except Exception as e:
-                            logger.error(f"Error processing row {i}: {e}")
+                            logger.error(f"处理行 {i} 时出错: {e}")
         except Exception as e:
-            logger.error(f"Error extracting testing info: {e}")
+            logger.error(f"提取测试信息时出错: {e}")
 
+        logger.debug(f"完成测试信息提取: {result}")
         return result
 
     def _extract_test_sample_info(self, doc) -> str:
@@ -168,7 +173,7 @@ class LTRApplicationDataExtractor:
         Returns:
             str: 格式化的样品信息
         """
-        logger.debug("Extracting test sample info...")
+        logger.debug("开始提取测试样品信息...")
         sample_info = []
         prev_first_col = ""
 
@@ -204,11 +209,13 @@ class LTRApplicationDataExtractor:
 
                             if first_col or second_col:
                                 sample_info.append(f"{first_col}:{second_col}")
+                                logger.debug(f"处理样品表格行 {i}: 产品='{first_col}', 料号='{second_col}'")
 
                         except Exception as e:
-                            logger.error(f"Error processing row {i}: {e}")
+                            logger.error(f"处理行 {i} 时出错: {e}")
         except Exception as e:
-            logger.error(f"Error extracting sample info: {e}")
+            logger.error(f"提取样品信息时出错: {e}")
 
         formatted_result = ";".join(sample_info)
+        logger.debug(f"完成样品信息提取: {formatted_result}")
         return formatted_result

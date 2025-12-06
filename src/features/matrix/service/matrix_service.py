@@ -30,7 +30,7 @@ class MatrixService:
         
         # 创建导出控制器和数据模型
         self.export_data_model = ExportDataModel(self.data_model)
-        self.export_controller = ExportController(self.export_data_model)
+        self.export_controller = ExportController(self.data_model)
         
         # 创建数据结构服务
         self.data_structure_service = MatrixDataStructureService(self.data_model, self.data_structure)
@@ -146,8 +146,25 @@ class MatrixService:
 
     def export_to_excel(self, file_path, export_type="matrix_excel"):
         """导出到Excel - Service层持久化功能"""
-        # 在导出前更新提取的数据
-        self._update_extracted_data()
+        # 在导出前强制同步数据模型，确保使用最新数据
+        self._sync_table_to_model()
+        
+        # 添加调试信息
+        try:
+            rows = self.data_model.rows
+            headers = self.data_model.headers
+            logger.debug(f"导出前数据概况 - 表头数量: {len(headers)}, 行数: {len(rows)}")
+            if headers:
+                logger.debug(f"表头内容: {headers}")
+            if rows:
+                logger.debug(f"导出前第一行数据: {rows[0][:5] if len(rows[0]) > 5 else rows[0]}")  # 只显示前5个元素
+                logger.debug(f"导出前前3行:")
+                for i, row in enumerate(rows[:3]):
+                    logger.debug(f"  第{i+1}行: {row}")
+                if len(rows) > 3:
+                    logger.debug(f"  ... (还有{len(rows)-3}行)")
+        except Exception as e:
+            logger.error(f"获取导出前数据信息时出错: {e}")
         # 使用导出控制器执行导出
         return self.export_controller.export_by_type(file_path, export_type)
 
@@ -214,3 +231,10 @@ class MatrixService:
         """
         # 将LTR数据设置到导出控制器中
         self.export_controller.set_ltr_data(ltr_data)
+        
+    def _sync_table_to_model(self):
+        """
+        同步表格数据到模型 - Service层数据同步
+        """
+        # 更新导出控制器中的数据模型
+        self.export_controller.update_data_model(self.data_model)
