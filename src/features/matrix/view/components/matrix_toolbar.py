@@ -38,7 +38,7 @@ class MatrixToolbar(QWidget):
         """连接所有信号到处理函数"""
         self.import_btn.clicked.connect(handlers.on_import_clicked)
         self.standardize_and_fill_btn.clicked.connect(handlers.on_standardize_and_fill_clicked)
-        self.basic_info_btn.clicked.connect(handlers.on_find_clicked)
+        self.basic_info_btn.clicked.connect(handlers.on_show_basic_info_dialog)
         self.generate_test_status_btn.clicked.connect(handlers.on_export_clicked)
         self.update_standard_versions_btn.clicked.connect(handlers.on_update_standards_clicked)
         self.generate_test_record_btn.clicked.connect(handlers.on_generate_test_record_clicked)

@@ -68,24 +68,61 @@ class MatrixEventHandlers:
             logger.error(f"标准化填充Matrix时出错: {e}", exc_info=True)
             QMessageBox.warning(self.view, "错误", f"标准化填充Matrix时出错: {str(e)}")
             
-    def on_find_clicked(self):
-        """处理查找按钮点击事件"""
-        # 弹出输入对话框让用户输入查找内容
-        search_text, ok = QInputDialog.getText(self.view, "查找", "请输入要查找的内容:")
-        if ok and search_text:
+    def on_show_basic_info_dialog(self):
+        """显示基本信息对话框 - View层事件触发"""
+        try:
+            logger.debug("开始显示基本信息对话框")
             # 同步表格数据到模型
-            self.view._sync_table_to_model()
-            # 调用控制器查找
-            results = self.controller.find_content(search_text)
-            if results:
-                # 显示查找结果
-                msg = f"找到 {len(results)} 个匹配项:\n"
-                for result in results:
-                    msg += f"第{result['row']+1}行, {result['header']}列: {result['value']}\n"
-                QMessageBox.information(self.view, "查找结果", msg)
+            self._sync_table_to_model()
+
+            # 获取项目数据文件路径
+            project_data_file_path = getattr(self.service, 'project_data_file_path', None)
+            logger.debug(f"从service获取到的项目数据文件路径: {project_data_file_path}")
+
+            # 如果service中没有项目数据文件路径，则尝试从状态管理器获取当前项目路径并构造文件路径
+            if not project_data_file_path:
+                logger.debug("service中没有项目数据文件路径，尝试从状态管理器获取")
+                current_project = state_manager.get_state("current_project")
+                logger.debug(f"从状态管理器获取到的当前项目路径: {current_project}")
+
+                if current_project and os.path.exists(current_project):
+                    # 查找项目中的JSON文件
+                    try:
+                        json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
+                        logger.debug(f"在项目目录中找到的JSON文件: {json_files}")
+
+                        if json_files:
+                            # 使用第一个JSON文件
+                            project_data_file_path = os.path.join(current_project, json_files[0])
+                            logger.debug(f"构造的项目数据文件路径: {project_data_file_path}")
+                    except Exception as e:
+                        logger.error(f"查找项目中的JSON文件时出错: {e}")
+
+            # 如果有项目数据文件路径，则读取数据并显示基本信息对话框
+            if project_data_file_path and os.path.exists(project_data_file_path):
+                logger.debug(f"项目数据文件存在: {project_data_file_path}")
+                try:
+                    import json
+                    with open(project_data_file_path, 'r', encoding='utf-8') as f:
+                        project_data = json.load(f)
+
+                    logger.debug(f"成功读取项目数据: {project_data}")
+                    # 显示基本信息对话框，同时传入项目数据文件路径
+                    from src.features.main_window.view.basic_info_dialog import BasicInfoDialog
+                    dialog = BasicInfoDialog(project_data, self)
+                    # 将项目数据文件路径设置到dialog对象上
+                    dialog.project_data_file_path = project_data_file_path
+                    dialog.exec_()
+                except Exception as e:
+                    logger.error(f"读取或显示项目基本信息时出错: {e}")
+                    QMessageBox.warning(self, "错误", f"无法读取项目基本信息: {str(e)}")
             else:
-                QMessageBox.information(self.view, "查找结果", "未找到匹配项")
-                
+                logger.warning(f"未找到项目基本信息文件或项目尚未打开: {project_data_file_path}")
+                QMessageBox.information(self, "提示", "未找到项目基本信息文件或项目尚未打开")
+        except Exception as e:
+            logger.error(f"显示基本信息对话框时出错: {e}")
+            QMessageBox.warning(self, "错误", f"显示基本信息对话框时出错: {str(e)}")
+
     def on_export_clicked(self):
         """处理导出按钮点击事件"""
         logger.debug("开始执行导出Test Status表到Excel操作")
