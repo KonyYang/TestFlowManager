@@ -159,13 +159,30 @@ class MatrixController:
             from src.core.state_manager import state_manager
             current_project = state_manager.get_state("current_project")
             
+            logger.info(f"开始自动导出Matrix数据，当前项目路径: {current_project}")
+            
             # 如果没有项目路径，则直接返回，不执行保存操作
             if not current_project or not os.path.exists(current_project):
                 logger.debug("没有获取到有效的项目目录，跳过Matrix数据自动保存")
                 return True
                 
-            # 构造默认文件名
-            matrix_file_path = os.path.join(current_project, "matrix.xlsx")
+            # 根据路径层级判断保存位置
+            # 将路径按分隔符分割，计算目录层级数
+            path_parts = current_project.replace('/', '\\').split('\\')
+            path_parts = [part for part in path_parts if part]  # 移除空字符串
+            
+            logger.info(f"路径层级分析: {path_parts}, 层级数: {len(path_parts)}")
+            
+            # 如果路径有4层（D:\TestFlowManager\Projects\DL-2025-12-046\DL-2025-12-046），取父目录
+            # 如果路径有3层（D:\TestFlowManager\Projects\DL-2025-12-046），直接使用当前目录
+            if len(path_parts) == 5:
+                # 4层路径，取父目录
+                matrix_file_path = os.path.join(os.path.dirname(current_project), "matrix.xlsx")
+                logger.info(f"检测到4层路径结构，将文件保存到父目录: {matrix_file_path}")
+            else:
+                # 3层或其它情况，直接在当前项目目录下保存
+                matrix_file_path = os.path.join(current_project, "matrix.xlsx")
+                logger.info(f"检测到{len(path_parts)}层路径结构，将文件保存到当前目录: {matrix_file_path}")
             
             # 同步表格数据到模型
             if self.parent and hasattr(self.parent, 'matrix_dialog'):

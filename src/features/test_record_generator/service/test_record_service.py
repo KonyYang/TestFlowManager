@@ -24,6 +24,8 @@ class TestRecordService:
         self.template_prefix = "FDQF-E-036"
         self.template_dir = config_manager.get("paths.template_dir")
         self.word_app = None
+        # 定义需要排除的Requirement值
+        self.exclude_requirement_values = ["No detrimental condition", "No damage"]
 
     def _find_template_file(self) -> Optional[str]:
         """
@@ -170,6 +172,20 @@ class TestRecordService:
         except Exception as e:
             logger.error(f"Error ensuring table has enough rows: {e}")
 
+    def _filter_requirement_text(self, requirement_text):
+        """
+        过滤Requirement文本，排除特定值
+        
+        Args:
+            requirement_text: 原始Requirement文本
+            
+        Returns:
+            过滤后的文本，如果在排除列表中则返回空字符串
+        """
+        if requirement_text in self.exclude_requirement_values:
+            return ""
+        return requirement_text
+
     def _fill_record_table_from_dict(self, table: Any, step_dict: Dict) -> None:
         """
         从字典填充表格内容
@@ -190,7 +206,10 @@ class TestRecordService:
                         table.Cell(current_row, 2).Range.Text = str(step_info.get("Test", ""))
                         table.Cell(current_row, 3).Range.Text = str(step_info.get("TestMethod", ""))
                         table.Cell(current_row, 4).Range.Text = str(step_info.get("Condition", ""))
-                        table.Cell(current_row, 9).Range.Text = str(step_info.get("Requirement", ""))
+                        # 对Requirement文本进行过滤
+                        requirement_text = step_info.get("Requirement", "")
+                        filtered_requirement = self._filter_requirement_text(requirement_text)
+                        table.Cell(current_row, 9).Range.Text = str(filtered_requirement)
                         current_row += 1
                     except Exception as cell_error:
                         logger.error(f"填充表格单元格时出错 (行 {current_row}): {cell_error}")
