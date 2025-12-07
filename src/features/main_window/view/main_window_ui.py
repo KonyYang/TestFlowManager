@@ -181,16 +181,10 @@ class MainWindow(QMainWindow):
 
         # 添加打开项目菜单项
         open_project_action = QAction("打开项目", self)
-        open_project_action.setShortcut("Ctrl+Shift+O")
+        open_project_action.setShortcut("Ctrl+O")
         open_project_action.triggered.connect(self._on_open_project)
         open_project_action.setFont(global_font)
         file_menu.addAction(open_project_action)
-
-        open_action = QAction("打开", self)
-        open_action.setShortcut("Ctrl+O")
-        open_action.triggered.connect(self._on_open_file)
-        open_action.setFont(global_font)
-        file_menu.addAction(open_action)
 
         # 添加导出窗口矩阵菜单项
         export_matrix_action = QAction("导出窗口矩阵", self)
@@ -203,6 +197,7 @@ class MainWindow(QMainWindow):
 
         # 添加查看LTR菜单项
         view_ltr_action = QAction("查看LTR", self)
+        view_ltr_action.setShortcut("Ctrl+F")
         view_ltr_action.triggered.connect(self._on_view_ltr)
         view_ltr_action.setFont(global_font)
         file_menu.addAction(view_ltr_action)

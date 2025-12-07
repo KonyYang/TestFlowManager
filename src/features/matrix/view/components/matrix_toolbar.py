@@ -13,26 +13,28 @@ class MatrixToolbar(QWidget):
         
     def _setup_ui(self):
         """设置工具栏界面"""
-        layout = QHBoxLayout()
-        layout.setSpacing(5)
+        self.layout_ = QHBoxLayout()
+        self.layout_.setSpacing(5)
         
         self.import_btn = QPushButton("导入Matrix")
         self.standardize_and_fill_btn = QPushButton("标准化填充Matrix")
         self.basic_info_btn = QPushButton("基本信息")
-        self.generate_test_status_btn = QPushButton("生成TestStatus表")
+        self.generate_test_status_btn = QPushButton("生成Test Status")
         self.update_standard_versions_btn = QPushButton("更新标准版本")
         self.generate_test_record_btn = QPushButton("生成Test Record")
         
-        layout.addWidget(self.import_btn)
-        layout.addWidget(self.standardize_and_fill_btn)
-        layout.addWidget(self.basic_info_btn)
-        layout.addWidget(self.generate_test_status_btn)
-        layout.addWidget(self.update_standard_versions_btn)
-        layout.addWidget(self.generate_test_record_btn)
+        self.layout_.addWidget(self.import_btn)
+        self.layout_.addWidget(self.standardize_and_fill_btn)
+        self.layout_.addWidget(self.update_standard_versions_btn)
+        self.layout_.addWidget(self.basic_info_btn)
+        self.layout_.addWidget(self.generate_test_status_btn)
+        self.layout_.addWidget(self.generate_test_record_btn)
         
-        layout.addStretch()  # 添加弹性空间
+        self.layout_.addStretch()  # 添加弹性空间
         
-        self.setLayout(layout)
+    def layout(self):
+        """返回工具栏的布局"""
+        return self.layout_
         
     def connect_signals(self, handlers):
         """连接所有信号到处理函数"""

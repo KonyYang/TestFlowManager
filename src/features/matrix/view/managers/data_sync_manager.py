@@ -11,15 +11,50 @@ class DataSyncManager:
         
     def sync_table_to_model(self):
         """同步表格数据到数据模型"""
-        # 移除同步表格数据的详细日志
-        for row in range(self.view.table_widget.rowCount()):
+        try:
+            logger.debug("开始同步表格数据到模型")
+            # 同步表头
+            headers = []
             for col in range(self.view.table_widget.columnCount()):
-                item = self.view.table_widget.item(row, col)
-                if item:
-                    self.controller.set_cell_value(row, col, item.text())
-                else:
-                    self.controller.set_cell_value(row, col, "")
-                    
+                header_item = self.view.table_widget.horizontalHeaderItem(col)
+                headers.append(header_item.text() if header_item else f"Column {col}")
+            self.controller.data_model.headers = headers
+            
+            # 同步数据行
+            rows = []
+            for row in range(self.view.table_widget.rowCount()):
+                row_data = []
+                for col in range(self.view.table_widget.columnCount()):
+                    item = self.view.table_widget.item(row, col)
+                    row_data.append(item.text() if item else "")
+                rows.append(row_data)
+            self.controller.data_model.rows = rows
+            
+            # 同步合并单元格信息
+            self.save_merged_cells_info()
+            
+            # 确保导出数据模型也是最新的
+            self.controller._sync_table_to_model()
+            
+            # 添加调试信息，显示同步后的数据概况
+            try:
+                rows = self.controller.data_model.rows
+                headers = self.controller.data_model.headers
+                logger.debug(f"同步后数据概况 - 表头数量: {len(headers)}, 行数: {len(rows)}")
+                if headers:
+                    logger.debug(f"表头内容: {headers}")
+                if rows:
+                    logger.debug(f"同步后第一行数据: {rows[0][:5] if len(rows[0]) > 5 else rows[0]}")  # 只显示前5个元素
+                    logger.debug(f"同步后前3行:")
+                    for i, row in enumerate(rows[:3]):
+                        logger.debug(f"  第{i+1}行: {row}")
+                    if len(rows) > 3:
+                        logger.debug(f"  ... (还有{len(rows)-3}行)")
+            except Exception as e:
+                logger.error(f"打印数据模型摘要时出错: {e}")
+        except Exception as e:
+            logger.error(f"同步表格数据到模型时出错: {e}", exc_info=True)
+
     def save_merged_cells_info(self):
         """
         保存合并单元格信息到数据模型中，以便导出时能够恢复
@@ -54,5 +89,5 @@ class DataSyncManager:
                             processed_cells.add((r, c))
                             
         # 更新数据模型中的合并单元格信息
-        self.controller.service.data_model.merged_cells_info = merged_cells_info
+        self.controller.data_model.merged_cells_info = merged_cells_info
         # 移除合并单元格信息保存的详细日志
