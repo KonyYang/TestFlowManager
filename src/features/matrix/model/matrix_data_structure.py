@@ -72,8 +72,25 @@ class MatrixDataStructure:
         # 处理只有initial或只有after test的情况
         if initial_steps and not after_test_steps and not combined_steps:
             # 只有initial的情况 - 只处理第一个initial步骤
+            # 使用正则表达式查找"Initial"（忽略大小写）
+            initial_pattern = re.compile(r'(initial[:\s]*)', re.IGNORECASE)
+            
             first_initial_index = initial_steps[0]
             step = group_steps[first_initial_index]
+            requirement = step.get("Requirement", "")
+            # 查找Initial的位置
+            initial_match = initial_pattern.search(requirement)
+            initial_requirement = ""
+            
+            if initial_match:
+                # 提取Initial部分的requirement
+                initial_start = initial_match.end()
+                initial_requirement = requirement[initial_start:].strip()
+                # 清理多余的空格和换行符
+                initial_requirement = " ".join(initial_requirement.split())
+                # 更新Requirement字段
+                step["Requirement"] = initial_requirement
+                
             original_description = step.get("StepDescription", step.get("Test", ""))
             step["StepDescription"] = "Initial " + original_description
             logger.info(f"处理仅有 'Initial' 的情况，步骤索引: {first_initial_index}, 描述更新为: {step['StepDescription']}")
@@ -81,8 +98,25 @@ class MatrixDataStructure:
             
         if after_test_steps and not initial_steps and not combined_steps:
             # 只有after test的情况 - 处理所有after test步骤，参考组合步骤中处理after步骤的逻辑
+            # 使用正则表达式查找"After test"（忽略大小写）
+            after_test_pattern = re.compile(r'(after\s*test[:\s]*)', re.IGNORECASE)
+            
             for i, step_index in enumerate(after_test_steps):
                 step = group_steps[step_index]
+                requirement = step.get("Requirement", "")
+                # 查找After test的位置
+                after_test_match = after_test_pattern.search(requirement)
+                after_test_requirement = ""
+                
+                if after_test_match:
+                    # 提取After test部分的requirement
+                    after_test_start = after_test_match.end()
+                    after_test_requirement = requirement[after_test_start:].strip()
+                    # 清理多余的空格和换行符
+                    after_test_requirement = " ".join(after_test_requirement.split())
+                    # 更新Requirement字段
+                    step["Requirement"] = after_test_requirement
+                    
                 if i == len(after_test_steps) - 1:
                     # 最后一个步骤 - Final
                     original_description = step.get("StepDescription", step.get("Test", ""))
