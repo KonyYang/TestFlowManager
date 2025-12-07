@@ -170,9 +170,6 @@ class ProjectCreatorController:
 
             self.context.temp_folder = temp_folder
 
-            # TODO: 将来可能需要使用temp_folder路径进行进一步操作
-            # 例如：创建项目结构、保存处理结果等
-
             # 只处理用户选中的附件
             selected_attachment = self._get_selected_attachment()
             word_attachment = None

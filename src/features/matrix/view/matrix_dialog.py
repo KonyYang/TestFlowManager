@@ -714,11 +714,25 @@ class MatrixDialog(QWidget):
                 if current_project and os.path.exists(current_project):
                     # 查找项目中的JSON文件
                     try:
+                        # 首先在当前目录查找
                         json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
                         logger.debug(f"在项目目录中找到的JSON文件: {json_files}")
                         
-                        if json_files:
-                            # 使用第一个JSON文件
+                        # 如果当前目录没有找到JSON文件，则在父目录查找
+                        if not json_files:
+                            parent_path = os.path.dirname(current_project)
+                            logger.debug(f"在父目录中查找JSON文件: {parent_path}")
+                            
+                            if os.path.exists(parent_path):
+                                json_files = [f for f in os.listdir(parent_path) if f.endswith('.json')]
+                                logger.debug(f"在父目录 {parent_path} 中找到的JSON文件: {json_files}")
+                                
+                                if json_files:
+                                    # 使用父目录中的JSON文件
+                                    project_data_file_path = os.path.join(parent_path, json_files[0])
+                                    logger.debug(f"构造的项目数据文件路径: {project_data_file_path}")
+                        else:
+                            # 使用当前目录中的JSON文件
                             project_data_file_path = os.path.join(current_project, json_files[0])
                             logger.debug(f"构造的项目数据文件路径: {project_data_file_path}")
                     except Exception as e:
