@@ -25,6 +25,8 @@ from src.features.matrix.view.components.matrix_context_menus import MatrixConte
 from src.features.matrix.view.managers.table_manager import TableManager
 # 导入数据同步管理器
 from src.features.matrix.view.managers.data_sync_manager import DataSyncManager
+# 导入导入/导出管理器
+from src.features.matrix.view.managers.import_export_manager import ImportExportManager
 # 导入事件处理器
 from src.features.matrix.view.handlers.matrix_event_handlers import MatrixEventHandlers
 import os
@@ -56,7 +58,7 @@ class MatrixDialog(QWidget):
         self._setup_ui()
         
         # 在初始化后自动导入项目中的matrix.xlsx文件（如果存在）
-        self._auto_import_matrix_from_project()
+        self.import_export_manager.auto_import_matrix_from_project()
 
     def _init_components(self):
         """初始化各个组件"""
@@ -65,6 +67,9 @@ class MatrixDialog(QWidget):
         
         # 初始化数据同步管理器
         self.data_sync_manager = DataSyncManager(self, self.service)
+        
+        # 初始化导入/导出管理器
+        self.import_export_manager = ImportExportManager(self, self.service)
         
         # 初始化事件处理器
         self.event_handlers = MatrixEventHandlers(self, self.service)
@@ -144,66 +149,6 @@ class MatrixDialog(QWidget):
         """根据选中单元格的状态执行合并或拆分操作"""
         logger.debug("执行合并或拆分单元格操作")
         self.service.merge_or_split_cells(self.table_widget)
-
-    def _copy_cells(self):
-        """复制选中的单元格"""
-        selected_ranges = self.table_widget.selectedRanges()
-        if not selected_ranges:
-            return
-            
-        # 只处理第一个选区
-        range_ = selected_ranges[0]
-        
-        # 保存选区的行列数和数据
-        self._copied_cells_data = {
-            'rows': range_.rowCount(),
-            'cols': range_.columnCount(),
-            'data': []
-        }
-        
-        # 提取选区数据
-        for row in range(range_.rowCount()):
-            row_data = []
-            for col in range(range_.columnCount()):
-                item = self.table_widget.item(range_.topRow() + row, range_.leftColumn() + col)
-                row_data.append(item.text() if item else "")
-            self._copied_cells_data['data'].append(row_data)
-        
-        logger.debug(f"已复制 {range_.rowCount()}x{range_.columnCount()} 单元格区域")
-
-    def _paste_cells(self):
-        """粘贴单元格数据到当前选区"""
-        # 检查是否有复制的数据
-        if not hasattr(self, '_copied_cells_data') or self._copied_cells_data is None:
-            return
-            
-        selected_ranges = self.table_widget.selectedRanges()
-        if not selected_ranges:
-            return
-            
-        # 只处理第一个选区
-        range_ = selected_ranges[0]
-        
-        # 获取复制的数据
-        copied_data = self._copied_cells_data['data']
-        copied_rows = self._copied_cells_data['rows']
-        copied_cols = self._copied_cells_data['cols']
-        
-        # 计算实际粘贴范围（要考虑边界限制）
-        actual_rows = min(copied_rows, self.table_widget.rowCount() - range_.topRow())
-        actual_cols = min(copied_cols, self.table_widget.columnCount() - range_.leftColumn())
-        
-        # 粘贴数据
-        for row in range(actual_rows):
-            for col in range(actual_cols):
-                item = self.table_widget.item(range_.topRow() + row, range_.leftColumn() + col)
-                if item:
-                    item.setText(copied_data[row][col])
-                else:
-                    new_item = QTableWidgetItem(copied_data[row][col])
-                    self.table_widget.setItem(range_.topRow() + row, range_.leftColumn() + col, new_item)
-        
-        logger.debug(f"已粘贴 {actual_rows}x{actual_cols} 单元格区域")
 
     def _on_item_changed(self, item):
         """处理表格项变更事件"""
@@ -361,72 +306,4 @@ class MatrixDialog(QWidget):
         """
         从项目文件夹自动导入matrix.xlsx文件
         """
-        try:
-            logger.debug("尝试从项目文件夹自动导入matrix.xlsx")
-            
-            # 获取当前项目路径
-            current_project = state_manager.get_state("current_project")
-            if not current_project:
-                logger.debug("没有当前项目，跳过自动导入")
-                return
-                
-            # 构造matrix.xlsx文件路径
-            matrix_file_path = os.path.join(current_project, "matrix.xlsx")
-            
-            # 检查文件是否存在
-            if os.path.exists(matrix_file_path):
-                logger.info(f"发现项目中的matrix.xlsx文件: {matrix_file_path}")
-                
-                # 导入文件
-                from src.features.matrix.service.document_parsers.excel_parser import ExcelParser
-                parser = ExcelParser()
-                result = parser.parse(matrix_file_path)
-                
-                if result and 'data' in result and result['data']:
-                    # 更新数据模型
-                    self.service.data_model.rows = result['data']
-                    if 'headers' in result and result['headers']:
-                        self.service.data_model.headers = result['headers']
-                    else:
-                        # 如果没有提供表头，使用默认的字母标识
-                        self.service.data_model.headers = [self.service.data_model._column_index_to_letter(i) 
-                                                        for i in range(len(result['data'][0]) if result['data'] else 7)]
-                    
-                    # 更新合并单元格信息
-                    if 'merged_cells' in result:
-                        self.service.data_model.merged_cells_info = result['merged_cells']
-                        
-                    # 更新表格显示
-                    self._update_table()
-                    logger.info("成功自动导入项目中的matrix.xlsx文件")
-                else:
-                    logger.warning("matrix.xlsx文件中没有有效数据")
-            else:
-                logger.debug(f"项目中没有matrix.xlsx文件: {matrix_file_path}")
-        except Exception as e:
-            logger.error(f"自动导入matrix.xlsx文件时出错: {e}")
-
-    def _export_current_data_as_default(self, matrix_file_path):
-        """
-        将当前Matrix数据导出为默认的matrix.xlsx文件
-        
-        Args:
-            matrix_file_path (str): 要导出的文件路径
-        """
-        try:
-            logger.debug(f"将当前Matrix数据导出为默认文件: {matrix_file_path}")
-            
-            # 确保目录存在
-            directory = os.path.dirname(matrix_file_path)
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-                
-            # 导出当前数据
-            success = self.service.export_to_excel(matrix_file_path, "matrix_excel")
-            
-            if success:
-                logger.info(f"成功将当前Matrix数据导出为默认文件: {matrix_file_path}")
-            else:
-                logger.warning(f"导出默认matrix.xlsx文件失败: {matrix_file_path}")
-        except Exception as e:
-            logger.error(f"导出默认matrix.xlsx文件时出错: {e}")
+        self.import_export_manager.auto_import_matrix_from_project()

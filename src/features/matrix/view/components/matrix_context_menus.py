@@ -1,5 +1,5 @@
 # src/features/matrix/view/components/matrix_context_menus.py
-from PyQt5.QtWidgets import QMenu, QAction
+from PyQt5.QtWidgets import QMenu, QAction, QTableWidgetItem
 from PyQt5.QtCore import QItemSelectionModel
 from PyQt5.QtGui import QCursor
 from src.core.logger import logger
@@ -41,8 +41,8 @@ class MatrixContextMenus:
         
         # 连接动作到处理函数
         merge_or_split_action.triggered.connect(self.view._merge_or_split_cells)
-        copy_cells_action.triggered.connect(self.view._copy_cells)
-        paste_cells_action.triggered.connect(self.view._paste_cells)
+        copy_cells_action.triggered.connect(self._copy_cells)
+        paste_cells_action.triggered.connect(self._paste_cells)
         
         # 保存菜单项引用以便动态更新
         self.merge_or_split_action = merge_or_split_action
@@ -59,7 +59,67 @@ class MatrixContextMenus:
         
         # 在鼠标位置显示菜单
         menu.exec_(QCursor.pos())
+
+    def _copy_cells(self):
+        """复制选中的单元格"""
+        selected_ranges = self.view.table_widget.selectedRanges()
+        if not selected_ranges:
+            return
+            
+        # 只处理第一个选区
+        range_ = selected_ranges[0]
         
+        # 保存选区的行列数和数据
+        self.view._copied_cells_data = {
+            'rows': range_.rowCount(),
+            'cols': range_.columnCount(),
+            'data': []
+        }
+        
+        # 提取选区数据
+        for row in range(range_.rowCount()):
+            row_data = []
+            for col in range(range_.columnCount()):
+                item = self.view.table_widget.item(range_.topRow() + row, range_.leftColumn() + col)
+                row_data.append(item.text() if item else "")
+            self.view._copied_cells_data['data'].append(row_data)
+        
+        logger.debug(f"已复制 {range_.rowCount()}x{range_.columnCount()} 单元格区域")
+
+    def _paste_cells(self):
+        """粘贴单元格数据到当前选区"""
+        # 检查是否有复制的数据
+        if not hasattr(self.view, '_copied_cells_data') or self.view._copied_cells_data is None:
+            return
+            
+        selected_ranges = self.view.table_widget.selectedRanges()
+        if not selected_ranges:
+            return
+            
+        # 只处理第一个选区
+        range_ = selected_ranges[0]
+        
+        # 获取复制的数据
+        copied_data = self.view._copied_cells_data['data']
+        copied_rows = self.view._copied_cells_data['rows']
+        copied_cols = self.view._copied_cells_data['cols']
+        
+        # 计算实际粘贴范围（要考虑边界限制）
+        actual_rows = min(copied_rows, self.view.table_widget.rowCount() - range_.topRow())
+        actual_cols = min(copied_cols, self.view.table_widget.columnCount() - range_.leftColumn())
+        
+        # 粘贴数据
+        for row in range(actual_rows):
+            for col in range(actual_cols):
+                item = self.view.table_widget.item(range_.topRow() + row, range_.leftColumn() + col)
+                if item:
+                    item.setText(copied_data[row][col])
+                else:
+                    new_item = QTableWidgetItem(copied_data[row][col])
+                    self.view.table_widget.setItem(range_.topRow() + row, range_.leftColumn() + col, new_item)
+        
+        logger.debug(f"已粘贴 {actual_rows}x{actual_cols} 单元格区域")
+
     def show_row_context_menu(self, position):
         """显示行右键菜单"""
         logger.debug(f"显示行右键菜单，位置: {position}")

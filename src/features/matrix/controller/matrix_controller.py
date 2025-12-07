@@ -228,11 +228,6 @@ class MatrixController:
                 success = self.export_controller.export_by_type(file_path, "matrix_excel")
                 
                 if success:
-                    QMessageBox.information(
-                        self.parent if self.parent else None,
-                        "成功",
-                        "窗口矩阵已成功导出到Excel"
-                    )
                     return True
                 else:
                     # 检查文件是否被占用
