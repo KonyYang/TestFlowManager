@@ -41,8 +41,9 @@ class TestRecordController:
                 # 查找项目根目录下以DL编号开头的子文件夹
                 dl_subfolder_path = None
                 if os.path.exists(project_root_dir):
-                    # 列出项目根目录中的所有文件夹
-                    for item in os.listdir(project_root_dir):
+                    # 列出项目根目录中的所有文件夹，并按名称排序确保一致性
+                    items = sorted(os.listdir(project_root_dir))
+                    for item in items:
                         item_path = os.path.join(project_root_dir, item)
                         # 检查是否为目录且以DL编号开头
                         if os.path.isdir(item_path) and item.startswith(dl_number):
@@ -53,9 +54,25 @@ class TestRecordController:
                 if not dl_subfolder_path:
                     dl_subfolder_path = project_root_dir
                 
-                # 直接在DL编号文件夹下生成文件，不再放在子文件夹中
+                # 在DL编号文件夹下查找Submitted Material子文件夹
+                submitted_material_path = os.path.join(dl_subfolder_path, "Submitted Material")
+                # 标准化路径分隔符
+                submitted_material_path = os.path.normpath(submitted_material_path)
+                
+                # 检查Submitted Material文件夹是否存在，如果不存在则创建
+                if not os.path.exists(submitted_material_path):
+                    try:
+                        os.makedirs(submitted_material_path)
+                        logger.info(f"创建Submitted Material文件夹: {submitted_material_path}")
+                    except Exception as e:
+                        logger.error(f"创建Submitted Material文件夹失败: {e}")
+                        # 如果创建失败，使用DL编号文件夹作为替代
+                        submitted_material_path = dl_subfolder_path
+                
+                # 在Submitted Material文件夹中生成文件
                 output_filename = f"{dl_number} Test Record.docx"
-                output_path = os.path.join(dl_subfolder_path, output_filename)
+                output_path = os.path.join(submitted_material_path, output_filename)
+                logger.debug(f"构造的默认输出路径: {output_path}")
                 return os.path.normpath(output_path)  # 标准化路径分隔符
             
             # 如果没有项目数据文件路径，则使用默认路径
@@ -102,6 +119,56 @@ class TestRecordController:
                                 logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
                         except Exception as e:
                             logger.error(f"读取项目数据文件时出错: {e}")
+                else:
+                    # 如果Matrix服务中没有项目数据文件路径，尝试从状态管理器获取
+                    from src.core.state_manager import state_manager
+                    current_project = state_manager.get_state("current_project")
+                    logger.debug(f"从状态管理器获取到当前项目路径: {current_project}")
+                    
+                    if current_project and os.path.exists(current_project):
+                        # 在当前项目路径中查找JSON文件
+                        try:
+                            json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
+                            if json_files:
+                                project_data_file_path = os.path.join(current_project, json_files[0])
+                                logger.debug(f"在当前项目路径中找到JSON文件: {project_data_file_path}")
+                                
+                                # 从项目数据文件中提取DL编号
+                                if os.path.exists(project_data_file_path):
+                                    try:
+                                        import json
+                                        with open(project_data_file_path, 'r', encoding='utf-8') as f:
+                                            project_data = json.load(f)
+                                            dl_number = project_data.get("DL", dl_number)
+                                            logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
+                                    except Exception as e:
+                                        logger.error(f"读取项目数据文件时出错: {e}")
+                            else:
+                                # 如果当前目录没有找到JSON文件，则在父目录查找
+                                parent_path = os.path.dirname(current_project)
+                                logger.debug(f"在父目录中查找JSON文件: {parent_path}")
+                                
+                                if os.path.exists(parent_path):
+                                    json_files = [f for f in os.listdir(parent_path) if f.endswith('.json')]
+                                    logger.debug(f"在父目录 {parent_path} 中找到的JSON文件: {json_files}")
+                                    
+                                    if json_files:
+                                        # 使用父目录中的JSON文件
+                                        project_data_file_path = os.path.join(parent_path, json_files[0])
+                                        logger.debug(f"构造的项目数据文件路径: {project_data_file_path}")
+                                        
+                                        # 从项目数据文件中提取DL编号
+                                        if os.path.exists(project_data_file_path):
+                                            try:
+                                                import json
+                                                with open(project_data_file_path, 'r', encoding='utf-8') as f:
+                                                    project_data = json.load(f)
+                                                    dl_number = project_data.get("DL", dl_number)
+                                                    logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
+                                            except Exception as e:
+                                                logger.error(f"读取项目数据文件时出错: {e}")
+                        except Exception as e:
+                            logger.error(f"查找项目中的JSON文件时出错: {e}")
                 
                 matrix_structure.dl_number = dl_number
                 matrix_structure.project_data_file_path = project_data_file_path
