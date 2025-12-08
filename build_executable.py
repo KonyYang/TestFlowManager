@@ -64,7 +64,8 @@ def copy_required_files():
             dist_template_dir.mkdir(exist_ok=True)
     
     # 创建README.txt文件
-    readme_content = """TestFlowManager 使用说明
+    version = get_version()
+    readme_content = f'''TestFlowManager 使用说明
 ========================
 
 这是一个独立的Windows应用程序，可以直接运行而无需安装Python。
@@ -79,8 +80,8 @@ def copy_required_files():
 - logs/: 日志文件目录
 
 使用方法:
-1. 首先，将整个目录结构移动到 D:\TestFlowManager 路径下
-2. 根据实际环境修改 D:\TestFlowManager\config\paths.ini 文件中的配置项：
+1. 首先，将整个目录结构移动到 D:\\TestFlowManager 路径下
+2. 根据实际环境修改 D:\\TestFlowManager\\config\\paths.ini 文件中的配置项：
    - 修改实际路径配置（如ltr_file等）
    - 更新密码配置（如ltr_password）
    - 根据使用者不同调整默认值配置（如project_leader）
@@ -94,12 +95,12 @@ def copy_required_files():
 5. 确保程序运行时有足够的权限访问所有需要的目录和文件。
 
 版本信息:
-- 当前版本: 1.0.0
+- 当前版本: {version}
 - 发布日期: 2025-12-03
 
 技术支持:
 如有任何问题，请联系技术支持团队：Even.Yang@fci.com
-"""
+'''
 
     readme_path = dist_dir / "README.txt"
     with open(readme_path, 'w', encoding='utf-8') as f:
@@ -192,6 +193,13 @@ def main():
     if missing_files:
         print(f"错误: 缺少必要的文件: {missing_files}")
         return False
+    
+    # 检查图标文件是否存在
+    icon_path = project_root / "src" / "app" / "resources" / "icons" / "app_icon.ico"
+    if not icon_path.exists():
+        print(f"警告: 图标文件不存在: {icon_path}")
+    else:
+        print(f"找到图标文件: {icon_path}")
     
     # 创建dist目录结构
     create_dist_structure()

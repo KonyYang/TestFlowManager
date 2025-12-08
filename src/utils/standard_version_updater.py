@@ -79,6 +79,39 @@ def compare_versions(version1: str, version2: str) -> int:
         return -1
 
 
+def is_network_path(file_path: str) -> bool:
+    """
+    判断文件路径是否为网络路径（UNC路径）
+
+    Args:
+        file_path (str): 文件路径
+
+    Returns:
+        bool: 如果是网络路径返回True，否则返回False
+    """
+    # 检查是否为UNC路径（以\\开头）
+    if file_path.startswith("\\\\"):
+        return True
+    
+    # 检查是否为映射的网络驱动器（如Z:\path）
+    # 通过检查驱动器根目录是否存在来判断
+    if os.path.isabs(file_path):
+        drive = os.path.splitdrive(file_path)[0]
+        if drive:
+            # 检查驱动器根目录是否存在
+            try:
+                drive_root = drive + "\\"
+                if os.path.exists(drive_root):
+                    # 尝试列出驱动器根目录的内容
+                    os.listdir(drive_root)
+                else:
+                    return True  # 驱动器根目录不存在，可能是网络驱动器
+            except (OSError, IOError):
+                # 无法访问驱动器根目录，很可能是网络驱动器断开连接
+                return True
+    return False
+
+
 def load_standard_data(file_path: str) -> dict:
     """
     从外部Excel文件加载标准数据
@@ -94,8 +127,13 @@ def load_standard_data(file_path: str) -> dict:
     try:
         # 检查文件是否存在
         if not os.path.exists(file_path):
-            logger.warning(f"标准文件不存在: {file_path}")
-            return standards, False  # 返回一个标志，表示文件不存在
+            # 检查是否为网络路径且可能断开连接
+            if is_network_path(file_path):
+                logger.warning(f"网络路径文件不存在，可能是网络连接断开: {file_path}")
+                return standards, False, True  # 返回标志，表示是网络路径且连接可能断开
+            else:
+                logger.warning(f"标准文件不存在: {file_path}")
+                return standards, False, False  # 返回标志，表示文件不存在
             
         # 根据文件扩展名选择合适的解析器
         if file_path.endswith('.xls') or file_path.endswith('.xlsx'):
@@ -108,7 +146,7 @@ def load_standard_data(file_path: str) -> dict:
         import traceback
         logger.error(f"详细错误信息: {traceback.format_exc()}")
         
-    return standards, True
+    return standards, True, False
 
 
 def _load_excel_standards(file_path: str) -> dict:
@@ -308,6 +346,7 @@ def update_test_method_versions(matrix_data: list) -> dict:
     updated_count = 0
     update_details = []
     file_exists = True  # 标记文件是否存在
+    is_network_disconnect = False  # 标记是否为网络断开
     
     try:
         # 获取测试标准文件路径
@@ -332,10 +371,16 @@ def update_test_method_versions(matrix_data: list) -> dict:
                 return {"updated_count": 0, "details": [], "file_exists": False, "file_path": standard_file_path}
             
         # 加载标准数据
-        standards, file_exists = load_standard_data(standard_file_path)
+        standards, file_exists, is_network_disconnect = load_standard_data(standard_file_path)
         
         if not file_exists:
-            return {"updated_count": 0, "details": [], "file_exists": False, "file_path": standard_file_path}
+            return {
+                "updated_count": 0, 
+                "details": [], 
+                "file_exists": False, 
+                "file_path": standard_file_path,
+                "is_network_disconnect": is_network_disconnect
+            }
             
         if not standards:
             return {"updated_count": 0, "details": [], "file_exists": True, "standards_loaded": False}
@@ -438,7 +483,12 @@ def update_test_method_versions(matrix_data: list) -> dict:
         import traceback
         logger.error(f"错误详情: {traceback.format_exc()}")
         
-    return {"updated_count": updated_count, "details": update_details, "file_exists": file_exists}
+    return {
+        "updated_count": updated_count, 
+        "details": update_details, 
+        "file_exists": file_exists,
+        "is_network_disconnect": is_network_disconnect
+    }
 
 
 def _extract_version_symbol(full_standard: str, base_method: str) -> str:

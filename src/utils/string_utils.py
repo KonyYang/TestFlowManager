@@ -139,3 +139,24 @@ def camel_to_snake(camel_str: str) -> str:
     """
     pattern = re.compile(r'(?<!^)(?=[A-Z])')
     return pattern.sub('_', camel_str).lower()
+
+
+def normalize_text(text: str) -> str:
+    """
+    规范化文本，去除前后空格和非字母符号
+
+    Args:
+        text: 原始文本
+
+    Returns:
+        规范化后的文本
+    """
+    if not text:
+        return ""
+    # 去除前后空格
+    text = text.strip()
+    # 去除非字母符号（保留字母、数字、空格）
+    text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
+    # 去除多余空格
+    text = ' '.join(text.split())
+    return text

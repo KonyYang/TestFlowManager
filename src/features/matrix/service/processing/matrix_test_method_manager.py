@@ -29,13 +29,25 @@ class MatrixTestMethodManager:
             # 检查标准文件是否存在
             if "file_exists" in result and not result["file_exists"]:
                 logger.warning(f"标准文件不存在: {result.get('file_path', '未知路径')}")
-                return {
-                    "success": False, 
-                    "updated_count": 0, 
-                    "details": [],
-                    "file_missing": True,
-                    "file_path": result.get("file_path", "")
-                }
+                
+                # 检查是否为网络断开连接
+                if result.get("is_network_disconnect", False):
+                    return {
+                        "success": False, 
+                        "updated_count": 0, 
+                        "details": [],
+                        "file_missing": True,
+                        "network_disconnect": True,
+                        "file_path": result.get("file_path", "")
+                    }
+                else:
+                    return {
+                        "success": False, 
+                        "updated_count": 0, 
+                        "details": [],
+                        "file_missing": True,
+                        "file_path": result.get("file_path", "")
+                    }
             
             # 检查是否加载了标准数据
             if "standards_loaded" in result and not result["standards_loaded"]:

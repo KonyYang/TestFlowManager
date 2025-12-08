@@ -272,6 +272,28 @@ class MatrixEventHandlers:
                 if "error" in result:
                     QMessageBox.warning(self.view, "失败", f"标准版本号更新出错: {result['error']}")
                     logger.error(f"标准版本号更新出错: {result['error']}")
+                elif result.get("file_missing", False):
+                    # 文件不存在的情况
+                    if result.get("network_disconnect", False):
+                        # 网络断开的情况
+                        QMessageBox.warning(
+                            self.view, 
+                            "失败", 
+                            f"标准版本号更新失败：无法访问标准文件，请检查网络连接。\n文件路径: {result.get('file_path', '未知路径')}"
+                        )
+                        logger.warning(f"标准文件无法访问，可能是网络断开: {result.get('file_path', '未知路径')}")
+                    else:
+                        # 普通文件不存在的情况
+                        QMessageBox.warning(
+                            self.view, 
+                            "失败", 
+                            f"标准版本号更新失败：未找到标准文件。\n文件路径: {result.get('file_path', '未知路径')}"
+                        )
+                        logger.warning(f"标准文件不存在: {result.get('file_path', '未知路径')}")
+                elif result.get("no_standards_found", False):
+                    # 没有找到标准数据的情况
+                    QMessageBox.information(self.view, "成功", "标准版本号更新完成，标准文件中未找到有效的标准数据")
+                    logger.info("标准版本号更新完成，标准文件中未找到有效的标准数据")
                 else:
                     # 没有找到需要更新的项，但不是错误
                     QMessageBox.information(self.view, "成功", "标准版本号更新完成，没有需要更新的项")
