@@ -52,6 +52,16 @@ class LTRComboBox(QComboBox):
             if index >= 0:
                 self.setCurrentIndex(index)
 
+    def wheelEvent(self, event):
+        """
+        重写wheelEvent以禁用鼠标滚轮切换选项的功能
+
+        Args:
+            event: 鼠标滚轮事件
+        """
+        # 不调用父类的wheelEvent，从而阻止默认的滚轮行为
+        pass
+
 
 class LTRTableWidgetItem(QTableWidgetItem):
     """

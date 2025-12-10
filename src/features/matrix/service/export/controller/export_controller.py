@@ -1,16 +1,19 @@
 from src.features.matrix.service.export.service.matrix_editor_export_service import MatrixEditorExcelExportService
 from src.features.matrix.service.export.service.test_status_export_service import TestStatusTableExportService
+from src.features.matrix.service.export.controller.record_data_table_export_controller import RecordDataTableExportController
 from src.core.logger import logger
 
 
 class ExportController:
     """导出控制器 - Controller层"""
 
-    def __init__(self, data_model, ltr_data=None):
+    def __init__(self, data_model, ltr_data=None, parent=None):
         self.data_model = data_model
         self.ltr_data = ltr_data
+        self.parent = parent
         self.excel_export_service = MatrixEditorExcelExportService(data_model)
         self.test_status_export_service = TestStatusTableExportService(data_model, ltr_data)
+        self.record_data_table_export_controller = RecordDataTableExportController(data_model, parent)
         # 移除LTR数据的详细日志输出
 
     def export_by_type(self, file_path, export_type):
@@ -50,7 +53,15 @@ class ExportController:
             elif export_type == "test_status":
                 logger.debug("调用 test_status 导出服务")
                 return self.test_status_export_service.export_to_excel(file_path)
-            elif export_type in ["llcr", "cr", "mating_unmating", "ir_dwv"]:
+            elif export_type == "llcr":
+                # 对于LLCR，我们使用专门的控制器处理
+                logger.debug("调用LLCR记录数据表格导出控制器")
+                return self.record_data_table_export_controller.export_llcr()
+            elif export_type == "cr":
+                # 对于CR，我们使用专门的控制器处理
+                logger.debug("调用CR记录数据表格导出控制器")
+                return self.record_data_table_export_controller.export_cr()
+            elif export_type in ["mating_unmating", "ir_dwv"]:
                 # 这些类型将使用相同的基础Excel导出服务，但可能有不同的处理逻辑
                 logger.debug(f"调用基础Excel导出服务，类型: {export_type}")
                 return self.excel_export_service.export_to_excel(file_path)
@@ -85,3 +96,5 @@ class ExportController:
         self.excel_export_service = MatrixEditorExcelExportService(data_model)
         # 重新创建TestStatusTableExportService实例以确保使用最新的数据
         self.test_status_export_service = TestStatusTableExportService(data_model, self.ltr_data)
+        # 更新RecordDataTableExportController中的数据模型
+        self.record_data_table_export_controller.update_data_model(data_model)

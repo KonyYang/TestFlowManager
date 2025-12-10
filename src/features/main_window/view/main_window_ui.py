@@ -214,6 +214,22 @@ class MainWindow(QMainWindow):
         edit_menu = menubar.addMenu("编辑")
         edit_menu.setFont(global_font)
 
+        # 测试表格菜单
+        test_table_menu = menubar.addMenu("测试表格")
+        test_table_menu.setFont(global_font)
+
+        # 添加LLCR子菜单项
+        llcr_action = QAction("LLCR", self)
+        llcr_action.triggered.connect(self._on_export_llcr)
+        llcr_action.setFont(global_font)
+        test_table_menu.addAction(llcr_action)
+
+        # 添加CR子菜单项
+        cr_action = QAction("CR", self)
+        cr_action.triggered.connect(self._on_export_cr)
+        cr_action.setFont(global_font)
+        test_table_menu.addAction(cr_action)
+
         # 视图菜单
         view_menu = menubar.addMenu("视图")
         view_menu.setFont(global_font)
@@ -286,6 +302,20 @@ class MainWindow(QMainWindow):
         if self.matrix_controller.handle_export_matrix_to_excel():
             self._update_status()
 
+    def _on_export_llcr(self) -> None:
+        """处理导出LLCR事件"""
+        logger.debug("Export LLCR action triggered")
+        # 调用matrix控制器处理LLCR导出
+        if self.matrix_controller.handle_export_llcr():
+            self._update_status()
+
+    def _on_export_cr(self) -> None:
+        """处理导出CR事件"""
+        logger.debug("Export CR action triggered")
+        # 调用matrix控制器处理CR导出
+        if self.matrix_controller.handle_export_cr():
+            self._update_status()
+
     def _on_exit(self) -> None:
         """处理退出事件"""
         logger.debug("Exit action triggered")
@@ -312,4 +342,3 @@ class MainWindow(QMainWindow):
         logger.info("MainWindow closing")
         self.controller.shutdown()
         event.accept()
-

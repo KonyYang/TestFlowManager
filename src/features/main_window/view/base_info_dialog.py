@@ -58,7 +58,7 @@ class BaseInfoDialog(QDialog):
         min_width, min_height = WindowUtils.get_scaled_window_size(1000, 1000)
         self.setMinimumSize(min_width, min_height)
         # 设置更小的初始尺寸并根据DPI进行适播
-        init_width, init_height = WindowUtils.get_scaled_window_size(1000, 1400)
+        init_width, init_height = WindowUtils.get_scaled_window_size(1000, 1200)
         self.resize(init_width, init_height)
 
         # 创建主布局
@@ -187,8 +187,22 @@ class BaseInfoDialog(QDialog):
 
             # 创建控件
             elif item_data.get('editor_type') == 'dropdown':
+                # 创建QComboBox实例
                 combo_box = QComboBox()
 
+                # 重写wheelEvent方法以禁用鼠标滚轮切换选项的功能
+                def wheelEvent(event):
+                    """
+                    重写wheelEvent以禁用鼠标滚轮切换选项的功能
+
+                    Args:
+                        event: 鼠标滚轮事件
+                    """
+                    # 不调用父类的wheelEvent，从而阻止默认的滚轮行为
+                    pass
+
+                # 将自定义的wheelEvent方法赋值给combo_box的wheelEvent属性
+                combo_box.wheelEvent = wheelEvent
                 if 'options' in item_data:
                     options = item_data['options']
                 else:

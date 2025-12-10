@@ -17,7 +17,7 @@ class MatrixController:
         self.parent = parent
         self.service = MatrixService()
         # 初始化导出控制器
-        self.export_controller = ExportController(self.service.data_model)
+        self.export_controller = ExportController(self.service.data_model, parent)
         # 初始化LTR集成服务
         self.ltr_integration_service = None
         # 初始化parent_view属性
@@ -288,5 +288,61 @@ class MatrixController:
                 self.parent if self.parent else None,
                 "错误",
                 f"导出过程中发生异常: {str(e)}"
+            )
+            return False
+
+    def handle_export_llcr(self):
+        """
+        处理导出LLCR事件
+        
+        Returns:
+            bool: 是否导出成功
+        """
+        try:
+            # 同步表格数据到模型
+            if self.parent and hasattr(self.parent, 'matrix_dialog'):
+                self.parent.matrix_dialog._sync_table_to_model()
+            
+            # 更新导出控制器的数据模型
+            self.export_controller.update_data_model(self.service.data_model)
+            
+            # 执行LLCR导出操作
+            success = self.export_controller.export_by_type(None, "llcr")
+            
+            return success
+        except Exception as e:
+            logger.error(f"导出LLCR时出错: {e}", exc_info=True)
+            QMessageBox.warning(
+                self.parent if self.parent else None,
+                "错误",
+                f"导出LLCR过程中发生异常: {str(e)}"
+            )
+            return False
+
+    def handle_export_cr(self):
+        """
+        处理导出CR事件
+        
+        Returns:
+            bool: 是否导出成功
+        """
+        try:
+            # 同步表格数据到模型
+            if self.parent and hasattr(self.parent, 'matrix_dialog'):
+                self.parent.matrix_dialog._sync_table_to_model()
+            
+            # 更新导出控制器的数据模型
+            self.export_controller.update_data_model(self.service.data_model)
+            
+            # 执行CR导出操作
+            success = self.export_controller.export_by_type(None, "cr")
+            
+            return success
+        except Exception as e:
+            logger.error(f"导出CR时出错: {e}", exc_info=True)
+            QMessageBox.warning(
+                self.parent if self.parent else None,
+                "错误",
+                f"导出CR过程中发生异常: {str(e)}"
             )
             return False
