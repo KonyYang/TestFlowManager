@@ -34,11 +34,22 @@ class RecordDataTableExportController:
             sample_count = params["sample_count"]
             is_delta_r_checked = params["is_delta_r_checked"]
             
-            # 获取保存文件路径
+            # 设置默认文件路径和文件名
+            default_dir = "D:\\outfile"
+            default_filename = "test llcr.xlsx"
+            
+            # 确保默认目录存在
+            if not os.path.exists(default_dir):
+                os.makedirs(default_dir)
+            
+            # 构建默认完整路径
+            default_path = os.path.join(default_dir, default_filename)
+            
+            # 获取保存文件路径，预设默认路径和文件名
             file_path, _ = QFileDialog.getSaveFileName(
                 self.parent, 
                 "保存LLCR记录数据表格", 
-                "", 
+                default_path, 
                 "Excel Files (*.xlsx)"
             )
             
@@ -49,12 +60,25 @@ class RecordDataTableExportController:
             if not file_path.endswith(".xlsx"):
                 file_path += ".xlsx"
             
+            # 使用SmartPointParser解析输入的字符串，获取分类字典
+            from src.utils.smart_point_parser import SmartPointParser
+            parser = SmartPointParser()
+            point_text = dialog.point_input.toPlainText().strip()
+            parsed_result = parser.parse(point_text)
+            category_dict = parsed_result['categories']
+            
+            # 检查是否有重复的工作表名称
+            if self._has_duplicate_sheet_names(category_dict):
+                QMessageBox.warning(self.parent, "警告", "检测到重复的工作表名称，请修改输入以确保每个分组有唯一的工作表名称。")
+                return False
+            
             # 执行导出
             success = self.llcr_export_service.export_to_excel(
                 file_path, 
                 sample_count=sample_count, 
                 point_array=point_array, 
-                is_delta_r_checked=is_delta_r_checked
+                is_delta_r_checked=is_delta_r_checked,
+                test_category_dict=category_dict if category_dict else None
             )
             
             if success:
@@ -149,6 +173,24 @@ class RecordDataTableExportController:
             logger.error(f"从Matrix数据中提取测试类别时出错: {e}", exc_info=True)
             # 出错时返回空字典，让对话框使用默认点位
             return {}
+
+    def _has_duplicate_sheet_names(self, category_dict):
+        """
+        检查是否有重复的工作表名称
+        
+        Args:
+            category_dict: 类别字典
+            
+        Returns:
+            bool: 如果有重复的工作表名称返回True，否则返回False
+        """
+        if not category_dict:
+            return False
+            
+        sheet_names = list(category_dict.keys())
+        # 检查是否有重复的名称（考虑Excel工作表名称长度限制31个字符）
+        trimmed_names = [name[:31] for name in sheet_names]
+        return len(trimmed_names) != len(set(trimmed_names))
 
     def update_data_model(self, data_model):
         """

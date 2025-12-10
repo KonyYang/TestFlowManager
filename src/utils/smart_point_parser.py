@@ -345,8 +345,8 @@ class SmartPointParser:
             # 检查起始点是否为纯数字
             try:
                 int(start)
-                logger.debug("范围表达式的起始点为纯数字，类别名称为 numeric")
-                return "numeric"
+                logger.debug("范围表达式的起始点为纯数字，类别名称为起始点")
+                return start  # 直接使用起始点作为名称
             except ValueError:
                 pass
         
@@ -359,14 +359,14 @@ class SmartPointParser:
         # 检查是否为纯数字
         try:
             int(first_point)
-            logger.debug("纯数字，类别名称为 numeric")
-            return "numeric"
+            logger.debug("纯数字，类别名称为数字本身")
+            return first_point  # 直接使用数字作为名称
         except ValueError:
             pass
             
-        # 默认类别名称
-        logger.debug("默认类别名称: custom")
-        return "custom"
+        # 对于没有前缀的点位（如"A"），直接使用点位本身作为类别名称
+        logger.debug(f"使用点位本身 {first_point} 作为类别名称")
+        return first_point
 
     def set_prefix_whitelist(self, whitelist: List[str]) -> None:
         """设置前缀白名单

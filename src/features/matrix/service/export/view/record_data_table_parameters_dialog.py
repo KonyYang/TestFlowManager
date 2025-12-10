@@ -25,25 +25,31 @@ class RecordDataTableParametersDialog(QDialog):
     def _setup_ui(self):
         """设置用户界面"""
         layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)  # 设置主布局左对齐
         
         # 测试点位输入框
         point_layout = QVBoxLayout()
-        point_layout.addWidget(QLabel("输入测试点位 (支持格式如: 1-8;P1-P3;Hp1-Hp5,Hp7;A,B)\n\n"
+        point_label = QLabel("输入测试点位 (支持格式如: 1-8;P1-P3;Hp1-Hp5,Hp7;A,B)\n\n"
             "- 范围: 1-5 展开为 [1,2,3,4,5]\n"
             "- 步长: 1-10:2 展开为 [1,3,5,7,9]\n"
             "- 排除: 1-5!3 展开为 [1,2,4,5]\n"
-            "- 分组: 使用分号';'分隔不同组别，使用逗号','分隔同组点位"))
+            "- 分组: 使用分号';'分隔不同组别，使用逗号','分隔同组点位")
+        point_label.setAlignment(Qt.AlignLeft)  # 确保标签左对齐
+        point_layout.addWidget(point_label)
         self.point_input = QTextEdit()
         self.point_input.setMaximumHeight(60)
         point_layout.addWidget(self.point_input)
+        point_layout.setAlignment(Qt.AlignLeft)  # 设置点位布局左对齐
         
         layout.addLayout(point_layout)
         
         # 样本数量和ΔR计算选项
         sample_layout = QHBoxLayout()
+        sample_layout.setAlignment(Qt.AlignLeft)  # 设置样本数量布局左对齐
         # 调整标签和输入框间距
         label = QLabel("样本数量")
         label.setFixedWidth(100)  # 设置标签固定宽度
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)  # 标签右对齐，垂直居中
         sample_layout.addWidget(label)
         self.sample_spinbox = QSpinBox()
         self.sample_spinbox.setMinimum(1)
@@ -64,16 +70,18 @@ class RecordDataTableParametersDialog(QDialog):
         if self.test_type == "CR":
             # 添加到样本数量行
             # 调整标签和输入框间距
-            label = QLabel("CR电流值 (A):")
-            label.setFixedWidth(120)  # 设置标签固定宽度
+            label = QLabel("CR电流(A)")
+            label.setFixedWidth(120)  # 增加标签宽度以适应更长的文本
+            label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)  # 标签右对齐，垂直居中
             sample_layout.addWidget(label)
             self.cr_current_input = QLineEdit()
-            self.cr_current_input.setPlaceholderText("例如: 1.0")
+            self.cr_current_input.setPlaceholderText("1.0")
             self.cr_current_input.setMaximumWidth(100)  # 缩短70%的宽度
             sample_layout.addWidget(self.cr_current_input)
         
         # 按钮
         button_layout = QHBoxLayout()
+        button_layout.setAlignment(Qt.AlignRight)  # 按钮右对齐
         self.ok_button = QPushButton("确定")
         self.cancel_button = QPushButton("取消")
         self.ok_button.clicked.connect(self._on_ok_clicked)
