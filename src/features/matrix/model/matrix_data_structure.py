@@ -439,6 +439,85 @@ class MatrixDataStructure:
         """
         return self.group_col_indices.get(group_name, -1)
 
+    def get_all_groups(self):
+        """
+        获取所有组别名称
+        
+        Returns:
+            list: 所有组别名称列表
+        """
+        return list(self.group_steps.keys())
+    
+    def get_test_data_for_export(self, group_name: str) -> Dict[str, Any]:
+        """
+        获取用于导出的测试数据
+        
+        Args:
+            group_name: 组别名称
+            
+        Returns:
+            包含step_dict、sample_size和column_index的字典
+        """
+        if group_name not in self.group_steps:
+            return {}
+            
+        # 构造step_dict，键为步骤号，值为步骤描述
+        step_dict = {}
+        for step in self.group_steps[group_name]:
+            step_number = step.get("StepNumber", "")
+            step_description = step.get("StepDescription", step.get("Test", ""))
+            if step_number:
+                step_dict[step_number] = step_description
+                
+        return {
+            "step_dict": step_dict,
+            "sample_size": self.group_sample_sizes.get(group_name, ""),
+            "column_index": self.group_col_indices.get(group_name, -1)
+        }
+
+    def extract_llcr_groups_and_steps(self) -> Dict[str, int]:
+        """
+        提取包含"LLCR"的组别及对应的步骤数量
+        
+        Returns:
+            Dict[str, int]: 键为组别名称，值为该组别包含的步骤数量
+        """
+        llcr_groups = {}
+        
+        # 遍历所有组别
+        for group_name in self.get_all_groups():
+            steps = self.get_group_steps(group_name)
+            
+            # 检查该组别中是否包含任何与LLCR相关的步骤
+            llcr_step_count = 0
+            for step in steps:
+                # 检查Test、TestMethod、Requirement等字段是否包含LLCR
+                if any("LLCR" in str(step.get(field, "")) for field in ["Test", "TestMethod", "Requirement", "StepDescription"]):
+                    llcr_step_count += 1
+                    
+            # 如果该组别包含LLCR相关步骤，则添加到结果中
+            if llcr_step_count > 0:
+                llcr_groups[group_name] = llcr_step_count
+                
+        return llcr_groups
+    
+    def print_llcr_groups_info(self):
+        """
+        打印包含LLCR的组别信息
+        """
+        llcr_groups = self.extract_llcr_groups_and_steps()
+        
+        if not llcr_groups:
+            print("未找到包含LLCR的组别")
+            return
+            
+        print("包含LLCR的组别信息:")
+        print("-" * 30)
+        for group_name, step_count in llcr_groups.items():
+            print(f"组别 {group_name}: {step_count} 个LLCR步骤")
+        print("-" * 30)
+        print(f"总共找到 {len(llcr_groups)} 个包含LLCR的组别")
+
     def to_dict(self) -> Dict[str, Any]:
         """
         将数据结构转换为字典格式

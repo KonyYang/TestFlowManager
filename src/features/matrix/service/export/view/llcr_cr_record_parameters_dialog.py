@@ -4,8 +4,8 @@ from src.core.logger import logger
 from src.utils.smart_point_parser import SmartPointParser
 
 
-class RecordDataTableParametersDialog(QDialog):
-    """记录数据表格参数输入对话框 - View层"""
+class LLCR_CR_RecordParametersDialog(QDialog):
+    """LLCR/CR记录参数输入对话框 - View层"""
     
     def __init__(self, parent=None, test_type="LLCR", default_points=None, test_category_dict=None):
         super().__init__(parent)
