@@ -97,4 +97,5 @@ class ExportController:
         # 重新创建TestStatusTableExportService实例以确保使用最新的数据
         self.test_status_export_service = TestStatusTableExportService(data_model, self.ltr_data)
         # 更新RecordDataTableExportController中的数据模型
+        # 注意：这里我们需要传递包含MatrixDataStructure的对象
         self.record_data_table_export_controller.update_data_model(data_model)

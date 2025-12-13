@@ -15,7 +15,7 @@ def get_condition_requirement_templates() -> Dict[str, Tuple[str, str]]:
     """
     return {
         "Examination": ("10x min magnification", "No detrimental condition"),
-        "LLCR": ("20mV max,100mA max", "Initial:  mΩ;\nAfter test:  mΩ"),
+        "LLCR": ("20mV max,100mA max", "Initial: ≤ mΩ;\nAfter test: ≤ mΩ"),
         "CR": ("A", "Initial:  mΩ;\nAfter test:  mΩ"),
         "Insulation Resistance": ("V/C, minutes, mated", " MΩ (GΩ)"),
         "Dielectric Withstanding Voltage": ("V/C ,minutes, mated", "No evidence of arc-over, insulation breakdown, or leakage current >1mA"),

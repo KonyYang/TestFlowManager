@@ -11,8 +11,11 @@ class MatrixData:
         # 数据行，第一行是原来的表头内容
         self.rows = [
             ["Test Item", "Section", "Test Method", "Condition", "Requirement", "1", "Notes"],  # 表头行
-            ["Visual Examination", "", "EIA-364-18B", "10x min magnification", "No detrimental condition", "1", ""],  # 数据行1
-            ["Sample size", "", "", "", "", "5", ""],    # 数据行2
+            ["Visual Examination", "", "EIA-364-18B", "10x min magnification", "No detrimental condition", "1,7", ""],  # 数据行
+            ["LLCR", "", "EIA-364-23D", "20mV max,100mA max", "Initial: ≤0.20mΩ;\nAfter test: ≤0.40mΩ", "2,4,6", ""],  # 数据行
+            ["Durability", "", "EIA-364-09D", "200cycles, 25.4mm/min", "No damage", "3", ""],  # 数据行
+            ["Salt-Spray", "", "EIA-364-26C", "Test Condition B, Duration 48 hours", "No damage", "5", ""],  # 数据行
+            ["Sample size", "", "", "", "", "5", ""],    # 样品数量行
             ["Time", "", "", "", "", "", ""],  # Time行
             ["Fee", "", "", "", "", "", ""],   # Fee行
         ]

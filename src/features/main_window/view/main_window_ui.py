@@ -90,7 +90,7 @@ class MainWindow(QMainWindow):
         """设置窗口图标"""
         try:
             # 获取图标文件路径
-            icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "app", "resources", "icons", "app_icon.ico")
+            icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "app", "resources", "icons", "app_icon.ico")
             icon_path = os.path.normpath(icon_path)
             
             # 检查图标文件是否存在
@@ -278,15 +278,6 @@ class MainWindow(QMainWindow):
         """处理新建文件事件"""
         logger.debug("New file action triggered")
         if self.controller.handle_new_file():
-            self._update_status()
-
-    def _on_open_file(self) -> None:
-        """处理打开文件事件"""
-        logger.debug("Open file action triggered")
-        # TODO: 实现文件选择对话框
-        # 这里只是一个示例，实际应该打开文件选择对话框
-        file_path = "example.txt"  # 示例文件路径
-        if self.controller.handle_open_file(file_path):
             self._update_status()
 
     def _on_open_project(self) -> None:

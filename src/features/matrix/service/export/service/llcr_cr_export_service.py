@@ -5,7 +5,6 @@ from openpyxl.styles import Alignment, Border, Side, PatternFill, Font
 from openpyxl.utils import get_column_letter
 from src.core.logger import logger
 import re
-from src.features.matrix.model.matrix_data_structure import MatrixDataStructure  # 导入您的数据结构
 
 class LLCRCRExportService(BaseExportService):
     """LLCR/CR导出服务"""
@@ -19,7 +18,7 @@ class LLCRCRExportService(BaseExportService):
         self.is_first_group = True  # 是否为第一个组
         self.initial_test_rows = {}  # 存储每个组的初始测试行 {group_name: row}
 
-    def set_matrix_data(self, matrix_data: MatrixDataStructure):
+    def set_matrix_data(self, matrix_data):
         """设置Matrix数据结构"""
         self.matrix_data = matrix_data
 
@@ -80,6 +79,17 @@ class LLCRCRExportService(BaseExportService):
                     self._insert_test_info_table(ws)
                     # 插入记录数据表格 - 使用Matrix数据
                     if self.matrix_data:
+                        # 输出一次Matrix数据信息
+                        logger.debug(f"Matrix数据信息: test_type={self.test_type}")
+                        logger.debug(f"Matrix数据存在，所有组别={self.matrix_data.get_all_groups()}")
+                        
+                        # 遍历所有组别，输出每个组别的信息
+                        for group_name in self.matrix_data.get_all_groups():
+                            steps = self.matrix_data.get_group_steps(group_name)
+                            sample_size = self.matrix_data.get_group_sample_size(group_name)
+                            logger.debug(f"组别 {group_name} - 步骤数: {len(steps)}, 样本数: {sample_size}")
+                        
+                        # 使用MatrixDataStructure对象
                         for group_name in self.matrix_data.get_all_groups():
                             group_sample_size = self.matrix_data.get_group_sample_size(group_name)
                             parsed_sample_size = self._parse_sample_count(group_sample_size)
@@ -102,12 +112,24 @@ class LLCRCRExportService(BaseExportService):
 
                 # 插入记录数据表格
                 if self.matrix_data:
+                    # 输出一次Matrix数据信息
+                    logger.debug(f"Matrix数据信息: test_type={self.test_type}")
+                    logger.debug(f"Matrix数据存在，所有组别={self.matrix_data.get_all_groups()}")
+                    
+                    # 遍历所有组别，输出每个组别的信息
+                    for group_name in self.matrix_data.get_all_groups():
+                        steps = self.matrix_data.get_group_steps(group_name)
+                        sample_size = self.matrix_data.get_group_sample_size(group_name)
+                        logger.debug(f"组别 {group_name} - 步骤数: {len(steps)}, 样本数: {sample_size}")
+                    
+                    # 使用MatrixDataStructure对象
                     for group_name in self.matrix_data.get_all_groups():
                         group_sample_size = self.matrix_data.get_group_sample_size(group_name)
                         parsed_sample_size = self._parse_sample_count(group_sample_size)
                         self._insert_record_data_table(ws, group_name, point_array, is_delta_r_checked,
-                                                       cr_current_value)
+                                                     cr_current_value)
                 else:
+                    # 回退到原有逻辑
                     self._insert_record_data_table(ws, sample_count, point_array, is_delta_r_checked, cr_current_value)
 
             # 保存文件
@@ -562,11 +584,6 @@ class LLCRCRExportService(BaseExportService):
 
         # 设置日期环境记录背景格式
         self._set_environment_column_format(ws, TestInfoStartRow, 4, TestInfoStartRow + 4, 9)
-        
-        # 如果有Matrix数据，提取并打印LLCR组别信息
-        if self.matrix_data:
-            print("开始提取LLCR组别信息...")
-            self.matrix_data.print_llcr_groups_info()
 
     def _apply_formatting(self, worksheet, title_row, sample_count, point_count,
                           calculateheader_col, calculate_start_col, stat_start_col, is_delta_r_checked):

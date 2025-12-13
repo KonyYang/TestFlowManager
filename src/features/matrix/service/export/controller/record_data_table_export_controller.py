@@ -13,6 +13,77 @@ class RecordDataTableExportController:
         self.parent = parent
         self.llcr_export_service = LLCRCRExportService(data_model)
         self.cr_export_service = LLCRCRExportService(data_model)  # 使用LLCRCRExportService替代CRExportService
+        # 设置Matrix数据结构到导出服务中
+        self._set_matrix_data_structure()
+
+    def _set_matrix_data_structure(self):
+        """设置Matrix数据结构到导出服务中"""
+        # 参考test_record_controller.py中的方式获取Matrix数据
+        matrix_data_structure = None
+        
+        # 尝试从data_model获取Matrix数据
+        if hasattr(self.data_model, 'rows'):
+            # data_model是一个包含rows属性的对象（如MatrixService）
+            matrix_data = self.data_model.rows
+            logger.debug(f"从data_model.rows获取到Matrix数据，共 {len(matrix_data)} 行")
+            
+            # 创建MatrixDataStructure实例来解析数据
+            from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
+            matrix_data_structure = MatrixDataStructure()
+            
+            # 尝试获取DL编号和项目数据文件路径
+            dl_number = "DL-UNKNOWN"
+            project_data_file_path = None
+            
+            # 从data_model获取项目数据文件路径
+            if hasattr(self.data_model, 'project_data_file_path') and self.data_model.project_data_file_path:
+                project_data_file_path = self.data_model.project_data_file_path
+                logger.debug(f"从data_model获取到项目数据文件路径: {project_data_file_path}")
+                
+                # 从项目数据文件中提取DL编号
+                if os.path.exists(project_data_file_path):
+                    try:
+                        import json
+                        with open(project_data_file_path, 'r', encoding='utf-8') as f:
+                            project_data = json.load(f)
+                            dl_number = project_data.get("DL", dl_number)
+                            logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
+                    except Exception as e:
+                        logger.error(f"读取项目数据文件时出错: {e}")
+            
+            matrix_data_structure.dl_number = dl_number
+            matrix_data_structure.project_data_file_path = project_data_file_path
+            logger.debug(f"设置DL编号: {dl_number}")
+            logger.debug(f"设置项目数据文件路径: {project_data_file_path}")
+            
+            # 更新MatrixDataStructure中的数据
+            warnings = matrix_data_structure.update_from_matrix(matrix_data)
+            if warnings:
+                logger.warning(f"Matrix数据验证警告: {warnings}")
+        # 方式1: data_model本身就是MatrixDataStructure实例
+        elif hasattr(self.data_model, 'group_steps') and hasattr(self.data_model, 'get_all_groups'):
+            matrix_data_structure = self.data_model
+            logger.debug("直接使用data_model作为MatrixDataStructure")
+        # 方式2: data_model是MatrixService实例，包含data_structure属性
+        elif hasattr(self.data_model, 'data_structure'):
+            matrix_data_structure = self.data_model.data_structure
+            logger.debug("使用MatrixService中的data_structure")
+        # 方式3: data_model是ExportDataModel实例，包含原始数据模型
+        elif hasattr(self.data_model, 'data_model') and hasattr(self.data_model.data_model, 'data_structure'):
+            matrix_data_structure = self.data_model.data_model.data_structure
+            logger.debug("使用ExportDataModel中的data_structure")
+        
+        # 设置MatrixDataStructure到导出服务
+        if matrix_data_structure:
+            self.llcr_export_service.set_matrix_data(matrix_data_structure)
+            self.cr_export_service.set_matrix_data(matrix_data_structure)
+            logger.debug("成功设置MatrixDataStructure到导出服务")
+            
+            # 打印Matrix结构信息（仅关键信息）
+            groups = matrix_data_structure.get_all_groups()
+            logger.debug(f"Matrix数据包含 {len(groups)} 个组别: {groups}")
+        else:
+            logger.warning("无法找到MatrixDataStructure对象")
 
     def export_llcr(self):
         """
@@ -194,11 +265,20 @@ class RecordDataTableExportController:
             dict: 测试类别字典，键为类别名称，值为点位数组
         """
         try:
-            # 如果数据模型有获取测试类别和点位的方法，则使用它
-            # 这里我们假设MatrixDataStructure有相应的方法
-            if hasattr(self.data_model, 'group_steps'):
+            # 获取MatrixDataStructure对象
+            matrix_data_structure = None
+            if hasattr(self.data_model, 'group_steps') and hasattr(self.data_model, 'get_all_groups'):
+                matrix_data_structure = self.data_model
+            elif hasattr(self.data_model, 'data_structure'):
+                matrix_data_structure = self.data_model.data_structure
+            elif hasattr(self.data_model, 'data_model') and hasattr(self.data_model.data_model, 'data_structure'):
+                matrix_data_structure = self.data_model.data_model.data_structure
+            
+            # 如果找到了MatrixDataStructure对象，则使用它提取数据
+            if matrix_data_structure:
                 test_category_dict = {}
-                for group_name, steps in self.data_model.group_steps.items():
+                for group_name in matrix_data_structure.get_all_groups():
+                    steps = matrix_data_structure.get_group_steps(group_name)
                     # 从步骤中提取唯一的测试点位
                     points = list(set([step.get("Test", "") for step in steps]))
                     # 过滤掉空字符串
@@ -242,3 +322,5 @@ class RecordDataTableExportController:
         # 重新创建导出服务实例以确保使用最新的数据
         self.llcr_export_service = LLCRCRExportService(data_model)
         self.cr_export_service = LLCRCRExportService(data_model)  # 使用LLCRCRExportService替代CRExportService
+        # 设置Matrix数据结构到导出服务中
+        self._set_matrix_data_structure()
