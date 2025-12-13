@@ -311,13 +311,16 @@ class MatrixDataStructure:
                     step = group_steps[step_index]
                     step["Requirement"] = after_test_requirement
                     
-                    # 获取前一个步骤的描述
-                    prev_step_index = combined_steps[i-1]
-                    prev_step_description = group_steps[prev_step_index].get("StepDescription", 
-                                                                           group_steps[prev_step_index].get("Test", ""))
+                    # 获取前一个步骤的描述（在整个group_steps中的前一个步骤，而不是在combined_steps中的前一个）
+                    prev_step_index = step_index - 1
+                    if prev_step_index >= 0:
+                        prev_step_description = group_steps[prev_step_index].get("StepDescription", 
+                                                                               group_steps[prev_step_index].get("Test", ""))
+                    else:
+                        # 如果没有前一个步骤，则使用默认值
+                        prev_step_description = test_item
                     step["StepDescription"] = "After " + prev_step_description
                     logger.info(f"处理第{i+1}个步骤，索引: {step_index}, 描述更新为: {step['StepDescription']}, 要求: {step['Requirement']}")
-
 
     def _collect_sample_sizes(self, matrix_data: List[List[str]], sample_size_row_index: int) -> List[str]:
         """
