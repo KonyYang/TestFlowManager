@@ -57,7 +57,7 @@ class RecordDataTableExportController:
             logger.debug(f"设置项目数据文件路径: {project_data_file_path}")
             
             # 更新MatrixDataStructure中的数据
-            warnings = matrix_data_structure.update_from_matrix(matrix_data)
+            warnings = matrix_data_structure.parse_matrix_to_structure(matrix_data)
             if warnings:
                 logger.warning(f"Matrix数据验证警告: {warnings}")
         # 方式1: data_model本身就是MatrixDataStructure实例

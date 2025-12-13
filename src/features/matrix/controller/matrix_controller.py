@@ -58,7 +58,7 @@ class MatrixController:
         # 在导出前确保数据是最新的
         self.service._sync_table_to_model()
         # 更新提取的数据
-        self.service._update_extracted_data()
+        self.service._parse_and_structure_matrix_data()
         return self.service.export_to_excel(file_path, export_type)
 
     def import_from_excel(self, file_path):

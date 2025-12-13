@@ -217,7 +217,7 @@ class TestRecordController:
                 if not os.path.exists(output_dir):
                     os.makedirs(output_dir)
                 
-                warnings = matrix_structure.update_from_matrix(matrix_data)
+                warnings = matrix_structure.parse_matrix_to_structure(matrix_data)
                 
                 # 记录解析结果
                 group_count = len(matrix_structure.group_steps)

@@ -10,22 +10,22 @@ class MatrixDataStructureService:
         self.data_model = data_model
         self.data_structure = data_structure
 
-    def update_extracted_data(self):
+    def parse_and_structure_matrix_data(self):
         """
-        更新提取的数据到统一数据结构中
+        解析Matrix原始数据并构造成结构化数据
         """
         try:
-            logger.debug("开始更新提取的数据")
-            # 使用Matrix数据更新数据结构
-            warnings = self.data_structure.update_from_matrix(self.data_model.rows)
+            logger.debug("开始结构化Matrix数据")
+            # Matrix数据结构化
+            warnings = self.data_structure.parse_matrix_to_structure(self.data_model.rows)
             
             # 记录警告信息
             if warnings:
                 for warning in warnings:
                     logger.warning(warning)
                     
-            logger.debug("提取的数据更新完成")
+            logger.debug("Matrix数据完成结构化")
             return warnings
         except Exception as e:
-            logger.error(f"更新提取数据时出错: {e}", exc_info=True)
+            logger.error(f"Matrix数据结构化时出错: {e}", exc_info=True)
             return []

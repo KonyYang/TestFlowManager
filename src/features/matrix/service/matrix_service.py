@@ -187,7 +187,7 @@ class MatrixService:
         result = self.spec_processing_service.update_standard_versions()
         if result["success"]:
             # 更新提取的数据
-            self._update_extracted_data()
+            self._parse_and_structure_matrix_data()
         return result
             
     def extract_test_methods_from_spec(self):
@@ -215,12 +215,12 @@ class MatrixService:
         """
         self.spec_processing_service._check_duplicate_values()
             
-    def _update_extracted_data(self):
+    def _parse_and_structure_matrix_data(self):
         """
-        更新提取的数据
+        解析Matrix原始数据并构造成结构化数据
         """
-        # 更新提取的数据
-        self.data_structure_service.update_extracted_data()
+        # 解析Matrix原始数据并构造成结构化数据
+        self.data_structure_service.parse_and_structure_matrix_data()
         
     def set_ltr_data(self, ltr_data):
         """

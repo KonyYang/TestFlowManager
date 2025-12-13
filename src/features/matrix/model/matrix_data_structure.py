@@ -21,340 +21,14 @@ class MatrixDataStructure:
     def __str__(self):
         return f"MatrixDataStructure(dl_number={self.dl_number}, project_data_file_path={self.project_data_file_path})"
     
-    def _update_initial_after_test_steps(self, group_steps: List[Dict[str, Any]]) -> None:
+    # ==================== 数据解析与结构化方法 ====================
+    
+    def parse_matrix_to_structure(self, matrix_data: List[List[str]]) -> List[str]:
         """
-        更新包含 "Initial" 和 "After test" 的步骤
+        将Matrix原始数据解析并重构为结构化字典数据
         
         Args:
-            group_steps: 组内的步骤列表
-        """
-        logger.info("开始处理包含 'Initial' 和 'After test' 的步骤")
-        
-        # 查找包含Initial或After test的步骤
-        initial_steps = []
-        after_test_steps = []
-        
-        for i, step in enumerate(group_steps):
-            requirement = step.get("Requirement", "")
-            # 规范化文本以忽略大小写和多余符号
-            normalized_req = normalize_text(requirement).lower()
-            
-            # 检查是否包含initial（忽略大小写）
-            if "initial" in normalized_req and "after test" not in normalized_req:
-                initial_steps.append(i)
-                logger.debug(f"找到包含 'Initial' 的步骤，索引: {i}, Requirement: {requirement}")
-                
-            # 检查是否包含after test（忽略大小写）
-            if "after test" in normalized_req and "initial" not in normalized_req:
-                after_test_steps.append(i)
-                logger.debug(f"找到包含 'After test' 的步骤，索引: {i}, Requirement: {requirement}")
-                
-        # 查找同时包含Initial和After test的步骤
-        combined_steps = []
-        for i, step in enumerate(group_steps):
-            requirement = step.get("Requirement", "")
-            # 规范化文本以忽略大小写和多余符号
-            normalized_req = normalize_text(requirement).lower()
-            
-            if "initial" in normalized_req and "after test" in normalized_req:
-                combined_steps.append(i)
-                logger.debug(f"找到同时包含 'Initial' 和 'After test' 的步骤，索引: {i}, Requirement: {requirement}")
-
-        logger.info(f"Initial步骤索引: {initial_steps}")
-        logger.info(f"After test步骤索引: {after_test_steps}")
-        logger.info(f"组合步骤索引: {combined_steps}")
-        
-        # 如果既没有initial也没有after test，直接返回
-        if not initial_steps and not after_test_steps and not combined_steps:
-            logger.info("未找到包含 'Initial' 或 'After test' 的步骤")
-            return
-            
-        # 处理只有initial或只有after test的情况
-        if initial_steps and not after_test_steps and not combined_steps:
-            # 只有initial的情况 - 只处理第一个initial步骤
-            # 使用正则表达式查找"Initial"（忽略大小写）
-            initial_pattern = re.compile(r'(initial[:\s]*)', re.IGNORECASE)
-            
-            first_initial_index = initial_steps[0]
-            step = group_steps[first_initial_index]
-            requirement = step.get("Requirement", "")
-            # 查找Initial的位置
-            initial_match = initial_pattern.search(requirement)
-            initial_requirement = ""
-            
-            if initial_match:
-                # 提取Initial部分的requirement
-                initial_start = initial_match.end()
-                initial_requirement = requirement[initial_start:].strip()
-                # 清理多余的空格和换行符
-                initial_requirement = " ".join(initial_requirement.split())
-                # 更新Requirement字段
-                step["Requirement"] = initial_requirement
-                
-            original_description = step.get("StepDescription", step.get("Test", ""))
-            step["StepDescription"] = "Initial " + original_description
-            logger.info(f"处理仅有 'Initial' 的情况，步骤索引: {first_initial_index}, 描述更新为: {step['StepDescription']}")
-            return
-            
-        if after_test_steps and not initial_steps and not combined_steps:
-            # 只有after test的情况 - 处理所有after test步骤，参考组合步骤中处理after步骤的逻辑
-            # 使用正则表达式查找"After test"（忽略大小写）
-            after_test_pattern = re.compile(r'(after\s*test[:\s]*)', re.IGNORECASE)
-            
-            for i, step_index in enumerate(after_test_steps):
-                step = group_steps[step_index]
-                requirement = step.get("Requirement", "")
-                # 查找After test的位置
-                after_test_match = after_test_pattern.search(requirement)
-                after_test_requirement = ""
-                
-                if after_test_match:
-                    # 提取After test部分的requirement
-                    after_test_start = after_test_match.end()
-                    after_test_requirement = requirement[after_test_start:].strip()
-                    # 清理多余的空格和换行符
-                    after_test_requirement = " ".join(after_test_requirement.split())
-                    # 更新Requirement字段
-                    step["Requirement"] = after_test_requirement
-                    
-                if i == len(after_test_steps) - 1:
-                    # 最后一个步骤 - Final
-                    original_description = step.get("StepDescription", step.get("Test", ""))
-                    step["StepDescription"] = "Final " + original_description
-                    logger.info(f"处理最后一个 'After test' 步骤，步骤索引: {step_index}, 描述更新为: {step['StepDescription']}")
-                else:
-                    # 中间步骤 - 获取前一个步骤的描述
-                    prev_step_index = step_index - 1
-                    if prev_step_index >= 0:
-                        prev_step_description = group_steps[prev_step_index].get("StepDescription", 
-                                                                               group_steps[prev_step_index].get("Test", ""))
-                    else:
-                        prev_step_description = "Unknown"
-                        
-                    step["StepDescription"] = "After " + prev_step_description
-                    logger.info(f"处理第{i}个 'After test' 步骤，步骤索引: {step_index}, 描述更新为: {step['StepDescription']}")
-            return
-            
-        # 处理同时包含Initial和After test的步骤
-        if combined_steps:
-            # 获取第一个步骤的requirement并拆分
-            first_step_index = combined_steps[0]
-            requirement = group_steps[first_step_index].get("Requirement", "")
-            logger.info(f"第一个步骤的Requirement: {requirement}")
-            
-            # 使用正则表达式查找"Initial"和"After test"（忽略大小写）
-            initial_pattern = re.compile(r'(initial[:\s]*)', re.IGNORECASE)
-            after_test_pattern = re.compile(r'(after\s*test[:\s]*)', re.IGNORECASE)
-            
-            # 查找Initial的位置
-            initial_match = initial_pattern.search(requirement)
-            # 查找After test的位置
-            after_test_match = after_test_pattern.search(requirement)
-            
-            initial_requirement = ""
-            after_test_requirement = ""
-            
-            if initial_match and after_test_match:
-                # 确保Initial在After test之前
-                if initial_match.start() < after_test_match.start():
-                    # 提取Initial部分的requirement
-                    initial_start = initial_match.end()
-                    initial_end = after_test_match.start()
-                    initial_requirement = requirement[initial_start:initial_end].strip()
-                    
-                    # 提取After test部分的requirement
-                    after_test_start = after_test_match.end()
-                    after_test_requirement = requirement[after_test_start:].strip()
-                    
-                    # 清理多余的空格和换行符
-                    initial_requirement = " ".join(initial_requirement.split())
-                    after_test_requirement = " ".join(after_test_requirement.split())
-                    
-                    logger.info(f"Initial requirement: '{initial_requirement}'")
-                    logger.info(f"After test requirement: '{after_test_requirement}'")
-                else:
-                    logger.warning("Initial should come before After test in requirement text")
-                    return
-            else:
-                logger.warning("Could not find both Initial and After test in requirement text")
-                return
-                
-            # 遍历这些步骤并进行修改
-            for i, step_index in enumerate(combined_steps):
-                step = group_steps[step_index]
-                step_num = int(step["StepNumber"])
-                
-                if i == 0:
-                    # 第一个步骤 - Initial
-                    original_description = step.get("StepDescription", step.get("Test", ""))
-                    step["StepDescription"] = "Initial " + original_description
-                    step["Requirement"] = initial_requirement
-                    logger.info(f"更新第{i}个步骤({step_index})为Initial步骤，描述: {step['StepDescription']}, 要求: {step['Requirement']}")
-                elif i == len(combined_steps) - 1:
-                    # 最后一个步骤 - After test
-                    original_description = step.get("StepDescription", step.get("Test", ""))
-                    step["StepDescription"] = "Final " + original_description
-                    step["Requirement"] = after_test_requirement
-                    logger.info(f"更新第{i}个步骤({step_index})为Final步骤，描述: {step['StepDescription']}, 要求: {step['Requirement']}")
-                else:
-                    # 中间步骤 - 获取前一个步骤的描述
-                    prev_step_index = step_index - 1
-                    if prev_step_index >= 0:
-                        prev_step_description = group_steps[prev_step_index].get("StepDescription", 
-                                                                               group_steps[prev_step_index].get("Test", ""))
-                    else:
-                        prev_step_description = "Unknown"
-                        
-                    step["StepDescription"] = "After " + prev_step_description
-                    step["Requirement"] = after_test_requirement
-                    logger.info(f"更新第{i}个步骤({step_index})为After步骤，描述: {step['StepDescription']}, 要求: {step['Requirement']}")
-
-    def _extract_group_columns(self, header_row: List[str]) -> None:
-        """
-        从表头行中提取组别列信息
-        
-        Args:
-            header_row: 表头行数据
-        """
-        # 从第6列开始查找组别列（"1", "2", "3", ...），直到遇到"Notes"列
-        start_col_index = 5  # 第6列（F列）开始
-        
-        # 查找所有组别列
-        for col_index in range(start_col_index, len(header_row)):
-            col_header = header_row[col_index] if col_index < len(header_row) else ""
-            if col_header.lower() in ["notes"]:
-                # 遇到Notes列，停止查找
-                break
-                
-            # 清理组别名称
-            cleaned_group_name = clean_group_name(col_header)
-            
-            # 检查是否为有效组别列（数字或字母）
-            if cleaned_group_name and (cleaned_group_name.isdigit() or cleaned_group_name.isalnum()):
-                self.group_col_indices[cleaned_group_name] = col_index
-                self.group_steps[cleaned_group_name] = []
-
-    def _process_sample_size(self, matrix_data: List[List[str]]) -> int:
-        """
-        处理样本大小行
-        
-        Args:
-            matrix_data: Matrix数据
-            
-        Returns:
-            样本大小行索引
-        """
-        # 查找Sample size行索引
-        sample_size_row_index = find_sample_size_row(matrix_data)
-        return sample_size_row_index
-
-    def _extract_test_items(self, matrix_data: List[List[str]], sample_size_row_index: int) -> None:
-        """
-        从Matrix数据中提取测试项
-        
-        Args:
-            matrix_data: Matrix数据
-            sample_size_row_index: 样本大小行索引
-        """
-        # 遍历所有行，提取每个组别的测试项
-        # 修改：在遇到"Sample"行时停止提取组别步骤
-        for row_idx, row in enumerate(matrix_data):
-            # 跳过表头行
-            if row_idx == 0:
-                continue
-            
-            # 检查是否遇到"Sample"行，如果是则停止处理
-            first_col_value = row[0] if len(row) > 0 else ""
-            if first_col_value.lower().startswith("sample"):
-                # 遇到Sample行，停止提取组别步骤
-                break
-            
-            test_item = row[0] if len(row) > 0 else ""
-            
-            # 遍历所有组别列
-            for group_name, col_index in self.group_col_indices.items():
-                # 获取原始列头用于查找
-                original_col_index = self.group_col_indices[group_name]
-                if original_col_index < len(row):
-                    group_step = row[original_col_index]
-                    
-                    # 如果不是Sample size行且组别步骤不为空，则添加到对应组别中
-                    if (row_idx != sample_size_row_index and 
-                        group_step and group_step.strip()):
-                        # 清理组别步骤数字 - 支持更复杂的格式
-                        step_numbers = clean_step_numbers(group_step)
-                        
-                        # 添加测试项目信息
-                        for step_number in step_numbers:
-                            step_info = {
-                                "StepNumber": step_number,
-                                "Test": test_item,
-                                "TestMethod": row[2] if len(row) > 2 else "",
-                                "Condition": row[3] if len(row) > 3 else "",
-                                "Requirement": row[4] if len(row) > 4 else "",
-                                "StepDescription": test_item  # 默认值为test_item
-                            }
-                            self.group_steps[group_name].append(step_info)
-
-    def _validate_and_sort_steps(self) -> List[str]:
-        """
-        验证并排序步骤
-        
-        Returns:
-            警告信息列表
-        """
-        warnings = []
-        
-        # 对每组内的步骤按键（步骤号，数值）升序排序
-        all_steps = {}  # 用于验证连续性
-        for group_name in self.group_steps.keys():
-            self.group_steps[group_name].sort(key=lambda x: int(x['StepNumber']))
-            
-            # 更新包含Initial和After test的步骤
-            self._update_initial_after_test_steps(self.group_steps[group_name])
-            
-            # 收集所有步骤信息用于验证
-            all_steps[group_name] = self.group_steps[group_name]
-        
-        # 验证步骤序列
-        for group_name, steps in all_steps.items():
-            is_valid, group_warnings = validate_step_sequence(steps, group_name)
-            warnings.extend(group_warnings)
-            
-        return warnings
-
-    def _collect_sample_sizes(self, matrix_data: List[List[str]], sample_size_row_index: int) -> List[str]:
-        """
-        收集样本大小信息
-        
-        Args:
-            matrix_data: Matrix数据
-            sample_size_row_index: 样本大小行索引
-            
-        Returns:
-            警告信息列表
-        """
-        warnings = []
-        
-        # 如果找到了Sample size行，则收集各组别的样品数量
-        if sample_size_row_index != -1 and sample_size_row_index < len(matrix_data):
-            sample_size_row = matrix_data[sample_size_row_index]
-            for group_name, col_index in self.group_col_indices.items():
-                if col_index < len(sample_size_row):
-                    sample_size = sample_size_row[col_index]
-                    self.group_sample_sizes[group_name] = sample_size
-        elif len(matrix_data) >= 3:  # 至少要有3行才能检查倒数第三行
-            # 如果没有找到Sample size行，添加警告信息
-            warnings.append("未找到样品数量行（应包含'sample'关键字且位于表格末尾几行），请检查数据格式")
-            
-        return warnings
-
-    def update_from_matrix(self, matrix_data: List[List[str]]) -> List[str]:
-        """
-        从Matrix数据中更新所有重要信息
-        
-        Args:
-            matrix_data: Matrix数据
+            matrix_data: 原始Matrix数据
             
         Returns:
             警告信息列表
@@ -383,15 +57,21 @@ class MatrixDataStructure:
             if duplicate_groups:
                 warnings.append(f"存在重复的组别名称: {', '.join(sorted(duplicate_groups))}")
             
-            # 处理样本大小
-            sample_size_row_index = self._process_sample_size(matrix_data)
+            # 查找样本大小行索引
+            sample_size_row_index = find_sample_size_row(matrix_data)
             
-            # 提取测试项
-            self._extract_test_items(matrix_data, sample_size_row_index)
+            # 重构组步骤信息
+            self._restructure_group_steps(matrix_data, sample_size_row_index)
             
-            # 验证并排序步骤
-            validation_warnings = self._validate_and_sort_steps()
-            warnings.extend(validation_warnings)
+            # 验证步骤序列
+            all_steps = {}
+            for group_name in self.group_steps.keys():
+                all_steps[group_name] = self.group_steps[group_name]
+                
+            # 验证步骤序列
+            for group_name, steps in all_steps.items():
+                is_valid, group_warnings = validate_step_sequence(steps, group_name)
+                warnings.extend(group_warnings)
             
             # 收集样本大小
             sample_size_warnings = self._collect_sample_sizes(matrix_data, sample_size_row_index)
@@ -403,6 +83,270 @@ class MatrixDataStructure:
             
         return warnings
 
+    # ==================== 内部辅助方法 ====================
+    
+    def _extract_group_columns(self, header_row: List[str]) -> None:
+        """
+        从表头行中提取组别列信息
+        
+        Args:
+            header_row: 表头行数据
+        """
+        # 从第6列开始查找组别列（"1", "2", "3", ...），直到遇到"Notes"列
+        start_col_index = 5  # 第6列（F列）开始
+        
+        # 查找所有组别列
+        for col_index in range(start_col_index, len(header_row)):
+            col_header = header_row[col_index] if col_index < len(header_row) else ""
+            if col_header.lower() in ["notes"]:
+                # 遇到Notes列，停止查找
+                break
+                
+            # 清理组别名称
+            cleaned_group_name = clean_group_name(col_header)
+            
+            # 检查是否为有效组别列（数字或字母）
+            if cleaned_group_name and (cleaned_group_name.isdigit() or cleaned_group_name.isalnum()):
+                self.group_col_indices[cleaned_group_name] = col_index
+                self.group_steps[cleaned_group_name] = []
+
+    # 该方法已被新的 _restructure_group_steps 方法替代
+    # 保留空实现以防止其他地方调用时报错
+    def _extract_test_items(self, matrix_data: List[List[str]], sample_size_row_index: int) -> None:
+        """
+        从Matrix数据中提取测试项（已废弃）
+        
+        Args:
+            matrix_data: Matrix数据
+            sample_size_row_index: 样本大小行索引
+        """
+        pass
+
+    def _restructure_group_steps(self, matrix_data: List[List[str]], sample_size_row_index: int) -> None:
+        """
+        重构各测试组别的步骤内容信息
+        
+        功能包括：
+        1. 对每组内的步骤按键（步骤号，数值）升序排序
+        2. 处理包含"Initial"和"After test"关键字的步骤，根据规则重新赋值StepDescription和requirement
+        
+        Args:
+            matrix_data: Matrix数据
+            sample_size_row_index: 样本大小行索引
+        """
+        # 遍历所有行，提取每个组别的测试项
+        # 修改：在遇到"Sample"行时停止提取组别步骤
+        for row_idx, row in enumerate(matrix_data):
+            # 跳过表头行
+            if row_idx == 0:
+                continue
+            
+            # 检查是否遇到"Sample"行，如果是则停止提取组别步骤
+            first_col_value = row[0] if len(row) > 0 else ""
+            if first_col_value.lower().startswith("sample"):
+                # 遇到Sample行，停止提取组别步骤
+                break
+            
+            # 安全地提取当前行视为一个一行多列的列表，第一列作为测试项，如果行为空则使用空字符串
+            test_item = row[0] if len(row) > 0 else ""
+            
+            # 遍历所有组别列
+            for group_name, col_index in self.group_col_indices.items():
+                # 获取原始列头用于查找
+                original_col_index = self.group_col_indices[group_name]
+                if original_col_index < len(row):
+                    group_step = row[original_col_index]
+                    
+                    # 如果不是Sample size行且组别步骤不为空，则添加到对应组别中
+                    if (row_idx != sample_size_row_index and 
+                        group_step and group_step.strip()):
+                        # 清理组别步骤数字 - 支持更复杂的格式
+                        step_numbers = clean_step_numbers(group_step)
+                        
+                        # 添加测试项目信息
+                        for step_number in step_numbers:
+                            step_info = {
+                                "StepNumber": step_number,
+                                "Test": test_item,
+                                "TestMethod": row[2] if len(row) > 2 else "",
+                                "Condition": row[3] if len(row) > 3 else "",
+                                "Requirement": row[4] if len(row) > 4 else "",
+                                "StepDescription": test_item  # 默认值为test_item
+                            }
+                            self.group_steps[group_name].append(step_info)
+                            
+        # 对每组内的步骤按键（步骤号，数值）升序排序，并处理Initial/After test逻辑
+        for group_name in self.group_steps.keys():
+            # 按步骤号排序
+            self.group_steps[group_name].sort(key=lambda x: int(x['StepNumber']))
+            
+            # 处理包含Initial和After test的步骤
+            self._process_initial_after_test_steps(group_name)
+
+    def _process_initial_after_test_steps(self, group_name: str) -> None:
+        """
+        处理组内包含"Initial"和"After test"关键字的步骤
+        
+        根据需求，处理以下三种情况：
+        1. 只有一个步骤包含Initial和After test：提取中间内容作为Initial requirement
+        2. 两个步骤：第一个为Initial，第二个为Final
+        3. 多个步骤：第一个为Initial，最后一个为Final，中间为After + 前一个步骤描述
+        
+        注意：只有当多个测试项的"Test"关键字相同时才会被组合在一起处理
+        
+        Args:
+            group_name: 组别名称
+        """
+        group_steps = self.group_steps[group_name]
+        logger.info(f"开始处理组 '{group_name}' 中包含 'Initial' 和 'After test' 的步骤")
+        
+        # 按Test关键字分组，只处理相同Test关键字的步骤
+        test_groups = {}
+        for i, step in enumerate(group_steps):
+            requirement = step.get("Requirement", "")
+            test_item = step.get("Test", "")
+            # 规范化文本以忽略大小写和多余符号
+            normalized_req = normalize_text(requirement).lower()
+            
+            if "initial" in normalized_req and "after test" in normalized_req:
+                if test_item not in test_groups:
+                    test_groups[test_item] = []
+                test_groups[test_item].append(i)
+                logger.debug(f"找到同时包含 'Initial' 和 'After test' 的步骤，索引: {i}, Test: {test_item}, Requirement: {requirement}")
+        
+        # 分别处理每个Test组
+        for test_item, combined_steps in test_groups.items():
+            # 如果没有同时包含Initial和After test的步骤，直接跳过
+            if not combined_steps:
+                logger.info(f"组 '{group_name}' 中Test '{test_item}' 未找到同时包含 'Initial' 和 'After test' 的步骤")
+                continue
+                
+            # 获取第一个步骤的requirement并拆分
+            first_step_index = combined_steps[0]
+            requirement = group_steps[first_step_index].get("Requirement", "")
+            logger.info(f"第一个步骤的Requirement: {requirement}")
+            
+            # 使用正则表达式查找"Initial"和"After test"（忽略大小写）
+            initial_pattern = re.compile(r'(initial[\s:]*)', re.IGNORECASE)
+            after_test_pattern = re.compile(r'(after\s*test[\s:]*)', re.IGNORECASE)
+            
+            # 查找Initial的位置
+            initial_match = initial_pattern.search(requirement)
+            # 查找After test的位置
+            after_test_match = after_test_pattern.search(requirement)
+            
+            initial_requirement = ""
+            after_test_requirement = ""
+            
+            if initial_match and after_test_match:
+                # 确保Initial在After test之前
+                if initial_match.start() < after_test_match.start():
+                    # 提取Initial部分的requirement（Initial和After test之间）
+                    initial_start = initial_match.end()
+                    initial_end = after_test_match.start()
+                    initial_requirement = requirement[initial_start:initial_end].strip()
+                    # 清理多余的空格和换行符以及标点符号
+                    initial_requirement = re.sub(r'^[^\w]+', '', initial_requirement)  # 去除开头的标点符号
+                    initial_requirement = re.sub(r'[^\w]+$', '', initial_requirement)  # 去除结尾的标点符号
+                    initial_requirement = " ".join(initial_requirement.split())
+                    
+                    # 提取After test部分的requirement（After test之后的内容）
+                    after_test_start = after_test_match.end()
+                    after_test_requirement = requirement[after_test_start:].strip()
+                    # 清理多余的空格和换行符以及标点符号
+                    after_test_requirement = re.sub(r'^[^\w]+', '', after_test_requirement)  # 去除开头的标点符号
+                    after_test_requirement = re.sub(r'[^\w]+$', '', after_test_requirement)  # 去除结尾的标点符号
+                    after_test_requirement = " ".join(after_test_requirement.split())
+                    
+                    logger.info(f"Initial requirement: '{initial_requirement}'")
+                    logger.info(f"After test requirement: '{after_test_requirement}'")
+                else:
+                    logger.warning("Initial should come before After test in requirement text")
+                    continue
+            else:
+                logger.warning("Could not find both Initial and After test in requirement text")
+                continue
+                
+            # 根据步骤数量处理不同情况
+            step_count = len(combined_steps)
+            
+            if step_count == 1:
+                # 情况1：只有一个步骤
+                step = group_steps[combined_steps[0]]
+                step["Requirement"] = initial_requirement
+                step["StepDescription"] = "Initial " + test_item
+                logger.info(f"处理单一步骤，索引: {combined_steps[0]}, 描述更新为: {step['StepDescription']}, 要求: {step['Requirement']}")
+                
+            elif step_count == 2:
+                # 情况2：两个步骤
+                # 第一个步骤 - Initial
+                step1 = group_steps[combined_steps[0]]
+                step1["Requirement"] = initial_requirement
+                step1["StepDescription"] = "Initial " + test_item
+                logger.info(f"处理第一个步骤，索引: {combined_steps[0]}, 描述更新为: {step1['StepDescription']}, 要求: {step1['Requirement']}")
+                
+                # 第二个步骤 - Final
+                step2 = group_steps[combined_steps[1]]
+                step2["Requirement"] = after_test_requirement
+                step2["StepDescription"] = "Final " + test_item
+                logger.info(f"处理第二个步骤，索引: {combined_steps[1]}, 描述更新为: {step2['StepDescription']}, 要求: {step2['Requirement']}")
+                
+            else:
+                # 情况3：多个步骤
+                # 第一个步骤 - Initial
+                first_step = group_steps[combined_steps[0]]
+                first_step["Requirement"] = initial_requirement
+                first_step["StepDescription"] = "Initial " + test_item
+                logger.info(f"处理第一个步骤，索引: {combined_steps[0]}, 描述更新为: {first_step['StepDescription']}, 要求: {first_step['Requirement']}")
+                
+                # 最后一个步骤 - Final
+                last_step = group_steps[combined_steps[-1]]
+                last_step["Requirement"] = after_test_requirement
+                last_step["StepDescription"] = "Final " + test_item
+                logger.info(f"处理最后一个步骤，索引: {combined_steps[-1]}, 描述更新为: {last_step['StepDescription']}, 要求: {last_step['Requirement']}")
+                
+                # 中间步骤 - After + 前一个步骤的描述
+                for i in range(1, len(combined_steps) - 1):
+                    step_index = combined_steps[i]
+                    step = group_steps[step_index]
+                    step["Requirement"] = after_test_requirement
+                    
+                    # 获取前一个步骤的描述
+                    prev_step_index = combined_steps[i-1]
+                    prev_step_description = group_steps[prev_step_index].get("StepDescription", 
+                                                                           group_steps[prev_step_index].get("Test", ""))
+                    step["StepDescription"] = "After " + prev_step_description
+                    logger.info(f"处理第{i+1}个步骤，索引: {step_index}, 描述更新为: {step['StepDescription']}, 要求: {step['Requirement']}")
+
+
+    def _collect_sample_sizes(self, matrix_data: List[List[str]], sample_size_row_index: int) -> List[str]:
+        """
+        收集样本大小信息
+        
+        Args:
+            matrix_data: Matrix数据
+            sample_size_row_index: 样本大小行索引
+            
+        Returns:
+            警告信息列表
+        """
+        warnings = []
+        
+        # 如果找到了Sample size行，则收集各组别的样品数量
+        if sample_size_row_index != -1 and sample_size_row_index < len(matrix_data):
+            sample_size_row = matrix_data[sample_size_row_index]
+            for group_name, col_index in self.group_col_indices.items():
+                if col_index < len(sample_size_row):
+                    sample_size = sample_size_row[col_index]
+                    self.group_sample_sizes[group_name] = sample_size
+        elif len(matrix_data) >= 3:  # 至少要有3行才能检查倒数第三行
+            # 如果没有找到Sample size行，添加警告信息
+            warnings.append("未找到样品数量行（应包含'sample'关键字且位于表格末尾几行），请检查数据格式")
+            
+        return warnings
+
+    # ==================== 数据访问方法 ====================
+    
     def get_group_steps(self, group_name: str) -> List[Dict[str, Any]]:
         """
         获取指定组别的步骤信息
