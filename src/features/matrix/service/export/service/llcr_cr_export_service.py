@@ -48,11 +48,6 @@ class LLCRCRExportService(BaseExportService):
         logger.debug(
             f"参数详情: sample_count={sample_count}, point_array={point_array}, is_delta_r_checked={is_delta_r_checked}, test_category_dict={test_category_dict}, cr_current_value={cr_current_value}")
         try:
-            # 重置状态变量
-            self.total_row_offset = 0
-            self.is_first_group = True
-            self.initial_test_rows = {}
-
             # 创建工作簿
             wb = Workbook()
             logger.debug("创建工作簿成功")
@@ -65,6 +60,11 @@ class LLCRCRExportService(BaseExportService):
 
                 # 为每个类别创建一个工作表
                 for category_name, points in test_category_dict.items():
+                    # 重置状态变量（针对每个工作表）
+                    self.total_row_offset = 0
+                    self.is_first_group = True
+                    self.initial_test_rows = {}
+                    
                     logger.debug(f"为类别'{category_name}'创建工作表，点位: {points}")
                     # 创建工作表并命名（限制工作表名称长度不超过31个字符）
                     safe_category_name = category_name[:31] if len(category_name) > 31 else category_name
@@ -100,7 +100,11 @@ class LLCRCRExportService(BaseExportService):
                         self._insert_record_data_table(ws, sample_count, point_array, sample_count, is_delta_r_checked, cr_current_value)
             else:
                 logger.debug("使用默认逻辑创建单一工作表")
-                # 如果没有提供test_category_dict，使用原有的逻辑
+                # 重置状态变量
+                self.total_row_offset = 0
+                self.is_first_group = True
+                self.initial_test_rows = {}
+                
                 # 如果没有提供测试点位数组，则从数据模型中提取
                 if point_array is None:
                     point_array = self._extract_point_array()
@@ -161,12 +165,14 @@ class LLCRCRExportService(BaseExportService):
                                   cr_current_value=""):
         """插入记录数据表格 - 增强版本，支持Matrix数据结构"""
         try:
+            logger.debug(f"开始处理工作表 {ws.title} 的记录数据表格")
             group_name = None
             
             # 判断第一个参数是sample_count还是group_name
             if isinstance(sample_count_or_group_name, str):
                 # 新的Matrix数据模式
                 group_name = sample_count_or_group_name
+                logger.debug(f"处理组: {group_name}, is_first_group: {self.is_first_group}")
                 if not self.matrix_data:
                     logger.error("Matrix数据未设置，无法插入记录数据表格")
                     return
@@ -216,15 +222,18 @@ class LLCRCRExportService(BaseExportService):
                 self.total_column_offset = 0  # 初始化列偏移量
                 # 保存第一个组的统计列起始位置，供后续组使用
                 self.first_group_stat_start_col = stat_start_col
+                logger.debug(f"[{group_name}] 是第一个组，stat_start_col设置为: {stat_start_col}")
             else:
                 # 后续组使用第一个组的统计列起始位置，确保统计列位置一致
                 stat_start_col = self.first_group_stat_start_col
+                logger.debug(f"[{group_name}] 不是第一个组，stat_start_col复用: {stat_start_col}")
 
             # 如果勾选了 Delta R，统计列需要延后（仅对LLCR有效）
             delta_r_start_col = None
             if is_delta_r_checked and self.test_type == "LLCR":
                 delta_r_start_col = stat_start_col
                 stat_start_col = delta_r_start_col + sample_count
+                logger.debug(f"[{group_name}] Delta R已勾选，delta_r_start_col: {delta_r_start_col}, 新stat_start_col: {stat_start_col}")
 
             record_data_tbl_title_row = 9  # 记录数据表头
             total_rows = len(point_array)  # 数据行数
@@ -236,9 +245,12 @@ class LLCRCRExportService(BaseExportService):
                                        calculateheader_col, calculate_start_col, calculate_end_col,
                                        stat_start_col, delta_r_start_col, sample_count, is_delta_r_checked)
                 self.is_first_group = False
+                logger.debug(f"[{group_name}] 已插入表头，设置is_first_group为False")
 
             # 计算当前表格的起始行
             current_row = 10 + self.total_row_offset
+            logger.debug(f"[{group_name}] 当前工作表起始行: {current_row}, 总行偏移量: {self.total_row_offset}")
+            logger.debug(f"[{group_name}] 当前工作表起始行: {current_row}, 总行偏移量: {self.total_row_offset}")
 
             # 填写步骤
             for step_key, step_description in step_dict.items():
@@ -301,6 +313,7 @@ class LLCRCRExportService(BaseExportService):
             # 保存当前组的行偏移量，用于后续计算
             current_total_row_offset = self.total_row_offset
             self.total_row_offset += step_count * len(point_array)
+            logger.debug(f"[{group_name}] 更新总行偏移量: {self.total_row_offset}, 步骤数: {step_count}, 点位数: {len(point_array)}")
 
             # 更新总列偏移量
             self.total_column_offset += (calculate_end_col - record_start_col + 1)
@@ -324,7 +337,9 @@ class LLCRCRExportService(BaseExportService):
             self._set_environment_column_format(ws, record_data_tbl_title_row, env_start_col, end_row,
                                                 env_start_col + 2)
             # 设置记录表格格式
+            logger.debug(f"设置记录表格格式，范围1: ({record_data_tbl_title_row}, 1) 到 ({end_row}, {record_end_col})")
             self._set_table_format(ws, record_data_tbl_title_row, 1, end_row, record_end_col, 2)
+            logger.debug(f"设置记录表格格式，范围2: ({record_data_tbl_title_row}, {calculateheader_col}) 到 ({end_row}, {stat_start_col + 6})")
             self._set_table_format(ws, record_data_tbl_title_row, calculateheader_col, end_row, stat_start_col + 6, 2)
 
             logger.debug(f"成功插入组 {group_name} 的记录数据表格，步骤数: {step_count}")
@@ -349,6 +364,7 @@ class LLCRCRExportService(BaseExportService):
                               stat_start_col, delta_r_start_col, sample_count, is_delta_r_checked, cr_current_value=""):
         """插入表格表头"""
         record_data_tbl_title_row = 9
+        logger.debug(f"插入表头到工作表 {ws.title}, record_data_tbl_title_row={record_data_tbl_title_row}")
 
         # 填写原始记录组别和步骤列表头
         title_value = f"CR {cr_current_value}A" if self.test_type == "CR" and cr_current_value else self.test_type if self.test_type else "LLCR"
@@ -392,6 +408,7 @@ class LLCRCRExportService(BaseExportService):
 
         # 设置表头样式
         self._set_header_style(ws, record_data_tbl_title_row, stat_start_col)
+        logger.debug(f"完成表头插入到工作表 {ws.title}")
 
     def _insert_calculation_formulas(self, ws, current_row, point_array, sample_count,
                                      calculate_start_col, bulk_avg_cell, current_cr_cell):
@@ -489,29 +506,33 @@ class LLCRCRExportService(BaseExportService):
     def _merge_cells_for_step(self, ws, current_row, point_array, stat_start_col, calculateheader_col):
         """合并步骤相关的单元格"""
         rows_count = len(point_array)
+        logger.debug(f"合并单元格，起始行: {current_row}, 行数: {rows_count}, stat_start_col: {stat_start_col}, calculateheader_col: {calculateheader_col}")
 
         # 合并统计列
         for i in range(7):  # Min到Rel. Hum.:% 共7列
             if stat_start_col + i <= stat_start_col + 6: # 确保安全范围
-                ws.merge_cells(start_row=current_row, start_column=stat_start_col + i,
-                               end_row=current_row + rows_count - 1, end_column=stat_start_col + i)
-                self._merge_cells_style(ws, current_row, stat_start_col + i, rows_count)
-                column_letter = get_column_letter(stat_start_col + i)
-                logger.debug(f"合并了统计列第{i+1}列（{column_letter}列），从行{current_row}到行{current_row + rows_count - 1}")
+                start_row = current_row
+                end_row = current_row + rows_count - 1
+                col = stat_start_col + i
+                logger.debug(f"合并统计列单元格: ({start_row}, {col}) 到 ({end_row}, {col})")
+                ws.merge_cells(start_row=start_row, start_column=col,
+                               end_row=end_row, end_column=col)
+                self._merge_cells_style(ws, start_row, col, rows_count)
+                column_letter = get_column_letter(col)
 
         # 合并步骤描述列
+        logger.debug(f"合并步骤描述列单元格: ({current_row}, 2) 到 ({current_row + rows_count - 1}, 2)")
         ws.merge_cells(start_row=current_row, start_column=2,
                        end_row=current_row + rows_count - 1, end_column=2)
         self._merge_cells_style(ws, current_row, 2, rows_count)
         column_letter = get_column_letter(2)
-        logger.debug(f"合并了步骤描述列（{column_letter}列），从行{current_row}到行{current_row + rows_count - 1}")
 
         # 合并计算区域的步骤描述列（对应统计列的步骤描述）
+        logger.debug(f"合并计算区域步骤描述列单元格: ({current_row}, {calculateheader_col+1}) 到 ({current_row + rows_count - 1}, {calculateheader_col+1})")
         ws.merge_cells(start_row=current_row, start_column=calculateheader_col + 1,
                        end_row=current_row + rows_count - 1, end_column=calculateheader_col + 1)
         self._merge_cells_style(ws, current_row, 5, rows_count)
         column_letter = get_column_letter(5)
-        logger.debug(f"合并了计算区域的步骤描述列（{column_letter}列），从行{current_row}到行{current_row + rows_count - 1}")
 
 
     # 以下辅助方法需要根据实际需求实现

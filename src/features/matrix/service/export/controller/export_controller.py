@@ -28,24 +28,24 @@ class ExportController:
             bool: 是否导出成功
         """
         try:
-            logger.debug(f"开始导出操作，类型: {export_type}，路径: {file_path}")
-
-            # 添加调试信息
-            try:
-                # 直接访问MatrixData类的rows属性
-                rows = self.data_model.rows
-                headers = self.data_model.headers
-                logger.debug(f"导出控制器数据概况 - 表头数量: {len(headers)}, 行数: {len(rows)}")
-                if headers:
-                    logger.debug(f"表头内容: {headers}")
-                if rows:
-                    logger.debug(f"导出控制器前3行:")
-                    for i, row in enumerate(rows[:3]):
-                        logger.debug(f"  第{i+1}行: {row}")
-                    if len(rows) > 3:
-                        logger.debug(f"  ... (还有{len(rows)-3}行)")
-            except Exception as e:
-                logger.error(f"获取导出控制器数据信息时出错: {e}")
+            # logger.debug(f"开始导出操作，类型: {export_type}，路径: {file_path}")
+            #
+            # # 添加调试信息
+            # try:
+            #     # 直接访问MatrixData类的rows属性
+            #     rows = self.data_model.rows
+            #     headers = self.data_model.headers
+            #     logger.debug(f"导出控制器数据概况 - 表头数量: {len(headers)}, 行数: {len(rows)}")
+            #     if headers:
+            #         logger.debug(f"表头内容: {headers}")
+            #     if rows:
+            #         logger.debug(f"导出控制器前3行:")
+            #         for i, row in enumerate(rows[:3]):
+            #             logger.debug(f"  第{i+1}行: {row}")
+            #         if len(rows) > 3:
+            #             logger.debug(f"  ... (还有{len(rows)-3}行)")
+            # except Exception as e:
+            #     logger.error(f"获取导出控制器数据信息时出错: {e}")
 
             if export_type == "matrix_excel":
                 # 移除调用matrix_excel导出服务的详细日志
