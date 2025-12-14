@@ -93,10 +93,11 @@ class LLCRCRExportService(BaseExportService):
                         for group_name in self.matrix_data.get_all_groups():
                             group_sample_size = self.matrix_data.get_group_sample_size(group_name)
                             parsed_sample_size = self._parse_sample_count(group_sample_size)
-                            self._insert_record_data_table(ws, group_name, points, is_delta_r_checked, cr_current_value)
+                            # 传递sample_count而不是parsed_sample_size
+                            self._insert_record_data_table(ws, group_name, points, sample_count, is_delta_r_checked, cr_current_value)
                     else:
                         # 回退到原有逻辑
-                        self._insert_record_data_table(ws, sample_count, points, is_delta_r_checked, cr_current_value)
+                        self._insert_record_data_table(ws, sample_count, point_array, sample_count, is_delta_r_checked, cr_current_value)
             else:
                 logger.debug("使用默认逻辑创建单一工作表")
                 # 如果没有提供test_category_dict，使用原有的逻辑
@@ -126,11 +127,12 @@ class LLCRCRExportService(BaseExportService):
                     for group_name in self.matrix_data.get_all_groups():
                         group_sample_size = self.matrix_data.get_group_sample_size(group_name)
                         parsed_sample_size = self._parse_sample_count(group_sample_size)
-                        self._insert_record_data_table(ws, group_name, point_array, is_delta_r_checked,
+                        # 传递sample_count而不是parsed_sample_size
+                        self._insert_record_data_table(ws, group_name, point_array, sample_count, is_delta_r_checked,
                                                      cr_current_value)
                 else:
                     # 回退到原有逻辑
-                    self._insert_record_data_table(ws, sample_count, point_array, is_delta_r_checked, cr_current_value)
+                    self._insert_record_data_table(ws, sample_count, point_array, sample_count, is_delta_r_checked, cr_current_value)
 
             # 保存文件
             logger.debug(f"准备保存工作簿到: {file_path}")
@@ -155,10 +157,12 @@ class LLCRCRExportService(BaseExportService):
             logger.warning(f"无法解析样本数量: {sample_size}，使用默认值1")
             return 1
 
-    def _insert_record_data_table(self, ws, sample_count_or_group_name, point_array, is_delta_r_checked=False,
+    def _insert_record_data_table(self, ws, sample_count_or_group_name, point_array, sample_count, is_delta_r_checked=False,
                                   cr_current_value=""):
         """插入记录数据表格 - 增强版本，支持Matrix数据结构"""
         try:
+            group_name = None
+            
             # 判断第一个参数是sample_count还是group_name
             if isinstance(sample_count_or_group_name, str):
                 # 新的Matrix数据模式
@@ -167,13 +171,22 @@ class LLCRCRExportService(BaseExportService):
                     logger.error("Matrix数据未设置，无法插入记录数据表格")
                     return
 
-                group_data = self.matrix_data.get_test_data_for_export(group_name)
+                # 定义过滤函数
+                def test_type_filter(step):
+                    # 如果没有指定测试类型，则包含所有步骤
+                    if not self.test_type or self.test_type not in ["LLCR", "CR"]:
+                        return True
+                    # 只包含与当前测试类型匹配的步骤
+                    return step.get("Test", "").upper() == self.test_type.upper()
+
+                # 根据测试类型过滤获取相应的测试数据
+                group_data = self.matrix_data.get_test_data_for_export(group_name, test_type_filter)
                 if not group_data:
                     logger.warning(f"组 {group_name} 没有可用的测试数据")
                     return
 
                 step_dict = group_data["step_dict"]
-                sample_count = self._parse_sample_count(group_data["sample_size"])
+                # sample_count已经在函数参数中传入，我们直接使用它
                 group_col_index = group_data["column_index"]
             else:
                 # 原有的sample_count模式（向后兼容）
@@ -193,7 +206,19 @@ class LLCRCRExportService(BaseExportService):
             calculateheader_col = record_end_col + 2 + 1  # 中间空格两列
             calculate_start_col = calculateheader_col + headers_cols  # 开始计算扣除体积电阻的值
             calculate_end_col = calculate_start_col + sample_count - 1
-            stat_start_col = calculate_end_col + 1  # 开始统计列
+            # 打印calculateheader_col的初始值和样本数量
+            logger.debug(f"[{group_name}] 样本数量: {sample_count}, calculateheader_col初始值: {calculateheader_col}")
+
+            # 计算统计列起始位置，考虑total_row_offset的影响
+            # 使用全局固定的统计列起始位置，避免每个组独立计算导致偏移
+            if self.is_first_group:
+                stat_start_col = calculate_end_col + 1  # 第一个组使用相对位置
+                self.total_column_offset = 0  # 初始化列偏移量
+                # 保存第一个组的统计列起始位置，供后续组使用
+                self.first_group_stat_start_col = stat_start_col
+            else:
+                # 后续组使用第一个组的统计列起始位置，确保统计列位置一致
+                stat_start_col = self.first_group_stat_start_col
 
             # 如果勾选了 Delta R，统计列需要延后（仅对LLCR有效）
             delta_r_start_col = None
@@ -206,9 +231,10 @@ class LLCRCRExportService(BaseExportService):
 
             # 如果是第一个group，插入记录数据表格表头
             if self.is_first_group:
+                # logger.debug(f"[{group_name}] 插入表头前 calculateheader_col: {calculateheader_col}")
                 self._insert_table_headers(ws, headers_cols, record_start_col, record_end_col,
-                                           calculateheader_col, calculate_start_col, calculate_end_col,
-                                           stat_start_col, delta_r_start_col, sample_count, is_delta_r_checked)
+                                       calculateheader_col, calculate_start_col, calculate_end_col,
+                                       stat_start_col, delta_r_start_col, sample_count, is_delta_r_checked)
                 self.is_first_group = False
 
             # 计算当前表格的起始行
@@ -216,6 +242,9 @@ class LLCRCRExportService(BaseExportService):
 
             # 填写步骤
             for step_key, step_description in step_dict.items():
+                # 打印当前步骤的calculateheader_col值
+                logger.debug(f"[{group_name}] 步骤 {step_key} 处理中, calculateheader_col: {calculateheader_col}, stat_start_col: {stat_start_col}")
+                
                 # 填写步骤描述
                 ws.cell(row=current_row, column=2).value = step_description.strip()
                 ws.cell(row=current_row, column=calculateheader_col + 1).value = step_description.strip()
@@ -233,53 +262,67 @@ class LLCRCRExportService(BaseExportService):
 
                 # 插入计算公式
                 self._insert_calculation_formulas(ws, current_row, point_array, sample_count,
-                                                  calculate_start_col, bulk_avg_cell, current_cr_cell)
+                                              calculate_start_col, bulk_avg_cell, current_cr_cell)
 
                 # 如果勾选了 Delta R，插入 Delta R 并填写公式（仅对LLCR有效）
                 if is_delta_r_checked and self.test_type == "LLCR" and delta_r_start_col:
                     self._handle_delta_r(ws, current_row, point_array, sample_count,
-                                         delta_r_start_col, calculate_start_col, step_description)
+                                     delta_r_start_col, calculate_start_col, step_description)
 
                 # 插入统计公式
                 self._insert_statistics_formulas(ws, current_row, point_array, sample_count,
-                                                 calculate_start_col, calculate_end_col, stat_start_col,
-                                                 delta_r_start_col, is_delta_r_checked)
+                                             calculate_start_col, calculate_end_col, stat_start_col,
+                                             delta_r_start_col, is_delta_r_checked)
 
                 # 设置数据范围的数字格式
                 self._set_number_format(ws, current_row, point_array, sample_count,
-                                        record_start_col, record_end_col, calculate_start_col, stat_start_col)
+                                    record_start_col, record_end_col, calculate_start_col, stat_start_col)
 
                 # 合并单元格
-                self._merge_cells_for_step(ws, current_row, point_array, stat_start_col)
+                self._merge_cells_for_step(ws, current_row, point_array, stat_start_col, calculateheader_col)
 
                 # 更新当前行
-                current_row = current_row + len(point_array) + 1
+                current_row = current_row + len(point_array)
 
             # 填写第一列组名
             ws.cell(row=10 + self.total_row_offset, column=1).value = f"Group {group_name}"
             if len(point_array) > 0:
                 ws.merge_cells(start_row=10 + self.total_row_offset, start_column=1,
-                               end_row=current_row - 1, end_column=1)
+                           end_row=current_row - 1, end_column=1)
 
             ws.cell(row=10 + self.total_row_offset, column=calculateheader_col).value = f"Group {group_name}"
             if len(point_array) > 0:
                 ws.merge_cells(start_row=10 + self.total_row_offset, start_column=calculateheader_col,
-                               end_row=current_row - 1, end_column=calculateheader_col)
+                           end_row=current_row - 1, end_column=calculateheader_col)
 
             # 更新总偏移量
             step_count = len(step_dict)
-            self.total_row_offset += step_count * (len(point_array) + 1)
+
+            # 保存当前组的行偏移量，用于后续计算
+            current_total_row_offset = self.total_row_offset
+            self.total_row_offset += step_count * len(point_array)
+
+            # 更新总列偏移量
+            self.total_column_offset += (calculate_end_col - record_start_col + 1)
+
+            # 只有在最后一个组处理完后才设置统计数据背景格式和环境记录格式
+            # 获取所有组的数量
+            all_groups = []
+            if self.matrix_data:
+                all_groups = self.matrix_data.get_all_groups()
+        
+            # 当处理到最后一个组时，设置统计列和环境列的格式
+            is_last_group = (group_name == all_groups[-1] if all_groups else True)
+        
+            end_row = record_data_tbl_title_row + self.total_row_offset
+
 
             # 设置统计数据背景格式
-            end_row = record_data_tbl_title_row + self.total_row_offset
             self._set_stat_column_format(ws, record_data_tbl_title_row, stat_start_col, end_row, stat_start_col + 3)
-
-            # 设置日期环境记录背景格式（如果有环境记录列）
+            # 设置日期环境记录背景格式
             env_start_col = stat_start_col + 4
-            if env_start_col <= stat_start_col + 6:  # 确保不超出范围
-                self._set_environment_column_format(ws, record_data_tbl_title_row, env_start_col, end_row,
-                                                    env_start_col + 2)
-
+            self._set_environment_column_format(ws, record_data_tbl_title_row, env_start_col, end_row,
+                                                env_start_col + 2)
             # 设置记录表格格式
             self._set_table_format(ws, record_data_tbl_title_row, 1, end_row, record_end_col, 2)
             self._set_table_format(ws, record_data_tbl_title_row, calculateheader_col, end_row, stat_start_col + 6, 2)
@@ -335,14 +378,17 @@ class LLCRCRExportService(BaseExportService):
             ws.cell(row=record_data_tbl_title_row, column=calculate_start_col + i - 1).value = f"{i}#"
 
         # 如果勾选了 Delta R，插入 Delta R 表格 (仅对LLCR有效)
-        if is_delta_r_checked and self.test_type == "LLCR" and delta_r_start_col:
+        # 只在第一个组时插入Delta R表头
+        if self.is_first_group and is_delta_r_checked and self.test_type == "LLCR" and delta_r_start_col:
             for i in range(1, sample_count + 1):
                 ws.cell(row=record_data_tbl_title_row, column=delta_r_start_col + i - 1).value = f"{i}#ΔR"
 
         # 填写统计标题和日期环境记录
-        stat_headers = ["Min", "Max", "Avg", "Stdev", "Test Date", "Amb Temp(°C)", "Rel. Hum.:%"]
-        for i, header in enumerate(stat_headers):
-            ws.cell(row=record_data_tbl_title_row, column=stat_start_col + i).value = header
+        # 只在第一个组时插入统计标题和环境记录
+        if self.is_first_group:
+            stat_headers = ["Min", "Max", "Avg", "Stdev", "Test Date", "Amb Temp(°C)", "Rel. Hum.:%"]
+            for i, header in enumerate(stat_headers):
+                ws.cell(row=record_data_tbl_title_row, column=stat_start_col + i).value = header
 
         # 设置表头样式
         self._set_header_style(ws, record_data_tbl_title_row, stat_start_col)
@@ -440,34 +486,54 @@ class LLCRCRExportService(BaseExportService):
             for cell in row:
                 cell.number_format = number_format
 
-    def _merge_cells_for_step(self, ws, current_row, point_array, stat_start_col):
+    def _merge_cells_for_step(self, ws, current_row, point_array, stat_start_col, calculateheader_col):
         """合并步骤相关的单元格"""
         rows_count = len(point_array)
 
         # 合并统计列
         for i in range(7):  # Min到Rel. Hum.:% 共7列
-            if stat_start_col + i <= stat_start_col + 6:  # 确保安全范围
+            if stat_start_col + i <= stat_start_col + 6: # 确保安全范围
                 ws.merge_cells(start_row=current_row, start_column=stat_start_col + i,
                                end_row=current_row + rows_count - 1, end_column=stat_start_col + i)
                 self._merge_cells_style(ws, current_row, stat_start_col + i, rows_count)
+                column_letter = get_column_letter(stat_start_col + i)
+                logger.debug(f"合并了统计列第{i+1}列（{column_letter}列），从行{current_row}到行{current_row + rows_count - 1}")
 
         # 合并步骤描述列
         ws.merge_cells(start_row=current_row, start_column=2,
                        end_row=current_row + rows_count - 1, end_column=2)
         self._merge_cells_style(ws, current_row, 2, rows_count)
+        column_letter = get_column_letter(2)
+        logger.debug(f"合并了步骤描述列（{column_letter}列），从行{current_row}到行{current_row + rows_count - 1}")
 
-        ws.merge_cells(start_row=current_row, start_column=5,  # calculateheader_col + 1
-                       end_row=current_row + rows_count - 1, end_column=5)
+        # 合并计算区域的步骤描述列（对应统计列的步骤描述）
+        ws.merge_cells(start_row=current_row, start_column=calculateheader_col + 1,
+                       end_row=current_row + rows_count - 1, end_column=calculateheader_col + 1)
         self._merge_cells_style(ws, current_row, 5, rows_count)
+        column_letter = get_column_letter(5)
+        logger.debug(f"合并了计算区域的步骤描述列（{column_letter}列），从行{current_row}到行{current_row + rows_count - 1}")
+
 
     # 以下辅助方法需要根据实际需求实现
     def _merge_cells_style(self, ws, start_row, start_col, row_span):
         """设置合并单元格样式"""
-        pass
+        # 实现合并单元格的样式设置
+        for row in range(start_row, start_row + row_span):
+            cell = ws.cell(row=row, column=start_col)
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
 
     def _set_header_style(self, ws, title_row, stat_start_col):
         """设置表头样式"""
-        pass
+        # 设置表头样式
+        header_font = Font(name='Arial', size=9, bold=True)
+        header_fill = PatternFill(start_color="DCDCDC", end_color="DCDCDC", fill_type="solid")
+        
+        # 设置表头行的字体和背景色
+        for col in range(1, ws.max_column + 1):
+            cell = ws.cell(row=title_row, column=col)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
 
     # 保留您原有的其他方法...
     def _extract_point_array(self):
@@ -707,7 +773,14 @@ class LLCRCRExportService(BaseExportService):
             for row in range(title_row, end_row + 1):
                 for col in range(start_col, end_col + 1):
                     cell = worksheet.cell(row=row, column=col)
-                    cell.fill = PatternFill(start_color="99CCFF", end_color="99CCFF", fill_type="solid")
+                    # 统计列的第一列、第二列要和原始数据的第一列、第二列一样，不需要填充背景色和添加边框
+                    if col >= start_col + 2:  # 从第三列开始应用背景色
+                        # Min到Stdev列使用浅蓝色背景
+                        if col <= start_col + 3:
+                            cell.fill = PatternFill(start_color="87CEEB", end_color="87CEEB", fill_type="solid")  # 浅蓝色
+                        # 环境列使用黄色背景
+                        elif col >= start_col + 4 and col <= start_col + 6:
+                            cell.fill = PatternFill(start_color="FFFFCC", end_color="FFFFCC", fill_type="solid")  # 淡黄色
 
             # 设置 start_col + 1 列的字体加粗 (Max列)
             for row in range(title_row + 1, end_row + 1):
@@ -719,6 +792,7 @@ class LLCRCRExportService(BaseExportService):
                     cell.font = Font(name='Arial', bold=True, size=9)
         except Exception as e:
             logger.error(f"设置统计数据背景格式时出错: {e}", exc_info=True)
+
 
     def _set_environment_column_format(self, worksheet, title_row, start_col, end_row, end_col):
         """设置日期环境记录格式"""

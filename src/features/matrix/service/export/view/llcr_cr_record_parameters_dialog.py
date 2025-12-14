@@ -97,27 +97,8 @@ class LLCR_CR_RecordParametersDialog(QDialog):
         
     def _init_points(self):
         """初始化测试点位"""
-        # 如果提供了测试类别字典，则使用其中的点位
-        if self.test_category_dict:
-            # 合并所有测试类别中的点位（去重）
-            all_points = []
-            for points in self.test_category_dict.values():
-                all_points.extend(points)
-            # 去重但保持顺序
-            unique_points = []
-            for point in all_points:
-                if point not in unique_points:
-                    unique_points.append(point)
-            
-            # 设置文本输入框的内容
-            point_text = "; ".join([", ".join(unique_points)])
-            self.point_input.setPlainText(point_text)
-        elif self.default_points:
-            # 设置文本输入框的内容
-            point_text = ", ".join(self.default_points)
-            self.point_input.setPlainText(point_text)
-        else:
-            self._init_default_points()
+        # 始终使用默认的"P1"点位，不再从Matrix数据中提取
+        self._init_default_points()
         
         # 设置焦点和光标位置
         self.point_input.setFocus()

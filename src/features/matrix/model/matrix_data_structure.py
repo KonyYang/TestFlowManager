@@ -17,6 +17,7 @@ class MatrixDataStructure:
         self.group_col_indices: Dict[str, int] = {}
         self.dl_number: str = "DL-UNKNOWN"
         self.project_data_file_path: str = None
+        self._is_parsed = False  # 添加解析状态标志
         
     def __str__(self):
         return f"MatrixDataStructure(dl_number={self.dl_number}, project_data_file_path={self.project_data_file_path})"
@@ -33,6 +34,11 @@ class MatrixDataStructure:
         Returns:
             警告信息列表
         """
+        # 检查是否已经解析过，避免重复解析
+        if self._is_parsed:
+            logger.debug("Matrix数据已解析过，跳过重复解析")
+            return []
+            
         warnings = []
         
         try:
@@ -76,6 +82,9 @@ class MatrixDataStructure:
             # 收集样本大小
             sample_size_warnings = self._collect_sample_sizes(matrix_data, sample_size_row_index)
             warnings.extend(sample_size_warnings)
+            
+            # 标记为已解析
+            self._is_parsed = True
             
         except Exception as e:
             logger.error(f"Error extracting test data: {e}")
@@ -395,12 +404,14 @@ class MatrixDataStructure:
         """
         return list(self.group_steps.keys())
     
-    def get_test_data_for_export(self, group_name: str) -> Dict[str, Any]:
+    def get_test_data_for_export(self, group_name: str, filter_func=None) -> Dict[str, Any]:
         """
         获取用于导出的测试数据
         
         Args:
             group_name: 组别名称
+            filter_func: 过滤函数，接受一个step字典作为参数，返回布尔值决定是否包含该步骤
+                        如果为None则返回所有测试数据
             
         Returns:
             包含step_dict、sample_size和column_index的字典
@@ -411,6 +422,10 @@ class MatrixDataStructure:
         # 构造step_dict，键为步骤号，值为步骤描述
         step_dict = {}
         for step in self.group_steps[group_name]:
+            # 如果提供了过滤函数，则使用它来决定是否包含该步骤
+            if filter_func and not filter_func(step):
+                continue
+            
             step_number = step.get("StepNumber", "")
             step_description = step.get("StepDescription", step.get("Test", ""))
             if step_number:
