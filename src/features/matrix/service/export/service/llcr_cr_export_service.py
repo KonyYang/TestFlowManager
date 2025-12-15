@@ -790,27 +790,25 @@ class LLCRCRExportService(BaseExportService):
     def _set_stat_column_format(self, worksheet, title_row, start_col, end_row, end_col):
         """设置统计数据背景格式"""
         try:
-            # 获取环境记录列范围
-            for row in range(title_row, end_row + 1):
-                for col in range(start_col, end_col + 1):
-                    cell = worksheet.cell(row=row, column=col)
-                    # 统计列的第一列、第二列要和原始数据的第一列、第二列一样，不需要填充背景色和添加边框
-                    if col >= start_col + 2:  # 从第三列开始应用背景色
-                        # Min到Stdev列使用浅蓝色背景
-                        if col <= start_col + 3:
-                            cell.fill = PatternFill(start_color="87CEEB", end_color="87CEEB", fill_type="solid")  # 浅蓝色
-                        # 环境列使用黄色背景
-                        elif col >= start_col + 4 and col <= start_col + 6:
-                            cell.fill = PatternFill(start_color="FFFFCC", end_color="FFFFCC", fill_type="solid")  # 淡黄色
+            # 预先创建样式对象，避免在循环中重复创建
+            blue_fill = PatternFill(start_color="87CEEB", end_color="87CEEB", fill_type="solid")
+            bold_font = Font(name='Arial', bold=True, size=9)
+            normal_font = Font(name='Arial', size=9)
+            
+            # 为第一列到第四列(Min, Max, Avg, Stdev)设置浅蓝色背景
+            for col_offset in range(4):  # 0, 1, 2, 3 (第一列到第四列)
+                col_letter = get_column_letter(start_col + col_offset)
+                col_range = f"{col_letter}{title_row+1}:{col_letter}{end_row}"
+                for row in worksheet[col_range]:
+                    for cell in row:
+                        cell.fill = blue_fill
 
-            # 设置 start_col + 1 列的字体加粗 (Max列)
-            for row in range(title_row + 1, end_row + 1):
-                cell = worksheet.cell(row=row, column=start_col + 1)
-                # 保持Arial字体，只修改加粗属性
-                if cell.font:
-                    cell.font = Font(name='Arial', bold=True, size=9)
-                else:
-                    cell.font = Font(name='Arial', bold=True, size=9)
+            # 为第二列(Max)设置字体加粗
+            max_col_letter = get_column_letter(start_col + 1)
+            max_range = f"{max_col_letter}{title_row+1}:{max_col_letter}{end_row}"
+            for row in worksheet[max_range]:
+                for cell in row:
+                    cell.font = bold_font
         except Exception as e:
             logger.error(f"设置统计数据背景格式时出错: {e}", exc_info=True)
 
@@ -818,15 +816,19 @@ class LLCRCRExportService(BaseExportService):
     def _set_environment_column_format(self, worksheet, title_row, start_col, end_row, end_col):
         """设置日期环境记录格式"""
         try:
-            # 获取环境记录列范围
-            for row in range(title_row, end_row + 1):
-                for col in range(start_col, end_col + 1):
-                    cell = worksheet.cell(row=row, column=col)
-                    cell.fill = PatternFill(start_color="FFFFCC", end_color="FFFFCC", fill_type="solid")  # 淡黄色
-                    # 保持Arial字体，只修改背景色和加粗
-                    if cell.font:
-                        cell.font = Font(name='Arial', bold=True, size=9)
-                    else:
-                        cell.font = Font(name='Arial', bold=True, size=9)
+            # 预先创建样式对象
+            yellow_fill = PatternFill(start_color="FFFFCC", end_color="FFFFCC", fill_type="solid")
+            bold_font = Font(name='Arial', bold=True, size=9)
+            
+            # 构建范围字符串
+            start_col_letter = get_column_letter(start_col)
+            end_col_letter = get_column_letter(end_col)
+            range_str = f"{start_col_letter}{title_row+1}:{end_col_letter}{end_row}"
+            
+            # 为整个范围应用样式
+            for row in worksheet[range_str]:
+                for cell in row:
+                    cell.fill = yellow_fill
+                    cell.font = bold_font
         except Exception as e:
             logger.error(f"设置环境记录背景格式时出错: {e}", exc_info=True)
