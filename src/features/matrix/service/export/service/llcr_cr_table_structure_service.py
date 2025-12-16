@@ -9,6 +9,66 @@ class LLCRCRTableStructureService:
     def __init__(self, formatting_service):
         self.formatting_service = formatting_service
         
+    def insert_table_headers(self, ws, headers_cols, record_start_col, record_end_col,
+                             calculateheader_col, calculate_start_col, calculate_end_col,
+                             stat_start_col, delta_r_start_col, sample_count, is_delta_r_checked, 
+                             cr_current_value, test_type, is_first_group=True):
+        """插入表格表头"""
+        record_data_tbl_title_row = 9
+        logger.debug(f"插入表头到工作表 {ws.title}, record_data_tbl_title_row={record_data_tbl_title_row}")
+
+        # 填写原始记录组别和步骤列表头
+        title_value = f"CR {cr_current_value}A" if test_type == "CR" and cr_current_value else test_type if test_type else "LLCR"
+        ws.cell(row=record_data_tbl_title_row, column=1).value = title_value
+        ws.merge_cells(start_row=record_data_tbl_title_row, start_column=1,
+                       end_row=record_data_tbl_title_row, end_column=2)
+
+        # 合并单元格样式
+        self._merge_cells_style(ws, record_data_tbl_title_row, 1, 2)
+
+        ws.cell(row=record_data_tbl_title_row, column=3).value = "S/N"
+
+        # 填写统计记录组别和步骤列表头
+        ws.cell(row=record_data_tbl_title_row, column=calculateheader_col).value = "unit:mΩ"
+        ws.merge_cells(start_row=record_data_tbl_title_row, start_column=calculateheader_col,
+                       end_row=record_data_tbl_title_row, end_column=calculateheader_col + 1)
+        self._merge_cells_style(ws, record_data_tbl_title_row, calculateheader_col, calculateheader_col + 1)
+
+        ws.cell(row=record_data_tbl_title_row, column=calculateheader_col + 2).value = "S/N"
+
+        # 填写原始记录样品编号表头
+        for i in range(1, sample_count + 1):
+            ws.cell(row=record_data_tbl_title_row, column=i + headers_cols).value = f"{i}#"
+
+        # 填写统计记录样品编号表头
+        for i in range(1, sample_count + 1):
+            ws.cell(row=record_data_tbl_title_row, column=calculate_start_col + i - 1).value = f"{i}#"
+
+        # 如果勾选了 Delta R，插入 Delta R 表格 (仅对LLCR有效)
+        # 只在第一个组时插入Delta R表头
+        if is_first_group and is_delta_r_checked and test_type == "LLCR" and delta_r_start_col:
+            for i in range(1, sample_count + 1):
+                ws.cell(row=record_data_tbl_title_row, column=delta_r_start_col + i - 1).value = f"{i}#ΔR"
+
+        # 填写统计标题和日期环境记录
+        # 只在第一个组时插入统计标题和环境记录
+        if is_first_group:
+            stat_headers = ["Min", "Max", "Avg", "Stdev", "Test Date", "Amb Temp(°C)", "Rel. Hum.:%"]
+            for i, header in enumerate(stat_headers):
+                ws.cell(row=record_data_tbl_title_row, column=stat_start_col + i).value = header
+
+        # 设置表头样式
+        self._set_header_style(ws, record_data_tbl_title_row, stat_start_col)
+        logger.debug(f"完成表头插入到工作表 {ws.title}")
+
+    def _merge_cells_style(self, ws, start_row, start_col, row_span):
+        """设置合并单元格样式"""
+        self.formatting_service.format_merge_cells_style(ws, start_row, start_col, row_span)
+
+    def _set_header_style(self, ws, title_row, stat_start_col):
+        """设置表头样式"""
+        self.formatting_service.format_range_bold_header(ws, title_row, stat_start_col)
+        
     def insert_bulk_resistance_table(self, ws, test_type, cr_current_value):
         """插入体积电阻表格"""
         bulk_tbl_start_row = 1  # 体积电阻起始行
