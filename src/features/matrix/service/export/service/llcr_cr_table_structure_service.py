@@ -61,6 +61,36 @@ class LLCRCRTableStructureService:
         self._set_header_style(ws, record_data_tbl_title_row, stat_start_col)
         logger.debug(f"完成表头插入到工作表 {ws.title}")
 
+    def merge_cells_for_step(self, ws, current_row, point_array, stat_start_col, calculateheader_col):
+        """合并步骤相关的单元格"""
+        rows_count = len(point_array)
+        logger.debug(
+            f"合并单元格，起始行: {current_row}, 行数: {rows_count}, stat_start_col: {stat_start_col}, calculateheader_col: {calculateheader_col}")
+
+        # 合并统计列
+        for i in range(7):  # Min到Rel. Hum.:% 共7列
+            if stat_start_col + i <= stat_start_col + 6:  # 确保安全范围
+                start_row = current_row
+                end_row = current_row + rows_count - 1
+                col = stat_start_col + i
+                logger.debug(f"合并统计列单元格: ({start_row}, {col}) 到 ({end_row}, {col})")
+                ws.merge_cells(start_row=start_row, start_column=col,
+                               end_row=end_row, end_column=col)
+                self._merge_cells_style(ws, start_row, col, rows_count)
+
+        # 合并步骤描述列
+        logger.debug(f"合并步骤描述列单元格: ({current_row}, 2) 到 ({current_row + rows_count - 1}, 2)")
+        ws.merge_cells(start_row=current_row, start_column=2,
+                       end_row=current_row + rows_count - 1, end_column=2)
+        self._merge_cells_style(ws, current_row, 2, rows_count)
+
+        # 合并计算区域的步骤描述列（对应统计列的步骤描述）
+        logger.debug(
+            f"合并计算区域步骤描述列单元格: ({current_row}, {calculateheader_col + 1}) 到 ({current_row + rows_count - 1}, {calculateheader_col + 1})")
+        ws.merge_cells(start_row=current_row, start_column=calculateheader_col + 1,
+                       end_row=current_row + rows_count - 1, end_column=calculateheader_col + 1)
+        self._merge_cells_style(ws, current_row, 5, rows_count)
+
     def _merge_cells_style(self, ws, start_row, start_col, row_span):
         """设置合并单元格样式"""
         self.formatting_service.format_merge_cells_style(ws, start_row, start_col, row_span)
