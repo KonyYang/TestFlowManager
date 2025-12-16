@@ -30,7 +30,7 @@ class EventDispatcher:
             if event_name not in self._events:
                 self._events[event_name] = []
             self._events[event_name].append(callback)
-            logger.debug(f"Subscribed to event '{event_name}', total subscribers: {len(self._events[event_name])}")
+            # logger.debug(f"Subscribed to event '{event_name}', total subscribers: {len(self._events[event_name])}")
 
     def unsubscribe(self, event_name: str, callback: Callable) -> None:
         """

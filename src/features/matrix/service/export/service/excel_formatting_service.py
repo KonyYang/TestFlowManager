@@ -1,4 +1,4 @@
-from openpyxl.styles import Alignment, Border, Side, PatternFill
+from openpyxl.styles import Alignment, Border, Side, PatternFill, Font
 from openpyxl.utils import get_column_letter
 from src.core.logger import logger
 
@@ -300,3 +300,38 @@ class ExcelFormattingService:
             logger.debug("已完成工作表带背景色格式化")
         except Exception as e:
             logger.error(f"工作表带背景色格式化时出错: {e}")
+            
+    def format_range_bold_header(self, ws, title_row, stat_start_col):
+        """
+        设置表头样式（加粗字体和灰色背景）
+        
+        Args:
+            ws: 工作表对象
+            title_row: 标题行号
+            stat_start_col: 统计列起始列号
+        """
+        # 设置表头样式
+        header_font = Font(name='Arial', size=9, bold=True)
+        header_fill = PatternFill(start_color="DCDCDC", end_color="DCDCDC", fill_type="solid")
+        
+        # 设置表头行的字体和背景色
+        for col in range(1, ws.max_column + 1):
+            cell = ws.cell(row=title_row, column=col)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+            
+    def format_merge_cells_style(self, ws, start_row, start_col, row_span):
+        """
+        设置合并单元格样式
+        
+        Args:
+            ws: 工作表对象
+            start_row: 起始行号
+            start_col: 起始列号
+            row_span: 合并行数
+        """
+        # 实现合并单元格的样式设置
+        for row in range(start_row, start_row + row_span):
+            cell = ws.cell(row=row, column=start_col)
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)

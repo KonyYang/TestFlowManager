@@ -215,11 +215,11 @@ class RecordDataTableExportController:
         if matrix_data_structure:
             self.llcr_export_service.set_matrix_data(matrix_data_structure)
             self.cr_export_service.set_matrix_data(matrix_data_structure)
-            logger.debug("成功设置MatrixDataStructure到导出服务")
+            # logger.debug("成功设置MatrixDataStructure到导出服务")
             
             # 打印Matrix结构信息（仅关键信息）
             groups = matrix_data_structure.get_all_groups()
-            logger.debug(f"Matrix数据包含 {len(groups)} 个组别: {groups}")
+            # logger.debug(f"Matrix数据包含 {len(groups)} 个组别: {groups}")
         else:
             logger.warning("无法找到MatrixDataStructure对象")
 

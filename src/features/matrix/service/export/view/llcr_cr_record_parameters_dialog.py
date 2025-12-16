@@ -75,7 +75,7 @@ class LLCR_CR_RecordParametersDialog(QDialog):
             label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)  # 标签右对齐，垂直居中
             sample_layout.addWidget(label)
             self.cr_current_input = QLineEdit()
-            self.cr_current_input.setPlaceholderText("1.0")
+            self.cr_current_input.setText("1.0")
             self.cr_current_input.setMaximumWidth(100)  # 缩短70%的宽度
             sample_layout.addWidget(self.cr_current_input)
         
@@ -120,12 +120,15 @@ class LLCR_CR_RecordParametersDialog(QDialog):
     def _validate_cr_current(self, value):
         """验证CR电流值"""
         if not value:
-            return True, ""
+            return False, "电流值不能为空"
             
         try:
             float_value = float(value)
             if float_value <= 0:
                 return False, "电流值必须大于0"
+            # 检查是否全为0（包括0.000这样的形式）
+            if float_value == 0.0:
+                return False, "电流值不能为0或0.0"
             return True, ""
         except ValueError:
             return False, "请输入有效的数字"

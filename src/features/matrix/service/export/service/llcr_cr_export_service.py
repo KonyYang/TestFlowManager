@@ -1,10 +1,14 @@
 from src.features.matrix.service.export.service.base_export_service import BaseExportService
 from src.features.matrix.service.export.service.excel_formatting_service import ExcelFormattingService
+from src.features.matrix.service.export.service.llcr_cr_table_structure_service import LLCRCRTableStructureService
+from src.features.matrix.service.export.service.llcr_cr_formula_service import LLCRCRFormulaService
+from src.features.matrix.service.export.service.llcr_cr_styling_service import LLCRCRStylingService
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Side, PatternFill, Font
 from openpyxl.utils import get_column_letter
 from src.core.logger import logger
 import re
+
 
 class LLCRCRExportService(BaseExportService):
     """LLCR/CR导出服务"""
@@ -12,6 +16,9 @@ class LLCRCRExportService(BaseExportService):
     def __init__(self, data_model):
         super().__init__(data_model)
         self.formatting_service = ExcelFormattingService()
+        self.table_structure_service = LLCRCRTableStructureService(self.formatting_service)
+        self.formula_service = LLCRCRFormulaService()
+        self.styling_service = LLCRCRStylingService()
         self.test_type = None  # 用于标识当前是LLCR还是CR导出
         self.matrix_data = None  # Matrix数据结构实例
         self.total_row_offset = 0  # 总偏移量
@@ -140,7 +147,13 @@ class LLCRCRExportService(BaseExportService):
 
             # 保存文件
             logger.debug(f"准备保存工作簿到: {file_path}")
-            return self._save_workbook_safely(wb, file_path)
+            save_result = self._save_workbook_safely(wb, file_path)
+            
+            # 如果保存成功，则生成Summary工作表
+            if save_result:
+                self._generate_summary_sheet_internal(file_path)
+            
+            return save_result
         except Exception as e:
             logger.error(f"导出{self.test_type}失败: {e}", exc_info=True)
             return False
@@ -413,95 +426,37 @@ class LLCRCRExportService(BaseExportService):
     def _insert_calculation_formulas(self, ws, current_row, point_array, sample_count,
                                      calculate_start_col, bulk_avg_cell, current_cr_cell):
         """插入计算公式"""
-        for j in range(len(point_array)):
-            for i in range(1, sample_count + 1):
-                col_idx = calculate_start_col + i - 1
-                record_col_idx = i + 3  # 原始记录列索引
-
-                if self.test_type == "CR" and current_cr_cell:
-                    formula = f'=({get_column_letter(record_col_idx)}{current_row + j} - ${bulk_avg_cell})/${current_cr_cell}'
-                else:
-                    formula = f'={get_column_letter(record_col_idx)}{current_row + j} - ${bulk_avg_cell}'
-
-                ws.cell(row=current_row + j, column=col_idx).value = formula
+        self.formula_service.insert_calculation_formulas(
+            ws, current_row, point_array, sample_count,
+            calculate_start_col, bulk_avg_cell, current_cr_cell, self.test_type
+        )
 
     def _handle_delta_r(self, ws, current_row, point_array, sample_count,
                         delta_r_start_col, calculate_start_col, step_description):
         """处理Delta R计算"""
-        # 检查是否为初始步骤
-        is_initial = "initial" in step_description.lower() and self.test_type.lower() in step_description.lower()
-
-        # 获取组名
-        group_cell_value = ws.cell(row=10 + self.total_row_offset, column=1).value
-        group_name = group_cell_value.replace("Group ", "") if group_cell_value else "Unknown"
-
-        if is_initial:
-            # 初始步骤，Delta R的值等于计算值
-            for j in range(len(point_array)):
-                for i in range(1, sample_count + 1):
-                    calc_col_idx = calculate_start_col + i - 1
-                    delta_r_col_idx = delta_r_start_col + i - 1
-                    formula = f'={get_column_letter(calc_col_idx)}{current_row + j}'
-                    ws.cell(row=current_row + j, column=delta_r_col_idx).value = formula
-
-            # 记录初始测试行
-            group_cell_value = ws.cell(row=10 + self.total_row_offset, column=1).value
-            group_name = group_cell_value.replace("Group ", "") if group_cell_value else "Unknown"
-            self.initial_test_rows[group_name] = current_row
-
-        else:
-            # 非初始步骤，需要减去初始值
-            group_cell_value = ws.cell(row=10 + self.total_row_offset, column=1).value
-            group_name = group_cell_value.replace("Group ", "") if group_cell_value else "Unknown"
-            initial_row = self.initial_test_rows.get(group_name)
-            if not initial_row:
-                logger.warning(f"组 {group_name} 未找到Initial {self.test_type}步骤！")
-                return
-
-            for j in range(len(point_array)):
-                for i in range(1, sample_count + 1):
-                    calc_col_idx = calculate_start_col + i - 1
-                    delta_r_col_idx = delta_r_start_col + i - 1
-                    initial_col_idx = calculate_start_col + i - 1
-
-                    formula = f'={get_column_letter(calc_col_idx)}{current_row + j} - {get_column_letter(initial_col_idx)}{initial_row + j}'
-                    ws.cell(row=current_row + j, column=delta_r_col_idx).value = formula
+        self.formula_service.handle_delta_r(
+            ws, current_row, point_array, sample_count,
+            delta_r_start_col, calculate_start_col, step_description,
+            self.test_type, self.initial_test_rows, self.total_row_offset
+        )
 
     def _insert_statistics_formulas(self, ws, current_row, point_array, sample_count,
                                     calculate_start_col, calculate_end_col, stat_start_col,
                                     delta_r_start_col, is_delta_r_checked):
         """插入统计公式"""
-        if is_delta_r_checked and self.test_type == "LLCR" and delta_r_start_col:
-            data_range = f"{get_column_letter(delta_r_start_col)}{current_row}:{get_column_letter(delta_r_start_col + sample_count - 1)}{current_row + len(point_array) - 1}"
-        else:
-            data_range = f"{get_column_letter(calculate_start_col)}{current_row}:{get_column_letter(calculate_end_col)}{current_row + len(point_array) - 1}"
-
-        # 插入统计公式
-        ws.cell(row=current_row, column=stat_start_col).value = f'=MIN({data_range})'  # Min
-        ws.cell(row=current_row, column=stat_start_col + 1).value = f'=MAX({data_range})'  # Max
-        ws.cell(row=current_row, column=stat_start_col + 2).value = f'=AVERAGE({data_range})'  # Avg
-        ws.cell(row=current_row, column=stat_start_col + 3).value = f'=STDEV({data_range})'  # Stdev
+        self.formula_service.insert_statistics_formulas(
+            ws, current_row, point_array, sample_count,
+            calculate_start_col, calculate_end_col, stat_start_col,
+            delta_r_start_col, is_delta_r_checked, self.test_type
+        )
 
     def _set_number_format(self, ws, current_row, point_array, sample_count,
                            record_start_col, record_end_col, calculate_start_col, stat_start_col):
         """设置数字格式"""
-        rows_count = len(point_array)
-
-        # 设置数字格式
-        number_format = "0.000" if self.test_type == "CR" else "0.0"
-
-        # 原始记录区域
-        if record_start_col and record_end_col:
-            record_range = f"{get_column_letter(record_start_col)}{current_row}:{get_column_letter(record_end_col)}{current_row + rows_count - 1}"
-            for row in ws[record_range]:
-                for cell in row:
-                    cell.number_format = number_format
-
-        # 计算区域
-        calc_range = f"{get_column_letter(calculate_start_col)}{current_row}:{get_column_letter(stat_start_col + 3)}{current_row + rows_count - 1}"
-        for row in ws[calc_range]:
-            for cell in row:
-                cell.number_format = number_format
+        self.styling_service.set_number_format(
+            ws, current_row, point_array, sample_count,
+            record_start_col, record_end_col, calculate_start_col, stat_start_col, self.test_type
+        )
 
     def _merge_cells_for_step(self, ws, current_row, point_array, stat_start_col, calculateheader_col):
         """合并步骤相关的单元格"""
@@ -518,45 +473,48 @@ class LLCRCRExportService(BaseExportService):
                 ws.merge_cells(start_row=start_row, start_column=col,
                                end_row=end_row, end_column=col)
                 self._merge_cells_style(ws, start_row, col, rows_count)
-                column_letter = get_column_letter(col)
 
         # 合并步骤描述列
         logger.debug(f"合并步骤描述列单元格: ({current_row}, 2) 到 ({current_row + rows_count - 1}, 2)")
         ws.merge_cells(start_row=current_row, start_column=2,
                        end_row=current_row + rows_count - 1, end_column=2)
         self._merge_cells_style(ws, current_row, 2, rows_count)
-        column_letter = get_column_letter(2)
 
         # 合并计算区域的步骤描述列（对应统计列的步骤描述）
         logger.debug(f"合并计算区域步骤描述列单元格: ({current_row}, {calculateheader_col+1}) 到 ({current_row + rows_count - 1}, {calculateheader_col+1})")
         ws.merge_cells(start_row=current_row, start_column=calculateheader_col + 1,
                        end_row=current_row + rows_count - 1, end_column=calculateheader_col + 1)
         self._merge_cells_style(ws, current_row, 5, rows_count)
-        column_letter = get_column_letter(5)
 
-
-    # 以下辅助方法需要根据实际需求实现
     def _merge_cells_style(self, ws, start_row, start_col, row_span):
         """设置合并单元格样式"""
-        # 实现合并单元格的样式设置
-        for row in range(start_row, start_row + row_span):
-            cell = ws.cell(row=row, column=start_col)
-            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+        self.formatting_service.format_merge_cells_style(ws, start_row, start_col, row_span)
 
     def _set_header_style(self, ws, title_row, stat_start_col):
         """设置表头样式"""
-        # 设置表头样式
-        header_font = Font(name='Arial', size=9, bold=True)
-        header_fill = PatternFill(start_color="DCDCDC", end_color="DCDCDC", fill_type="solid")
+        self.formatting_service.format_range_bold_header(ws, title_row, stat_start_col)
         
-        # 设置表头行的字体和背景色
-        for col in range(1, ws.max_column + 1):
-            cell = ws.cell(row=title_row, column=col)
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    def _set_table_format(self, ws, start_row, start_col, end_row, end_col, column_color_count):
+        """设置表格格式 - 参考VBA SetTableFormat函数"""
+        self.styling_service.set_table_format(ws, start_row, start_col, end_row, end_col, column_color_count)
+        
+    def _set_stat_column_format(self, worksheet, title_row, start_col, end_row, end_col):
+        """设置统计数据背景格式"""
+        self.styling_service.set_stat_column_format(worksheet, title_row, start_col, end_row, end_col)
+        
+    def _set_environment_column_format(self, worksheet, title_row, start_col, end_row, end_col):
+        """设置日期环境记录格式"""
+        self.styling_service.set_environment_column_format(worksheet, title_row, start_col, end_row, end_col)
+        
+    def _set_number_format(self, ws, current_row, point_array, sample_count,
+                           record_start_col, record_end_col, calculate_start_col, stat_start_col):
+        """设置数字格式"""
+        self.styling_service.set_number_format(
+            ws, current_row, point_array, sample_count,
+            record_start_col, record_end_col, calculate_start_col, stat_start_col, self.test_type
+        )
 
-    # 保留您原有的其他方法...
+    # 以下辅助方法需要根据实际需求实现
     def _extract_point_array(self):
         """从Matrix数据中提取测试点位数组"""
         point_array = []
@@ -576,259 +534,199 @@ class LLCRCRExportService(BaseExportService):
 
     def _insert_bulk_resistance_table(self, ws, testType, crCurrentValue):
         """插入体积电阻表格"""
-        BulkTblStartRow = 1  # 体积电阻起始行
-
-        logger.debug(
-            f"_insert_bulk_resistance_table called with testType: {testType}, crCurrentValue: {crCurrentValue}")
-
-        # 体积电阻表头
-        if testType == "CR":
-            logger.debug("Inserting CR bulk resistance table header")
-            ws.cell(row=BulkTblStartRow, column=1).value = "unit:mV"
-            ws.cell(row=BulkTblStartRow, column=2).value = "Voltage"
-            ws.cell(row=BulkTblStartRow + 5, column=1).value = "Current(Unit:A)"
-            ws.cell(row=BulkTblStartRow + 5, column=2).value = crCurrentValue
-        else:
-            logger.debug("Inserting LLCR bulk resistance table header")
-            ws.cell(row=BulkTblStartRow, column=1).value = "unit:mΩ"
-            ws.cell(row=BulkTblStartRow, column=2).value = "Resistance"
-
-        # 体积电阻列
-        bulk_labels = ["bulk1", "bulk2", "bulk3", "Avg"]
-        for i, label in enumerate(bulk_labels):
-            ws.cell(row=BulkTblStartRow + 1 + i, column=1).value = label
-            ws.cell(row=BulkTblStartRow + 1 + i, column=2).value = 0 if i < 3 else None
-
-        if testType == "CR":
-            logger.debug("Setting CR number format")
-            # 设置数据范围的数字格式为三位小数
-            for row in range(BulkTblStartRow + 1, BulkTblStartRow + 5):
-                ws.cell(row=row, column=2).number_format = "0.000"
-        else:
-            logger.debug("Setting LLCR number format")
-            # 设置数据范围的数字格式为一位小数
-            for row in range(BulkTblStartRow + 1, BulkTblStartRow + 5):
-                ws.cell(row=row, column=2).number_format = "0.0"
-
-        # 插入统计公式
-        data_range = f"B{BulkTblStartRow + 1}:B{BulkTblStartRow + 3}"
-        ws.cell(row=BulkTblStartRow + 4, column=2).value = f"=AVERAGE({data_range})"
-        logger.debug(f"Inserted formula: =AVERAGE({data_range})")
-
-        # 设置体积电阻表格格式
-        self._set_table_format(ws, BulkTblStartRow, 1, BulkTblStartRow + 5, 2, 0)
-        logger.debug("_insert_bulk_resistance_table completed")
+        self.table_structure_service.insert_bulk_resistance_table(ws, testType, crCurrentValue)
 
     def _insert_test_info_table(self, ws, test_info=None):
         """插入测试信息表格 - 使用默认值"""
-        TestInfoStartRow = 1  # 测试信息起始行
-
         # 使用固定的默认值
         targetFolderName = "Default Folder"  # 可以根据需要修改这个默认值
+        self.table_structure_service.insert_test_info_table(ws, targetFolderName)
 
-        # 插入测试信息 - 严格按照VBA代码的逻辑
-        ws.cell(row=TestInfoStartRow, column=4).value = "LTR"
-        ws.cell(row=TestInfoStartRow + 1, column=4).value = "Tested By"
-        ws.cell(row=TestInfoStartRow + 2, column=4).value = "Test Equipment ID"
-        ws.cell(row=TestInfoStartRow + 3, column=4).value = "Test Condition"
-        ws.cell(row=TestInfoStartRow + 4, column=4).value = "Test Requirement"
-        ws.cell(row=TestInfoStartRow, column=6).value = targetFolderName
-        ws.cell(row=TestInfoStartRow + 1, column=6).value = "Even Yang"
-        ws.cell(row=TestInfoStartRow + 2, column=6).value = "DG-Q-0639/0640"
-        ws.cell(row=TestInfoStartRow + 3, column=6).value = "20mV,100mA Max"
-
-        # 注意：VBA代码中还有一行调用 AssignLLCRorCRRequirementFromConfirmSpec 来获取 Test Requirement
-        # 这里暂时留空，因为该函数需要额外实现
-        ws.cell(row=TestInfoStartRow + 4, column=6).value = ""  # Test Requirement 暂时留空
-
-        # 合并单元格
-        for i in range(0, 5):  # 从第0行（TestInfoStartRow）到第4行（TestInfoStartRow + 4）
-            # 合并第4列和第5列
-            start_cell = ws.cell(row=TestInfoStartRow + i, column=4)
-            end_cell = ws.cell(row=TestInfoStartRow + i, column=5)
-            ws.merge_cells(start_row=start_cell.row, start_column=start_cell.column,
-                           end_row=end_cell.row, end_column=end_cell.column)
-
-            # 合并第6列和第9列
-            start_cell = ws.cell(row=TestInfoStartRow + i, column=6)
-            end_cell = ws.cell(row=TestInfoStartRow + i, column=9)
-            ws.merge_cells(start_row=start_cell.row, start_column=start_cell.column,
-                           end_row=end_cell.row, end_column=end_cell.column)
-
-        # 设置测试信息表格格式
-        self._set_table_format(ws, TestInfoStartRow, 4, TestInfoStartRow + 4, 9, 0)
-
-        # 设置单元格格式
-        for row in range(TestInfoStartRow, TestInfoStartRow + 5):
-            for col in range(4, 10):
-                cell = ws.cell(row=row, column=col)
-                # 保持Arial字体，只修改对齐方式
-                if cell.font:
-                    cell.font = Font(name='Arial', bold=cell.font.bold, size=9)
-                else:
-                    cell.font = Font(name='Arial', size=9)
-                cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
-
-        # 设置日期环境记录背景格式
-        self._set_environment_column_format(ws, TestInfoStartRow, 4, TestInfoStartRow + 4, 9)
-
-    def _apply_formatting(self, worksheet, title_row, sample_count, point_count,
-                          calculateheader_col, calculate_start_col, stat_start_col, is_delta_r_checked):
-        """应用表格格式化"""
+    def _generate_summary_sheet_internal(self, file_path):
+        """
+        内部方法：在导出Excel文件后自动生成Summary工作表
+        """
         try:
-            # 定义边框样式
-            thin_border = Border(
-                left=Side(style='thin'),
-                right=Side(style='thin'),
-                top=Side(style='thin'),
-                bottom=Side(style='thin')
-            )
-
-            # 定义字体
-            font = Font(name='Arial', size=9)
-
-            # 定义灰色背景填充
-            gray_fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
-
-            # 获取实际使用的行列数
-            last_row = worksheet.max_row
-            last_col = stat_start_col + 6  # 包括统计列和环境记录列
-
-            # 定义整个表格区域
-            for row in range(title_row, last_row + 1):
-                for col in range(1, last_col + 1):
-                    cell = worksheet.cell(row=row, column=col)
-                    cell.border = thin_border
-                    cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-                    # 只在没有字体设置的情况下应用默认字体
-                    if not cell.font or not cell.font.name:
-                        cell.font = font
-
-            # 设置表头行粗体并添加灰色背景
-            for col in range(1, last_col + 1):
-                cell = worksheet.cell(row=title_row, column=col)
-                cell.font = Font(name='Arial', size=9, bold=True)
-                cell.fill = gray_fill
-
-            # 设置列宽
-            for col in range(1, last_col + 1):
-                column_letter = get_column_letter(col)
-                if col in [1, 2, calculateheader_col, calculateheader_col + 1, stat_start_col, stat_start_col + 1,
-                           stat_start_col + 2, stat_start_col + 3]:
-                    worksheet.column_dimensions[column_letter].width = 15
-                else:
-                    worksheet.column_dimensions[column_letter].width = 10
-
-            # 自动调整行高
-            for row in range(title_row, last_row + 1):
-                worksheet.row_dimensions[row].height = 20
-
-            logger.debug(f"{self.test_type}格式化应用完成")
-
-        except Exception as e:
-            logger.error(f"应用{self.test_type}格式化时出错: {e}", exc_info=True)
-
-    def _set_table_format(self, ws, start_row, start_col, end_row, end_col, column_color_count):
-        """设置表格格式 - 参考VBA SetTableFormat函数"""
-        # 设置整个范围的字体为 Arial
-        for row in range(start_row, end_row + 1):
-            for col in range(start_col, end_col + 1):
-                cell = ws.cell(row=row, column=col)
-                # 设置字体为 Arial
-                if cell.font is None:
-                    cell.font = Font(name='Arial', size=9)
-                else:
-                    # 创建新的字体对象而不是修改现有对象
-                    cell.font = Font(name='Arial', size=9, bold=cell.font.bold, color=cell.font.color)
-
-        # 设置单元格边框 - 使用较粗的边框样式
-        thick_border = Border(
-            left=Side(style='medium'),  # 对应VBA LineStyle=1, Weight=2
-            right=Side(style='medium'),
-            top=Side(style='medium'),
-            bottom=Side(style='medium')
-        )
-
-        for row in range(start_row, end_row + 1):
-            for col in range(start_col, end_col + 1):
-                cell = ws.cell(row=row, column=col)
-                cell.border = thick_border
-
-        # 设置单元格内容水平和垂直居中，并启用自动换行
-        center_alignment = Alignment(
-            horizontal='center',
-            vertical='center',
-            wrap_text=True  # 启用自动换行
-        )
-
-        for row in range(start_row, end_row + 1):
-            for col in range(start_col, end_col + 1):
-                cell = ws.cell(row=row, column=col)
-                cell.alignment = center_alignment
-
-        # 设置首行（表头）格式 - 加粗和浅灰色背景
-        header_fill = PatternFill(start_color="DCDCDC", end_color="DCDCDC", fill_type="solid")  # RGB(220,220,220)
-        for col in range(start_col, end_col + 1):
-            cell = ws.cell(row=start_row, column=col)
-            cell.font = Font(name='Arial', bold=True, size=9)
-            cell.fill = header_fill
-
-        # 设置前几列的格式（根据column_color_count参数）
-        first_col_fill = PatternFill(start_color="DCDCDC", end_color="DCDCDC", fill_type="solid")  # RGB(220,220,220)
-        # 注意：这里start_col + column_color_count可能需要根据实际需求调整
-        # VBA中是设置从第start_col列到第start_col + ColumnColorCount列
-        for row in range(start_row, end_row + 1):
-            for col in range(start_col, min(start_col + column_color_count + 1, end_col + 1)):
-                cell = ws.cell(row=row, column=col)
-                cell.font = Font(name='Arial', bold=True, size=9)
-                cell.fill = first_col_fill
-
-        # 设置第二列宽度为12
-        column_letter = get_column_letter(2)
-        ws.column_dimensions[column_letter].width = 12
-
-    def _set_stat_column_format(self, worksheet, title_row, start_col, end_row, end_col):
-        """设置统计数据背景格式"""
-        try:
-            # 预先创建样式对象，避免在循环中重复创建
-            blue_fill = PatternFill(start_color="87CEEB", end_color="87CEEB", fill_type="solid")
-            bold_font = Font(name='Arial', bold=True, size=9)
-            normal_font = Font(name='Arial', size=9)
+            from openpyxl import load_workbook
+            from openpyxl.styles import Font, PatternFill, Alignment
+            from openpyxl.utils import get_column_letter
+            import os
             
-            # 为第一列到第四列(Min, Max, Avg, Stdev)设置浅蓝色背景
-            for col_offset in range(4):  # 0, 1, 2, 3 (第一列到第四列)
-                col_letter = get_column_letter(start_col + col_offset)
-                col_range = f"{col_letter}{title_row+1}:{col_letter}{end_row}"
-                for row in worksheet[col_range]:
-                    for cell in row:
-                        cell.fill = blue_fill
-
-            # 为第二列(Max)设置字体加粗
-            max_col_letter = get_column_letter(start_col + 1)
-            max_range = f"{max_col_letter}{title_row+1}:{max_col_letter}{end_row}"
-            for row in worksheet[max_range]:
-                for cell in row:
-                    cell.font = bold_font
-        except Exception as e:
-            logger.error(f"设置统计数据背景格式时出错: {e}", exc_info=True)
-
-
-    def _set_environment_column_format(self, worksheet, title_row, start_col, end_row, end_col):
-        """设置日期环境记录格式"""
-        try:
-            # 预先创建样式对象
-            yellow_fill = PatternFill(start_color="FFFFCC", end_color="FFFFCC", fill_type="solid")
-            bold_font = Font(name='Arial', bold=True, size=9)
+            # 加载工作簿
+            wb = load_workbook(file_path)
             
-            # 构建范围字符串
-            start_col_letter = get_column_letter(start_col)
-            end_col_letter = get_column_letter(end_col)
-            range_str = f"{start_col_letter}{title_row+1}:{end_col_letter}{end_row}"
+            # 获取第一个工作表（Sheet1）
+            if '1' in wb.sheetnames:
+                source_ws = wb['1']
+            else:
+                source_ws = wb.active
             
-            # 为整个范围应用样式
-            for row in worksheet[range_str]:
-                for cell in row:
-                    cell.fill = yellow_fill
-                    cell.font = bold_font
+            # 创建Summary工作表
+            if 'Summary' in wb.sheetnames:
+                summary_ws = wb['Summary']
+            else:
+                summary_ws = wb.create_sheet('Summary')
+            
+            # 解析合并单元格信息
+            merged_cells_ranges = source_ws.merged_cells.ranges
+            
+            # 创建一个映射来存储单元格与其所属合并区域的关系
+            cell_to_merged_range = {}
+            for merged_range in merged_cells_ranges:
+                for row in range(merged_range.min_row, merged_range.max_row + 1):
+                    for col in range(merged_range.min_col, merged_range.max_col + 1):
+                        cell_to_merged_range[(row, col)] = merged_range
+            
+            # 查找统计数据列的位置（Min, Max, Avg, Stdev）
+            stat_columns = {}
+            stat_headers = ['Min', 'Max', 'Avg', 'Stdev']
+            
+            # 在前5行中查找统计标题
+            for row_idx in range(1, 6):
+                for col_idx in range(1, source_ws.max_column + 1):
+                    cell_value = source_ws.cell(row=row_idx, column=col_idx).value
+                    if cell_value in stat_headers:
+                        stat_columns[cell_value] = col_idx
+            
+            # 检查是否找到了所有统计列
+            if not all(header in stat_columns for header in stat_headers):
+                logger.warning("未能找到所有统计列 (Min, Max, Avg, Stdev)")
+                # 尝试另一种方式查找
+                for col_idx in range(1, source_ws.max_column + 1):
+                    for row_idx in range(1, 6):
+                        cell_value = str(source_ws.cell(row=row_idx, column=col_idx).value or '').strip()
+                        for header in stat_headers:
+                            if header.lower() in cell_value.lower():
+                                stat_columns[header] = col_idx
+                                break
+            
+            # 提取Group和Step信息
+            groups_and_steps = []
+            current_group = None
+            
+            # 遍历数据行查找Group和Step
+            for row_idx in range(10, source_ws.max_row + 1):  # 从第10行开始通常是数据行
+                # 检查是否有Group信息（第1列）
+                group_cell_value = source_ws.cell(row=row_idx, column=1).value
+                if group_cell_value and str(group_cell_value).startswith('Group'):
+                    current_group = group_cell_value
+                
+                # 检查是否有Step信息（第2列）
+                step_cell_value = source_ws.cell(row=row_idx, column=2).value
+                if step_cell_value and current_group:
+                    # 检查这行是否有统计数据（通过检查是否有Min值）
+                    min_col = stat_columns.get('Min')
+                    if min_col:
+                        stat_value = source_ws.cell(row=row_idx, column=min_col).value
+                        # 如果这一行有统计数据，则认为这是一个有效的Step行
+                        if stat_value is not None:
+                            groups_and_steps.append({
+                                'group': current_group,
+                                'step': step_cell_value,
+                                'row': row_idx
+                            })
+            
+            # 去重，保留每个group-step组合的一个实例
+            unique_groups_and_steps = []
+            seen_combinations = set()
+            for item in groups_and_steps:
+                combination = (item['group'], item['step'])
+                if combination not in seen_combinations:
+                    unique_groups_and_steps.append(item)
+                    seen_combinations.add(combination)
+            
+            # 创建Summary表头
+            # 第一行
+            summary_ws.cell(row=1, column=1).value = "Test Step"
+            summary_ws.cell(row=1, column=3).value = "Statistics"
+            summary_ws.merge_cells(start_row=1, start_column=3, end_row=1, end_column=6)
+            
+            # 第二行
+            summary_ws.cell(row=2, column=1).value = "Test Step"
+            summary_ws.cell(row=2, column=2).value = ""
+            summary_ws.cell(row=2, column=3).value = "Min"
+            summary_ws.cell(row=2, column=4).value = "Max"
+            summary_ws.cell(row=2, column=5).value = "Avg"
+            summary_ws.cell(row=2, column=6).value = "Stdev"
+            
+            # 设置表头格式
+            header_font = Font(name='Arial', size=9, bold=True)
+            header_fill = PatternFill(start_color="DCDCDC", end_color="DCDCDC", fill_type="solid")
+            center_alignment = Alignment(horizontal='center', vertical='center')
+            
+            # 设置表头样式
+            for col in range(1, 7):
+                for row in range(1, 3):
+                    if row == 1 and col == 2:
+                        continue  # 跳过(1,2)位置
+                    
+                    cell = summary_ws.cell(row=row, column=col)
+                    cell.font = header_font
+                    cell.fill = header_fill
+                    cell.alignment = center_alignment
+            
+            # 填充数据
+            group_colors = [
+                PatternFill(start_color="FFFACD", end_color="FFFACD", fill_type="solid"),  # 淡黄色
+                PatternFill(start_color="FFE4B5", end_color="FFE4B5", fill_type="solid")   # 稍深黄
+            ]
+            
+            prev_group = None
+            color_index = 0
+            
+            for idx, item in enumerate(unique_groups_and_steps):
+                row_idx = idx + 3  # 从第3行开始填数据
+                group = item['group']
+                step = item['step']
+                source_row = item['row']
+                
+                # 切换颜色
+                if group != prev_group:
+                    color_index = (color_index + 1) % len(group_colors)
+                    prev_group = group
+                
+                fill_color = group_colors[color_index]
+                
+                # 填写Step名称
+                step_cell = summary_ws.cell(row=row_idx, column=1)
+                step_cell.value = step
+                step_cell.fill = fill_color
+                step_cell.alignment = center_alignment
+                
+                # 填写统计数据引用公式
+                for i, stat_name in enumerate(stat_headers):
+                    col_idx = 3 + i  # C, D, E, F列
+                    stat_col = stat_columns.get(stat_name)
+                    
+                    if stat_col:
+                        # 创建引用公式
+                        formula = f"='1'!{get_column_letter(stat_col)}{source_row}"
+                        stat_cell = summary_ws.cell(row=row_idx, column=col_idx)
+                        stat_cell.value = formula
+                        stat_cell.fill = fill_color
+                        stat_cell.alignment = center_alignment
+                        
+                        # 设置数字格式
+                        stat_cell.number_format = "0.000" if self.test_type == "CR" else "0.0"
+                    else:
+                        # 如果找不到统计列，填入空值
+                        stat_cell = summary_ws.cell(row=row_idx, column=col_idx)
+                        stat_cell.value = ""
+                        stat_cell.fill = fill_color
+                        stat_cell.alignment = center_alignment
+                
+                # 设置空的B列
+                empty_cell = summary_ws.cell(row=row_idx, column=2)
+                empty_cell.value = ""
+                empty_cell.fill = fill_color
+            
+            # 自动调整列宽
+            for col_idx in range(1, 7):
+                summary_ws.column_dimensions[get_column_letter(col_idx)].width = 20
+            
+            # 保存工作簿
+            wb.save(file_path)
+            logger.info(f"Summary工作表已成功生成并保存到: {file_path}")
+            
         except Exception as e:
-            logger.error(f"设置环境记录背景格式时出错: {e}", exc_info=True)
+            logger.error(f"生成Summary工作表时出错: {e}", exc_info=True)

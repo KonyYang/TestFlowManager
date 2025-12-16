@@ -207,7 +207,7 @@ class MatrixDataStructure:
             group_name: 组别名称
         """
         group_steps = self.group_steps[group_name]
-        logger.info(f"开始处理组 '{group_name}' 中包含 'Initial' 和 'After test' 的步骤")
+        # logger.info(f"开始处理组 '{group_name}' 中包含 'Initial' 和 'After test' 的步骤")
         
         # 按Test关键字分组，只处理相同Test关键字的步骤
         test_groups = {}
@@ -221,19 +221,19 @@ class MatrixDataStructure:
                 if test_item not in test_groups:
                     test_groups[test_item] = []
                 test_groups[test_item].append(i)
-                logger.debug(f"找到同时包含 'Initial' 和 'After test' 的步骤，索引: {i}, Test: {test_item}, Requirement: {requirement}")
+                # logger.debug(f"找到同时包含 'Initial' 和 'After test' 的步骤，索引: {i}, Test: {test_item}, Requirement: {requirement}")
         
         # 分别处理每个Test组
         for test_item, combined_steps in test_groups.items():
             # 如果没有同时包含Initial和After test的步骤，直接跳过
             if not combined_steps:
-                logger.info(f"组 '{group_name}' 中Test '{test_item}' 未找到同时包含 'Initial' 和 'After test' 的步骤")
+                # logger.info(f"组 '{group_name}' 中Test '{test_item}' 未找到同时包含 'Initial' 和 'After test' 的步骤")
                 continue
                 
             # 获取第一个步骤的requirement并拆分
             first_step_index = combined_steps[0]
             requirement = group_steps[first_step_index].get("Requirement", "")
-            logger.info(f"第一个步骤的Requirement: {requirement}")
+            # logger.info(f"第一个步骤的Requirement: {requirement}")
             
             # 使用正则表达式查找"Initial"和"After test"（忽略大小写）
             initial_pattern = re.compile(r'(initial[\s:]*)', re.IGNORECASE)
@@ -254,24 +254,17 @@ class MatrixDataStructure:
                     initial_start = initial_match.end()
                     initial_end = after_test_match.start()
                     initial_requirement = requirement[initial_start:initial_end].strip()
-                    # 清理多余的空格和换行符以及标点符号
-                    initial_requirement = re.sub(r'^[^\w]+', '', initial_requirement)  # 去除开头的标点符号
-                    initial_requirement = re.sub(r'[^\w]+$', '', initial_requirement)  # 去除结尾的标点符号
-                    initial_requirement = " ".join(initial_requirement.split())
+                    # 提取":"和";"之间的内容
+                    initial_requirement = self._extract_between_separators(initial_requirement, ":", ";")
                     
                     # 提取After test部分的requirement（After test之后的内容）
                     after_test_start = after_test_match.end()
                     after_test_requirement = requirement[after_test_start:].strip()
-                    # 清理多余的空格和换行符以及标点符号
-                    after_test_requirement = re.sub(r'^[^\w]+', '', after_test_requirement)  # 去除开头的标点符号
-                    after_test_requirement = re.sub(r'[^\w]+$', '', after_test_requirement)  # 去除结尾的标点符号
-                    after_test_requirement = " ".join(after_test_requirement.split())
+                    # 提取"After test:"到结尾的内容
+                    after_test_requirement = self._extract_from_colon_to_end(after_test_requirement)
                     
-                    logger.info(f"Initial requirement: '{initial_requirement}'")
-                    logger.info(f"After test requirement: '{after_test_requirement}'")
-                else:
-                    logger.warning("Initial should come before After test in requirement text")
-                    continue
+                    # logger.info(f"Initial requirement: '{initial_requirement}'")
+                    # logger.info(f"After test requirement: '{after_test_requirement}'")
             else:
                 logger.warning("Could not find both Initial and After test in requirement text")
                 continue
@@ -284,7 +277,7 @@ class MatrixDataStructure:
                 step = group_steps[combined_steps[0]]
                 step["Requirement"] = initial_requirement
                 step["StepDescription"] = "Initial " + test_item
-                logger.info(f"处理单一步骤，索引: {combined_steps[0]}, 描述更新为: {step['StepDescription']}, 要求: {step['Requirement']}")
+                # logger.info(f"处理单一步骤，索引: {combined_steps[0]}, 描述更新为: {step['StepDescription']}, 要求: {step['Requirement']}")
                 
             elif step_count == 2:
                 # 情况2：两个步骤
@@ -292,13 +285,13 @@ class MatrixDataStructure:
                 step1 = group_steps[combined_steps[0]]
                 step1["Requirement"] = initial_requirement
                 step1["StepDescription"] = "Initial " + test_item
-                logger.info(f"处理第一个步骤，索引: {combined_steps[0]}, 描述更新为: {step1['StepDescription']}, 要求: {step1['Requirement']}")
+                # logger.info(f"处理第一个步骤，索引: {combined_steps[0]}, 描述更新为: {step1['StepDescription']}, 要求: {step1['Requirement']}")
                 
                 # 第二个步骤 - Final
                 step2 = group_steps[combined_steps[1]]
                 step2["Requirement"] = after_test_requirement
                 step2["StepDescription"] = "Final " + test_item
-                logger.info(f"处理第二个步骤，索引: {combined_steps[1]}, 描述更新为: {step2['StepDescription']}, 要求: {step2['Requirement']}")
+                # logger.info(f"处理第二个步骤，索引: {combined_steps[1]}, 描述更新为: {step2['StepDescription']}, 要求: {step2['Requirement']}")
                 
             else:
                 # 情况3：多个步骤
@@ -306,13 +299,13 @@ class MatrixDataStructure:
                 first_step = group_steps[combined_steps[0]]
                 first_step["Requirement"] = initial_requirement
                 first_step["StepDescription"] = "Initial " + test_item
-                logger.info(f"处理第一个步骤，索引: {combined_steps[0]}, 描述更新为: {first_step['StepDescription']}, 要求: {first_step['Requirement']}")
+                # logger.info(f"处理第一个步骤，索引: {combined_steps[0]}, 描述更新为: {first_step['StepDescription']}, 要求: {first_step['Requirement']}")
                 
                 # 最后一个步骤 - Final
                 last_step = group_steps[combined_steps[-1]]
                 last_step["Requirement"] = after_test_requirement
                 last_step["StepDescription"] = "Final " + test_item
-                logger.info(f"处理最后一个步骤，索引: {combined_steps[-1]}, 描述更新为: {last_step['StepDescription']}, 要求: {last_step['Requirement']}")
+                # logger.info(f"处理最后一个步骤，索引: {combined_steps[-1]}, 描述更新为: {last_step['StepDescription']}, 要求: {last_step['Requirement']}")
                 
                 # 中间步骤 - After + 前一个步骤的描述
                 for i in range(1, len(combined_steps) - 1):
@@ -329,7 +322,7 @@ class MatrixDataStructure:
                         # 如果没有前一个步骤，则使用默认值
                         prev_step_description = test_item
                     step["StepDescription"] = "After " + prev_step_description
-                    logger.info(f"处理第{i+1}个步骤，索引: {step_index}, 描述更新为: {step['StepDescription']}, 要求: {step['Requirement']}")
+                    # logger.info(f"处理第{i+1}个步骤，索引: {step_index}, 描述更新为: {step['StepDescription']}, 要求: {step['Requirement']}")
 
     def _collect_sample_sizes(self, matrix_data: List[List[str]], sample_size_row_index: int) -> List[str]:
         """
@@ -356,6 +349,68 @@ class MatrixDataStructure:
             warnings.append("未找到样品数量行（应包含'sample'关键字且位于表格末尾几行），请检查数据格式")
             
         return warnings
+
+    def _extract_between_separators(self, text: str, start_sep: str, end_sep: str) -> str:
+        """
+        提取两个分隔符之间的内容
+        
+        Args:
+            text: 原始文本
+            start_sep: 起始分隔符
+            end_sep: 结束分隔符
+            
+        Returns:
+            提取出的内容
+        """
+        # 查找起始分隔符
+        start_pos = text.find(start_sep)
+        # 查找结束分隔符
+        end_pos = text.find(end_sep)
+        
+        if start_pos != -1 and end_pos != -1:
+            # 如果两个分隔符都存在，且起始分隔符在结束分隔符之前
+            if start_pos < end_pos:
+                # 提取两个分隔符之间的内容
+                result = text[start_pos + len(start_sep):end_pos]
+                return result.strip()
+            else:
+                # 如果起始分隔符在结束分隔符之后，只提取到结束分隔符之前的内容
+                result = text[:end_pos]
+                return result.strip()
+        elif start_pos != -1:
+            # 如果只有起始分隔符存在，提取其后所有内容
+            result = text[start_pos + len(start_sep):]
+            return result.strip()
+        elif end_pos != -1:
+            # 如果只有结束分隔符存在，提取到结束分隔符之前的内容
+            result = text[:end_pos]
+            return result.strip()
+        else:
+            # 如果两个分隔符都不存在，返回原文本
+            return text.strip()
+
+    def _extract_from_colon_to_end(self, text: str) -> str:
+        """
+        提取从冒号(:)到文本结尾的内容，并清理多余空格
+        
+        Args:
+            text: 原始文本
+            
+        Returns:
+            提取并清理后的内容
+        """
+        # 查找冒号位置
+        colon_pos = text.find(':')
+        if colon_pos != -1:
+            # 如果找到冒号，提取其后内容
+            result = text[colon_pos + 1:].strip()
+        else:
+            # 如果没找到冒号，返回原文本并清理
+            result = text.strip()
+            
+        # 清理多余的空格和换行符
+        result = " ".join(result.split())
+        return result
 
     # ==================== 数据访问方法 ====================
     
