@@ -55,6 +55,36 @@ class LLCRCRTableStructureService:
 
         # 设置体积电阻表格格式
         self.formatting_service.format_range(ws, bulk_tbl_start_row, 1, bulk_tbl_start_row + 5, 2)
+        
+        # 添加字体和背景色设置
+        # 设置字体为Arial，大小为9
+        font = Font(name='Arial', size=9)
+
+        # 应用字体和背景色到整个表格区域
+        for row in range(bulk_tbl_start_row, bulk_tbl_start_row + 6):
+            for col in range(1, 3):
+                cell = ws.cell(row=row, column=col)
+                cell.font = font
+
+        # 根据附图要求，设置首行和首列的特殊样式
+        # 设置首行（表头行）为粗体字并添加灰色背景色
+        header_font = Font(name='Arial', size=9, bold=True)
+        header_fill = PatternFill(start_color="DCDCDC", end_color="DCDCDC", fill_type="solid")
+        
+        # 设置首行样式
+        for col in range(1, 3):
+            cell = ws.cell(row=bulk_tbl_start_row, column=col)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+        # 设置首列（A列）为粗体字并添加灰色背景色
+        for row in range(bulk_tbl_start_row, bulk_tbl_start_row + 6):
+            cell = ws.cell(row=row, column=1)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+        
         logger.debug("insert_bulk_resistance_table completed")
         
     def insert_test_info_table(self, ws, target_folder_name="Default Folder"):
@@ -117,7 +147,7 @@ class LLCRCRTableStructureService:
             # 构建范围字符串
             start_col_letter = get_column_letter(start_col)
             end_col_letter = get_column_letter(end_col)
-            range_str = f"{start_col_letter}{title_row+1}:{end_col_letter}{end_row}"
+            range_str = f"{start_col_letter}{title_row}:{end_col_letter}{end_row}"
             
             # 为整个范围应用样式
             for row in worksheet[range_str]:
