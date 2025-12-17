@@ -17,96 +17,161 @@ class LLCRCRSpecSummaryService:
         try:
             # 加载工作簿
             wb = load_workbook(file_path)
+            logger.info(f"开始处理文件: {file_path}")
 
-            # 获取第一个工作表（Sheet1）
-            if '1' in wb.sheetnames:
-                source_ws = wb['1']
-            else:
-                source_ws = wb.active
-
-            # 创建Summary工作表
-            if 'Summary' in wb.sheetnames:
-                summary_ws = wb['Summary']
-            else:
-                summary_ws = wb.create_sheet('Summary')
-
-            # 解析合并单元格信息
-            merged_cells_ranges = source_ws.merged_cells.ranges
-
-            # 创建一个映射来存储单元格与其所属合并区域的关系
-            cell_to_merged_range = {}
-            for merged_range in merged_cells_ranges:
-                for row in range(merged_range.min_row, merged_range.max_row + 1):
-                    for col in range(merged_range.min_col, merged_range.max_col + 1):
-                        cell_to_merged_range[(row, col)] = merged_range
+            # 从第一个工作表提取步骤信息
+            first_sheet_name = None
+            for sheet_name in wb.sheetnames:
+                if sheet_name != 'Summary':
+                    first_sheet_name = sheet_name
+                    break
+            
+            if not first_sheet_name:
+                logger.warning("未找到任何数据工作表")
+                return
+                
+            source_ws = wb[first_sheet_name]
+            logger.info(f"从工作表 {first_sheet_name} 提取步骤信息")
 
             # 查找统计数据列的位置（Min, Max, Avg, Stdev）
             stat_columns = {}
             stat_headers = ['Min', 'Max', 'Avg', 'Stdev']
+            
+            # 直接在第9行（标题行）从第4列开始查找统计列
+            record_data_tbl_title_row = 9  # 记录数据表头
+            for col_idx in range(4, source_ws.max_column + 1):  # 从第4列开始
+                cell_value = source_ws.cell(row=record_data_tbl_title_row, column=col_idx).value
+                if cell_value in stat_headers:
+                    stat_columns[cell_value] = col_idx
+            
+            logger.info(f"在工作表 {first_sheet_name} 中找到统计列位置: {stat_columns}")
 
-            # 在前5行中查找统计标题
-            for row_idx in range(1, 6):
-                for col_idx in range(1, source_ws.max_column + 1):
-                    cell_value = source_ws.cell(row=row_idx, column=col_idx).value
+            # 获取合并单元格信息
+            merged_cells_ranges = source_ws.merged_cells.ranges
+            
+            # 创建一个映射来存储行号与其所属合并区域的关系
+            row_to_merged_range = {}
+            for merged_range in merged_cells_ranges:
+                for row in range(merged_range.min_row, merged_range.max_row + 1):
+                    # 只关注第2列（步骤列）的合并情况
+                    if merged_range.min_col <= 2 <= merged_range.max_col:
+                        row_to_merged_range[row] = merged_range
+
+            # 提取步骤信息（从第10行开始）
+            steps_data = []
+            processed_merged_ranges = set()  # 记录已处理的合并区域
+            
+            row_idx = 10
+            while row_idx <= source_ws.max_row:
+                # 检查当前行是否属于某个合并区域
+                if row_idx in row_to_merged_range:
+                    merged_range = row_to_merged_range[row_idx]
+                    
+                    # 如果这个合并区域已经处理过了，跳过
+                    if merged_range in processed_merged_ranges:
+                        row_idx += 1
+                        continue
+                    
+                    # 标记这个合并区域已处理
+                    processed_merged_ranges.add(merged_range)
+                    
+                    # 获取合并区域第一行的数据作为步骤数据
+                    first_row = merged_range.min_row
+                    group_cell_value = source_ws.cell(row=first_row, column=1).value
+                    step_cell_value = source_ws.cell(row=first_row, column=2).value
+                    
+                    # 为每个统计数据列创建单元格引用（使用合并区域的第一行）
+                    stat_cells = {}
+                    for stat_name, col_idx in stat_columns.items():
+                        cell_ref = f"{get_column_letter(col_idx)}{first_row}"
+                        stat_cells[stat_name] = cell_ref
+                    
+                    # 只有当至少有一个统计列有数据时才处理此行
+                    has_stat_data = any(stat_cells.values())
+                    if has_stat_data and (group_cell_value or step_cell_value):
+                        steps_data.append({
+                            'row': first_row,
+                            'group': group_cell_value,
+                            'step': step_cell_value,
+                            'stat_cells': stat_cells
+                        })
+                    
+                    # 跳到合并区域的下一行
+                    row_idx = merged_range.max_row + 1
+                else:
+                    # 处理未合并的行
+                    group_cell_value = source_ws.cell(row=row_idx, column=1).value
+                    step_cell_value = source_ws.cell(row=row_idx, column=2).value
+                    
+                    # 为每个统计数据列创建单元格引用
+                    stat_cells = {}
+                    for stat_name, col_idx in stat_columns.items():
+                        cell_ref = f"{get_column_letter(col_idx)}{row_idx}"
+                        stat_cells[stat_name] = cell_ref
+                    
+                    # 只有当至少有一个统计列有数据时才处理此行
+                    has_stat_data = any(stat_cells.values())
+                    if has_stat_data and (group_cell_value or step_cell_value):
+                        steps_data.append({
+                            'row': row_idx,
+                            'group': group_cell_value,
+                            'step': step_cell_value,
+                            'stat_cells': stat_cells
+                        })
+                    
+                    row_idx += 1
+
+            logger.info(f"从工作表 {first_sheet_name} 中提取了 {len(steps_data)} 个步骤数据")
+
+            # 收集所有工作表中的统计数据
+            all_sheet_data = {}
+            for sheet_name in wb.sheetnames:
+                if sheet_name == 'Summary':
+                    continue
+                    
+                sheet = wb[sheet_name]
+                sheet_stat_columns = {}
+                
+                # 查找当前工作表的统计数据列位置
+                for col_idx in range(4, sheet.max_column + 1):
+                    cell_value = sheet.cell(row=9, column=col_idx).value
                     if cell_value in stat_headers:
-                        stat_columns[cell_value] = col_idx
+                        sheet_stat_columns[cell_value] = col_idx
+                
+                # 为当前工作表的每一行创建统计数据引用
+                sheet_data = {}
+                for row_idx in range(10, sheet.max_row + 1):
+                    stat_cells = {}
+                    for stat_name, col_idx in sheet_stat_columns.items():
+                        cell_ref = f"{get_column_letter(col_idx)}{row_idx}"
+                        stat_cells[stat_name] = cell_ref
+                    sheet_data[row_idx] = stat_cells
+                    
+                all_sheet_data[sheet_name] = {
+                    'data': sheet_data,
+                    'stat_columns': sheet_stat_columns
+                }
 
-            # 检查是否找到了所有统计列
-            if not all(header in stat_columns for header in stat_headers):
-                logger.warning("未能找到所有统计列 (Min, Max, Avg, Stdev)")
-                # 尝试另一种方式查找
-                for col_idx in range(1, source_ws.max_column + 1):
-                    for row_idx in range(1, 6):
-                        cell_value = str(source_ws.cell(row=row_idx, column=col_idx).value or '').strip()
-                        for header in stat_headers:
-                            if header.lower() in cell_value.lower():
-                                stat_columns[header] = col_idx
-                                break
-
-            # 提取Group和Step信息
-            groups_and_steps = []
-            current_group = None
-
-            # 遍历数据行查找Group和Step
-            for row_idx in range(10, source_ws.max_row + 1):  # 从第10行开始通常是数据行
-                # 检查是否有Group信息（第1列）
-                group_cell_value = source_ws.cell(row=row_idx, column=1).value
-                if group_cell_value and str(group_cell_value).startswith('Group'):
-                    current_group = group_cell_value
-
-                # 检查是否有Step信息（第2列）
-                step_cell_value = source_ws.cell(row=row_idx, column=2).value
-                if step_cell_value and current_group:
-                    # 检查这行是否有统计数据（通过检查是否有Min值）
-                    min_col = stat_columns.get('Min')
-                    if min_col:
-                        stat_value = source_ws.cell(row=row_idx, column=min_col).value
-                        # 如果这一行有统计数据，则认为这是一个有效的Step行
-                        if stat_value is not None:
-                            groups_and_steps.append({
-                                'group': current_group,
-                                'step': step_cell_value,
-                                'row': row_idx
-                            })
-
-            # 去重，保留每个group-step组合的一个实例
-            unique_groups_and_steps = []
-            seen_combinations = set()
-            for item in groups_and_steps:
-                combination = (item['group'], item['step'])
-                if combination not in seen_combinations:
-                    unique_groups_and_steps.append(item)
-                    seen_combinations.add(combination)
+            # 创建Summary工作表
+            if 'Summary' in wb.sheetnames:
+                summary_ws = wb['Summary']
+                # 清空现有内容
+                for row in summary_ws.iter_rows():
+                    for cell in row:
+                        cell.value = None
+            else:
+                summary_ws = wb.create_sheet('Summary')
 
             # 创建Summary表头
             # 第一行
-            summary_ws.cell(row=1, column=1).value = "Test Step"
+            summary_ws.cell(row=1, column=1).value = "Group"
+            summary_ws.cell(row=1, column=2).value = "Test Step"
             summary_ws.cell(row=1, column=3).value = "Statistics"
             summary_ws.merge_cells(start_row=1, start_column=3, end_row=1, end_column=6)
 
             # 第二行
-            summary_ws.cell(row=2, column=1).value = "Test Step"
-            summary_ws.cell(row=2, column=2).value = ""
+            summary_ws.cell(row=2, column=1).value = "Group"
+            summary_ws.cell(row=2, column=2).value = "Test Step"
             summary_ws.cell(row=2, column=3).value = "Min"
             summary_ws.cell(row=2, column=4).value = "Max"
             summary_ws.cell(row=2, column=5).value = "Avg"
@@ -120,9 +185,6 @@ class LLCRCRSpecSummaryService:
             # 设置表头样式
             for col in range(1, 7):
                 for row in range(1, 3):
-                    if row == 1 and col == 2:
-                        continue  # 跳过(1,2)位置
-
                     cell = summary_ws.cell(row=row, column=col)
                     cell.font = header_font
                     cell.fill = header_fill
@@ -137,12 +199,18 @@ class LLCRCRSpecSummaryService:
             prev_group = None
             color_index = 0
 
-            for idx, item in enumerate(unique_groups_and_steps):
-                row_idx = idx + 3  # 从第3行开始填数据
-                group = item['group']
-                step = item['step']
-                source_row = item['row']
+            # 数据行字体样式（与表头统一）
+            data_font = Font(name='Arial', size=9)
+            max_font = Font(name='Arial', size=9, bold=True)  # Max列使用粗体
 
+            # 遍历每个步骤填充数据
+            for idx, step_info in enumerate(steps_data):
+                row_idx = idx + 3  # 从第3行开始填数据
+                group = step_info['group']
+                step = step_info['step']
+                source_row = step_info['row']
+                stat_cells = step_info['stat_cells']
+                
                 # 切换颜色
                 if group != prev_group:
                     color_index = (color_index + 1) % len(group_colors)
@@ -150,38 +218,58 @@ class LLCRCRSpecSummaryService:
 
                 fill_color = group_colors[color_index]
 
-                # 填写Step名称
-                step_cell = summary_ws.cell(row=row_idx, column=1)
+                # 填写Group信息（第一列）
+                group_cell = summary_ws.cell(row=row_idx, column=1)
+                group_cell.value = group
+                group_cell.fill = fill_color
+                group_cell.alignment = center_alignment
+                group_cell.font = data_font  # 使用数据行字体样式
+
+                # 填写Test Step信息（第二列）
+                step_cell = summary_ws.cell(row=row_idx, column=2)
                 step_cell.value = step
                 step_cell.fill = fill_color
                 step_cell.alignment = center_alignment
+                step_cell.font = data_font  # 使用数据行字体样式
 
-                # 填写统计数据引用公式
+                # 填写统计数据引用公式（从对应行的每个工作表中获取数据）
                 for i, stat_name in enumerate(stat_headers):
-                    col_idx = 3 + i  # C, D, E, F列
-                    stat_col = stat_columns.get(stat_name)
-
-                    if stat_col:
-                        # 创建引用公式
-                        formula = f"='1'!{get_column_letter(stat_col)}{source_row}"
+                    col_idx = 3 + i  # 从第3列开始填统计数据（C, D, E, F列）
+                    
+                    # 为每个工作表创建统计值
+                    stat_values = []
+                    for sheet_name in wb.sheetnames:
+                        if sheet_name == 'Summary':
+                            continue
+                            
+                        sheet_data = all_sheet_data[sheet_name]['data']
+                        if source_row in sheet_data and stat_name in sheet_data[source_row]:
+                            stat_cell_ref = sheet_data[source_row][stat_name]
+                            stat_values.append(f"='{sheet_name}'!{stat_cell_ref}")
+                    
+                    # 如果有统计数据，填写第一个工作表的引用
+                    if stat_values:
+                        formula = stat_values[0]  # 使用第一个工作表的数据
                         stat_cell = summary_ws.cell(row=row_idx, column=col_idx)
                         stat_cell.value = formula
                         stat_cell.fill = fill_color
                         stat_cell.alignment = center_alignment
+                        
+                        # Max列使用粗体字，其他列使用普通字体
+                        if stat_name == 'Max':
+                            stat_cell.font = max_font
+                        else:
+                            stat_cell.font = data_font
 
                         # 设置数字格式
                         stat_cell.number_format = "0.000" if self.test_type == "CR" else "0.0"
                     else:
-                        # 如果找不到统计列，填入空值
+                        # 如果找不到统计单元格引用，填入空值
                         stat_cell = summary_ws.cell(row=row_idx, column=col_idx)
                         stat_cell.value = ""
                         stat_cell.fill = fill_color
                         stat_cell.alignment = center_alignment
-
-                # 设置空的B列
-                empty_cell = summary_ws.cell(row=row_idx, column=2)
-                empty_cell.value = ""
-                empty_cell.fill = fill_color
+                        stat_cell.font = data_font
 
             # 自动调整列宽
             for col_idx in range(1, 7):

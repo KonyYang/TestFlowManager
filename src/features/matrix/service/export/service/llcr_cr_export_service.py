@@ -139,7 +139,7 @@ class LLCRCRExportService(BaseExportService):
                     for group_name in self.matrix_data.get_all_groups():
                         steps = self.matrix_data.get_group_steps(group_name)
                         sample_size = self.matrix_data.get_group_sample_size(group_name)
-                        logger.debug(f"组别 {group_name} - 步骤数: {len(steps)}, 样本数: {sample_size}")
+                        # logger.debug(f"组别 {group_name} - 步骤数: {len(steps)}, 样本数: {sample_size}")
 
                     # 使用MatrixDataStructure对象
                     for group_name in self.matrix_data.get_all_groups():
@@ -278,8 +278,8 @@ class LLCRCRExportService(BaseExportService):
             # 填写步骤
             for step_key, step_description in step_dict.items():
                 # 打印当前步骤的calculateheader_col值
-                logger.debug(
-                    f"[{group_name}] 步骤 {step_key} 处理中, calculateheader_col: {calculateheader_col}, stat_start_col: {stat_start_col}")
+                # logger.debug(
+                #     f"[{group_name}] 步骤 {step_key} 处理中, calculateheader_col: {calculateheader_col}, stat_start_col: {stat_start_col}")
 
                 # 填写步骤描述
                 ws.cell(row=current_row, column=2).value = step_description.strip()
