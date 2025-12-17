@@ -1,3 +1,4 @@
+
 from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
@@ -76,6 +77,12 @@ class LLCRCRSpecSummaryService:
                 row_idx += 1
 
             logger.info(f"从工作表 {first_sheet_name} 中提取了 {len(steps_data)} 个步骤数据")
+            
+            # 记录每个工作表的行数，用于调试后面测试点位变少的问题
+            for sheet_name in wb.sheetnames:
+                if sheet_name == 'Summary':
+                    continue
+                logger.info(f"工作表 {sheet_name} 总共有 {wb[sheet_name].max_row} 行数据")
 
             # 收集所有工作表中的统计数据
             all_sheet_data = {}
@@ -105,6 +112,8 @@ class LLCRCRSpecSummaryService:
                     'data': sheet_data,
                     'stat_columns': sheet_stat_columns
                 }
+                
+                logger.info(f"工作表 {sheet_name} 包含 {len(sheet_data)} 行统计数据")
 
             # 创建Summary工作表
             if 'Summary' in wb.sheetnames:
@@ -198,24 +207,34 @@ class LLCRCRSpecSummaryService:
                         col_idx = start_col + i
                         
                         # 检查该工作表是否有对应的统计数据
-                        if source_row in sheet_data and stat_name in sheet_data[source_row]:
-                            stat_cell_ref = sheet_data[source_row][stat_name]
-                            formula = f"='{sheet_name}'!{stat_cell_ref}"
+                        # 由于我们现在支持跨工作表的不同步骤，需要根据实际的Group和Step来查找数据
+                        stat_found = False
+                        for sheet_row, stat_cells in sheet_data.items():
+                            # 获取该行的Group和Step信息以进行匹配
+                            sheet_group = wb[sheet_name].cell(row=sheet_row, column=1).value
+                            sheet_step = wb[sheet_name].cell(row=sheet_row, column=2).value
                             
-                            stat_cell = summary_ws.cell(row=row_idx, column=col_idx)
-                            stat_cell.value = formula
-                            stat_cell.alignment = center_alignment
-                            stat_cell.border = border_style
-                            
-                            # Max列使用粗体字，其他列使用普通字体
-                            if stat_name == 'Max':
-                                stat_cell.font = max_font
-                            else:
-                                stat_cell.font = data_font
+                            if sheet_group == group and sheet_step == step and stat_name in stat_cells:
+                                stat_cell_ref = stat_cells[stat_name]
+                                formula = f"='{sheet_name}'!{stat_cell_ref}"
+                                
+                                stat_cell = summary_ws.cell(row=row_idx, column=col_idx)
+                                stat_cell.value = formula
+                                stat_cell.alignment = center_alignment
+                                stat_cell.border = border_style
+                                
+                                # Max列使用粗体字，其他列使用普通字体
+                                if stat_name == 'Max':
+                                    stat_cell.font = max_font
+                                else:
+                                    stat_cell.font = data_font
 
-                            # 设置数字格式
-                            stat_cell.number_format = "0.000" if self.test_type == "CR" else "0.0"
-                        else:
+                                # 设置数字格式
+                                stat_cell.number_format = "0.000" if self.test_type == "CR" else "0.0"
+                                stat_found = True
+                                break
+                        
+                        if not stat_found:
                             # 如果找不到统计单元格引用，填入空值
                             stat_cell = summary_ws.cell(row=row_idx, column=col_idx)
                             stat_cell.value = ""
@@ -257,14 +276,6 @@ class LLCRCRSpecSummaryService:
                     # 按交替规则填充背景色（第一个Group不填充，第二个填充，第三个不填充，第四个填充，以此类推）
                     if i % 2 == 1:  # 偶数索引（0,2,4...）不填充，奇数索引（1,3,5...）填充
                         for row in range(current_row, end_row + 1):
-                            # 填充Group列（第1列）
-                            group_cell = summary_ws.cell(row=row, column=1)
-                            group_cell.fill = fill_color
-                            
-                            # 填充Test Step列（第2列）
-                            step_cell = summary_ws.cell(row=row, column=2)
-                            step_cell.fill = fill_color
-                            
                             # 填充统计数据列（从第3列开始的所有列）
                             for col in range(3, total_columns + 1):
                                 stat_cell = summary_ws.cell(row=row, column=col)
@@ -273,7 +284,7 @@ class LLCRCRSpecSummaryService:
 
             # 设置列宽
             # 第一列（Group列）设置为较窄
-            summary_ws.column_dimensions[get_column_letter(1)].width = 12
+            summary_ws.column_dimensions[get_column_letter(1)].width = 10
             # 第二列（Test Step列）设置为较宽
             summary_ws.column_dimensions[get_column_letter(2)].width = 25
             # 数据列设置为更窄
