@@ -5,13 +5,13 @@ from src.core.logger import logger
 
 class LLCRCRTableStructureService:
     """LLCR/CR表格结构服务 - 专门处理各种表格结构创建"""
-    
+
     def __init__(self, formatting_service):
         self.formatting_service = formatting_service
-        
+
     def insert_table_headers(self, ws, headers_cols, record_start_col, record_end_col,
                              calculateheader_col, calculate_start_col, calculate_end_col,
-                             stat_start_col, delta_r_start_col, sample_count, is_delta_r_checked, 
+                             stat_start_col, delta_r_start_col, sample_count, is_delta_r_checked,
                              cr_current_value, test_type, is_first_group=True):
         """插入表格表头"""
         record_data_tbl_title_row = 9
@@ -98,7 +98,7 @@ class LLCRCRTableStructureService:
     def _set_header_style(self, ws, title_row, stat_start_col):
         """设置表头样式"""
         self.formatting_service.format_range_bold_header(ws, title_row, stat_start_col)
-        
+
     def insert_bulk_resistance_table(self, ws, test_type, cr_current_value):
         """插入体积电阻表格"""
         bulk_tbl_start_row = 1  # 体积电阻起始行
@@ -128,7 +128,7 @@ class LLCRCRTableStructureService:
 
         if test_type == "CR":
             logger.debug("Setting CR number format")
-            
+
             # 设置数据范围的数字格式为三位小数
             for row in range(bulk_tbl_start_row + 1, bulk_tbl_start_row + 5):
                 ws.cell(row=row, column=2).number_format = "0.000"
@@ -145,7 +145,7 @@ class LLCRCRTableStructureService:
 
         # 设置体积电阻表格格式
         self.formatting_service.format_range(ws, bulk_tbl_start_row, 1, bulk_tbl_start_row + 5, 2)
-        
+
         # 添加字体和背景色设置
         # 设置字体为Arial，大小为9
         font = Font(name='Arial', size=9)
@@ -160,23 +160,23 @@ class LLCRCRTableStructureService:
         # 设置首行（表头行）为粗体字并添加灰色背景色
         header_font = Font(name='Arial', size=9, bold=True)
         header_fill = PatternFill(start_color="DCDCDC", end_color="DCDCDC", fill_type="solid")
-        
+
         # 设置首行样式
         for col in range(1, 3):
             cell = ws.cell(row=bulk_tbl_start_row, column=col)
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = Alignment(horizontal='center', vertical='center')
-        
+
         # 设置首列（A列）为粗体字并添加灰色背景色
         for row in range(bulk_tbl_start_row, bulk_tbl_start_row + 6):
             cell = ws.cell(row=row, column=1)
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = Alignment(horizontal='center', vertical='center')
-        
+
         logger.debug("insert_bulk_resistance_table completed")
-        
+
     def insert_test_info_table(self, ws, target_folder_name="Default Folder"):
         """插入测试信息表格"""
         test_info_start_row = 1  # 测试信息起始行
@@ -226,19 +226,19 @@ class LLCRCRTableStructureService:
 
         # 设置日期环境记录背景格式
         self._set_environment_column_format(ws, test_info_start_row, 4, test_info_start_row + 4, 9)
-        
+
     def _set_environment_column_format(self, worksheet, title_row, start_col, end_row, end_col):
         """设置日期环境记录格式"""
         try:
             # 预先创建样式对象
             yellow_fill = PatternFill(start_color="FFFFCC", end_color="FFFFCC", fill_type="solid")
             bold_font = Font(name='Arial', bold=True, size=9)
-            
+
             # 构建范围字符串
             start_col_letter = get_column_letter(start_col)
             end_col_letter = get_column_letter(end_col)
             range_str = f"{start_col_letter}{title_row}:{end_col_letter}{end_row}"
-            
+
             # 为整个范围应用样式
             for row in worksheet[range_str]:
                 for cell in row:

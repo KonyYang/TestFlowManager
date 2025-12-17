@@ -59,7 +59,7 @@ class LLCRCRExportService(BaseExportService):
         try:
             # 初始化摘要服务
             self.summary_service = LLCRCRSpecSummaryService(self.test_type)
-            
+
             # 创建工作簿
             wb = Workbook()
             logger.debug("创建工作簿成功")
@@ -392,7 +392,7 @@ class LLCRCRExportService(BaseExportService):
         self.table_structure_service.insert_table_headers(
             ws, headers_cols, record_start_col, record_end_col,
             calculateheader_col, calculate_start_col, calculate_end_col,
-            stat_start_col, delta_r_start_col, sample_count, 
+            stat_start_col, delta_r_start_col, sample_count,
             is_delta_r_checked, cr_current_value, self.test_type, self.is_first_group
         )
 

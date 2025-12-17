@@ -11,6 +11,7 @@ from src.core.logger import logger
 from src.core.config_manager import config_manager
 from src.utils.word_utils import get_shared_word_app, release_word_app, open_word_file
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
+from src.features.test_record_generator.service.table_structure_service import TestRecordTableStructureService
 import json
 import shutil
 
