@@ -1,5 +1,5 @@
 from openpyxl import load_workbook
-from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from src.core.logger import logger
 
@@ -141,6 +141,8 @@ class LLCRCRSpecSummaryService:
             header_font = Font(name='Arial', size=9, bold=True)
             header_fill = PatternFill(start_color="DCDCDC", end_color="DCDCDC", fill_type="solid")
             center_alignment = Alignment(horizontal='center', vertical='center')
+            border_style = Border(left=Side(style='thin'), right=Side(style='thin'), 
+                                  top=Side(style='thin'), bottom=Side(style='thin'))
 
             # 设置表头样式
             for col in range(1, total_columns + 1):
@@ -149,12 +151,14 @@ class LLCRCRSpecSummaryService:
                     cell.font = header_font
                     cell.fill = header_fill
                     cell.alignment = center_alignment
+                    cell.border = border_style
 
             # 填充数据，只使用一种浅黄色背景色
             fill_color = PatternFill(start_color="FFFACD", end_color="FFFACD", fill_type="solid")  # 淡黄色
 
             # 数据行字体样式（与表头统一）
             data_font = Font(name='Arial', size=9)
+            bold_data_font = Font(name='Arial', size=9, bold=True)  # 前两列使用粗体
             max_font = Font(name='Arial', size=9, bold=True)  # Max列使用粗体
 
             # 遍历每个步骤填充数据
@@ -169,7 +173,9 @@ class LLCRCRSpecSummaryService:
                 group_cell.value = group
                 # 根据交替规则填充背景色（第一个Group不填充，第二个填充，第三个不填充，第四个填充，以此类推）
                 group_cell.alignment = center_alignment
-                group_cell.font = data_font  # 使用数据行字体样式
+                group_cell.font = bold_data_font  # 第一列使用粗体字体
+                group_cell.fill = header_fill  # 第一列使用表头背景色
+                group_cell.border = border_style
 
                 logger.info(f"在第 {row_idx} 行填写 Group: '{group}'")
 
@@ -177,7 +183,9 @@ class LLCRCRSpecSummaryService:
                 step_cell = summary_ws.cell(row=row_idx, column=2)
                 step_cell.value = step
                 step_cell.alignment = center_alignment
-                step_cell.font = data_font  # 使用数据行字体样式
+                step_cell.font = bold_data_font  # 第二列使用粗体字体
+                step_cell.fill = header_fill  # 第二列使用表头背景色
+                step_cell.border = border_style
 
                 # 为每个工作表填写统计数据引用公式
                 for sheet_idx, sheet_name in enumerate(data_sheet_names):
@@ -197,6 +205,7 @@ class LLCRCRSpecSummaryService:
                             stat_cell = summary_ws.cell(row=row_idx, column=col_idx)
                             stat_cell.value = formula
                             stat_cell.alignment = center_alignment
+                            stat_cell.border = border_style
                             
                             # Max列使用粗体字，其他列使用普通字体
                             if stat_name == 'Max':
@@ -212,6 +221,7 @@ class LLCRCRSpecSummaryService:
                             stat_cell.value = ""
                             stat_cell.alignment = center_alignment
                             stat_cell.font = data_font
+                            stat_cell.border = border_style
 
             # 记录最后有效行的位置
             last_valid_row = len(steps_data) + 2
@@ -259,10 +269,16 @@ class LLCRCRSpecSummaryService:
                             for col in range(3, total_columns + 1):
                                 stat_cell = summary_ws.cell(row=row, column=col)
                                 stat_cell.fill = fill_color
+                                stat_cell.border = border_style
 
-            # 自动调整列宽
-            for col_idx in range(1, total_columns + 1):
-                summary_ws.column_dimensions[get_column_letter(col_idx)].width = 20
+            # 设置列宽
+            # 第一列（Group列）设置为较窄
+            summary_ws.column_dimensions[get_column_letter(1)].width = 12
+            # 第二列（Test Step列）设置为较宽
+            summary_ws.column_dimensions[get_column_letter(2)].width = 25
+            # 数据列设置为更窄
+            for col_idx in range(3, total_columns + 1):
+                summary_ws.column_dimensions[get_column_letter(col_idx)].width = 10
 
             # 保存工作簿
             wb.save(file_path)

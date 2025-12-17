@@ -5,11 +5,7 @@ from src.features.matrix.service.export.service.llcr_cr_formula_service import L
 from src.features.matrix.service.export.service.llcr_cr_styling_service import LLCRCRStylingService
 from src.features.matrix.service.export.service.llcr_cr_summary_service import LLCRCRSpecSummaryService
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Border, Side, PatternFill, Font
-from openpyxl.utils import get_column_letter
 from src.core.logger import logger
-import re
-
 
 class LLCRCRExportService(BaseExportService):
     """LLCR/CR导出服务"""
@@ -64,89 +60,57 @@ class LLCRCRExportService(BaseExportService):
             wb = Workbook()
             logger.debug("创建工作簿成功")
 
-            # 如果提供了test_category_dict，按分组创建多个工作表
-            if test_category_dict and isinstance(test_category_dict, dict):
-                logger.debug(f"使用test_category_dict创建多个工作表: {test_category_dict}")
-                # 删除默认工作表
-                wb.remove(wb.active)
-
-                # 为每个类别创建一个工作表
-                for category_name, points in test_category_dict.items():
-                    # 重置状态变量（针对每个工作表）
-                    self.total_row_offset = 0
-                    self.is_first_group = True
-                    self.initial_test_rows = {}
-
-                    logger.debug(f"为类别'{category_name}'创建工作表，点位: {points}")
-                    # 创建工作表并命名（限制工作表名称长度不超过31个字符）
-                    safe_category_name = category_name[:31] if len(category_name) > 31 else category_name
-                    ws = wb.create_sheet(safe_category_name)
-                    logger.debug(f"工作表'{safe_category_name}'创建成功")
-
-                    # 插入体积电阻表格
-                    logger.debug(
-                        f"调用_insert_bulk_resistance_table，参数: test_type={self.test_type}, cr_current_value={cr_current_value}")
-                    self._insert_bulk_resistance_table(ws, self.test_type, cr_current_value)
-                    # 插入测试信息表格
-                    self._insert_test_info_table(ws)
-                    # 插入记录数据表格 - 使用Matrix数据
-                    if self.matrix_data:
-                        # 输出一次Matrix数据信息
-                        logger.debug(f"Matrix数据信息: test_type={self.test_type}")
-                        logger.debug(f"Matrix数据存在，所有组别={self.matrix_data.get_all_groups()}")
-
-                        # 遍历所有组别，输出每个组别的信息
-                        for group_name in self.matrix_data.get_all_groups():
-                            steps = self.matrix_data.get_group_steps(group_name)
-                            sample_size = self.matrix_data.get_group_sample_size(group_name)
-                            logger.debug(f"组别 {group_name} - 步骤数: {len(steps)}, 样本数: {sample_size}")
-
-                        # 使用MatrixDataStructure对象
-                        for group_name in self.matrix_data.get_all_groups():
-                            group_sample_size = self.matrix_data.get_group_sample_size(group_name)
-                            parsed_sample_size = self._parse_sample_count(group_sample_size)
-                            # 传递sample_count而不是parsed_sample_size
-                            self._insert_record_data_table(ws, group_name, points, sample_count, is_delta_r_checked,
-                                                           cr_current_value)
-                    else:
-                        # 回退到原有逻辑
-                        self._insert_record_data_table(ws, sample_count, point_array, sample_count, is_delta_r_checked,
-                                                       cr_current_value)
-            else:
-                logger.debug("使用默认逻辑创建单一工作表")
-                # 重置状态变量
-                self.total_row_offset = 0
-                self.is_first_group = True
-                self.initial_test_rows = {}
-
+            # 统一处理逻辑：无论单个工作表还是多个工作表，都使用统一的处理流程
+            # 如果没有提供test_category_dict，则构建一个统一格式的test_category_dict
+            if not test_category_dict or not isinstance(test_category_dict, dict):
                 # 如果没有提供测试点位数组，则从数据模型中提取
                 if point_array is None:
                     point_array = self._extract_point_array()
                     logger.debug(f"从数据模型提取点位数组: {point_array}")
+                
+                # 构建统一的test_category_dict格式，即使是简单的单点位情况也变成字典形式
+                test_category_dict = {"Sheet1": point_array}
+                logger.debug(f"构建默认test_category_dict: {test_category_dict}")
 
-                # 创建工作表并填充数据
-                ws = wb.active
-                ws.title = self.test_type if self.test_type else ("LLCR" if not cr_current_value else "CR")
-                logger.debug(f"设置工作表标题为: {ws.title}")
+            # 删除默认工作表
+            wb.remove(wb.active)
+            
+            # 为每个类别创建一个工作表
+            for category_name, points in test_category_dict.items():
+                # 重置状态变量（针对每个工作表）
+                self.total_row_offset = 0
+                self.is_first_group = True
+                self.initial_test_rows = {}
 
-                # 插入记录数据表格
+                logger.debug(f"为类别'{category_name}'创建工作表，点位: {points}")
+                # 创建工作表并命名（限制工作表名称长度不超过31个字符）
+                safe_category_name = category_name[:31] if len(category_name) > 31 else category_name
+                ws = wb.create_sheet(safe_category_name)
+                logger.debug(f"工作表'{safe_category_name}'创建成功")
+
+                # 插入体积电阻表格
+                logger.debug(
+                    f"调用_insert_bulk_resistance_table，参数: test_type={self.test_type}, cr_current_value={cr_current_value}")
+                self._insert_bulk_resistance_table(ws, self.test_type, cr_current_value)
+                # 插入测试信息表格
+                self._insert_test_info_table(ws)
+                # 插入记录数据表格 - 使用Matrix数据
                 if self.matrix_data:
                     # 输出一次Matrix数据信息
                     logger.debug(f"Matrix数据信息: test_type={self.test_type}")
                     logger.debug(f"Matrix数据存在，所有组别={self.matrix_data.get_all_groups()}")
 
                     # 遍历所有组别，输出每个组别的信息
-                    for group_name in self.matrix_data.get_all_groups():
-                        steps = self.matrix_data.get_group_steps(group_name)
-                        sample_size = self.matrix_data.get_group_sample_size(group_name)
+                    # for group_name in self.matrix_data.get_all_groups():
+                        # steps = self.matrix_data.get_group_steps(group_name)
+                        # sample_size = self.matrix_data.get_group_sample_size(group_name)
                         # logger.debug(f"组别 {group_name} - 步骤数: {len(steps)}, 样本数: {sample_size}")
 
                     # 使用MatrixDataStructure对象
                     for group_name in self.matrix_data.get_all_groups():
-                        group_sample_size = self.matrix_data.get_group_sample_size(group_name)
-                        parsed_sample_size = self._parse_sample_count(group_sample_size)
+                        # group_sample_size = self.matrix_data.get_group_sample_size(group_name)
                         # 传递sample_count而不是parsed_sample_size
-                        self._insert_record_data_table(ws, group_name, point_array, sample_count, is_delta_r_checked,
+                        self._insert_record_data_table(ws, group_name, points, sample_count, is_delta_r_checked,
                                                        cr_current_value)
                 else:
                     # 回退到原有逻辑
@@ -214,14 +178,11 @@ class LLCRCRExportService(BaseExportService):
                     return
 
                 step_dict = group_data["step_dict"]
-                # sample_count已经在函数参数中传入，我们直接使用它
-                group_col_index = group_data["column_index"]
             else:
                 # 原有的sample_count模式（向后兼容）
                 sample_count = sample_count_or_group_name
                 step_dict = {"1": "Test Step"}  # 默认步骤
                 group_name = "Default"
-                group_col_index = -1
 
             # 验证输入参数
             if not self._validate_inputs(point_array, step_dict):
@@ -259,7 +220,6 @@ class LLCRCRExportService(BaseExportService):
                     f"[{group_name}] Delta R已勾选，delta_r_start_col: {delta_r_start_col}, 新stat_start_col: {stat_start_col}")
 
             record_data_tbl_title_row = 9  # 记录数据表头
-            total_rows = len(point_array)  # 数据行数
 
             # 如果是第一个group，插入记录数据表格表头
             if self.is_first_group:
@@ -342,15 +302,6 @@ class LLCRCRExportService(BaseExportService):
 
             # 更新总列偏移量
             self.total_column_offset += (calculate_end_col - record_start_col + 1)
-
-            # 只有在最后一个组处理完后才设置统计数据背景格式和环境记录格式
-            # 获取所有组的数量
-            all_groups = []
-            if self.matrix_data:
-                all_groups = self.matrix_data.get_all_groups()
-
-            # 当处理到最后一个组时，设置统计列和环境列的格式
-            is_last_group = (group_name == all_groups[-1] if all_groups else True)
 
             end_row = record_data_tbl_title_row + self.total_row_offset
 
@@ -479,7 +430,7 @@ class LLCRCRExportService(BaseExportService):
         """插入体积电阻表格"""
         self.table_structure_service.insert_bulk_resistance_table(ws, testType, crCurrentValue)
 
-    def _insert_test_info_table(self, ws, test_info=None):
+    def _insert_test_info_table(self, ws):
         """插入测试信息表格 - 使用默认值"""
         # 使用固定的默认值
         targetFolderName = "Default Folder"  # 可以根据需要修改这个默认值
