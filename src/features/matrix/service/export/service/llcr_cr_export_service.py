@@ -14,6 +14,7 @@ class LLCRCRExportService(BaseExportService):
         super().__init__(data_model)
         self.formatting_service = ExcelFormattingService()
         self.table_structure_service = LLCRCRTableStructureService(self.formatting_service)
+        self.table_structure_service.export_service = self  # 添加反向引用
         self.formula_service = LLCRCRFormulaService()
         self.styling_service = LLCRCRStylingService()
         self.summary_service = None  # 摘要服务将在导出时初始化
@@ -21,7 +22,7 @@ class LLCRCRExportService(BaseExportService):
         self.matrix_data = None  # Matrix数据结构实例
         self.total_row_offset = 0  # 总偏移量
         self.is_first_group = True  # 是否为第一个组
-        self.initial_test_rows = {}  # 存储每个组的初始测试行 {group_name: row}
+        self.dl_number = None  # 添加DL编号属性
 
     def set_matrix_data(self, matrix_data):
         """设置Matrix数据结构"""
@@ -431,10 +432,10 @@ class LLCRCRExportService(BaseExportService):
         self.table_structure_service.insert_bulk_resistance_table(ws, testType, crCurrentValue)
 
     def _insert_test_info_table(self, ws):
-        """插入测试信息表格 - 使用默认值"""
-        # 使用固定的默认值
-        targetFolderName = "Default Folder"  # 可以根据需要修改这个默认值
-        self.table_structure_service.insert_test_info_table(ws, targetFolderName)
+        """插入测试信息表格"""
+        # 如果有DL编号，使用DL编号作为target_folder_name，否则使用默认值
+        target_folder_name = self.dl_number if self.dl_number else "Default Folder"
+        self.table_structure_service.insert_test_info_table(ws, target_folder_name)
 
     def _generate_summary_sheet_internal(self, file_path):
         """

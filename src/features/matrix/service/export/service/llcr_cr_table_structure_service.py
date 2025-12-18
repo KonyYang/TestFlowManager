@@ -194,7 +194,24 @@ class LLCRCRTableStructureService:
 
         # 注意：VBA代码中还有一行调用 AssignLLCRorCRRequirementFromConfirmSpec 来获取 Test Requirement
         # 这里暂时留空，因为该函数需要额外实现
-        ws.cell(row=test_info_start_row + 4, column=6).value = ""  # Test Requirement 暂时留空
+        # 获取LLCR/CR需求并填充到Test Requirement单元格
+        requirements = []
+        if hasattr(self, 'export_service') and self.export_service.matrix_data:
+            # 根据当前测试类型获取对应的需求列表
+            if hasattr(self.export_service, 'test_type'):
+                if self.export_service.test_type == "LLCR":
+                    requirements = self.export_service.matrix_data.get_llcr_requirements()
+                elif self.export_service.test_type == "CR":
+                    requirements = self.export_service.matrix_data.get_cr_requirements()
+            
+        if requirements:
+            # 将所有需求连接成一个字符串
+            requirement_text = "; ".join(requirements)
+            ws.cell(row=test_info_start_row + 4, column=6).value = requirement_text
+            logger.debug(f"填充Test Requirement: {requirement_text}")
+        else:
+            ws.cell(row=test_info_start_row + 4, column=6).value = ""  # Test Requirement 暂时留空
+            logger.debug("没有找到对应测试类型的需求，Test Requirement留空")
 
         # 合并单元格
         for i in range(0, 5):  # 从第0行（TestInfoStartRow）到第4行（TestInfoStartRow + 4）

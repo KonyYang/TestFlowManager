@@ -18,6 +18,8 @@ class MatrixDataStructure:
         self.dl_number: str = "DL-UNKNOWN"
         self.project_data_file_path: str = None
         self._is_parsed = False  # 添加解析状态标志
+        self.llcr_requirements = []  # 添加LLCR需求列表
+        self.cr_requirements = []    # 添加CR需求列表
         
     def __str__(self):
         return f"MatrixDataStructure(dl_number={self.dl_number}, project_data_file_path={self.project_data_file_path})"
@@ -143,6 +145,10 @@ class MatrixDataStructure:
             matrix_data: Matrix数据
             sample_size_row_index: 样本大小行索引
         """
+        # 清空之前的LLCR和CR需求列表
+        self.llcr_requirements = []
+        self.cr_requirements = []
+        
         # 遍历所有行，提取每个组别的测试项
         # 修改：在遇到"Sample"行时停止提取组别步骤
         for row_idx, row in enumerate(matrix_data):
@@ -182,6 +188,21 @@ class MatrixDataStructure:
                                 "Requirement": row[4] if len(row) > 4 else "",
                                 "StepDescription": test_item  # 默认值为test_item
                             }
+                            
+                            # 如果是LLCR测试项，收集其Requirement
+                            if test_item.upper() == "LLCR":
+                                requirement = row[4] if len(row) > 4 else ""
+                                if requirement and requirement not in self.llcr_requirements:
+                                    self.llcr_requirements.append(requirement)
+                                    logger.debug(f"收集到LLCR需求: {requirement}")
+                                    
+                            # 如果是CR测试项，收集其Requirement
+                            if test_item.upper() == "CR":
+                                requirement = row[4] if len(row) > 4 else ""
+                                if requirement and requirement not in self.cr_requirements:
+                                    self.cr_requirements.append(requirement)
+                                    logger.debug(f"收集到CR需求: {requirement}")
+                                    
                             self.group_steps[group_name].append(step_info)
                             
         # 对每组内的步骤按键（步骤号，数值）升序排序，并处理Initial/After test逻辑
@@ -491,3 +512,21 @@ class MatrixDataStructure:
             "sample_size": self.group_sample_sizes.get(group_name, ""),
             "column_index": self.group_col_indices.get(group_name, -1)
         }
+    
+    def get_llcr_requirements(self) -> List[str]:
+        """
+        获取所有LLCR测试项的Requirement内容
+        
+        Returns:
+            list: LLCR需求列表
+        """
+        return self.llcr_requirements
+
+    def get_cr_requirements(self) -> List[str]:
+        """
+        获取所有CR测试项的Requirement内容
+        
+        Returns:
+            list: CR需求列表
+        """
+        return self.cr_requirements

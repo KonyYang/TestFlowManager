@@ -46,6 +46,9 @@ class RecordDataTableExportController:
         try:
             logger.debug(f"开始导出{test_type}记录数据表格")
             
+            # 获取DL编号（如果可用）
+            dl_number = self._get_dl_number()
+            
             # 显示参数输入对话框
             dialog = LLCR_CR_RecordParametersDialog(self.parent, test_type)
             if dialog.exec_() != QDialog.Accepted:
@@ -63,6 +66,10 @@ class RecordDataTableExportController:
             # 设置默认文件路径和文件名
             default_dir = "D:\\outfile"
             default_filename = f"test {test_type.lower()}.xlsx"
+            
+            # 如果有DL编号，使用DL编号作为文件名的一部分
+            if dl_number:
+                default_filename = f"{dl_number} test {test_type.lower()}.xlsx"
             
             # 确保默认目录存在
             if not os.path.exists(default_dir):
@@ -99,6 +106,10 @@ class RecordDataTableExportController:
             if self._has_duplicate_sheet_names(category_dict):
                 QMessageBox.warning(self.parent, "警告", "检测到重复的工作表名称，请修改输入以确保每个分组有唯一的工作表名称。")
                 return False
+            
+            # 设置DL编号到导出服务
+            self.llcr_export_service.dl_number = dl_number
+            self.cr_export_service.dl_number = dl_number
             
             # 执行导出
             logger.debug(f"开始调用{test_type.lower()}_export_service.export_{test_type.lower()}_to_excel方法")
@@ -240,6 +251,39 @@ class RecordDataTableExportController:
         # 检查是否有重复的名称（考虑Excel工作表名称长度限制31个字符）
         trimmed_names = [name[:31] for name in sheet_names]
         return len(trimmed_names) != len(set(trimmed_names))
+
+    def _get_dl_number(self):
+        """
+        获取DL编号
+        
+        Returns:
+            str: DL编号，如果无法获取则返回None
+        """
+        try:
+            # 尝试从状态管理器获取当前项目路径
+            from src.core.state_manager import state_manager
+            current_project = state_manager.get_state("current_project")
+            
+            if current_project and os.path.exists(current_project):
+                # 在当前项目路径中查找JSON文件
+                try:
+                    json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
+                    if json_files:
+                        project_data_file_path = os.path.join(current_project, json_files[0])
+                        
+                        # 从项目数据文件中提取DL编号
+                        if os.path.exists(project_data_file_path):
+                            with open(project_data_file_path, 'r', encoding='utf-8') as f:
+                                project_data = json.load(f)
+                                dl_number = project_data.get("DL")
+                                logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
+                                return dl_number
+                except Exception as e:
+                    logger.warning(f"查找或读取项目JSON文件时出错: {e}")
+        except Exception as e:
+            logger.warning(f"获取DL编号时出错: {e}")
+        
+        return None
 
     def _extract_test_categories_from_matrix(self):
         """
