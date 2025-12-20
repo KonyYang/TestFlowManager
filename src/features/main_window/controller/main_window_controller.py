@@ -49,6 +49,9 @@ class MainWindowController:
         
         # 初始化Matrix项目控制器
         self.matrix_project_controller = MatrixProjectController(view)
+        
+        # 初始化当前项目路径
+        self._current_project_path = None
 
         # 订阅事件
         event_dispatcher.subscribe("ltr.processing.started", self._on_ltr_processing_started)
@@ -469,6 +472,9 @@ class MainWindowController:
 
             # 保存当前项目路径到状态
             state_manager.set_state("current_project", project_path)
+            
+            # 保存当前项目路径到控制器属性
+            self._current_project_path = project_path
             
             # 设置LTR编号到Matrix控制器
             if dl_number:

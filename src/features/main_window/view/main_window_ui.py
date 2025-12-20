@@ -15,6 +15,9 @@ from src.features.matrix.controller.matrix_project_controller import MatrixProje
 from src.features.matrix.view.matrix_dialog import MatrixDialog
 from src.features.matrix.controller.matrix_controller import MatrixController
 
+# 导入客户报告生成相关组件
+from src.features.customer_report_generator.controller.customer_report_controller import CustomerReportController
+
 # 添加QApplication导入
 from PyQt5.QtWidgets import QApplication
 import os
@@ -32,6 +35,8 @@ class MainWindow(QMainWindow):
         # 初始化Matrix控制器
         self.matrix_project_controller = MatrixProjectController(self)
         self.matrix_controller = MatrixController(self)
+        # 初始化客户报告生成控制器
+        self.customer_report_controller = CustomerReportController(self)
         # 保存窗口状态信息
         self.is_custom_sized = False
         self.custom_geometry = None
@@ -230,6 +235,28 @@ class MainWindow(QMainWindow):
         cr_action.setFont(global_font)
         test_table_menu.addAction(cr_action)
 
+        # 报告菜单
+        report_menu = menubar.addMenu("报告")
+        report_menu.setFont(global_font)
+
+        # 添加创建报告菜单项
+        create_report_action = QAction("创建报告", self)
+        create_report_action.triggered.connect(self._on_create_report)
+        create_report_action.setFont(global_font)
+        report_menu.addAction(create_report_action)
+
+        # 添加更新报告菜单项
+        update_report_action = QAction("更新报告", self)
+        update_report_action.triggered.connect(self._on_update_report)
+        update_report_action.setFont(global_font)
+        report_menu.addAction(update_report_action)
+
+        # 添加转客户版菜单项
+        convert_customer_version_action = QAction("转客户版", self)
+        convert_customer_version_action.triggered.connect(self._on_convert_customer_version)
+        convert_customer_version_action.setFont(global_font)
+        report_menu.addAction(convert_customer_version_action)
+
         # 视图菜单
         view_menu = menubar.addMenu("视图")
         view_menu.setFont(global_font)
@@ -305,6 +332,29 @@ class MainWindow(QMainWindow):
         logger.debug("Export CR action triggered")
         # 调用matrix控制器处理CR导出
         if self.matrix_controller.handle_export_cr():
+            self._update_status()
+
+    def _on_create_report(self) -> None:
+        """处理创建报告事件"""
+        logger.debug("Create report action triggered")
+        # TODO: 实现创建报告功能
+        self._update_status()
+
+    def _on_update_report(self) -> None:
+        """处理更新报告事件"""
+        logger.debug("Update report action triggered")
+        # TODO: 实现更新报告功能
+        self._update_status()
+
+    def _on_convert_customer_version(self) -> None:
+        """处理转客户版事件"""
+        logger.debug("Convert to customer version action triggered")
+        # 获取当前项目路径
+        current_project_path = getattr(self.controller, '_current_project_path', None)
+        # 调用客户报告控制器处理生成客户报告
+        if self.customer_report_controller.handle_generate_customer_report(current_project_path):
+            self._update_status()
+        else:
             self._update_status()
 
     def _on_exit(self) -> None:
