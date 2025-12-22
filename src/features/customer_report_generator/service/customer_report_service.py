@@ -7,11 +7,13 @@ import os
 import shutil
 import pythoncom
 import win32com.client as win32
+from src.utils.word_utils import cleanup_word_resources
 from datetime import datetime
 from pathlib import Path
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from src.core.logger import logger
 from src.core.config_manager import config_manager
+
 
 
 class CustomerReportService:
@@ -30,9 +32,10 @@ class CustomerReportService:
     def _initialize_word_app(self):
         """初始化Word应用程序"""
         try:
-            # 初始化COM组件
-            pythoncom.CoInitialize()
-            self.word_app = win32.gencache.EnsureDispatch('Word.Application')
+            from src.utils.word_utils import get_shared_word_app
+            self.word_app = get_shared_word_app()
+            if self.word_app is None:
+                raise Exception("无法获取Word应用程序实例")
             self.word_app.Visible = False
             logger.debug("Word应用程序初始化成功")
         except Exception as e:
@@ -124,8 +127,11 @@ class CustomerReportService:
             if not os.path.exists(template_path):
                 raise FileNotFoundError(f"模板文档不存在: {template_path}")
             
-            # 打开源文档（只读模式）
-            self.source_doc = self.word_app.Documents.Open(source_path, ReadOnly=True)
+            # 使用word_utils中的函数打开源文档（只读模式）
+            from src.utils.word_utils import open_word_file
+            self.source_doc = open_word_file(source_path, read_only=True)
+            if self.source_doc is None:
+                raise Exception(f"无法打开源文档: {source_path}")
             logger.debug(f"成功打开源文档: {source_path}")
             
             # 创建临时模板文件路径
@@ -143,6 +149,52 @@ class CustomerReportService:
         except Exception as e:
             logger.error(f"准备文档时出错: {e}")
             raise
+
+    def _validate_source_document_type(self, expected_type="LABORATORY TEST REPORT"):
+        """
+        验证源文档类型是否为期望的报告类型
+        
+        Args:
+            expected_type (str): 期望的文档类型，默认为"LABORATORY TEST REPORT"
+        
+        Returns:
+            bool: 如果是期望的文档类型返回True，否则返回False
+        """
+        try:
+            # 检查文档是否成功打开
+            if not self.source_doc:
+                logger.error("源文档未打开，无法验证类型")
+                return False
+
+            # 获取源文档第一节首页页眉
+            first_section = self.source_doc.Sections(1)
+            header_range = first_section.Headers(2).Range  # wdHeaderFooterFirstPage = 2
+
+            # 检查首页页眉中是否有表格
+            if header_range.Tables.Count == 0:
+                logger.info("❌ 源文档首节首页页眉中未找到表格")
+                return False
+
+            # 获取第一个表格
+            header_table = header_range.Tables(1)
+            if header_table.Rows.Count < 1 or header_table.Columns.Count < 2:
+                logger.info("❌ 表格行列不足，无法检查标志")
+                return False
+
+            # 检查表格第1行第2列的内容
+            cell_text = header_table.Cell(1, 2).Range.Text.strip()
+
+            # 判断是否包含期望的文档类型
+            if expected_type in cell_text:
+                logger.info(f"✅ 检测到有效的{expected_type}")
+                return True
+            else:
+                logger.info(f"⚠️ 文档类型不匹配，期望: {expected_type}, 实际内容: {cell_text[:50]}...")
+                return False
+
+        except Exception as e:
+            logger.error(f"验证源文档类型时出错: {e}")
+            return False
 
     def _modify_header(self):
         """
@@ -522,48 +574,30 @@ class CustomerReportService:
             # 将内容插入到模板文档末尾
             self._insert_content_to_document_end(content_range)
             
-            logger.debug("修订记录复制完成")
+            # 在文档末尾添加3个空行和"*** End of Report ***"段落
+            # 定位到目标文档末尾
+            target_range = self.template_doc.Range()
+            target_range.Collapse(0)  # wdCollapseEnd = 0
+            
+            # 添加3个空行
+            target_range.Text = "\n\n\n"
+            
+            # 添加"*** End of Report ***"段落并设置格式
+            end_marker_range = self.template_doc.Range()
+            end_marker_range.Collapse(0)  # wdCollapseEnd = 0
+            end_marker_range.Text = "*** End of Report ***\n"
+            
+            # 设置格式：Times New Roman 字体、小四字号、加粗、倾斜、居中
+            end_marker_range.Font.Name = "Times New Roman"
+            end_marker_range.Font.Size = 12  # 小四对应12磅
+            end_marker_range.Font.Bold = True
+            end_marker_range.Font.Italic = True
+            end_marker_range.ParagraphFormat.Alignment = 1  # 1 表示居中对齐
+            
+            logger.debug("修订记录复制完成，并添加了报告结束标记")
             return True
         except Exception as e:
             logger.error(f"复制修订记录时出错: {e}")
-            return False
-
-    def _add_end_of_report(self):
-        """
-        添加报告结束标记
-        """
-        try:
-            # 检查文档是否包含段落
-            if not hasattr(self.source_doc, 'Paragraphs'):
-                logger.warning("源文档不包含段落")
-                return False
-                
-            # 从源文档的最后一个段落开始往前查找"*** End of Report ***"
-            found_end_marker = False
-            end_marker_paragraph = None
-            
-            for i in range(self.source_doc.Paragraphs.Count, 0, -1):
-                paragraph = self.source_doc.Paragraphs(i)
-                if "*** End of Report ***" in paragraph.Range.Text:
-                    found_end_marker = True
-                    end_marker_paragraph = paragraph
-                    break
-            
-            if not found_end_marker:
-                logger.warning("源文档中未找到 '*** End of Report ***' 内容")
-                return False
-            
-            # 获取模板文档的末尾范围
-            target_range = self.template_doc.Content
-            target_range.Collapse(0)  # wdCollapseEnd = 0
-            
-            # 复制内容
-            target_range.FormattedText = end_marker_paragraph.Range.FormattedText
-            
-            logger.debug("报告结束标记添加完成")
-            return True
-        except Exception as e:
-            logger.error(f"添加报告结束标记时出错: {e}")
             return False
 
     def _move_and_format_text(self):
@@ -731,14 +765,16 @@ class CustomerReportService:
             # 关闭文档
             if self.template_doc:
                 try:
-                    self.template_doc.Close(SaveChanges=False)
+                    from src.utils.word_utils import close_document
+                    close_document(self.template_doc, save_changes=False)
                 except:
                     pass  # 文档可能已经关闭
                 self.template_doc = None
             
             if self.source_doc:
                 try:
-                    self.source_doc.Close(SaveChanges=False)
+                    from src.utils.word_utils import close_document
+                    close_document(self.source_doc, save_changes=False)
                 except:
                     pass  # 文档可能已经关闭
                 self.source_doc = None
@@ -751,19 +787,13 @@ class CustomerReportService:
                 except Exception as e:
                     logger.warning(f"删除临时文件时出错: {e}")
             
-            # 退出Word应用
-            if self.word_app:
-                try:
-                    self.word_app.Quit()
-                except:
-                    pass  # Word应用可能已经退出
-                self.word_app = None
-            
-            # 卸载COM组件
+            # 释放Word应用实例
             try:
-                pythoncom.CoUninitialize()
+                from src.utils.word_utils import release_word_app
+                release_word_app()
             except:
-                pass  # COM组件可能已经卸载
+                pass
+            
             logger.debug("资源清理完成")
         except Exception as e:
             logger.error(f"清理资源时出错: {e}")
@@ -802,6 +832,10 @@ class CustomerReportService:
             if not self.source_doc or not self.template_doc:
                 return False, "未能成功打开源文档或模板文档"
             
+            # 验证源文档类型是否为实验室测试报告
+            if not self._validate_source_document_type("LABORATORY TEST REPORT"):
+                return False, "源文档不是有效的实验室测试报告"
+            
             # 修改页眉信息
             if not self._modify_header():
                 return False, "修改页眉信息失败"
@@ -810,7 +844,7 @@ class CustomerReportService:
             if not self._copy_purpose_to_equipments_content():
                 return False, "复制核心内容失败"
 
-            # 复制修订记录
+            # 复制修订记录和报告结束标记
             if not self._copy_revision_record():
                 return False, "复制修订记录失败"
 
@@ -818,10 +852,6 @@ class CustomerReportService:
             if not self._remove_number_and_dot_in_formatted_paragraphs():
                 return False, "清理章节标题格式失败"
 
-            # 添加报告结束标记
-            if not self._add_end_of_report():
-                return False, "添加报告结束标记失败"
-            
             # 移动并格式化特定文本
             if not self._move_and_format_text():
                 return False, "移动并格式化特定文本失败"
@@ -843,10 +873,6 @@ class CustomerReportService:
         finally:
             # 清理资源
             self._cleanup()
-
-
-
-
 
 
 
