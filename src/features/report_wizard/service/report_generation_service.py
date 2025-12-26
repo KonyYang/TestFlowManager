@@ -8,8 +8,10 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Optional
+import pythoncom
 from src.core.logger import logger
 from src.features.report_wizard.service.header_modifier import HeaderModifier
+from src.utils.word_utils import open_docx_document, save_docx_document
 from src.features.report_wizard.model.header_data import HeaderData
 
 
@@ -72,10 +74,11 @@ class ReportGenerationService:
             shutil.copy2(self.template_path, output_path)
             logger.info(f"模板已复制到: {output_path}")
 
-            # 修改页眉信息
+            # 创建页眉修改器实例
             header_modifier = HeaderModifier(output_path)
             try:
-                header_modifier.open()
+                # 打开文档进行修改
+                header_modifier.doc = open_docx_document(output_path)
                 
                 # 准备页眉数据字典
                 header_dict = {
@@ -89,31 +92,85 @@ class ReportGenerationService:
                     "completion_date": header_data.completion_date
                 }
                 
-                # 修改首页页眉
+                # ----------------------------------
+                # ✅ 第一步：使用 python-docx 填充文档内容（如正文表格等）
+                # ----------------------------------
+                logger.info("开始执行 python-docx 修改...")
+                
+                # 修改修订记录表格中的日期 (使用python-docx修改)
+                success3 = header_modifier.modify_revision_record_date(header_dict, doc=header_modifier.doc)
+                if success3:
+                    logger.info("修订记录表格日期已成功修改")
+                else:
+                    logger.error("修订记录表格日期修改失败")
+                
+                # ✅ 确保 python-docx 修改已保存，为 win32com 操作提供最新输入
+                try:
+                    save_docx_document(header_modifier.doc, output_path)  # 保存当前修改，确保 win32com 可读取
+                    logger.info("✅ python-docx 修改已保存")
+                except Exception as e:
+                    logger.error(f"保存 python-docx 修改失败: {e}")
+                    return False
+
+                # ----------------------------------
+                # ✅ 第二步：使用 win32com 进行页眉页脚操作
+                # ----------------------------------
+                logger.info("开始执行 win32com 修改...")
+                
+                # 修改首页页眉 (使用win32com修改)
                 success = header_modifier.modify_header(header_dict)
                 if success:
                     logger.info("首页页眉信息已成功修改")
                 else:
                     logger.error("首页页眉信息修改失败")
-                            
-                # 修改第二节页眉
+                    return False
+
+                # 修改第二节页眉 (使用win32com修改)
                 success2 = header_modifier.modify_second_header(header_dict)
                 if success2:
                     logger.info("第二节页眉信息已成功修改")
                 else:
                     logger.error("第二节页眉信息修改失败")
-                            
-                # 修改修订记录表格中的日期
-                success3 = header_modifier.modify_revision_record_date(header_dict)
-                if success3:
-                    logger.info("修订记录表格日期已成功修改")
-                else:
-                    logger.error("修订记录表格日期修改失败")
-                            
-                # 最后使用win32com保存整个文档，因为Word应用可能已经打开了文档
-                header_modifier.save_with_win32()
+                    return False
+
+                # ----------------------------------
+                # ✅ 第三步：保存所有修改内容
+                # ----------------------------------
+                logger.info("开始执行最终保存...")
+
+                # 使用win32com打开文档并保存
+                word_app = header_modifier.word_app
+                if word_app is None:
+                    from src.utils.word_utils import get_shared_word_app
+                    word_app = get_shared_word_app()
+                    if word_app is None:
+                        logger.error("无法获取Word应用程序实例")
+                        return False
+
+                # 使用win32com打开最终文档并保存
+                win_doc = word_app.Documents.Open(output_path)
+
+                # 保存文档
+                win_doc.Save()
+                logger.info(f"✅ 文档已通过 win32com 成功保存至: {output_path}")
+
+                # 关闭文档
+                win_doc.Close(SaveChanges=False)
+
+                logger.info("✅ 页眉修改步骤已完成，文档已保存")
+
+            except Exception as e:
+                logger.error(f"❌ 文档修改失败: {e}", exc_info=True)
+                return False
             finally:
-                header_modifier.cleanup()
+                # 尝试清理header_modifier资源
+                try:
+                    if header_modifier:
+                        header_modifier.cleanup()
+                except:
+                    pass  # 如果清理失败，则跳过
+                
+            pythoncom.CoUninitialize()
 
             return output_path
 

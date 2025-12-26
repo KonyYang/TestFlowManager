@@ -50,11 +50,7 @@ class HeaderInfoPage(QFrame):
         self.version_edit.setText("Rev.A")  # 默认值
         form_layout.addRow("版本号:", self.version_edit)
         
-        # 日期输入
-        self.date_edit = QDateEdit()
-        self.date_edit.setDate(QDate.currentDate())
-        self.date_edit.setCalendarPopup(True)
-        form_layout.addRow("日期:", self.date_edit)
+
         
         # 测试者输入
         self.tester_edit = QLineEdit()
@@ -83,14 +79,14 @@ class HeaderInfoPage(QFrame):
         self.test_end_date.setCalendarPopup(True)
         form_layout.addRow("测试结束日期:", self.test_end_date)
         
-        form_group.setLayout(form_layout)
-        layout.addWidget(form_group)
-        
         # 报告完成日期
         self.report_completion_date = QDateEdit()
         self.report_completion_date.setDate(QDate.currentDate())
         self.report_completion_date.setCalendarPopup(True)
         form_layout.addRow("报告完成日期:", self.report_completion_date)
+        
+        form_group.setLayout(form_layout)
+        layout.addWidget(form_group)
         
         # 添加弹性空间
         layout.addStretch()
@@ -134,7 +130,6 @@ class HeaderInfoPage(QFrame):
         self.header_data = HeaderData(
             report_no=self.report_no_edit.text().strip(),
             version=self.version_edit.text().strip(),
-            date=self.date_edit.date().toString("yyyy-MM-dd"),
             tester=self.tester_edit.text().strip(),
             report_title=self.report_title_edit.text().strip(),
             requested_by=self.requested_by_edit.text().strip(),
@@ -153,29 +148,7 @@ class HeaderInfoPage(QFrame):
         self.report_no_edit.setText(header_data.report_no)
         self.version_edit.setText(header_data.version)
         
-        # 尝试解析日期字符串并设置到日期编辑器
-        if header_data.date:
-            try:
-                date = QDate.fromString(header_data.date, "yyyy-MM-dd")
-                if date.isValid():
-                    self.date_edit.setDate(date)
-                else:
-                    # 如果格式不匹配，尝试其他格式
-                    formats = ["yyyy-MM-dd", "dd/MMM/yyyy", "d MMM yyyy", "M/d/yyyy"]
-                    parsed_date = None
-                    for fmt in formats:
-                        date = QDate.fromString(header_data.date, fmt)
-                        if date.isValid():
-                            parsed_date = date
-                            break
-                    if parsed_date:
-                        self.date_edit.setDate(parsed_date)
-                    else:
-                        self.date_edit.setDate(QDate.currentDate())
-            except:
-                self.date_edit.setDate(QDate.currentDate())
-        else:
-            self.date_edit.setDate(QDate.currentDate())
+
         
         self.tester_edit.setText(header_data.tester)
         self.report_title_edit.setText(header_data.report_title)

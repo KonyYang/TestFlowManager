@@ -9,6 +9,7 @@ from typing import Optional, Dict, Any
 from pathlib import Path
 from docx import Document
 from datetime import datetime
+import pythoncom
 from src.core.logger import logger
 from src.utils.word_utils import get_shared_word_app
 
@@ -26,54 +27,7 @@ class HeaderModifier:
         self.win_document = None
         self.word_app = None
 
-    def open(self):
-        """打开 Word 文档"""
-        try:
-            self.doc = Document(self.file_path)
-            logger.info(f"成功加载文档: {self.file_path}")
-        except Exception as e:
-            logger.error(f"无法加载文档: {e}")
-            raise
 
-    def save(self, save_path=None):
-        """保存修改后的文档"""
-        try:
-            logger.info(f"准备保存文档: {self.file_path} (是否为副本？)")
-            if save_path:
-                logger.info(f"📖 正在将文档另存为新路径: {save_path}")
-                self.doc.save(save_path)
-                logger.info(f"✅ 文档已另存为: {save_path}")
-            else:
-                logger.info(f"📖 正在将文档保存回原路径: {self.file_path}")
-                self.doc.save(self.file_path)
-                logger.info(f"✅ 文档已保存至: {self.file_path}")
-        except Exception as e:
-            logger.error(f"❌ 保存文档失败: {e}", exc_info=True)
-            raise
-
-    def save_with_win32(self, save_path=None):
-        """使用win32com保存文档（当文档被Word应用打开时使用）"""
-        try:
-            if self.win_document:
-                if save_path:
-                    # 保存到新路径
-                    self.win_document.SaveAs2(save_path)
-                    logger.info(f"✅ 文档已使用Word另存为: {save_path}")
-                else:
-                    # 保存到原路径
-                    self.win_document.Save()
-                    logger.info(f"✅ 文档已使用Word保存至原路径")
-                return True
-            else:
-                logger.error("没有可用的Word文档实例")
-                return False
-        except Exception as e:
-            logger.error(f"❌ 使用Word保存文档失败: {e}", exc_info=True)
-            return False
-
-    def close(self):
-        """关闭文档资源"""
-        pass
 
     def modify_header(self, header_data: Dict[str, Any]) -> bool:
         """
@@ -99,18 +53,16 @@ class HeaderModifier:
             header_range = first_section.Headers(2).Range  # wdHeaderFooterFirstPage = 2
 
             # 查找合适的表格
-            logger.info("🔍 开始查找符合条件的表格（rows >= 5 and cols >= 3）...")
-            logger.debug(f"📎 当前页眉中表格数量: {header_range.Tables.Count}")
+            # logger.info("🔍 开始查找符合条件的表格（rows >= 5 and cols >= 3）...")
+            # logger.debug(f"📎 当前页眉中表格数量: {header_range.Tables.Count}")
 
             suitable_table = None
             for table_index in range(1, header_range.Tables.Count + 1):
                 header_table = header_range.Tables(table_index)
                 rows = header_table.Rows.Count
                 cols = header_table.Columns.Count
-                logger.debug(f"📎 正在检查第 {table_index} 个表格：{rows} 行 x {cols} 列")
 
                 if rows >= 5 and cols >= 3:
-                    logger.info(f"✅ 找到符合条件的表格：第 {table_index} 个表格，{rows} 行 x {cols} 列")
                     suitable_table = header_table
                     break
 
@@ -121,14 +73,11 @@ class HeaderModifier:
             # 从header_data中获取数据
             report_no = header_data.get("report_no", "").strip()
             version = header_data.get("version", "").strip()
-            date = header_data.get("date", "").strip()
+            completion_date = header_data.get("completion_date", "").strip()
             tester = header_data.get("tester", "").strip()
             report_title = header_data.get("report_title", "").strip()
             requested_by = header_data.get("requested_by", "").strip()
             test_period = header_data.get("test_period", "").strip()
-
-            # 格式化日期
-            formatted_date = self._format_date(date) if date else ""
 
             # 填充单元格内容 - 实验室测试报告格式
             self._replace_cell_text(suitable_table.Cell(3, 1), report_no, "第3行第1列")
@@ -136,7 +85,7 @@ class HeaderModifier:
             self._replace_cell_text(suitable_table.Cell(3, 4), tester, "第3行第4列")
             self._replace_cell_text(suitable_table.Cell(5, 3), tester, "第5行第3列", only_first_paragraph=True)
             self._replace_cell_text(suitable_table.Cell(5, 2), report_title, "第5行第2列")
-            self._replace_cell_text(suitable_table.Cell(3, 2), formatted_date, "第3行第2列")
+            self._replace_cell_text(suitable_table.Cell(3, 2), completion_date, "第3行第2列")
             self._replace_cell_text(suitable_table.Cell(3, 3), test_period, "第3行第3列")
             
             # 检查是否有第5列，如果有则更新版本号
@@ -202,7 +151,7 @@ class HeaderModifier:
             return parsed_date.strftime("%d/%b/%Y")  # 输出格式：31/Oct/2024
         return date_str  # 如果解析失败，返回原始字符串
 
-    def modify_revision_record_date(self, header_data: Dict[str, Any], is_customer_report: bool = False) -> bool:
+    def modify_revision_record_date(self, header_data: Dict[str, Any], is_customer_report: bool = False, doc=None) -> bool:
         """
         修改正文 'REVISION RECORD' 表格中的日期
         
@@ -223,14 +172,19 @@ class HeaderModifier:
             # 格式化日期
             formatted_date = self.format_date_to_standard(completion_date_str)
 
+            # 使用传入的doc参数，如果为None则使用self.doc
+            doc_to_use = doc if doc is not None else self.doc
+            if doc_to_use is None:
+                logger.error("❌ 文档对象未提供且self.doc为None")
+                return False
+            
             found = False
             target_paragraph_found = False
 
             target_title = "REVISION RECORD" if is_customer_report else "8. REVISION RECORD"
 
-            for i, para in enumerate(self.doc.paragraphs):
+            for i, para in enumerate(doc_to_use.paragraphs):
                 if target_title in para.text:
-                    logger.info(f"✅ 成功找到目标段落: '{target_title}'")
                     target_paragraph_found = True
 
                     current_element = para._element
@@ -239,7 +193,7 @@ class HeaderModifier:
                     while next_element is not None:
                         if next_element.tag.endswith('tbl'):
                             from docx.table import Table
-                            table_obj = Table(next_element, self.doc)
+                            table_obj = Table(next_element, doc_to_use)
                             table = table_obj
                             found = True
                             break
@@ -249,11 +203,9 @@ class HeaderModifier:
                         break
 
             if not target_paragraph_found:
-                logger.warning(f"❌ 未找到目标段落: '{target_title}'")
                 # 尝试查找其他可能的标题
-                for i, para in enumerate(self.doc.paragraphs):
+                for i, para in enumerate(doc_to_use.paragraphs):
                     if "REVISION" in para.text and ("RECORD" in para.text or "record" in para.text.lower()):
-                        logger.info(f"✅ 找到可能的目标段落: '{para.text}'")
                         target_paragraph_found = True
 
                         current_element = para._element
@@ -262,7 +214,7 @@ class HeaderModifier:
                         while next_element is not None:
                             if next_element.tag.endswith('tbl'):
                                 from docx.table import Table
-                                table_obj = Table(next_element, self.doc)
+                                table_obj = Table(next_element, doc_to_use)
                                 table = table_obj
                                 found = True
                                 break
@@ -272,13 +224,12 @@ class HeaderModifier:
                             break
 
             if not found:
-                logger.warning(f"❌ 未找到目标段落后紧接的表格")
+                logger.warning(f"未找到包含 '{target_title}' 的表格")
                 # 尝试查找所有表格，看是否有包含修订记录相关文本的
-                for table in self.doc.tables:
+                for table_idx, table in enumerate(doc_to_use.tables):
                     for row in table.rows:
                         for cell in row.cells:
                             if "DATE" in cell.text.upper() or "DATE" in cell.text.upper():
-                                logger.info(f"✅ 找到可能的修订记录表格")
                                 table = table
                                 found = True
                                 break
@@ -288,12 +239,13 @@ class HeaderModifier:
                         break
 
             if not found:
+                logger.warning("未找到任何可能的修订记录表格")
                 return False
 
             if len(table.rows) < 2 or len(table.columns) < 4:
                 logger.warning("目标表格行列不足，无法操作！")
                 return False
-
+            
             # 修改第二行（索引1）的日期列，通常是第3列（索引2）或第4列（索引3）
             try:
                 # 首先检查表头，找到日期列
@@ -306,46 +258,101 @@ class HeaderModifier:
                 
                 # 如果找到了日期列标题，就在该列设置日期；否则默认在第3列设置
                 target_col = 2 if date_column_idx == -1 else date_column_idx
+                target_row = 1  # 通常在第二行（索引1）更新日期
                 
-                # 修改第一行数据（索引1）的日期列 - 使用docx专用方法
-                self._set_docx_cell_text(table.cell(1, target_col), formatted_date)
+                # 修改第一行数据（索引1）的日期列 - 使用参考代码的set_cell_text方法
+                self.set_cell_text(table.cell(target_row, target_col), formatted_date)
                 
-                logger.info(f"✅ 修订记录表格日期已更新为: {formatted_date}")
+                logger.info(f"修订记录表格日期已更新为: {formatted_date}")
             except Exception as cell_error:
                 logger.error(f"更新修订记录表格日期时出错: {cell_error}")
                 # 备选方案：尝试更新第2列和第3列
                 try:
-                    self._set_docx_cell_text(table.cell(1, 2), formatted_date)
-                    self._set_docx_cell_text(table.cell(1, 3), formatted_date)
-                    logger.info(f"✅ 修订记录表格日期已备选更新为: {formatted_date}")
+                    self.set_cell_text(table.cell(1, 2), formatted_date)
+                    self.set_cell_text(table.cell(1, 3), formatted_date)
+                    logger.info(f"修订记录表格日期已通过备选方案更新为: {formatted_date}")
                 except Exception as backup_error:
                     logger.error(f"备选更新修订记录表格日期时也出错: {backup_error}")
                     return False
 
-            logger.info(f"当前表格共 {len(table.rows)} 行")
-
             if is_customer_report:
                 while len(table.rows) < 4:
                     table.add_row()
-                    logger.debug("新增一行以满足最小4行要求")
 
                 if len(table.rows) > 4:
-                    logger.info(f"发现表格行数大于4，准备删除多余行（当前共 {len(table.rows)} 行）")
                     for i in range(len(table.rows) - 1, 3, -1):  # 保留前4行
                         table._tbl.remove(table.rows[i]._tr)
-                    logger.info("✅ 已成功删除多余行，仅保留前4行")
 
                 for i in range(2, 4):
                     for cell in table.rows[i].cells:
-                        self._set_docx_cell_text(cell, "")
+                        self.set_cell_text(cell, "")
 
-                logger.info("✅ 第三、四行内容已清空")
+            return True
 
             return True
 
         except Exception as e:
             logger.error(f"修改修订记录日期失败: {e}", exc_info=True)
             return False
+
+    def set_cell_text(self, cell, new_texts, replace_all_paragraphs=False):
+        """
+        替换单元格中的文本内容，保留原有格式（支持多段落）
+
+        :param cell: python-docx 单元格对象
+        :param new_texts: 字符串 或 字符串列表（对应多个段落）
+        :param replace_all_paragraphs: 是否替换所有段落，默认只替换第一个
+        """
+        if isinstance(new_texts, str):
+            new_texts = [new_texts]
+
+        # 获取单元格的原始内容
+        original_content = cell.text.strip()
+        
+        paragraphs = cell.paragraphs
+        if not replace_all_paragraphs:
+            paragraphs = paragraphs[:1] if paragraphs else []
+
+        for i, para in enumerate(paragraphs):
+            if i >= len(new_texts):
+                break
+
+            if not para.runs:
+                para.add_run(new_texts[i])
+                continue
+
+            # 保留第一个 run 的格式
+            first_run = para.runs[0]
+            original_format = {
+                'bold': first_run.bold,
+                'italic': first_run.italic,
+                'underline': first_run.underline,
+                'font_name': first_run.font.name,
+                'font_size': first_run.font.size,
+                'color': first_run.font.color.rgb if first_run.font.color else None,
+                'highlight_color': first_run.font.highlight_color,
+                'alignment': para.alignment,
+            }
+
+            # 清空原有文本
+            for run in list(para.runs):
+                run.text = ""
+
+            # 插入新文本
+            new_run = para.add_run(new_texts[i])
+            new_run.bold = original_format['bold']
+            new_run.italic = original_format['italic']
+            new_run.underline = original_format['underline']
+            new_run.font.name = original_format['font_name']
+            new_run.font.size = original_format['font_size']
+            if original_format['color']:
+                new_run.font.color.rgb = original_format['color']
+            new_run.font.highlight_color = original_format['highlight_color']
+            para.alignment = original_format['alignment']
+
+        # 记录被替换的单元格信息
+        logger.info(f"✅ 单元格内容已更新，保留了原始格式")
+        logger.info(f"📍 被修改单元格原始内容: '{original_content}' -> 新内容: '{new_texts[0] if new_texts else ''}'")
 
     def _set_docx_cell_text(self, cell, new_text: str):
         """
@@ -475,8 +482,16 @@ class HeaderModifier:
         """清理资源"""
         try:
             if self.win_document:
-                self.win_document.Close()
+                # 检查文档是否仍然可用
+                try:
+                    # 尝试访问文档的一个属性来检查连接状态
+                    _ = self.win_document.Name
+                    # 如果能成功访问，则关闭文档
+                    self.win_document.Close()
+                except (AttributeError, Exception):
+                    # 如果文档已断开连接，则跳过关闭
+                    pass
                 self.win_document = None
             # 注意：不要关闭word_app，因为它可能是共享实例
         except Exception as e:
-            logger.error(f"清理页眉修改器资源时出错: {e}")
+            logger.debug(f"清理页眉修改器资源时出错: {e}")  # 改为debug级别，避免不必要的错误日志

@@ -453,3 +453,50 @@ def get_section_footer(section: Any, footer_type: int = 1) -> Optional[Any]:
     except Exception as e:
         logger.error(f"Failed to get section footer: {e}")
         return None
+
+
+def open_docx_document(file_path: str):
+    """
+    使用python-docx打开Word文档
+
+    Args:
+        file_path: Word文档路径
+
+    Returns:
+        Document对象，如果打开失败则返回None
+    """
+    try:
+        from docx import Document
+        doc = Document(file_path)
+        logger.info(f"成功加载文档: {file_path}")
+        return doc
+    except Exception as e:
+        logger.error(f"无法加载文档: {e}")
+        raise
+
+
+def save_docx_document(doc, save_path: str = None):
+    """
+    保存Word文档
+
+    Args:
+        doc: Document对象
+        save_path: 保存路径，如果为None则保存到原路径
+
+    Returns:
+        是否成功保存
+    """
+    try:
+        logger.info(f"准备保存文档: {save_path if save_path else 'unknown path'}")
+        if save_path:
+            logger.info(f"📖 正在将文档另存为新路径: {save_path}")
+            doc.save(save_path)
+            logger.info(f"✅ 文档已另存为: {save_path}")
+        else:
+            # 如果没有提供保存路径，抛出错误
+            logger.error("❌ 保存路径不能为空")
+            return False
+        return True
+    except Exception as e:
+        logger.error(f"❌ 保存文档失败: {e}", exc_info=True)
+        raise
