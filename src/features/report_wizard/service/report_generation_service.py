@@ -89,7 +89,7 @@ class ReportGenerationService:
                     "report_title": header_data.report_title,
                     "requested_by": header_data.requested_by,
                     "test_period": header_data.test_period,
-                    "completion_date": header_data.completion_date
+                    "completion_date": header_data.report_date
                 }
                 
                 # ----------------------------------

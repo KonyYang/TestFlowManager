@@ -80,7 +80,9 @@ class HeaderModifier:
             test_period = header_data.get("test_period", "").strip()
 
             # 填充单元格内容 - 实验室测试报告格式
-            self._replace_cell_text(suitable_table.Cell(3, 1), report_no, "第3行第1列")
+            # 根据版本号决定报告编号的显示格式
+            formatted_report_no = self._format_report_no_for_display(header_data)
+            self._replace_cell_text(suitable_table.Cell(3, 1), formatted_report_no, "第3行第1列")
             self._replace_cell_text(suitable_table.Cell(5, 1), requested_by, "第5行第1列")
             self._replace_cell_text(suitable_table.Cell(3, 4), tester, "第3行第4列")
             self._replace_cell_text(suitable_table.Cell(5, 3), tester, "第5行第3列", only_first_paragraph=True)
@@ -90,7 +92,8 @@ class HeaderModifier:
             
             # 检查是否有第5列，如果有则更新版本号
             if suitable_table.Columns.Count >= 5:
-                self._replace_cell_text(suitable_table.Cell(3, 5), version, "第3行第5列")
+                version_to_display = self._format_version_for_display(version)
+                self._replace_cell_text(suitable_table.Cell(3, 5), version_to_display, "第3行第5列")
 
             logger.info("✅ 首页页眉内容已成功填写")
             return True
@@ -418,9 +421,9 @@ class HeaderModifier:
                 if self.word_app is None:
                     logger.error("无法获取Word应用程序实例")
                     return False
-            
+
             self.word_app.Visible = False
-            
+
             # 打开文档
             cleaned_path = os.path.normpath(self.file_path)
             self.win_document = self.word_app.Documents.Open(cleaned_path)
@@ -458,9 +461,13 @@ class HeaderModifier:
             # 定义要替换的值
             report_no = header_data.get("report_no", "").strip()
 
+            # 如果 report_no 为空，则跳过修改
             if not report_no:
-                logger.warning("⚠️ header_data 中未找到 report_no 字段！")
-                return False
+                logger.warning("⚠️ header_data 中未找到 report_no 字段，跳过第二节页眉修改")
+                return True  # 返回成功，因为这不是致命错误
+
+            # 根据版本号格式化最终的报告编号
+            final_report_no = self._format_report_no_for_display(header_data)
 
             # 创建新范围，从 "Report No." 后开始
             new_range = cell_range.Duplicate
@@ -469,14 +476,46 @@ class HeaderModifier:
             new_range.End = cell_range.End - 1  # 去掉最后的 \x07（Word 的段落标记）
 
             # 替换为新的 report_no
-            new_range.Text = report_no
+            new_range.Text = final_report_no
 
-            logger.info(f"✅ 已更新 'Report No.' 为: '{report_no}'")
+            logger.info(f"✅ 已更新 'Report No.' 为: '{final_report_no}'")
             return True
 
         except Exception as e:
             logger.error(f"填写第二节页眉失败: {e}", exc_info=True)
             return False
+
+    def _format_report_no_for_display(self, header_data: Dict[str, Any]) -> str:
+        """
+        根据版本号格式化报告编号显示
+        如果版本号是 "A"，则只显示报告编号；否则添加 "Rev." 前缀
+        """
+        report_no = header_data.get("report_no", "").strip()
+        version = header_data.get("version", "A").strip()
+        
+        if version == "A":
+            return report_no
+        else:
+            # 如果版本号不包含 "Rev." 前缀，则添加
+            if not version.startswith("Rev."):
+                version_with_prefix = f"Rev.{version}"
+            else:
+                version_with_prefix = version
+            return f"{report_no} {version_with_prefix}"
+
+    def _format_version_for_display(self, version: str) -> str:
+        """
+        格式化版本号显示
+        如果版本号是 "A"，则只显示 "A"；否则添加 "Rev." 前缀
+        """
+        if version == "A":
+            return "A"
+        else:
+            # 如果版本号不包含 "Rev." 前缀，则添加
+            if not version.startswith("Rev."):
+                return f"Rev.{version}"
+            else:
+                return version
 
     def cleanup(self):
         """清理资源"""

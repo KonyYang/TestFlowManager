@@ -18,6 +18,9 @@ from src.features.matrix.controller.matrix_controller import MatrixController
 # 导入客户报告生成相关组件
 from src.features.customer_report_generator.controller.customer_report_controller import CustomerReportController
 
+# 导入报告向导相关组件
+from src.features.report_wizard.controller.report_wizard_controller import ReportWizardController
+
 # 添加QApplication导入
 from PyQt5.QtWidgets import QApplication
 import os
@@ -37,6 +40,8 @@ class MainWindow(QMainWindow):
         self.matrix_controller = MatrixController(self)
         # 初始化客户报告生成控制器
         self.customer_report_controller = CustomerReportController(self)
+        # 初始化报告向导控制器
+        self.report_wizard_controller = ReportWizardController(self)
         # 保存窗口状态信息
         self.is_custom_sized = False
         self.custom_geometry = None
@@ -337,7 +342,12 @@ class MainWindow(QMainWindow):
     def _on_create_report(self) -> None:
         """处理创建报告事件"""
         logger.debug("Create report action triggered")
-        # TODO: 实现创建报告功能
+        # 获取当前项目路径
+        current_project_path = getattr(self.controller, '_current_project_path', None)
+        # 设置项目路径到报告向导控制器
+        self.report_wizard_controller.set_project_path(current_project_path)
+        # 显示报告向导对话框
+        self.report_wizard_controller.show_wizard()
         self._update_status()
 
     def _on_update_report(self) -> None:
