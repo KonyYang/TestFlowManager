@@ -21,6 +21,9 @@ from src.features.customer_report_generator.controller.customer_report_controlle
 # 导入报告向导相关组件
 from src.features.report_wizard.controller.report_wizard_controller import ReportWizardController
 
+# 导入文档解析器相关组件
+from src.features.document_parser.controller.document_parser_controller import DocumentParserController
+
 # 添加QApplication导入
 from PyQt5.QtWidgets import QApplication
 import os
@@ -42,6 +45,8 @@ class MainWindow(QMainWindow):
         self.customer_report_controller = CustomerReportController(self)
         # 初始化报告向导控制器
         self.report_wizard_controller = ReportWizardController(self)
+        # 初始化文档解析控制器
+        self.document_parser_controller = DocumentParserController(self)
         # 保存窗口状态信息
         self.is_custom_sized = False
         self.custom_geometry = None
@@ -269,6 +274,12 @@ class MainWindow(QMainWindow):
         # 工具菜单
         tools_menu = menubar.addMenu("工具")
         tools_menu.setFont(global_font)
+        
+        # 添加正文内容编辑菜单项
+        body_content_action = QAction("正文内容编辑", self)
+        body_content_action.triggered.connect(self._on_edit_body_content)
+        body_content_action.setFont(global_font)
+        tools_menu.addAction(body_content_action)
 
         # 帮助菜单
         help_menu = menubar.addMenu("帮助")
@@ -366,6 +377,22 @@ class MainWindow(QMainWindow):
             self._update_status()
         else:
             self._update_status()
+
+    def _on_edit_body_content(self) -> None:
+        """处理正文内容编辑事件"""
+        logger.debug("Edit body content action triggered")
+        # 调用文档解析控制器显示正文内容编辑器
+        # 这里可以先弹出文件选择对话框让用户选择Word文档
+        from PyQt5.QtWidgets import QFileDialog
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "选择Word文档", "", "Word文档 (*.doc *.docx)"
+        )
+        if file_path:
+            logger.info(f"用户选择了文件: {file_path}")
+            self.document_parser_controller.show_body_content_editor(file_path)
+        else:
+            logger.info("用户取消了文件选择")
+        self._update_status()
 
     def _on_exit(self) -> None:
         """处理退出事件"""

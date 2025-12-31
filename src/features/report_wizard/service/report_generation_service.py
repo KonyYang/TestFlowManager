@@ -211,3 +211,36 @@ class ReportGenerationService:
         except Exception as e:
             logger.error(f"加载项目数据失败: {e}")
             return None
+
+    def get_generated_report_path(self, header_data: HeaderData, output_dir: Optional[str] = None) -> str:
+        """
+        获取将要生成的报告文件路径（不实际生成文件）
+        
+        Args:
+            header_data: 页眉数据
+            output_dir: 输出目录，如果为None则使用默认目录
+            
+        Returns:
+            str: 将要生成的报告文件路径
+        """
+        try:
+            # 确定输出目录
+            if output_dir is None:
+                output_dir = self.default_output_dir
+            
+            # 确保输出目录存在
+            os.makedirs(output_dir, exist_ok=True)
+
+            # 生成输出文件名
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            if header_data.report_no:
+                filename = f"{header_data.report_no}_Report_{timestamp}.docx"
+            else:
+                filename = f"Test_Report_{timestamp}.docx"
+            
+            output_path = os.path.join(output_dir, filename)
+            return output_path
+
+        except Exception as e:
+            logger.error(f"获取报告路径失败: {e}")
+            raise

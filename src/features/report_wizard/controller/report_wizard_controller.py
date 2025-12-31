@@ -65,8 +65,17 @@ class ReportWizardController:
                 header_data = all_data['header_data']
                 
                 try:
-                    # 生成报告
-                    output_path = self.service.create_report_from_template(header_data)
+                    # 获取正文内容页面的文档路径
+                    body_content_page = self.view.pages[1]  # 第二页是正文内容编辑页
+                    document_path = body_content_page.get_document_path()
+                    
+                    if document_path:
+                        # 如果用户选择了文档，则更新文档内容
+                        print(f"使用用户选择的文档: {document_path}")
+                        output_path = document_path
+                    else:
+                        # 如果用户没有选择文档，则生成新报告
+                        output_path = self.service.create_report_from_template(header_data)
 
                     # 显示成功消息
                     from PyQt5.QtWidgets import QMessageBox

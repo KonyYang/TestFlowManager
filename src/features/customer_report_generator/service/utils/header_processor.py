@@ -114,10 +114,24 @@ class HeaderProcessor:
             report_no_content = report_no_content.replace("\r", "").replace("\x07", "").strip()
             logger.debug(f"从源文档提取的报告编号内容: {report_no_content}")
             
+            # 检查是否包含版本号（Rev.X格式）
+            import re
+            rev_match = re.search(r" Rev\.([A-Z]+)$", report_no_content)
+            
+            if rev_match:
+                # 提取基础报告编号和版本号
+                base_report_no = report_no_content[:rev_match.start()]
+                version = rev_match.group(0)  # 包含空格的完整版本号，如" Rev.B"
+                # 组合为新的报告编号格式
+                new_report_no = base_report_no + "-CR" + version
+            else:
+                # 没有版本号的普通情况
+                new_report_no = report_no_content + "-CR"
+            
             # 填充模板页眉表格
-            # 第3行第1列：report_no_content + "-CR"
-            template_header_table.Cell(3, 1).Range.Text = report_no_content + "-CR"
-            logger.debug(f"已设置模板表格第3行第1列内容: {report_no_content}-CR")
+            # 第3行第1列：处理后的报告编号
+            template_header_table.Cell(3, 1).Range.Text = new_report_no
+            logger.debug(f"已设置模板表格第3行第1列内容: {new_report_no}")
             
             # 第3行第2、3列 - 模仿VBA中的处理方式
             col2_text = source_header_table.Cell(3, 2).Range.Text.replace("\r", "").strip()
@@ -235,7 +249,21 @@ class HeaderProcessor:
                     logger.debug("在模板文档第二节页眉表格中找到 'Report No.' 关键词")
                     
                     # 清理 report_no_content 中的隐藏字符和段落标记（模仿VBA）
-                    replace_text = report_no_content.replace("\r", "").replace("\x07", "").strip()
+                    cleaned_report_no = report_no_content.replace("\r", "").replace("\x07", "").strip()
+                    
+                    # 检查是否包含版本号（Rev.X格式）
+                    import re
+                    rev_match = re.search(r" Rev\.([A-Z]+)$", cleaned_report_no)
+                    
+                    if rev_match:
+                        # 提取基础报告编号和版本号
+                        base_report_no = cleaned_report_no[:rev_match.start()]
+                        version = rev_match.group(0)  # 包含空格的完整版本号，如" Rev.B"
+                        # 组合为新的报告编号格式
+                        new_report_no = base_report_no + "-CR" + version
+                    else:
+                        # 没有版本号的普通情况
+                        new_report_no = cleaned_report_no + "-CR"
                     
                     # 创建新范围，从 "Report No." 后开始
                     new_range = cell_range.Duplicate
@@ -243,9 +271,9 @@ class HeaderProcessor:
                     new_range.Start = cell_range.Start + report_no_end_pos
                     new_range.End = cell_range.End - 1  # 去掉最后的 \x07（Word 的段落标记）
                     
-                    # 替换为新的 DL 编号
-                    new_range.Text = replace_text + "-CR"
-                    logger.debug(f"已在第二节页眉中将 'Report No.' 更新为: '{replace_text}-CR'")
+                    # 替换为新的报告编号
+                    new_range.Text = new_report_no
+                    logger.debug(f"已在第二节页眉中将 'Report No.' 更新为: '{new_report_no}'")
                 except Exception as e:
                     logger.error(f"处理模板文档第二节页眉时出错: {e}")
                     return False

@@ -207,8 +207,21 @@ class DocumentUtils:
                 logger.error("提取的字符串为空，无法生成新文件名")
                 return ""
             
-            # 生成新文件名
-            new_filename = source_filename.replace(extracted_string, extracted_string + "-CR")
+            # 检查是否包含版本号（Rev.X格式）
+            import re
+            rev_match = re.search(r" Rev\.([A-Z]+)$", extracted_string)
+            
+            if rev_match:
+                # 提取基础报告编号和版本号
+                base_string = extracted_string[:rev_match.start()]
+                version = rev_match.group(0)  # 包含空格的完整版本号，如" Rev.B"
+                # 组合为新的文件名格式
+                new_extracted_string = base_string + "-CR" + version
+                new_filename = source_filename.replace(extracted_string, new_extracted_string)
+            else:
+                # 没有版本号的普通情况
+                new_filename = source_filename.replace(extracted_string, extracted_string + "-CR")
+            
             new_filename = new_filename.replace("Report", "Report_Customer")
             
             logger.debug(f"生成的新文件名: {new_filename}")

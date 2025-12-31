@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal
 from src.features.report_wizard.view.header_info_page import HeaderInfoPage
+from src.features.report_wizard.view.body_content_page import BodyContentPage
 
 
 class ReportWizardDialog(QDialog):
@@ -37,6 +38,9 @@ class ReportWizardDialog(QDialog):
         
         # 添加页眉信息页面
         self.add_header_info_page()
+        
+        # 添加正文内容编辑页面
+        self.add_body_content_page()
     
     def init_ui(self):
         """初始化用户界面"""
@@ -48,7 +52,7 @@ class ReportWizardDialog(QDialog):
         main_layout.addWidget(title_label)
         
         # 进度指示器
-        self.progress_label = QLabel("步骤 1/4: 页眉信息")
+        self.progress_label = QLabel("步骤 1/2: 页眉信息")
         self.progress_label.setStyleSheet("font-size: 14px; margin: 5px;")
         main_layout.addWidget(self.progress_label)
         
@@ -90,6 +94,21 @@ class ReportWizardDialog(QDialog):
         self.page_container.addWidget(header_page)
         self.update_navigation_buttons()
     
+    def add_body_content_page(self):
+        """添加正文内容编辑页面"""
+        body_content_page = BodyContentPage()
+        self.pages.append(body_content_page)
+        self.page_container.addWidget(body_content_page)
+        
+        # 连接正文内容更新信号
+        body_content_page.content_updated.connect(self._on_content_updated)
+        
+        self.update_navigation_buttons()
+    
+    def _on_content_updated(self, document_path: str):
+        """处理正文内容更新完成事件"""
+        print(f"正文内容已更新: {document_path}")
+    
     def go_to_prev_page(self):
         """跳转到上一页"""
         if self.current_page_index > 0:
@@ -106,12 +125,18 @@ class ReportWizardDialog(QDialog):
     
     def finish_wizard(self):
         """完成向导"""
-        # 获取当前页的数据
-        current_page = self.pages[self.current_page_index]
-        if hasattr(current_page, 'get_header_data'):
-            header_data = current_page.get_header_data()
-            # 这里可以触发报告生成逻辑
-            print(f"完成向导，获取到页眉数据: {header_data}")
+        # 获取所有页面的数据
+        all_data = self.get_all_data()
+        
+        # 获取正文内容页面的文档路径
+        body_content_page = self.pages[1]  # 假设正文内容页面是第二个页面
+        document_path = body_content_page.get_document_path()
+        
+        if document_path:
+            print(f"完成向导，文档路径: {document_path}")
+            print(f"页眉数据: {all_data.get('header_data')}")
+        else:
+            print("完成向导，但未选择文档")
             
         self.accept()  # 关闭对话框
     
@@ -133,6 +158,8 @@ class ReportWizardDialog(QDialog):
         """获取当前页面标题"""
         if self.current_page_index == 0:
             return "页眉信息"
+        elif self.current_page_index == 1:
+            return "正文内容编辑"
         return f"步骤 {self.current_page_index + 1}"
     
     def get_all_data(self):

@@ -17,6 +17,7 @@ from . import word_utils
 # 导入类（对于包含类定义的模块）
 from .config_handler import ConfigHandler
 from .ltr_data_manager import LTRDataManager
+from .document_content_editor import DocumentContentEditor
 
 # 为了向后兼容，创建别名
 DateUtils = date_utils
@@ -40,6 +41,7 @@ __all__ = [
     'word_utils',
     'ConfigHandler',
     'LTRDataManager',
+    'DocumentContentEditor',
     # 别名
     'DateUtils',
     'EmailUtils',
@@ -48,5 +50,6 @@ __all__ = [
     'LogHandler',
     'MSGFileUtils',
     'StringUtils',
-    'WordUtils'
+    'WordUtils',
+    'DocumentContentEditor'
 ]
