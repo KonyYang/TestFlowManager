@@ -50,6 +50,8 @@ class ReportGenerationService:
             str: 生成的报告文件路径
         """
         try:
+            logger.info(f"开始创建报告，页眉数据: {header_data}")
+            
             # 验证模板文件
             if not self.validate_template_exists():
                 raise FileNotFoundError(f"模板文件不存在: {self.template_path}")
@@ -72,7 +74,7 @@ class ReportGenerationService:
 
             # 复制模板到输出位置
             shutil.copy2(self.template_path, output_path)
-            logger.info(f"模板已复制到: {output_path}")
+            logger.info(f"模板已从 {self.template_path} 复制到: {output_path}")
 
             # 创建页眉修改器实例
             header_modifier = HeaderModifier(output_path)
@@ -146,6 +148,10 @@ class ReportGenerationService:
                     if word_app is None:
                         logger.error("无法获取Word应用程序实例")
                         return False
+
+                # 确保Word应用程序不可见
+                word_app.Visible = False
+                word_app.DisplayAlerts = False
 
                 # 使用win32com打开最终文档并保存
                 win_doc = word_app.Documents.Open(output_path)

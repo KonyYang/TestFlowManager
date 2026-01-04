@@ -525,6 +525,10 @@ class BodyContentService:
                 logger.error("无法获取Word应用程序实例")
                 return False
 
+            # 确保Word应用程序不可见
+            self.word_app.Visible = False
+            self.word_app.DisplayAlerts = False
+
             doc = self.word_app.Documents.Open(file_path)
             found = False
 

@@ -118,10 +118,48 @@ class ReportWizardDialog(QDialog):
     
     def go_to_next_page(self):
         """跳转到下一页"""
+        import os
+        from src.features.report_wizard.service.report_generation_service import ReportGenerationService
+        from src.core.logger import logger
+        
         if self.current_page_index < len(self.pages) - 1:
+            # 在跳转到下一页之前，处理当前页的数据
+            if self.current_page_index == 0:  # 从页眉信息页跳转到正文内容页
+                logger.info("开始处理页眉信息页面数据")
+                
+                # 获取页眉信息页面的数据
+                header_page = self.pages[0]
+                header_data = header_page.get_header_data()
+                
+                logger.info(f"获取到页眉数据: {header_data}")
+                
+                # 创建报告生成服务
+                service = ReportGenerationService()
+                
+                # 创建报告文档
+                logger.info("开始创建报告文档")
+                try:
+                    document_path = service.create_report_from_template(header_data)
+                    logger.info(f"报告文档创建成功: {document_path}")
+                    
+                    # 设置正文内容页面的文档路径
+                    body_content_page = self.pages[1]
+                    body_content_page.set_document_path(document_path)
+                    
+                    logger.info(f"文档路径已设置到正文内容页面: {document_path}")
+                    
+                except Exception as e:
+                    logger.error(f"创建报告文档失败: {e}")
+                    from PyQt5.QtWidgets import QMessageBox
+                    QMessageBox.critical(self, "错误", f"创建报告文档失败: {str(e)}")
+                    return  # 不继续跳转到下一页
+            
+            # 跳转到下一页
             self.current_page_index += 1
             self.page_container.setCurrentIndex(self.current_page_index)
             self.update_navigation_buttons()
+            
+            logger.info(f"已跳转到第 {self.current_page_index + 1} 页")
     
     def finish_wizard(self):
         """完成向导"""
