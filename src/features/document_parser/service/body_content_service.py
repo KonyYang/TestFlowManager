@@ -25,6 +25,9 @@ class BodyContentService:
         """初始化正文内容填充服务"""
         self.predefined_descriptions = self._load_predefined_descriptions()
         self.word_app = None
+        
+        # 确保Word应用程序在后台运行
+        self._ensure_word_app_background_mode()
 
     def _load_predefined_descriptions(self) -> Dict[str, List[str]]:
         """
@@ -520,16 +523,16 @@ class BodyContentService:
         """
         try:
             # 使用win32com.client进行精确操作
-            self.word_app = get_shared_word_app()
-            if not self.word_app:
+            word_app = get_shared_word_app()
+            if not word_app:
                 logger.error("无法获取Word应用程序实例")
                 return False
 
             # 确保Word应用程序不可见
-            self.word_app.Visible = False
-            self.word_app.DisplayAlerts = False
+            word_app.Visible = False
+            word_app.DisplayAlerts = False
 
-            doc = self.word_app.Documents.Open(file_path)
+            doc = word_app.Documents.Open(file_path)
             found = False
 
             # 遍历所有段落查找关键词
@@ -537,7 +540,7 @@ class BodyContentService:
                 para_text = para.Range.Text.strip()
                 if keyword.upper() in para_text.upper():
                     # 找到关键词后，更新下一个段落的内容
-                    next_para = self._find_next_paragraph(doc, para)
+                    next_para = self._find_next_paragraph(word_app, para)
                     if next_para:
                         next_para.Range.Text = new_content
                         found = True
@@ -546,6 +549,8 @@ class BodyContentService:
 
             if found:
                 doc.Save()
+            
+            # 关闭文档
             doc.Close()
 
             return found
@@ -553,13 +558,28 @@ class BodyContentService:
         except Exception as e:
             logger.error(f"更新关键词后段落时出错: {e}")
             return False
+        finally:
+            # 确保Word应用程序在操作完成后正确关闭
+            try:
+                if 'word_app' in locals() and word_app is not None:
+                    # 关闭所有文档
+                    for doc in word_app.Documents:
+                        try:
+                            doc.Close(SaveChanges=False)
+                        except:
+                            pass
+                    # 退出Word应用
+                    word_app.Quit()
+                    logger.debug("Word application quit after paragraph update")
+            except Exception as e:
+                logger.error(f"关闭Word应用程序时出错: {e}")
 
-    def _find_next_paragraph(self, doc, current_paragraph) -> Optional:
+    def _find_next_paragraph(self, word_app, current_paragraph) -> Optional:
         """
         查找下一个段落
 
         Args:
-            doc: Word文档对象
+            word_app: Word应用程序对象
             current_paragraph: 当前段落对象
 
         Returns:
@@ -570,12 +590,42 @@ class BodyContentService:
             current_pos = current_paragraph.Range.End
             
             # 遍历后续段落
-            for para in doc.Paragraphs:
+            for para in word_app.ActiveDocument.Paragraphs:
                 if para.Range.Start > current_pos:
                     return para
         except Exception as e:
             logger.error(f"查找下一个段落时出错: {e}")
         return None
+    
+    def _ensure_word_app_background_mode(self):
+        """
+        确保Word应用程序在后台运行
+        """
+        try:
+            self.word_app = get_shared_word_app()
+            if self.word_app:
+                self.word_app.Visible = False
+                self.word_app.DisplayAlerts = False
+        except Exception as e:
+            logger.error(f"设置Word应用程序后台模式时出错: {e}")
+    
+    def __del__(self):
+        """
+        析构函数，确保Word应用程序资源被正确释放
+        """
+        try:
+            if hasattr(self, 'word_app') and self.word_app is not None:
+                # 关闭所有文档
+                for doc in self.word_app.Documents:
+                    try:
+                        doc.Close(SaveChanges=False)
+                    except:
+                        pass
+                # 退出Word应用
+                self.word_app.Quit()
+                logger.debug("BodyContentService: Word application quit on destruction")
+        except Exception as e:
+            logger.error(f"在析构函数中关闭Word应用程序时出错: {e}")
 
     def get_all_content_sections(self, file_path: str) -> Dict[str, str]:
         """

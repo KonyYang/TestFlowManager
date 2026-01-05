@@ -416,14 +416,13 @@ class DocumentEditorMixin:
             original_text = self.original_purpose_content.toPlainText()
             is_modified = current_text != original_text
             
-            # 不启用混入类中的保存按钮，因为我们使用向导导航按钮
-            if hasattr(self, 'save_btn') and self.save_btn:
-                self.save_btn.setEnabled(False)  # 确保保存按钮始终被禁用
-            
             if is_modified:
                 self.current_edits["PURPOSE"] = current_text
             elif "PURPOSE" in self.current_edits:
                 del self.current_edits["PURPOSE"]
+            
+            # 更新保存按钮状态
+            self._update_save_button_state()
                 
             # 发出内容更新信号
             if hasattr(self, 'content_updated'):
@@ -439,14 +438,13 @@ class DocumentEditorMixin:
             original_text = self.original_conclusions_content.toPlainText()
             is_modified = current_text != original_text
             
-            # 不启用混入类中的保存按钮，因为我们使用向导导航按钮
-            if hasattr(self, 'save_btn') and self.save_btn:
-                self.save_btn.setEnabled(False)  # 确保保存按钮始终被禁用
-            
             if is_modified:
                 self.current_edits["CONCLUSIONS"] = current_text
             elif "CONCLUSIONS" in self.current_edits:
                 del self.current_edits["CONCLUSIONS"]
+            
+            # 更新保存按钮状态
+            self._update_save_button_state()
                 
             # 发出内容更新信号
             if hasattr(self, 'content_updated'):
@@ -503,6 +501,26 @@ class DocumentEditorMixin:
         except Exception as e:
             logger.error(f"保存修改时出错: {e}")
     
+    def _update_save_button_state(self):
+        """更新保存按钮的状态"""
+        try:
+            if hasattr(self, 'save_btn') and self.save_btn:
+                # 检查是否有任何内容被修改
+                current_purpose_text = self.edit_purpose_content.toPlainText()
+                original_purpose_text = self.original_purpose_content.toPlainText()
+                purpose_modified = current_purpose_text != original_purpose_text
+                
+                current_conclusions_text = self.edit_conclusions_content.toPlainText()
+                original_conclusions_text = self.original_conclusions_content.toPlainText()
+                conclusions_modified = current_conclusions_text != original_conclusions_text
+                
+                # 如果任一内容被修改，则启用保存按钮
+                is_modified = purpose_modified or conclusions_modified
+                self.save_btn.setEnabled(is_modified)
+                
+        except Exception as e:
+            logger.error(f"更新保存按钮状态时出错: {e}")
+    
     def _save_changes_to_document(self):
         """将当前编辑内容保存到文档中"""
         try:
@@ -552,6 +570,9 @@ class DocumentEditorMixin:
                     # 发送信号通知控制器更新内容
                     if hasattr(self, 'content_updated'):
                         self.content_updated.emit(self.file_path)
+                    
+                    # 更新保存按钮状态（此时文档已保存，按钮应被禁用）
+                    self._update_save_button_state()
                     return True
                 else:
                     logger.error("批量更新失败")

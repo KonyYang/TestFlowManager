@@ -212,7 +212,8 @@ class DocumentParserService:
             
             # 创建Word应用实例
             word_app = win32com.client.Dispatch("Word.Application")
-            word_app.Visible = False
+            word_app.Visible = False  # 确保Word应用程序不可见
+            word_app.DisplayAlerts = False  # 禁用显示警告
             
             # 打开文档
             doc = word_app.Documents.Open(file_path, ReadOnly=False)
@@ -466,7 +467,8 @@ class DocumentParserService:
             
             # 创建Word应用实例
             word_app = win32com.client.Dispatch("Word.Application")
-            word_app.Visible = False
+            word_app.Visible = False  # 确保Word应用程序不可见
+            word_app.DisplayAlerts = False  # 禁用显示警告
             
             # 打开文档
             doc = word_app.Documents.Open(file_path, ReadOnly=True)

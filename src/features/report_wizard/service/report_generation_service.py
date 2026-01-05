@@ -176,6 +176,21 @@ class ReportGenerationService:
                 except:
                     pass  # 如果清理失败，则跳过
                 
+                # 确保Word应用程序在操作完成后正确关闭
+                try:
+                    if 'word_app' in locals() and word_app is not None:
+                        # 关闭所有文档
+                        for doc in word_app.Documents:
+                            try:
+                                doc.Close(SaveChanges=False)
+                            except:
+                                pass
+                        # 退出Word应用
+                        word_app.Quit()
+                        logger.debug("Word application quit after report generation")
+                except Exception as e:
+                    logger.error(f"关闭Word应用程序时出错: {e}")
+                
             pythoncom.CoUninitialize()
 
             return output_path
@@ -183,6 +198,17 @@ class ReportGenerationService:
         except Exception as e:
             logger.error(f"创建报告失败: {e}")
             raise
+
+    def __del__(self):
+        """
+        析构函数，确保Word应用程序资源被正确释放
+        """
+        try:
+            # 通常不需要在此服务中直接管理Word应用实例
+            # 因为使用的是共享实例，由word_utils模块统一管理
+            logger.debug("ReportGenerationService: 已初始化清理")
+        except Exception as e:
+            logger.error(f"在析构函数中清理资源时出错: {e}")
 
     def load_project_data(self, project_path: str) -> Optional[HeaderData]:
         """

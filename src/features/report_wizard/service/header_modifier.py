@@ -44,6 +44,7 @@ class HeaderModifier:
                 return False
             
             self.word_app.Visible = False
+            self.word_app.DisplayAlerts = False
             
             # 打开文档
             cleaned_path = os.path.normpath(self.file_path)
@@ -423,6 +424,7 @@ class HeaderModifier:
                     return False
 
             self.word_app.Visible = False
+            self.word_app.DisplayAlerts = False
 
             # 打开文档
             cleaned_path = os.path.normpath(self.file_path)
@@ -531,6 +533,28 @@ class HeaderModifier:
                     # 如果文档已断开连接，则跳过关闭
                     pass
                 self.win_document = None
+            
             # 注意：不要关闭word_app，因为它可能是共享实例
+            # 但在当前场景下，我们仍需确保它不会显示界面
+            if self.word_app:
+                try:
+                    # 确保Word应用保持不可见状态
+                    self.word_app.Visible = False
+                except:
+                    pass  # 如果设置不可见失败，则跳过
         except Exception as e:
             logger.debug(f"清理页眉修改器资源时出错: {e}")  # 改为debug级别，避免不必要的错误日志
+    
+    def __del__(self):
+        """
+        析构函数，确保Word应用程序资源被正确释放
+        """
+        try:
+            if hasattr(self, 'win_document') and self.win_document is not None:
+                try:
+                    self.win_document.Close(SaveChanges=False)
+                    logger.debug("HeaderModifier: Document closed on destruction")
+                except:
+                    pass  # 如果关闭失败，跳过
+        except Exception as e:
+            logger.error(f"在析构函数中关闭文档时出错: {e}")
