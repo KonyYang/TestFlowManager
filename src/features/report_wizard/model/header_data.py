@@ -25,6 +25,7 @@ class HeaderData:
     start_test_date: str = ""  # 用于存储 start_test_date
     finish_test_date: str = ""  # 用于存储 finish_test_date
     report_date: str = ""  # 用于存储 report_date
+    date_lab_received_samples: str = ""  # 用于存储 date_lab_received_samples
 
     @classmethod
     def from_json(cls, json_data: dict) -> 'HeaderData':
@@ -49,6 +50,7 @@ class HeaderData:
         start_test_date = json_data.get("start_test_date", "")
         finish_test_date = json_data.get("finish_test_date", "")
         report_date = json_data.get("report_date", "")
+        date_lab_received_samples = json_data.get("date_lab_received_samples", "")
 
         # 创建测试周期字符串（如果提供了开始和结束日期）
         test_period = ""
@@ -67,6 +69,7 @@ class HeaderData:
             report_date=report_date,  # 使用 report_date 字段作为report_date字段
             start_test_date=start_test_date,  # 使用从JSON获取的start_test_date字段
             finish_test_date=finish_test_date,  # 使用从JSON获取的finish_test_date字段
+            date_lab_received_samples=date_lab_received_samples,  # 使用从JSON获取的date_lab_received_samples字段
         )
 
     def increment_version(self):
@@ -130,5 +133,6 @@ class HeaderData:
             "test_period": self.test_period,
             "start_test_date": self.start_test_date,
             "finish_test_date": self.finish_test_date,
-            "report_date": self.report_date
+            "report_date": self.report_date,
+            "date_lab_received_samples": self.date_lab_received_samples
         }

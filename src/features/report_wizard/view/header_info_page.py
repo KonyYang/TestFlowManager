@@ -49,9 +49,7 @@ class HeaderInfoPage(QFrame):
         self.version_edit.setPlaceholderText("例如: A")
         self.version_edit.setText("A")  # 默认值
         form_layout.addRow("版本号:", self.version_edit)
-        
 
-        
         # 测试者输入
         self.tester_edit = QLineEdit()
         self.tester_edit.setPlaceholderText("请输入测试者姓名")
@@ -66,6 +64,12 @@ class HeaderInfoPage(QFrame):
         self.requested_by_edit = QLineEdit()
         self.requested_by_edit.setPlaceholderText("请输入请求者姓名")
         form_layout.addRow("请求者:", self.requested_by_edit)
+        
+        # 样品接收日期
+        self.sample_received_date = QDateEdit()
+        self.sample_received_date.setDate(QDate.currentDate())
+        self.sample_received_date.setCalendarPopup(True)
+        form_layout.addRow("样品接收日期:", self.sample_received_date)
         
         # 测试开始日期
         self.test_start_date = QDateEdit()
@@ -127,6 +131,13 @@ class HeaderInfoPage(QFrame):
         report_year = report_date_qdate.year()
         report_date_str = f"{report_day:02d}/{months[report_month]}/{report_year}"
         
+        # 格式化样品接收日期
+        sample_received_date_qdate = self.sample_received_date.date()
+        sample_received_day = sample_received_date_qdate.day()
+        sample_received_month = sample_received_date_qdate.month()
+        sample_received_year = sample_received_date_qdate.year()
+        sample_received_date_str = f"{sample_received_day:02d}/{months[sample_received_month]}/{sample_received_year}"
+        
         self.header_data = HeaderData(
             report_no=self.report_no_edit.text().strip(),
             version=self.version_edit.text().strip(),
@@ -134,7 +145,8 @@ class HeaderInfoPage(QFrame):
             report_title=self.report_title_edit.text().strip(),
             requested_by=self.requested_by_edit.text().strip(),
             test_period=test_period,
-            report_date=report_date_str
+            report_date=report_date_str,
+            date_lab_received_samples=sample_received_date_str
         )
         return self.header_data
     
@@ -158,8 +170,42 @@ class HeaderInfoPage(QFrame):
         logger.info(f"从JSON获取的finish_test_date: '{header_data.finish_test_date}'")
         logger.info(f"从JSON获取的report_date: '{header_data.report_date}'")
         logger.info(f"从JSON获取的test_period: '{header_data.test_period}'")
+        logger.info(f"从JSON获取的date_lab_received_samples: '{header_data.date_lab_received_samples}'")
         
         # 优先使用单独的日期字段，如果不存在再尝试使用test_period字段
+        # 设置样品接收日期
+        sample_received_date_set = False
+        if header_data.date_lab_received_samples:
+            try:
+                # 优先使用手动解析器处理标准格式 "DD MMM YYYY"
+                parsed_date = self.parse_date_string(header_data.date_lab_received_samples)
+                if parsed_date and parsed_date.isValid():
+                    self.sample_received_date.setDate(parsed_date)
+                    logger.info(f"设置样品接收日期(从date_lab_received_samples字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
+                    sample_received_date_set = True
+                else:
+                    # 如果手动解析失败，尝试其他方法
+                    logger.debug(f"手动解析失败，尝试其他格式: '{header_data.date_lab_received_samples}'")
+                    sample_received_date = QDate.fromString(header_data.date_lab_received_samples, "yyyy-MM-dd")
+                    if not sample_received_date.isValid():
+                        # 尝试其他格式
+                        formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MM/yyyy", "yyyy-MM-dd"]
+                        for fmt in formats:
+                            sample_received_date = QDate.fromString(header_data.date_lab_received_samples, fmt)
+                            logger.debug(f"尝试格式 '{fmt}'，解析结果: {sample_received_date.isValid()}")
+                            if sample_received_date.isValid():
+                                break
+
+                    if sample_received_date.isValid():
+                        self.sample_received_date.setDate(sample_received_date)
+                        logger.info(f"设置样品接收日期(从date_lab_received_samples字段): {sample_received_date.toString('yyyy/MM/dd')}")
+                        sample_received_date_set = True
+                    else:
+                        logger.warning(f"无法解析date_lab_received_samples: {header_data.date_lab_received_samples}")
+                        logger.warning(f"可用格式: dd MMM yyyy, dd/MMM/yyyy, dd/MM/yyyy, d/MMM/yyyy, d/MM/yyyy, yyyy-MM-dd")
+            except Exception as e:
+                logger.error(f"解析date_lab_received_samples时出错: {e}")
+        
         # 设置测试开始日期
         start_date_set = False
         if header_data.start_test_date:
