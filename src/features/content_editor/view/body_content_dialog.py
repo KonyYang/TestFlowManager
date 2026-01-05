@@ -10,8 +10,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal
 from src.core.logger import logger
-from src.features.document_parser.service.body_content_service import BodyContentService
-from src.features.document_parser.utils.document_editor_mixin import DocumentEditorMixin
+from src.features.content_editor.service.body_content_service import BodyContentService
+from src.utils.document_editor_mixin import DocumentEditorMixin
 
 
 class BodyContentDialog(QDialog, DocumentEditorMixin):

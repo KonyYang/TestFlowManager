@@ -10,7 +10,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal
 from src.core.logger import logger
-from src.features.document_parser.service.body_content_service import BodyContentService
+# 延迟导入 BodyContentService 以避免循环导入
+# from src.features.content_editor.service.body_content_service import BodyContentService
 
 
 class DocumentEditorMixin:
@@ -32,6 +33,8 @@ class DocumentEditorMixin:
         
         # 只有当 body_content_service 不存在时才创建新实例
         if not hasattr(self, 'body_content_service') or self.body_content_service is None:
+            # 延迟导入 BodyContentService 以避免循环导入
+            from src.features.content_editor.service.body_content_service import BodyContentService
             self.body_content_service = BodyContentService()
             logger.info(f"BodyContentService 实例已创建，预设描述内容: {self.body_content_service.predefined_descriptions}")
         else:

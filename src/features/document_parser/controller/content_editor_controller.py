@@ -1,28 +1,25 @@
 """
-文档解析控制器
-协调文档解析和处理的各个组件
+内容编辑器控制器
+协调文档内容编辑的各个组件
 """
 
 from typing import Optional
 from PyQt5.QtWidgets import QApplication, QMessageBox
-from src.features.document_parser.service.document_parser_service import DocumentParserService
-from src.features.content_editor.service.body_content_service import BodyContentService
-from src.features.content_editor.utils.document_content_editor import DocumentContentEditor
+from src.features.document_parser.service.body_content_service import BodyContentService
+from src.features.content_editor.view.body_content_dialog import BodyContentDialog
 from src.core.logger import logger
 
 
-class DocumentParserController:
+class ContentEditorController:
     """
-    文档解析控制器
-    协调文档解析和处理的各个组件
+    内容编辑器控制器
+    协调文档内容编辑的各个组件
     """
 
     def __init__(self, parent_window=None):
-        """初始化文档解析控制器"""
+        """初始化内容编辑器控制器"""
         self.parent_window = parent_window
-        self.service = DocumentParserService()
         self.body_content_service = BodyContentService()
-        self.document_content_editor = DocumentContentEditor()
         
         # 确保Word应用程序在后台运行
         try:
@@ -43,12 +40,17 @@ class DocumentParserController:
         """
         try:
             logger.info(f"开始显示正文内容编辑器，文件路径: {file_path}")
-            # 使用文档内容编辑器工具来显示编辑对话框
-            success = self.document_content_editor.edit_document_content(file_path, self.parent_window)
-            if success:
-                logger.info(f"正文内容编辑对话框已处理，文件路径: {file_path}")
-            else:
-                logger.warning(f"正文内容编辑对话框未成功处理，文件路径: {file_path}")
+            # 显示编辑对话框
+            dialog = BodyContentDialog(file_path, self.parent_window)
+            logger.info(f"正文内容编辑对话框已创建，文件路径: {file_path}")
+            
+            # 连接内容更新信号
+            dialog.content_updated.connect(
+                lambda updates: self._update_document_content(file_path, updates)
+            )
+            
+            dialog.exec_()
+            logger.info(f"正文内容编辑对话框已关闭，文件路径: {file_path}")
             
         except Exception as e:
             print(f"显示正文内容编辑器时出错: {e}")
