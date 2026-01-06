@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import pyqtSignal
 from src.features.report_wizard.view.header_info_page import HeaderInfoPage
 from src.features.report_wizard.view.body_content_page import BodyContentPage
+from src.features.report_wizard.view.test_spec_tables_page import TestSpecTablesPage
 
 
 class ReportWizardDialog(QDialog):
@@ -33,6 +34,9 @@ class ReportWizardDialog(QDialog):
         # 存储所有页面
         self.pages = []
         
+        # Matrix服务引用
+        self.matrix_service = None
+        
         # 初始化UI
         self.init_ui()
         
@@ -41,6 +45,9 @@ class ReportWizardDialog(QDialog):
         
         # 添加正文内容编辑页面
         self.add_body_content_page()
+        
+        # 添加Test Spec Tables页面
+        self.add_test_spec_tables_page()
     
     def init_ui(self):
         """初始化用户界面"""
@@ -105,6 +112,40 @@ class ReportWizardDialog(QDialog):
         
         self.update_navigation_buttons()
     
+    def add_test_spec_tables_page(self):
+        """添加Test Spec Tables页面"""
+        from src.core.logger import logger
+        # 从body_content_page获取文档路径
+        if len(self.pages) > 1:
+            body_page = self.pages[1]  # 第二页是正文内容编辑页
+            if hasattr(body_page, 'get_document_path'):
+                document_path = body_page.get_document_path()
+                logger.info(f"从body_content_page获取文档路径: {document_path}")
+            else:
+                document_path = None
+                logger.info("body_content_page没有get_document_path方法")
+        else:
+            document_path = None
+            logger.info("页面列表中body_content_page不存在")
+        
+        logger.info(f"创建TestSpecTablesPage: 传递document_path和matrix_service参数")
+        logger.info(f"传递的document_path: {document_path}")
+        logger.info(f"传递的matrix_service: {self.matrix_service is not None}")
+        
+        # 创建TestSpecTablesPage并传递文档路径和Matrix服务
+        test_spec_page = TestSpecTablesPage(
+            document_path=document_path,
+            matrix_service=self.matrix_service  # 传递Matrix服务
+        )
+        
+        # 连接TestSpecTablesPage的next_clicked信号到向导的下一步功能
+        test_spec_page.next_clicked.connect(self.go_to_next_page)
+        
+        self.pages.append(test_spec_page)
+        self.page_container.addWidget(test_spec_page)
+        
+        self.update_navigation_buttons()
+    
     def _on_content_updated(self, document_path: str):
         """处理正文内容更新完成事件"""
         print(f"正文内容已更新: {document_path}")
@@ -127,6 +168,8 @@ class ReportWizardDialog(QDialog):
         import os
         from src.features.report_wizard.service.report_generation_service import ReportGenerationService
         from src.core.logger import logger
+        
+        logger.info(f"准备跳转到第 {self.current_page_index + 1} 页，当前索引: {self.current_page_index}")
         
         if self.current_page_index < len(self.pages) - 1:
             # 在跳转到下一页之前，处理当前页的数据
@@ -162,6 +205,35 @@ class ReportWizardDialog(QDialog):
             
             # 跳转到下一页
             self.current_page_index += 1
+            
+            logger.info(f"跳转到页面索引: {self.current_page_index}")
+            
+            # 如果跳转到TestSpecTablesPage（索引为2），则传递文档路径和Matrix服务
+            if self.current_page_index == 2 and len(self.pages) > 1:
+                body_page = self.pages[1]  # 第二页是正文内容编辑页
+                logger.info(f"正在跳转到TestSpecTablesPage，body_page类型: {type(body_page)}")
+                
+                document_path = None
+                if hasattr(body_page, 'get_document_path'):
+                    document_path = body_page.get_document_path()
+                    logger.info(f"从body_page获取文档路径: {document_path}")
+                else:
+                    logger.info("body_page没有get_document_path方法")
+                
+                if document_path:
+                    test_spec_page = self.pages[2]
+                    logger.info(f"向test_spec_page设置文档路径: {document_path}")
+                    if hasattr(test_spec_page, 'set_document_path'):
+                        test_spec_page.set_document_path(document_path)
+                        
+                    # 同时设置Matrix服务（如果可用）
+                    if self.matrix_service:
+                        logger.info("向test_spec_page设置Matrix服务")
+                        if hasattr(test_spec_page, 'set_matrix_service'):
+                            test_spec_page.set_matrix_service(self.matrix_service)
+                else:
+                    logger.warning("无法获取文档路径")
+            
             self.page_container.setCurrentIndex(self.current_page_index)
             self.update_navigation_buttons()
             
@@ -204,6 +276,8 @@ class ReportWizardDialog(QDialog):
             return "页眉信息"
         elif self.current_page_index == 1:
             return "正文内容编辑"
+        elif self.current_page_index == 2:
+            return "填充Test表格"
         return f"步骤 {self.current_page_index + 1}"
     
     def get_all_data(self):
@@ -216,4 +290,17 @@ class ReportWizardDialog(QDialog):
             if hasattr(header_page, 'get_header_data'):
                 all_data['header_data'] = header_page.get_header_data()
         
+        # 获取Test Spec Tables页面的数据
+        if len(self.pages) > 2:
+            test_spec_page = self.pages[2]
+            if hasattr(test_spec_page, 'get_current_data'):
+                all_data['test_spec_data'] = test_spec_page.get_current_data()
+        
         return all_data
+    
+    def set_matrix_service(self, matrix_service):
+        """设置Matrix服务"""
+        from src.core.logger import logger
+        logger.info(f"ReportWizardDialog接收到Matrix服务: {matrix_service is not None}")
+        self.matrix_service = matrix_service
+

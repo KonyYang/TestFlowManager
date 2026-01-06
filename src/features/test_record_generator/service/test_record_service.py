@@ -239,10 +239,10 @@ class TestRecordService:
             needed_groups: 需要的组别数量
         """
         try:
-            # 模板默认有2个组别（2个段落和2个表格）
-            default_groups = 2
+            # 模板默认有1个组别（包含两个表格：一个用于数据填充，一个用于手工记录）
+            default_groups = 1
             # 如果有n个组别，实际上需要复制n-1次（因为模板已经有1份）
-            groups_to_add = needed_groups - 1
+            groups_to_add = needed_groups - default_groups
             
             logger.info(f"检查是否需要复制模板段落和表格: 当前组别数={needed_groups}, 默认组别数={default_groups}, 需要添加={groups_to_add}")
             
@@ -448,13 +448,13 @@ class TestRecordService:
                 logger.warning("没有找到任何组别数据")
                 return False
 
-            # 如果组别数量超过2个，需要复制模板中的段落和表格
-            if group_count > 2:
-                logger.info(f"检测到 {group_count} 个组别，超过默认的2个，开始复制模板段落和表格")
+            # 如果组别数量超过1个，需要复制模板中的段落和表格
+            if group_count > 1:
+                logger.info(f"检测到 {group_count} 个组别，超过默认的1个，开始复制模板段落和表格")
                 self._duplicate_template_sections(new_doc, group_count)
                 logger.info(f"复制完成后文档表格数量: {new_doc.Tables.Count}")
             else:
-                logger.info(f"组别数量 {group_count} 未超过默认值2，无需复制模板")
+                logger.info(f"组别数量 {group_count} 未超过默认值1，无需复制模板")
 
             logger.info(f"Matrix数据解析完成，共找到 {group_count} 个组别")
 
