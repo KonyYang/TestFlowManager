@@ -21,6 +21,9 @@ class HeaderInfoPage(QFrame):
         """初始化页眉信息页面"""
         super().__init__(parent)
         self.header_data = HeaderData()
+        # 添加状态保持变量
+        self._cached_header_data = None  # 用于缓存已修改的header数据
+        self._content_loaded = False  # 标记内容是否已加载
         self.init_ui()
     
     def init_ui(self):
@@ -148,8 +151,10 @@ class HeaderInfoPage(QFrame):
             report_date=report_date_str,
             date_lab_received_samples=sample_received_date_str
         )
+        # 缓存当前数据
+        self._cached_header_data = self.header_data
         return self.header_data
-    
+
     def set_header_data(self, header_data: HeaderData):
         """
         设置页面中的页眉数据
@@ -159,216 +164,229 @@ class HeaderInfoPage(QFrame):
         """
         logger.info(f"开始设置页眉数据: {header_data}")
 
-        self.report_no_edit.setText(header_data.report_no)
-        self.version_edit.setText(header_data.version)
-        self.tester_edit.setText(header_data.tester)
-        self.report_title_edit.setText(header_data.report_title)
-        self.requested_by_edit.setText(header_data.requested_by)
+        # 检查是否已有缓存内容，如果有则优先使用缓存内容以保持状态
+        if self._content_loaded and self._cached_header_data is not None:
+            logger.info("检测到已缓存的用户修改内容，使用缓存内容以保持状态")
+            cached_data = self._cached_header_data
+            self.report_no_edit.setText(cached_data.report_no)
+            self.version_edit.setText(cached_data.version)
+            self.tester_edit.setText(cached_data.tester)
+            self.report_title_edit.setText(cached_data.report_title)
+            self.requested_by_edit.setText(cached_data.requested_by)
+        else:
+            # 使用传入的header_data设置页面内容
+            self.report_no_edit.setText(header_data.report_no)
+            self.version_edit.setText(header_data.version)
+            self.tester_edit.setText(header_data.tester)
+            self.report_title_edit.setText(header_data.report_title)
+            self.requested_by_edit.setText(header_data.requested_by)
 
-        # 首先记录从JSON获取的日期字段值
-        logger.info(f"从JSON获取的start_test_date: '{header_data.start_test_date}'")
-        logger.info(f"从JSON获取的finish_test_date: '{header_data.finish_test_date}'")
-        logger.info(f"从JSON获取的report_date: '{header_data.report_date}'")
-        logger.info(f"从JSON获取的test_period: '{header_data.test_period}'")
-        logger.info(f"从JSON获取的date_lab_received_samples: '{header_data.date_lab_received_samples}'")
-        
-        # 优先使用单独的日期字段，如果不存在再尝试使用test_period字段
-        # 设置样品接收日期
-        sample_received_date_set = False
-        if header_data.date_lab_received_samples:
-            try:
-                # 优先使用手动解析器处理标准格式 "DD MMM YYYY"
-                parsed_date = self.parse_date_string(header_data.date_lab_received_samples)
-                if parsed_date and parsed_date.isValid():
-                    self.sample_received_date.setDate(parsed_date)
-                    logger.info(f"设置样品接收日期(从date_lab_received_samples字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
-                    sample_received_date_set = True
-                else:
-                    # 如果手动解析失败，尝试其他方法
-                    logger.debug(f"手动解析失败，尝试其他格式: '{header_data.date_lab_received_samples}'")
-                    sample_received_date = QDate.fromString(header_data.date_lab_received_samples, "yyyy-MM-dd")
-                    if not sample_received_date.isValid():
-                        # 尝试其他格式
-                        formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MM/yyyy", "yyyy-MM-dd"]
-                        for fmt in formats:
-                            sample_received_date = QDate.fromString(header_data.date_lab_received_samples, fmt)
-                            logger.debug(f"尝试格式 '{fmt}'，解析结果: {sample_received_date.isValid()}")
-                            if sample_received_date.isValid():
-                                break
-
-                    if sample_received_date.isValid():
-                        self.sample_received_date.setDate(sample_received_date)
-                        logger.info(f"设置样品接收日期(从date_lab_received_samples字段): {sample_received_date.toString('yyyy/MM/dd')}")
+            # 首先记录从JSON获取的日期字段值
+            logger.info(f"从JSON获取的start_test_date: '{header_data.start_test_date}'")
+            logger.info(f"从JSON获取的finish_test_date: '{header_data.finish_test_date}'")
+            logger.info(f"从JSON获取的report_date: '{header_data.report_date}'")
+            logger.info(f"从JSON获取的test_period: '{header_data.test_period}'")
+            logger.info(f"从JSON获取的date_lab_received_samples: '{header_data.date_lab_received_samples}'")
+            
+            # 优先使用单独的日期字段，如果不存在再尝试使用test_period字段
+            # 设置样品接收日期
+            sample_received_date_set = False
+            if header_data.date_lab_received_samples:
+                try:
+                    # 优先使用手动解析器处理标准格式 "DD MMM YYYY"
+                    parsed_date = self.parse_date_string(header_data.date_lab_received_samples)
+                    if parsed_date and parsed_date.isValid():
+                        self.sample_received_date.setDate(parsed_date)
+                        logger.info(f"设置样品接收日期(从date_lab_received_samples字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
                         sample_received_date_set = True
                     else:
-                        logger.warning(f"无法解析date_lab_received_samples: {header_data.date_lab_received_samples}")
-                        logger.warning(f"可用格式: dd MMM yyyy, dd/MMM/yyyy, dd/MM/yyyy, d/MMM/yyyy, d/MM/yyyy, yyyy-MM-dd")
-            except Exception as e:
-                logger.error(f"解析date_lab_received_samples时出错: {e}")
-        
-        # 设置测试开始日期
-        start_date_set = False
-        if header_data.start_test_date:
-            try:
-                # 优先使用手动解析器处理标准格式 "DD MMM YYYY"
-                parsed_date = self.parse_date_string(header_data.start_test_date)
-                if parsed_date and parsed_date.isValid():
-                    self.test_start_date.setDate(parsed_date)
-                    logger.info(f"设置测试开始日期(从start_test_date字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
-                    start_date_set = True
-                else:
-                    # 如果手动解析失败，尝试其他方法
-                    logger.debug(f"手动解析失败，尝试其他格式: '{header_data.start_test_date}'")
-                    start_date = QDate.fromString(header_data.start_test_date, "yyyy-MM-dd")
-                    if not start_date.isValid():
-                        # 尝试其他格式
-                        formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MM/yyyy", "yyyy-MM-dd"]
-                        for fmt in formats:
-                            start_date = QDate.fromString(header_data.start_test_date, fmt)
-                            logger.debug(f"尝试格式 '{fmt}'，解析结果: {start_date.isValid()}")
-                            if start_date.isValid():
-                                break
+                        # 如果手动解析失败，尝试其他方法
+                        logger.debug(f"手动解析失败，尝试其他格式: '{header_data.date_lab_received_samples}'")
+                        sample_received_date = QDate.fromString(header_data.date_lab_received_samples, "yyyy-MM-dd")
+                        if not sample_received_date.isValid():
+                            # 尝试其他格式
+                            formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MM/yyyy", "yyyy-MM-dd"]
+                            for fmt in formats:
+                                sample_received_date = QDate.fromString(header_data.date_lab_received_samples, fmt)
+                                logger.debug(f"尝试格式 '{fmt}'，解析结果: {sample_received_date.isValid()}")
+                                if sample_received_date.isValid():
+                                    break
 
-                    if start_date.isValid():
-                        self.test_start_date.setDate(start_date)
-                        logger.info(f"设置测试开始日期(从start_test_date字段): {start_date.toString('yyyy/MM/dd')}")
+                        if sample_received_date.isValid():
+                            self.sample_received_date.setDate(sample_received_date)
+                            logger.info(f"设置样品接收日期(从date_lab_received_samples字段): {sample_received_date.toString('yyyy/MM/dd')}")
+                            sample_received_date_set = True
+                        else:
+                            logger.warning(f"无法解析date_lab_received_samples: {header_data.date_lab_received_samples}")
+                            logger.warning(f"可用格式: dd MMM yyyy, dd/MMM/yyyy, dd/MM/yyyy, d/MMM/yyyy, d/MM/yyyy, yyyy-MM-dd")
+                except Exception as e:
+                    logger.error(f"解析date_lab_received_samples时出错: {e}")
+            
+            # 设置测试开始日期
+            start_date_set = False
+            if header_data.start_test_date:
+                try:
+                    # 优先使用手动解析器处理标准格式 "DD MMM YYYY"
+                    parsed_date = self.parse_date_string(header_data.start_test_date)
+                    if parsed_date and parsed_date.isValid():
+                        self.test_start_date.setDate(parsed_date)
+                        logger.info(f"设置测试开始日期(从start_test_date字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
                         start_date_set = True
                     else:
-                        logger.warning(f"无法解析start_test_date: {header_data.start_test_date}")
-                        logger.warning(f"可用格式: dd MMM yyyy, dd/MMM/yyyy, dd/MM/yyyy, d/MMM/yyyy, d/MM/yyyy, yyyy-MM-dd")
-            except Exception as e:
-                logger.error(f"解析start_test_date时出错: {e}")
-        
-        # 设置测试结束日期
-        finish_date_set = False
-        if header_data.finish_test_date:
-            try:
-                # 优先使用手动解析器处理标准格式 "DD MMM YYYY"
-                parsed_date = self.parse_date_string(header_data.finish_test_date)
-                if parsed_date and parsed_date.isValid():
-                    self.test_end_date.setDate(parsed_date)
-                    logger.info(f"设置测试结束日期(从finish_test_date字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
-                    finish_date_set = True
-                else:
-                    # 如果手动解析失败，尝试其他方法
-                    logger.debug(f"手动解析失败，尝试其他格式: '{header_data.finish_test_date}'")
-                    end_date = QDate.fromString(header_data.finish_test_date, "yyyy-MM-dd")
-                    if not end_date.isValid():
-                        # 尝试其他格式
-                        formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MM/yyyy", "yyyy-MM-dd"]
-                        for fmt in formats:
-                            end_date = QDate.fromString(header_data.finish_test_date, fmt)
-                            logger.debug(f"尝试格式 '{fmt}'，解析结果: {end_date.isValid()}")
-                            if end_date.isValid():
-                                break
+                        # 如果手动解析失败，尝试其他方法
+                        logger.debug(f"手动解析失败，尝试其他格式: '{header_data.start_test_date}'")
+                        start_date = QDate.fromString(header_data.start_test_date, "yyyy-MM-dd")
+                        if not start_date.isValid():
+                            # 尝试其他格式
+                            formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MM/yyyy", "yyyy-MM-dd"]
+                            for fmt in formats:
+                                start_date = QDate.fromString(header_data.start_test_date, fmt)
+                                logger.debug(f"尝试格式 '{fmt}'，解析结果: {start_date.isValid()}")
+                                if start_date.isValid():
+                                    break
 
-                    if end_date.isValid():
-                        self.test_end_date.setDate(end_date)
-                        logger.info(f"设置测试结束日期(从finish_test_date字段): {end_date.toString('yyyy/MM/dd')}")
+                        if start_date.isValid():
+                            self.test_start_date.setDate(start_date)
+                            logger.info(f"设置测试开始日期(从start_test_date字段): {start_date.toString('yyyy/MM/dd')}")
+                            start_date_set = True
+                        else:
+                            logger.warning(f"无法解析start_test_date: {header_data.start_test_date}")
+                            logger.warning(f"可用格式: dd MMM yyyy, dd/MMM/yyyy, dd/MM/yyyy, d/MMM/yyyy, d/MM/yyyy, yyyy-MM-dd")
+                except Exception as e:
+                    logger.error(f"解析start_test_date时出错: {e}")
+            
+            # 设置测试结束日期
+            finish_date_set = False
+            if header_data.finish_test_date:
+                try:
+                    # 优先使用手动解析器处理标准格式 "DD MMM YYYY"
+                    parsed_date = self.parse_date_string(header_data.finish_test_date)
+                    if parsed_date and parsed_date.isValid():
+                        self.test_end_date.setDate(parsed_date)
+                        logger.info(f"设置测试结束日期(从finish_test_date字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
                         finish_date_set = True
                     else:
-                        logger.warning(f"无法解析finish_test_date: {header_data.finish_test_date}")
-                        logger.warning(f"可用格式: dd MMM yyyy, dd/MMM/yyyy, dd/MM/yyyy, d/MMM/yyyy, d/MM/yyyy, yyyy-MM-dd")
-            except Exception as e:
-                logger.error(f"解析finish_test_date时出错: {e}")
-        
-        # 如果单独的日期字段未设置，尝试从test_period字段解析
-        if not start_date_set or not finish_date_set:
-            if header_data.test_period:
-                try:
-                    # 测试周期格式为 "DD/MMM/YYYY-DD/MMM/YYYY" 或 "DD MMM YYYY-DD MMM YYYY"
-                    if '-' in header_data.test_period:
-                        dates = header_data.test_period.split('-')
-                        if len(dates) >= 2:
-                            start_date_str = dates[0].strip()
-                            end_date_str = dates[1].strip()
+                        # 如果手动解析失败，尝试其他方法
+                        logger.debug(f"手动解析失败，尝试其他格式: '{header_data.finish_test_date}'")
+                        end_date = QDate.fromString(header_data.finish_test_date, "yyyy-MM-dd")
+                        if not end_date.isValid():
+                            # 尝试其他格式
+                            formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MMM/yyyy", "yyyy-MM-dd"]
+                            for fmt in formats:
+                                end_date = QDate.fromString(header_data.finish_test_date, fmt)
+                                logger.debug(f"尝试格式 '{fmt}'，解析结果: {end_date.isValid()}")
+                                if end_date.isValid():
+                                    break
 
-                            # 解析开始日期
-                            if not start_date_set:
-                                # 优先使用手动解析器
-                                parsed_date = self.parse_date_string(start_date_str)
-                                if parsed_date and parsed_date.isValid():
-                                    self.test_start_date.setDate(parsed_date)
-                                    logger.info(f"设置测试开始日期(从test_period字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
-                                else:
-                                    start_date = QDate.fromString(start_date_str, "dd/MMM/yyyy")
-                                    if not start_date.isValid():
-                                        # 尝试其他格式
-                                        formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MM/yyyy", "yyyy-MM-dd"]
-                                        for fmt in formats:
-                                            start_date = QDate.fromString(start_date_str, fmt)
-                                            logger.debug(f"从test_period解析开始日期，格式 '{fmt}'，结果: {start_date.isValid()}")
-                                            if start_date.isValid():
-                                                break
-
-                                    if start_date.isValid():
-                                        self.test_start_date.setDate(start_date)
-                                        logger.info(f"设置测试开始日期(从test_period字段): {start_date.toString('yyyy/MM/dd')}")
-
-                            # 解析结束日期
-                            if not finish_date_set:
-                                # 优先使用手动解析器
-                                parsed_date = self.parse_date_string(end_date_str)
-                                if parsed_date and parsed_date.isValid():
-                                    self.test_end_date.setDate(parsed_date)
-                                    logger.info(f"设置测试结束日期(从test_period字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
-                                else:
-                                    end_date = QDate.fromString(end_date_str, "dd/MMM/yyyy")
-                                    if not end_date.isValid():
-                                        # 尝试其他格式
-                                        formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MMM/yyyy", "yyyy-MM-dd"]
-                                        for fmt in formats:
-                                            end_date = QDate.fromString(end_date_str, fmt)
-                                            logger.debug(f"从test_period解析结束日期，格式 '{fmt}'，结果: {end_date.isValid()}")
-                                            if end_date.isValid():
-                                                break
-
-                                    if end_date.isValid():
-                                        self.test_end_date.setDate(end_date)
-                                        logger.info(f"设置测试结束日期(从test_period字段): {end_date.toString('yyyy/MM/dd')}")
+                        if end_date.isValid():
+                            self.test_end_date.setDate(end_date)
+                            logger.info(f"设置测试结束日期(从finish_test_date字段): {end_date.toString('yyyy/MM/dd')}")
+                            finish_date_set = True
+                        else:
+                            logger.warning(f"无法解析finish_test_date: {header_data.finish_test_date}")
+                            logger.warning(f"可用格式: dd MMM yyyy, dd/MMM/yyyy, dd/MM/yyyy, d/MMM/yyyy, d/MM/yyyy, yyyy-MM-dd")
                 except Exception as e:
-                    logger.error(f"解析测试周期时出错: {e}")
+                    logger.error(f"解析finish_test_date时出错: {e}")
+            
+            # 如果单独的日期字段未设置，尝试从test_period字段解析
+            if not start_date_set or not finish_date_set:
+                if header_data.test_period:
+                    try:
+                        # 测试周期格式为 "DD/MMM/YYYY-DD/MMM/YYYY" 或 "DD MMM YYYY-DD MMM YYYY"
+                        if '-' in header_data.test_period:
+                            dates = header_data.test_period.split('-')
+                            if len(dates) >= 2:
+                                start_date_str = dates[0].strip()
+                                end_date_str = dates[1].strip()
 
-        # 设置报告完成日期
-        report_date_set = False
-        if header_data.report_date:  # 使用report_date字段
-            try:
-                # 优先使用手动解析器处理标准格式 "DD MMM YYYY"
-                parsed_date = self.parse_date_string(header_data.report_date)
-                if parsed_date and parsed_date.isValid():
-                    self.report_completion_date.setDate(parsed_date)
-                    logger.info(f"设置报告完成日期(从report_date字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
-                    report_date_set = True
-                else:
-                    # 如果手动解析失败，尝试其他方法
-                    logger.debug(f"手动解析失败，尝试其他格式: '{header_data.report_date}'")
-                    report_date = QDate.fromString(header_data.report_date, "yyyy-MM-dd")
-                    if not report_date.isValid():
-                        # 尝试其他格式
-                        formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MM/yyyy", "yyyy-MM-dd"]
-                        for fmt in formats:
-                            report_date = QDate.fromString(header_data.report_date, fmt)
-                            logger.debug(f"尝试格式 '{fmt}'，解析结果: {report_date.isValid()}")
-                            if report_date.isValid():
-                                break
+                                # 解析开始日期
+                                if not start_date_set:
+                                    # 优先使用手动解析器
+                                    parsed_date = self.parse_date_string(start_date_str)
+                                    if parsed_date and parsed_date.isValid():
+                                        self.test_start_date.setDate(parsed_date)
+                                        logger.info(f"设置测试开始日期(从test_period字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
+                                    else:
+                                        start_date = QDate.fromString(start_date_str, "dd/MMM/yyyy")
+                                        if not start_date.isValid():
+                                            # 尝试其他格式
+                                            formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MMM/yyyy", "yyyy-MM-dd"]
+                                            for fmt in formats:
+                                                start_date = QDate.fromString(start_date_str, fmt)
+                                                logger.debug(f"从test_period解析开始日期，格式 '{fmt}'，结果: {start_date.isValid()}")
+                                                if start_date.isValid():
+                                                    break
 
-                    if report_date.isValid():
-                        self.report_completion_date.setDate(report_date)
-                        logger.info(f"设置报告完成日期(从report_date字段): {report_date.toString('yyyy/MM/dd')}")
+                                        if start_date.isValid():
+                                            self.test_start_date.setDate(start_date)
+                                            logger.info(f"设置测试开始日期(从test_period字段): {start_date.toString('yyyy/MM/dd')}")
+
+                                # 解析结束日期
+                                if not finish_date_set:
+                                    # 优先使用手动解析器
+                                    parsed_date = self.parse_date_string(end_date_str)
+                                    if parsed_date and parsed_date.isValid():
+                                        self.test_end_date.setDate(parsed_date)
+                                        logger.info(f"设置测试结束日期(从test_period字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
+                                    else:
+                                        end_date = QDate.fromString(end_date_str, "dd/MMM/yyyy")
+                                        if not end_date.isValid():
+                                            # 尝试其他格式
+                                            formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MMM/yyyy", "yyyy-MM-dd"]
+                                            for fmt in formats:
+                                                end_date = QDate.fromString(end_date_str, fmt)
+                                                logger.debug(f"从test_period解析结束日期，格式 '{fmt}'，结果: {end_date.isValid()}")
+                                                if end_date.isValid():
+                                                    break
+
+                                        if end_date.isValid():
+                                            self.test_end_date.setDate(end_date)
+                                            logger.info(f"设置测试结束日期(从test_period字段): {end_date.toString('yyyy/MM/dd')}")
+                    except Exception as e:
+                        logger.error(f"解析测试周期时出错: {e}")
+
+            # 设置报告完成日期
+            report_date_set = False
+            if header_data.report_date:  # 使用report_date字段
+                try:
+                    # 优先使用手动解析器处理标准格式 "DD MMM YYYY"
+                    parsed_date = self.parse_date_string(header_data.report_date)
+                    if parsed_date and parsed_date.isValid():
+                        self.report_completion_date.setDate(parsed_date)
+                        logger.info(f"设置报告完成日期(从report_date字段手动解析): {parsed_date.toString('yyyy/MM/dd')}")
                         report_date_set = True
                     else:
-                        logger.warning(f"无法解析report_date: {header_data.report_date}")
-                        logger.warning(f"可用格式: dd MMM yyyy, dd/MMM/yyyy, dd/MM/yyyy, d/MMM/yyyy, d/MM/yyyy, yyyy-MM-dd")
-            except Exception as e:
-                logger.error(f"解析report_date时出错: {e}")
-        
-        # 如果以上都没有设置，使用当前日期
-        if not report_date_set:
-            self.report_completion_date.setDate(QDate.currentDate())
-            logger.info(f"使用当前日期作为报告完成日期")
+                        # 如果手动解析失败，尝试其他方法
+                        logger.debug(f"手动解析失败，尝试其他格式: '{header_data.report_date}'")
+                        report_date = QDate.fromString(header_data.report_date, "yyyy-MM-dd")
+                        if not report_date.isValid():
+                            # 尝试其他格式
+                            formats = ["dd MMM yyyy", "dd/MMM/yyyy", "dd/MM/yyyy", "d/MMM/yyyy", "d/MM/yyyy", "yyyy-MM-dd"]
+                            for fmt in formats:
+                                report_date = QDate.fromString(header_data.report_date, fmt)
+                                logger.debug(f"尝试格式 '{fmt}'，解析结果: {report_date.isValid()}")
+                                if report_date.isValid():
+                                    break
 
-        self.header_data = header_data
-        logger.info("页眉数据设置完成")
+                        if report_date.isValid():
+                            self.report_completion_date.setDate(report_date)
+                            logger.info(f"设置报告完成日期(从report_date字段): {report_date.toString('yyyy/MM/dd')}")
+                            report_date_set = True
+                        else:
+                            logger.warning(f"无法解析report_date: {header_data.report_date}")
+                            logger.warning(f"可用格式: dd MMM yyyy, dd/MMM/yyyy, dd/MM/yyyy, d/MMM/yyyy, d/MM/yyyy, yyyy-MM-dd")
+                except Exception as e:
+                    logger.error(f"解析report_date时出错: {e}")
+            
+            # 如果以上都没有设置，使用当前日期
+            if not report_date_set:
+                self.report_completion_date.setDate(QDate.currentDate())
+                logger.info(f"使用当前日期作为报告完成日期")
+
+            self.header_data = header_data
+            # 标记内容已加载
+            self._content_loaded = True
+            logger.info("页眉数据设置完成")
         
     def parse_date_string(self, date_str: str):
         """

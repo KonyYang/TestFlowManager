@@ -112,6 +112,12 @@ class ReportWizardDialog(QDialog):
     def go_to_prev_page(self):
         """跳转到上一页"""
         if self.current_page_index > 0:
+            # 在切换页面之前，保存当前页面的数据
+            current_page = self.pages[self.current_page_index]
+            if hasattr(current_page, 'get_header_data'):
+                # 保存页眉页面数据
+                header_data = current_page.get_header_data()
+            
             self.current_page_index -= 1
             self.page_container.setCurrentIndex(self.current_page_index)
             self.update_navigation_buttons()

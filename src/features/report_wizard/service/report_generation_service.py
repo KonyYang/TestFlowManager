@@ -106,6 +106,15 @@ class ReportGenerationService:
                 else:
                     logger.error("修订记录表格日期修改失败")
                 
+                # 修改正文中样品接收日期 (使用python-docx修改)
+                # 添加date_lab_received_samples字段到header_dict
+                header_dict["date_lab_received_samples"] = header_data.date_lab_received_samples
+                success4 = header_modifier.modify_sample_received_date(header_dict, doc=header_modifier.doc)
+                if success4:
+                    logger.info("样品接收日期已成功修改")
+                else:
+                    logger.warning("样品接收日期修改失败，这可能是正常的，如果文档中没有相关段落")
+                
                 # ✅ 确保 python-docx 修改已保存，为 win32com 操作提供最新输入
                 try:
                     save_docx_document(header_modifier.doc, output_path)  # 保存当前修改，确保 win32com 可读取
