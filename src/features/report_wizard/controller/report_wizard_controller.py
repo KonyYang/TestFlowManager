@@ -22,6 +22,7 @@ class ReportWizardController:
         self.view = None
         self.service = ReportGenerationService()
         self.current_project_path = None
+        self.matrix_service = None
 
     def set_project_path(self, project_path: str):
         """
@@ -32,9 +33,22 @@ class ReportWizardController:
         """
         self.current_project_path = project_path
 
+    def set_matrix_service(self, matrix_service):
+        """
+        设置Matrix服务
+        
+        Args:
+            matrix_service: Matrix服务实例
+        """
+        self.matrix_service = matrix_service
+
     def show_wizard(self):
         """显示报告向导对话框"""
         self.view = ReportWizardDialog(self.parent_window)
+        
+        # 设置Matrix服务（如果存在）
+        if self.matrix_service:
+            self.view.set_matrix_service(self.matrix_service)
         
         # 如果有项目路径，尝试加载项目数据
         if self.current_project_path:

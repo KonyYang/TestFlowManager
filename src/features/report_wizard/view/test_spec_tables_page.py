@@ -80,6 +80,27 @@ class TestSpecTablesWorker(QThread):
                 group_count = len(matrix_structure.group_steps)
                 logger.info(f"Worker: Matrix数据解析完成，共找到 {group_count} 个组别")
                 
+                # 添加数据结构内容的详细日志
+                logger.debug(f"Worker: Matrix数据结构详情 - DL编号: {matrix_structure.dl_number}")
+                logger.debug(f"Worker: Matrix数据结构详情 - 项目数据文件路径: {matrix_structure.project_data_file_path}")
+                logger.debug(f"Worker: Matrix数据结构详情 - 组别列表: {list(matrix_structure.group_steps.keys())}")
+                
+                # 显示每个组别的步骤数量
+                for group_name, steps in matrix_structure.group_steps.items():
+                    logger.debug(f"Worker: 组别 '{group_name}' 包含 {len(steps)} 个步骤")
+                    # 如果步骤数量不多，显示前几个步骤的详细信息
+                    if len(steps) > 0:
+                        for i, step in enumerate(steps[:3]):  # 只显示前3个步骤作为示例
+                            logger.debug(f"Worker:   步骤 {i+1}: {step}")
+                        if len(steps) > 3:
+                            logger.debug(f"Worker:   ... 还有 {len(steps) - 3} 个步骤")
+                
+                # 显示LLCR和CR需求
+                if matrix_structure.llcr_requirements:
+                    logger.debug(f"Worker: LLCR需求: {matrix_structure.llcr_requirements}")
+                if matrix_structure.cr_requirements:
+                    logger.debug(f"Worker: CR需求: {matrix_structure.cr_requirements}")
+                
                 if warnings:
                     logger.warning(f"Worker: Matrix数据验证警告: {warnings}")
                 
@@ -216,6 +237,27 @@ class TestSpecTablesPage(QFrame):
                 group_count = len(self.matrix_data_structure.group_steps)
                 logger.info(f"Matrix数据解析完成，共找到 {group_count} 个组别")
                 
+                # 添加数据结构内容的详细日志
+                logger.debug(f"Matrix数据结构详情 - DL编号: {self.matrix_data_structure.dl_number}")
+                logger.debug(f"Matrix数据结构详情 - 项目数据文件路径: {self.matrix_data_structure.project_data_file_path}")
+                logger.debug(f"Matrix数据结构详情 - 组别列表: {list(self.matrix_data_structure.group_steps.keys())}")
+                
+                # 显示每个组别的步骤数量
+                for group_name, steps in self.matrix_data_structure.group_steps.items():
+                    logger.debug(f"组别 '{group_name}' 包含 {len(steps)} 个步骤")
+                    # 如果步骤数量不多，显示前几个步骤的详细信息
+                    if len(steps) > 0:
+                        for i, step in enumerate(steps[:3]):  # 只显示前3个步骤作为示例
+                            logger.debug(f"  步骤 {i+1}: {step}")
+                        if len(steps) > 3:
+                            logger.debug(f"  ... 还有 {len(steps) - 3} 个步骤")
+                
+                # 显示LLCR和CR需求
+                if self.matrix_data_structure.llcr_requirements:
+                    logger.debug(f"LLCR需求: {self.matrix_data_structure.llcr_requirements}")
+                if self.matrix_data_structure.cr_requirements:
+                    logger.debug(f"CR需求: {self.matrix_data_structure.cr_requirements}")
+                
                 if warnings:
                     logger.warning(f"Matrix数据验证警告: {warnings}")
                 
@@ -285,8 +327,8 @@ class TestSpecTablesPage(QFrame):
         self.status_label.setText("正在开始处理...")
         logger.info(f"开始处理文档: {self.document_path}")
         
-        # 创建并启动工作线程
-        self.worker = TestSpecTablesWorker(self.document_path)
+        # 创建并启动工作线程，传递Matrix服务以便worker可以创建数据结构
+        self.worker = TestSpecTablesWorker(self.document_path, self.matrix_service)
         self.worker.progress_updated.connect(self.update_progress)
         self.worker.status_updated.connect(self.update_status)
         self.worker.finished.connect(self.processing_finished)

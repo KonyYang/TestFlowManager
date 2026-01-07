@@ -357,6 +357,8 @@ class MainWindow(QMainWindow):
         current_project_path = getattr(self.controller, '_current_project_path', None)
         # 设置项目路径到报告向导控制器
         self.report_wizard_controller.set_project_path(current_project_path)
+        # 设置Matrix服务到报告向导控制器
+        self.report_wizard_controller.set_matrix_service(self.matrix_controller.service)
         # 显示报告向导对话框
         self.report_wizard_controller.show_wizard()
         self._update_status()

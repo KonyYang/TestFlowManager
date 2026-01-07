@@ -14,6 +14,7 @@ from docx.oxml.shared import OxmlElement, qn
 from docx.text.paragraph import Paragraph
 from docx.table import Table
 import re
+import inspect
 
 
 class TestSpecTablesService:
@@ -25,6 +26,33 @@ class TestSpecTablesService:
     def __init__(self):
         """初始化Test Spec Tables服务"""
         pass
+    
+    def _safe_callback_call(self, callback, *args):
+        """
+        安全调用回调函数或Qt信号
+        
+        Args:
+            callback: 回调函数或Qt信号
+            *args: 传递给回调的参数
+            
+        Returns:
+            调用结果，如果调用失败则返回None
+        """
+        if callback is None:
+            return None
+            
+        try:
+            # 检查是否是Qt信号
+            # Qt信号对象通常有emit方法
+            if hasattr(callback, 'emit'):
+                # 这是一个Qt信号，使用emit方法调用
+                return callback.emit(*args)
+            else:
+                # 这是一个普通函数，直接调用
+                return callback(*args)
+        except Exception as e:
+            logger.error(f"回调调用失败: {e}")
+            return None
 
     def fill_test_description_and_methods(
         self, 
@@ -48,14 +76,14 @@ class TestSpecTablesService:
         logger.info(f"开始填充Test Description和Test Method表格，文档路径: {document_path}")
         try:
             if status_callback:
-                status_callback("正在打开文档...")
+                self._safe_callback_call(status_callback, "正在打开文档...")
             
             # 检查文档是否存在
             import os
             if not os.path.exists(document_path):
                 logger.error(f"文档不存在: {document_path}")
                 if status_callback:
-                    status_callback(f"错误: 文档不存在 - {document_path}")
+                    self._safe_callback_call(status_callback, f"错误: 文档不存在 - {document_path}")
                 return False
             
             # 打开Word文档
@@ -63,10 +91,10 @@ class TestSpecTablesService:
             logger.info(f"成功打开文档，包含 {len(doc.paragraphs)} 个段落和 {len(doc.tables)} 个表格")
             
             if progress_callback:
-                progress_callback(10)
+                self._safe_callback_call(progress_callback, 10)
             
             if status_callback:
-                status_callback("正在从Matrix数据中提取所有组别信息...")
+                self._safe_callback_call(status_callback, "正在从Matrix数据中提取所有组别信息...")
             
             # 从Matrix数据结构中获取所有组别的数据
             all_groups = matrix_data_structure.get_all_groups()
@@ -74,7 +102,7 @@ class TestSpecTablesService:
             if not all_groups:
                 logger.warning("Matrix数据结构中没有找到任何组别")
                 if status_callback:
-                    status_callback("警告: Matrix数据中没有找到任何组别")
+                    self._safe_callback_call(status_callback, "警告: Matrix数据中没有找到任何组别")
                 return False
             
             # 合并所有组别的步骤数据
@@ -91,7 +119,7 @@ class TestSpecTablesService:
             if not all_steps:
                 logger.warning("所有组别中都没有找到任何步骤数据")
                 if status_callback:
-                    status_callback("警告: 所有组别中都没有找到任何步骤数据")
+                    self._safe_callback_call(status_callback, "警告: 所有组别中都没有找到任何步骤数据")
                 return False
             
             # 过滤掉"Sample size"行之后的数据
@@ -107,17 +135,17 @@ class TestSpecTablesService:
                 logger.info(f"过滤后剩余 {len(filtered_steps)} 个步骤（原 {len(all_steps)} 个）")
             
             if progress_callback:
-                progress_callback(30)
+                self._safe_callback_call(progress_callback, 30)
             
             if status_callback:
-                status_callback("正在查找TEST DESCRIPTION段落...")
+                self._safe_callback_call(status_callback, "正在查找TEST DESCRIPTION段落...")
             
             # 查找并填充Test Description表格
             description_table = self._find_table_by_paragraph(doc, "TEST DESCRIPTION")
             if description_table:
                 logger.info("找到TEST DESCRIPTION表格")
                 if status_callback:
-                    status_callback("正在填充Test Description表格...")
+                    self._safe_callback_call(status_callback, "正在填充Test Description表格...")
                 self._fill_description_table(description_table, filtered_steps)
                 # 设置最后一行的底纹为蓝色
                 self._set_last_row_shading(description_table, len(filtered_steps))
@@ -127,38 +155,38 @@ class TestSpecTablesService:
                     status_callback("警告: 未找到TEST DESCRIPTION表格")
             
             if progress_callback:
-                progress_callback(60)
+                self._safe_callback_call(progress_callback, 60)
             
             if status_callback:
-                status_callback("正在查找TEST METHODS/REQUIREMENTS段落...")
+                self._safe_callback_call(status_callback, "正在查找TEST METHODS/REQUIREMENTS段落...")
             
             # 查找并填充Test Method表格
             method_table = self._find_table_by_paragraph(doc, "TEST METHODS/REQUIREMENTS")
             if method_table:
                 logger.info("找到TEST METHODS/REQUIREMENTS表格")
                 if status_callback:
-                    status_callback("正在填充Test Method表格...")
+                    self._safe_callback_call(status_callback, "正在填充Test Method表格...")
                 self._fill_method_table(method_table, filtered_steps)
             else:
                 logger.warning("未找到TEST METHODS/REQUIREMENTS表格")
                 if status_callback:
-                    status_callback("警告: 未找到TEST METHODS/REQUIREMENTS表格")
+                    self._safe_callback_call(status_callback, "警告: 未找到TEST METHODS/REQUIREMENTS表格")
             
             if progress_callback:
-                progress_callback(90)
+                self._safe_callback_call(progress_callback, 90)
             
             if status_callback:
-                status_callback("正在保存文档...")
+                self._safe_callback_call(status_callback, "正在保存文档...")
             
             # 保存文档
             doc.save(document_path)
             logger.info(f"文档已保存: {document_path}")
             
             if progress_callback:
-                progress_callback(100)
+                self._safe_callback_call(progress_callback, 100)
             
             if status_callback:
-                status_callback("处理完成！表格已成功填充。")
+                self._safe_callback_call(status_callback, "处理完成！表格已成功填充。")
             
             logger.info(f"Test Description和Test Method表格填充完成，共处理{len(filtered_steps)}个步骤")
             return True
@@ -168,7 +196,7 @@ class TestSpecTablesService:
             import traceback
             logger.error(f"错误堆栈: {traceback.format_exc()}")
             if status_callback:
-                status_callback(f"错误: {str(e)}")
+                self._safe_callback_call(status_callback, f"错误: {str(e)}")
             return False
 
     def _find_table_by_paragraph(self, doc, target_text: str) -> Optional[Table]:
