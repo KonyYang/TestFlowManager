@@ -70,9 +70,10 @@ class ReportWizardDialog(QDialog):
         # 按钮布局
         button_layout = QHBoxLayout()
         
-        self.prev_button = QPushButton("上一步")
-        self.prev_button.clicked.connect(self.go_to_prev_page)
-        self.prev_button.setEnabled(False)  # 初始时禁用上一步按钮
+        # 上一步按钮已被禁用以简化操作流程
+        # self.prev_button = QPushButton("上一步")
+        # self.prev_button.clicked.connect(self.go_to_prev_page)
+        # self.prev_button.setEnabled(False)  # 初始时禁用上一步按钮
         
         self.next_button = QPushButton("下一步")
         self.next_button.clicked.connect(self.go_to_next_page)
@@ -84,7 +85,7 @@ class ReportWizardDialog(QDialog):
         self.cancel_button = QPushButton("取消")
         self.cancel_button.clicked.connect(self.reject)
         
-        button_layout.addWidget(self.prev_button)
+        # button_layout.addWidget(self.prev_button)  # 已禁用上一步按钮
         button_layout.addWidget(self.next_button)
         button_layout.addWidget(self.finish_button)
         button_layout.addStretch()
@@ -150,18 +151,18 @@ class ReportWizardDialog(QDialog):
         """处理正文内容更新完成事件"""
         print(f"正文内容已更新: {document_path}")
     
-    def go_to_prev_page(self):
-        """跳转到上一页"""
-        if self.current_page_index > 0:
-            # 在切换页面之前，保存当前页面的数据
-            current_page = self.pages[self.current_page_index]
-            if hasattr(current_page, 'get_header_data'):
-                # 保存页眉页面数据
-                header_data = current_page.get_header_data()
-            
-            self.current_page_index -= 1
-            self.page_container.setCurrentIndex(self.current_page_index)
-            self.update_navigation_buttons()
+    # def go_to_prev_page(self):
+    #     """跳转到上一页"""
+    #     if self.current_page_index > 0:
+    #         # 在切换页面之前，保存当前页面的数据
+    #         current_page = self.pages[self.current_page_index]
+    #         if hasattr(current_page, 'get_header_data'):
+    #             # 保存页眉页面数据
+    #             header_data = current_page.get_header_data()
+    #         
+    #         self.current_page_index -= 1
+    #         self.page_container.setCurrentIndex(self.current_page_index)
+    #         self.update_navigation_buttons()
     
     def go_to_next_page(self):
         """跳转到下一页"""
@@ -261,8 +262,8 @@ class ReportWizardDialog(QDialog):
         # 更新进度标签
         self.progress_label.setText(f"步骤 {self.current_page_index + 1}/{len(self.pages)}: {self.get_page_title()}")
         
-        # 更新上一步按钮状态
-        self.prev_button.setEnabled(self.current_page_index > 0)
+        # 上一步按钮已被禁用以简化操作流程
+        # self.prev_button.setEnabled(self.current_page_index > 0)
         
         # 更新下一步按钮状态
         self.next_button.setEnabled(self.current_page_index < len(self.pages) - 1)

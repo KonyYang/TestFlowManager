@@ -188,20 +188,6 @@ class HeaderModifier:
         """
         return HeaderManager.modify_second_header(self.file_path, header_data, self.word_app)
 
-    def _format_report_no_for_display(self, header_data: Dict[str, Any]) -> str:
-        """
-        根据版本号格式化报告编号显示
-        如果版本号是 "A"，则只显示报告编号；否则添加 "Rev." 前缀
-        """
-        return HeaderManager.format_report_no_for_display(header_data)
-
-    def _format_version_for_display(self, version: str) -> str:
-        """
-        格式化版本号显示
-        如果版本号是 "A"，则只显示 "A"；否则添加 "Rev." 前缀
-        """
-        return HeaderManager.format_version_for_display(version)
-
     def cleanup(self):
         """清理资源"""
         try:

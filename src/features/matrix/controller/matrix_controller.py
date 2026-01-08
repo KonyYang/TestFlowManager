@@ -15,6 +15,7 @@ class MatrixController:
 
     def __init__(self, parent=None):
         self.parent = parent
+        # 使用单例模式获取MatrixService实例
         self.service = MatrixService()
         # 初始化导出控制器
         self.export_controller = ExportController(self.service.data_model, parent)

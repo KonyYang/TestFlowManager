@@ -24,7 +24,7 @@ class ReportGenerationService:
     def __init__(self):
         """初始化报告生成服务"""
         self.template_path = r"D:\TestFlowManager\Template\E-3707_H Laboratory Test Report_241216.docx"
-        self.default_output_dir = r"D:\TestFlowManager\Output"
+        self.default_output_dir = r"D:\outfile"
 
     def validate_template_exists(self) -> bool:
         """

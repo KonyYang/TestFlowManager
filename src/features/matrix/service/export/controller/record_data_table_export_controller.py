@@ -210,11 +210,18 @@ class RecordDataTableExportController:
                 logger.debug(f"设置DL编号: {dl_number}")
                 logger.debug(f"设置项目数据文件路径: {project_data_file_path}")
                 
-                # 更新MatrixDataStructure中的数据，避免重复解析
+                # 检查MatrixDataStructure是否已经解析过数据，避免重复解析
                 if not getattr(matrix_data_structure, '_is_parsed', False):
                     warnings = matrix_data_structure.parse_matrix_to_structure(matrix_data)
                     if warnings:
                         logger.warning(f"Matrix数据验证警告: {warnings}")
+                    # 记录LLCR需求
+                    if hasattr(matrix_data_structure, 'llcr_requirements'):
+                        logger.debug(f"收集到LLCR需求: {matrix_data_structure.llcr_requirements}")
+                    else:
+                        logger.debug("收集到LLCR需求: 未找到llcr_requirements属性")
+                else:
+                    logger.debug("MatrixDataStructure已解析过，跳过重复解析")
                 
                 # 缓存已解析的数据结构
                 self._parsed_matrix_data = matrix_data_structure

@@ -48,6 +48,7 @@ class MatrixDialog(QWidget):
         self.copied_col_data = None
 
         if service is None:
+            # 使用单例模式获取MatrixService实例
             self.service = MatrixService()
         else:
             self.service = service

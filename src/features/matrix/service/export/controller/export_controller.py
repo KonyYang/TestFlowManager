@@ -13,7 +13,9 @@ class ExportController:
         self.parent = parent
         self.excel_export_service = MatrixEditorExcelExportService(data_model)
         self.test_status_export_service = TestStatusTableExportService(data_model, ltr_data)
-        self.record_data_table_export_controller = RecordDataTableExportController(data_model, parent)
+        # 懒加载RecordDataTableExportController，避免在初始化时重复解析数据
+        self._record_data_table_export_controller = None
+        self._parent = parent  # 保存parent用于懒加载时使用
         # 移除LTR数据的详细日志输出
 
     def export_by_type(self, file_path, export_type):
@@ -44,7 +46,7 @@ class ExportController:
             #             logger.debug(f"  第{i+1}行: {row}")
             #         if len(rows) > 3:
             #             logger.debug(f"  ... (还有{len(rows)-3}行)")
-            # except Exception as e:
+            #     except Exception as e:
             #     logger.error(f"获取导出控制器数据信息时出错: {e}")
 
             if export_type == "matrix_excel":
@@ -54,13 +56,13 @@ class ExportController:
                 logger.debug("调用 test_status 导出服务")
                 return self.test_status_export_service.export_to_excel(file_path)
             elif export_type == "llcr":
-                # 对于LLCR，我们使用专门的控制器处理
+                # 对于LLCR，我们使用专门的控制器处理 - 懒加载
                 logger.debug("调用LLCR记录数据表格导出控制器")
-                return self.record_data_table_export_controller.export_llcr()
+                return self._get_record_data_table_export_controller().export_llcr()
             elif export_type == "cr":
-                # 对于CR，我们使用专门的控制器处理
+                # 对于CR，我们使用专门的控制器处理 - 懒加载
                 logger.debug("调用CR记录数据表格导出控制器")
-                return self.record_data_table_export_controller.export_cr()
+                return self._get_record_data_table_export_controller().export_cr()
             elif export_type in ["mating_unmating", "ir_dwv"]:
                 # 这些类型将使用相同的基础Excel导出服务，但可能有不同的处理逻辑
                 logger.debug(f"调用基础Excel导出服务，类型: {export_type}")
@@ -71,6 +73,12 @@ class ExportController:
         except Exception as e:
             logger.error(f"导出过程中出错: {e}", exc_info=True)
             return False
+
+    def _get_record_data_table_export_controller(self):
+        """懒加载RecordDataTableExportController实例"""
+        if self._record_data_table_export_controller is None:
+            self._record_data_table_export_controller = RecordDataTableExportController(self.data_model, self._parent)
+        return self._record_data_table_export_controller
 
     def set_ltr_data(self, ltr_data):
         """
@@ -96,6 +104,7 @@ class ExportController:
         self.excel_export_service = MatrixEditorExcelExportService(data_model)
         # 重新创建TestStatusTableExportService实例以确保使用最新的数据
         self.test_status_export_service = TestStatusTableExportService(data_model, self.ltr_data)
-        # 更新RecordDataTableExportController中的数据模型
-        # 注意：这里我们需要传递包含MatrixDataStructure的对象
-        self.record_data_table_export_controller.update_data_model(data_model)
+        # 更新RecordDataTableExportController中的数据模型（如果已创建）
+        if self._record_data_table_export_controller:
+            # 注意：这里我们需要传递包含MatrixDataStructure的对象
+            self._record_data_table_export_controller.update_data_model(data_model)

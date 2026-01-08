@@ -10,11 +10,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal, QThread, pyqtSlot
 from src.core.logger import logger
-from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 from src.features.report_wizard.service.test_spec_tables_service import TestSpecTablesService
-from src.core.state_manager import state_manager
-from src.features.matrix.service.matrix_service import MatrixService
-
 
 class TestSpecTablesWorker(QThread):
     """处理Test Spec Tables的后台工作线程"""
@@ -154,7 +150,7 @@ class TestSpecTablesPage(QFrame):
     # 自定义信号
     content_updated = pyqtSignal(str)  # 传递更新的文档路径
     # 导航信号
-    previous_clicked = pyqtSignal()
+    # previous_clicked = pyqtSignal()  # 已禁用上一步功能
     next_clicked = pyqtSignal()
     finish_clicked = pyqtSignal()
     cancel_clicked = pyqtSignal()
