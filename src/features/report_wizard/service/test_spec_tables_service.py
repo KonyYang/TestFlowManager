@@ -147,7 +147,8 @@ class TestSpecTablesService:
             
             # 使用win32com方式查找并填充Test Description表格
             # 通过查找TEST DESCRIPTION表格并填充
-            description_table = self._find_table_by_paragraph_win32com(word_doc, "TEST DESCRIPTION")
+            from .utils.table_handler import TableHandler
+            description_table = TableHandler.find_table_by_paragraph_win32com(word_doc, "TEST DESCRIPTION")
             if description_table:
                 logger.info("找到TEST DESCRIPTION表格")
                 if status_callback:
@@ -167,7 +168,8 @@ class TestSpecTablesService:
                 self._safe_callback_call(status_callback, "正在查找TEST METHODS/REQUIREMENTS段落...")
             
             # 查找并填充Test Method表格
-            method_table = self._find_table_by_paragraph_win32com(word_doc, "TEST METHODS/REQUIREMENTS")
+            from .utils.table_handler import TableHandler
+            method_table = TableHandler.find_table_by_paragraph_win32com(word_doc, "TEST METHODS/REQUIREMENTS")
             if method_table:
                 logger.info("找到TEST METHODS/REQUIREMENTS表格")
                 if status_callback:
@@ -214,160 +216,6 @@ class TestSpecTablesService:
                 pass
 
 
-    def _find_table_by_paragraph_win32com(self, word_doc, paragraph_keyword: str):
-        """
-        使用win32com在Word文档中根据段落关键字查找紧跟其后的表格
-        
-        Args:
-            word_doc: win32com Word文档对象
-            paragraph_keyword: 段落中的关键字（如"TEST DESCRIPTION"）
-            
-        Returns:
-            找到的表格对象，如果未找到则返回None
-        """
-        logger.info(f"使用win32com查找关键字 '{paragraph_keyword}' 后的表格")
-        
-        # 遍历文档中的所有段落
-        for i in range(1, word_doc.Paragraphs.Count + 1):
-            paragraph = word_doc.Paragraphs(i)
-            para_text = paragraph.Range.Text.strip()
-            
-            # 检查段落文本是否包含目标关键字
-            if paragraph_keyword.upper() in para_text.upper():
-                # 检查段落是否为粗体且有下划线
-                if paragraph.Range.Font.Bold and paragraph.Range.Font.Underline:
-                    logger.info(f"找到包含 '{paragraph_keyword}' 的粗体下划线段落: {para_text}")
-                    
-                    # 获取文档中所有表格的位置
-                    table_positions = []
-                    for j, doc_table in enumerate(word_doc.Tables):
-                        # 记录表格在文档中的位置
-                        table_positions.append((doc_table.Range.Start, doc_table))
-                    
-                    # 按表格起始位置排序
-                    table_positions.sort(key=lambda x: x[0])
-                    
-                    # 查找紧跟在此段落后的第一个表格
-                    paragraph_end_pos = paragraph.Range.End
-                    for pos, table in table_positions:
-                        if pos >= paragraph_end_pos:
-                            logger.info(f"找到紧跟在段落后的表格")
-                            return table
-        
-        # 如果通过段落查找失败，尝试通过表格内容查找
-        for j, doc_table in enumerate(word_doc.Tables):
-            # 检查表格第一行的单元格内容
-            if doc_table.Rows.Count > 0:
-                first_row = doc_table.Rows(1)
-                for cell in first_row.Cells:
-                    cell_text = cell.Range.Text.strip()
-                    if paragraph_keyword.upper() in cell_text.upper():
-                        # 检查字体是否为粗体
-                        if cell.Range.Font.Bold:
-                            logger.info(f"在表格中找到包含 '{paragraph_keyword}' 的单元格")
-                            return doc_table
-        
-        logger.warning(f"未找到关键字 '{paragraph_keyword}' 后的表格")
-        return None
-
-    def _apply_table_formatting(self, target_table):
-        """
-        应用表格格式设置，包括边框、自动调整和垂直对齐
-        
-        Args:
-            target_table: Word表格对象（win32com对象）
-        """
-        try:
-            # 设置表格边框线
-            target_table.Borders.Enable = True
-            # 设置边框线宽
-            for border_id in range(7):  # Word中边框的ID范围是0-6
-                try:
-                    target_table.Borders(border_id).Visible = True
-                    target_table.Borders(border_id).LineWidth = 0.5  # 设置线宽
-                except:
-                    # 某些边框可能不存在，忽略错误
-                    pass
-
-            # 设置表格根据窗口自动调整 - 使用安全的多级降级策略
-            success = False
-            
-            # 方法1: 百分比宽度设置（安全方法）
-            try:
-                # 先设置宽度类型为百分比
-                target_table.PreferredWidthType = 2  # wdPreferredWidthPercent
-                # 安全设置宽度值为100%（页面宽度的100%）
-                target_table.PreferredWidth = 100  # 设置为页面宽度的100%
-                target_table.AllowAutoFit = False  # 禁用自动调整，强制使用设定宽度
-                logger.info("成功使用百分比宽度设置并禁用自动调整")
-                success = True
-            except Exception as e1:
-                logger.warning(f"百分比宽度设置失败: {e1}")
-                
-            # 如果方法1失败，尝试方法2: AutoFitBehavior(1) - 自动适应窗口
-            if not success:
-                try:
-                    target_table.PreferredWidthType = 3  # wdPreferredWidthType = wdPreferredWidthPercent
-                    target_table.AllowAutoFit = True
-                    target_table.AutoFitBehavior(1)  # wdAutoFitWindow
-                    logger.info("成功使用AutoFitBehavior(1)调整表格")
-                    success = True
-                except Exception as e2:
-                    logger.warning(f"AutoFitBehavior(1)失败: {e2}")
-                    
-            # 如果前两种方法都失败，尝试方法3: AutoFit()，然后手动调整列宽
-            if not success:
-                try:
-                    target_table.AutoFit()
-                    logger.info("成功使用AutoFit()调整表格")
-                    
-                    # 尝试手动调整每列宽度，使其平均分布
-                    total_cols = target_table.Columns.Count
-                    if total_cols > 0:
-                        # 获取页面宽度（减去页边距）
-                        try:
-                            page_width = target_table.Range.Document.PageSetup.PageWidth
-                            left_margin = target_table.Range.Document.PageSetup.LeftMargin
-                            right_margin = target_table.Range.Document.PageSetup.RightMargin
-                            available_width = page_width - left_margin - right_margin
-                            
-                            # 平均分配每列宽度，确保不超过最大限制
-                            col_width = min(available_width * 0.9 / total_cols, 1584) if total_cols > 0 else 1584  # 使用90%的可用宽度，最大不超过1584
-                            
-                            for i in range(1, total_cols + 1):
-                                target_table.Columns(i).Width = col_width
-                            
-                            logger.info(f"手动设置每列宽度为 {col_width} 磅")
-                        except Exception as e3:
-                            logger.warning(f"手动调整列宽失败: {e3}")
-                    success = True
-                except Exception as e3:
-                    logger.warning(f"AutoFit()失败: {e3}")
-
-            # 设置所有单元格垂直对齐方式为居中
-            try:
-                target_table.CellRange.VerticalAlignment = 1  # wdCellAlignVerticalCenter = 1
-            except:
-                pass
-            
-            # 额外确保所有单元格都设置为垂直居中（双重保险）
-            try:
-                for i in range(1, target_table.Rows.Count + 1):
-                    row = target_table.Rows(i)
-                    for j in range(1, row.Cells.Count + 1):
-                        cell = row.Cells(j)
-                        cell.VerticalAlignment = 1  # wdAlignVerticalCenter
-                logger.info("所有单元格已设置为垂直居中")
-            except Exception as e:
-                logger.warning(f"设置单元格垂直居中失败: {e}")
-                # 如果上述方法失败，尝试使用CellRange方式
-                try:
-                    target_table.CellRange.VerticalAlignment = 1  # wdCellAlignVerticalCenter = 1
-                except:
-                    pass
-        except Exception as e:
-            logger.warning(f"设置表格格式时出错: {e}")
-    
     def _fill_description_table_win32com(self, target_table, document_path: str, word_app_instance=None) -> None:
         """
         使用win32com填充Test Description表格
@@ -474,14 +322,16 @@ class TestSpecTablesService:
                     target_table.Columns.Add()
                 logger.info(f"添加了 {target_cols - current_cols} 列")
                 # 添加列后立即重新应用表格格式，确保表格适应窗口
-                self._apply_table_formatting(target_table)
+                from .utils.table_handler import TableHandler
+                TableHandler.apply_table_formatting(target_table)
             elif current_cols > target_cols:
                 for _ in range(current_cols - target_cols):
                     if target_table.Columns.Count > target_cols:
                         target_table.Columns(target_table.Columns.Count).Delete()
                 logger.info(f"删除了 {current_cols - target_cols} 列")
                 # 删除列后也需要重新应用表格格式
-                self._apply_table_formatting(target_table)
+                from .utils.table_handler import TableHandler
+                TableHandler.apply_table_formatting(target_table)
             
             logger.info(f"最终表格尺寸 - 行数: {target_table.Rows.Count}, 列数: {target_table.Columns.Count}")
             
@@ -523,7 +373,8 @@ class TestSpecTablesService:
                                 logger.warning(f"无法保留第{actual_row_index+1}行第{j+1}列的格式")
             
             # 最后再应用一次表格格式设置，确保整体格式正确
-            self._apply_table_formatting(target_table)
+            from .utils.table_handler import TableHandler
+            TableHandler.apply_table_formatting(target_table)
 
             # 查找并设置"Sample size"行的背景色为浅蓝色
             try:
@@ -644,23 +495,7 @@ class TestSpecTablesService:
                     if target_table.Rows.Count > required_rows and required_rows > 0:
                         target_table.Rows(target_table.Rows.Count).Delete()
                 logger.info(f"删除了 {current_rows - required_rows} 行")
-        
-            # # 保持表格至少有3列，但不删除现有列
-            # logger.info(f"当前表格列数: {target_table.Columns.Count}, 需要列数: {target_cols}")
-            #
-            # current_cols = target_table.Columns.Count
-            # if current_cols < target_cols:
-            #     # 添加缺失的列，但不删除现有列
-            #     for _ in range(target_cols - current_cols):
-            #         target_table.Columns.Add()
-            #     logger.info(f"添加了 {target_cols - current_cols} 列")
-            #     # 添加列后立即重新应用表格格式，确保表格适应窗口
-            #     self._apply_table_formatting(target_table)
-            # else:
-            #     logger.info(f"保持现有 {current_cols} 列，不删除任何列")
-            #
-            # logger.info(f"最终表格尺寸 - 行数: {target_table.Rows.Count}, 列数: {target_table.Columns.Count}")
-            
+
             # 填充数据（包含标题行）
             for i, row_data in enumerate(rows_to_process):
                 actual_row_index = i  # 从0开始
@@ -710,7 +545,8 @@ class TestSpecTablesService:
                                 logger.warning(f"无法保留第{actual_row_index+1}行第{j+1}列的格式")
             
             # 最后再应用一次表格格式设置，确保整体格式正确
-            self._apply_table_formatting(target_table)
+            from .utils.table_handler import TableHandler
+            TableHandler.apply_table_formatting(target_table)
 
             # 保存文档
             word_doc.Save()
