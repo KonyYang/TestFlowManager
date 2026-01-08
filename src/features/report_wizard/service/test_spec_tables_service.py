@@ -373,16 +373,89 @@ class TestSpecTablesService:
             target_table.Borders.Enable = True
             # 设置边框线宽
             for border_id in range(7):  # Word中边框的ID范围是0-6
-                target_table.Borders(border_id).Visible = True
-                target_table.Borders(border_id).LineWidth = 0.5  # 设置线宽
+                try:
+                    target_table.Borders(border_id).Visible = True
+                    target_table.Borders(border_id).LineWidth = 0.5  # 设置线宽
+                except:
+                    # 某些边框可能不存在，忽略错误
+                    pass
 
-            # 设置表格根据窗口自动调整
-            target_table.PreferredWidthType = 3  # wdPreferredWidthType = wdPreferredWidthPercent
-            target_table.AllowAutoFit = True
-            target_table.AutoFitBehavior(1)  # wdAutoFitWindow - 根据窗口自动调整
+            # 设置表格根据窗口自动调整 - 使用安全的多级降级策略
+            success = False
+            
+            # 方法1: 百分比宽度设置（安全方法）
+            try:
+                # 先设置宽度类型为百分比
+                target_table.PreferredWidthType = 2  # wdPreferredWidthPercent
+                # 安全设置宽度值（不超过100）
+                target_table.PreferredWidth = 90  # 设置为页面宽度的90%
+                target_table.AllowAutoFit = False  # 禁用自动调整，强制使用设定宽度
+                logger.info("成功使用百分比宽度设置并禁用自动调整")
+                success = True
+            except Exception as e1:
+                logger.warning(f"百分比宽度设置失败: {e1}")
+                
+            # 如果方法1失败，尝试方法2: AutoFitBehavior(1) - 自动适应窗口
+            if not success:
+                try:
+                    target_table.PreferredWidthType = 3  # wdPreferredWidthType = wdPreferredWidthPercent
+                    target_table.AllowAutoFit = True
+                    target_table.AutoFitBehavior(1)  # wdAutoFitWindow
+                    logger.info("成功使用AutoFitBehavior(1)调整表格")
+                    success = True
+                except Exception as e2:
+                    logger.warning(f"AutoFitBehavior(1)失败: {e2}")
+                    
+            # 如果前两种方法都失败，尝试方法3: AutoFit()，然后手动调整列宽
+            if not success:
+                try:
+                    target_table.AutoFit()
+                    logger.info("成功使用AutoFit()调整表格")
+                    
+                    # 尝试手动调整每列宽度，使其平均分布
+                    total_cols = target_table.Columns.Count
+                    if total_cols > 0:
+                        # 获取页面宽度（减去页边距）
+                        try:
+                            page_width = target_table.Range.Document.PageSetup.PageWidth
+                            left_margin = target_table.Range.Document.PageSetup.LeftMargin
+                            right_margin = target_table.Range.Document.PageSetup.RightMargin
+                            available_width = page_width - left_margin - right_margin
+                            
+                            # 平均分配每列宽度，确保不超过最大限制
+                            col_width = min(available_width * 0.9 / total_cols, 1584) if total_cols > 0 else 1584  # 使用90%的可用宽度，最大不超过1584
+                            
+                            for i in range(1, total_cols + 1):
+                                target_table.Columns(i).Width = col_width
+                            
+                            logger.info(f"手动设置每列宽度为 {col_width} 磅")
+                        except Exception as e3:
+                            logger.warning(f"手动调整列宽失败: {e3}")
+                    success = True
+                except Exception as e3:
+                    logger.warning(f"AutoFit()失败: {e3}")
 
             # 设置所有单元格垂直对齐方式为居中
-            target_table.CellRange.VerticalAlignment = 1  # wdCellAlignVerticalCenter = 1
+            try:
+                target_table.CellRange.VerticalAlignment = 1  # wdCellAlignVerticalCenter = 1
+            except:
+                pass
+            
+            # 额外确保所有单元格都设置为垂直居中（双重保险）
+            try:
+                for i in range(1, target_table.Rows.Count + 1):
+                    row = target_table.Rows(i)
+                    for j in range(1, row.Cells.Count + 1):
+                        cell = row.Cells(j)
+                        cell.VerticalAlignment = 1  # wdAlignVerticalCenter
+                logger.info("所有单元格已设置为垂直居中")
+            except Exception as e:
+                logger.warning(f"设置单元格垂直居中失败: {e}")
+                # 如果上述方法失败，尝试使用CellRange方式
+                try:
+                    target_table.CellRange.VerticalAlignment = 1  # wdCellAlignVerticalCenter = 1
+                except:
+                    pass
         except Exception as e:
             logger.warning(f"设置表格格式时出错: {e}")
     
@@ -491,11 +564,15 @@ class TestSpecTablesService:
                 for _ in range(target_cols - current_cols):
                     target_table.Columns.Add()
                 logger.info(f"添加了 {target_cols - current_cols} 列")
+                # 添加列后立即重新应用表格格式，确保表格适应窗口
+                self._apply_table_formatting(target_table)
             elif current_cols > target_cols:
                 for _ in range(current_cols - target_cols):
                     if target_table.Columns.Count > target_cols:
                         target_table.Columns(target_table.Columns.Count).Delete()
                 logger.info(f"删除了 {current_cols - target_cols} 列")
+                # 删除列后也需要重新应用表格格式
+                self._apply_table_formatting(target_table)
             
             logger.info(f"最终表格尺寸 - 行数: {target_table.Rows.Count}, 列数: {target_table.Columns.Count}")
             
@@ -537,7 +614,7 @@ class TestSpecTablesService:
                             except:
                                 logger.warning(f"无法保留第{actual_row_index+1}行第{j+1}列的格式")
             
-            # 应用表格格式设置
+            # 最后再应用一次表格格式设置，确保整体格式正确
             self._apply_table_formatting(target_table)
 
             # 保存文档
