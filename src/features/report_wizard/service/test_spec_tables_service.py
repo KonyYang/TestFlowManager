@@ -387,8 +387,8 @@ class TestSpecTablesService:
             try:
                 # 先设置宽度类型为百分比
                 target_table.PreferredWidthType = 2  # wdPreferredWidthPercent
-                # 安全设置宽度值（不超过100）
-                target_table.PreferredWidth = 90  # 设置为页面宽度的90%
+                # 安全设置宽度值为100%（页面宽度的100%）
+                target_table.PreferredWidth = 100  # 设置为页面宽度的100%
                 target_table.AllowAutoFit = False  # 禁用自动调整，强制使用设定宽度
                 logger.info("成功使用百分比宽度设置并禁用自动调整")
                 success = True
@@ -617,6 +617,23 @@ class TestSpecTablesService:
             # 最后再应用一次表格格式设置，确保整体格式正确
             self._apply_table_formatting(target_table)
 
+            # 查找并设置"Sample size"行的背景色为浅蓝色
+            try:
+                for i in range(1, target_table.Rows.Count + 1):
+                    row = target_table.Rows(i)
+                    first_cell = row.Cells(1)
+                    cell_text = first_cell.Range.Text.strip().lower()
+                    if cell_text.startswith("sample"):
+                        # 找到Sample行，设置背景色为浅蓝色 (RGB 135,206,235) -> BGR 0xEBCE87
+                        for j in range(1, row.Cells.Count + 1):
+                            cell = row.Cells(j)
+                            # 设置单元格背景色为浅蓝色 (RGB 135,206,235) - 在BGR格式中为 0xEBCE87
+                            cell.Shading.BackgroundPatternColor = 0xEBCE87
+                        logger.info(f"已为Sample size行({i})设置浅蓝色背景")
+                        break
+            except Exception as e:
+                logger.warning(f"设置Sample size行背景色时出错: {e}")
+
             # 保存文档
             word_doc.Save()
             logger.info(f"文档已保存: {document_path}")
@@ -706,6 +723,23 @@ class TestSpecTablesService:
         # 应用表格格式设置
         self._apply_table_formatting(table)
 
+        # 查找并设置"Sample size"行的背景色为浅蓝色
+        try:
+            for i in range(1, table.Rows.Count + 1):
+                row = table.Rows(i)
+                first_cell = row.Cells(1)
+                cell_text = first_cell.Range.Text.strip().lower()
+                if cell_text.startswith("sample"):
+                    # 找到Sample行，设置背景色为浅蓝色 (RGB 135,206,235) -> BGR 0xEBCE87
+                    for j in range(1, row.Cells.Count + 1):
+                        cell = row.Cells(j)
+                        # 设置单元格背景色为浅蓝色 (RGB 135,206,235) - 在BGR格式中为 0xEBCE87
+                        cell.Shading.BackgroundPatternColor = 0xEBCE87
+                    logger.info(f"已为Sample size行({i})设置浅蓝色背景")
+                    break
+        except Exception as e:
+            logger.warning(f"设置Sample size行背景色时出错: {e}")
+
         logger.info("Test Method表格填充完成")
 
     def _fill_method_table(self, table, steps: list) -> None:
@@ -780,9 +814,33 @@ class TestSpecTablesService:
                         logger.debug(f"第{i+1}行第3列填充: {condition}")
 
         logger.info("Test Method表格填充完成")
+    
+    def _set_last_row_shading_win32com(self, table, total_rows: int) -> None:
+        """
+        设置表格最后一行的底纹为浅蓝色（RGB 135,206,235）- win32com版本
+
+        Args:
+            table: Word表格对象（win32com对象）
+            total_rows: 总行数
+        """
+        logger.info(f"设置表格最后一行底纹为浅蓝色，总行数: {total_rows}")
+        if total_rows <= 0 or table.Rows.Count < total_rows:
+            logger.warning(f"无法设置底纹，总行数: {total_rows}, 实际行数: {table.Rows.Count}")
+            return
+
+        # 获取最后一行（基于实际数据行数）
+        last_row_idx = min(total_rows, table.Rows.Count)
+        if last_row_idx > 0:
+            last_row = table.Rows(last_row_idx)
+            for i in range(1, last_row.Cells.Count + 1):
+                cell = last_row.Cells(i)
+                # 设置单元格背景色为浅蓝色 (RGB 135,206,235) - 在BGR格式中为 0xEBCE87
+                cell.Shading.BackgroundPatternColor = 0xEBCE87  # 浅蓝色的十六进制值 (BGR格式)
+                logger.debug(f"设置单元格背景色为浅蓝色")
+    
     def _set_last_row_shading(self, table, total_rows: int) -> None:
         """
-        设置表格最后一行的底纹为蓝色
+        设置表格最后一行的底纹为蓝色 - python-docx版本
 
         Args:
             table: Word表格对象
