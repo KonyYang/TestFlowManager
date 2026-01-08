@@ -153,8 +153,8 @@ class TestSpecTablesService:
                 if status_callback:
                     self._safe_callback_call(status_callback, "正在填充Test Description表格...")
                 
-                # 将查找到的表格对象直接传递给_fill_description_table方法，避免重复查找
-                self._fill_description_table(description_table, document_path, word_app)
+                # 将查找到的表格对象直接传递给_fill_description_table_win32com方法，避免重复查找
+                self._fill_description_table_win32com(description_table, document_path, word_app)
             else:
                 logger.warning("未找到TEST DESCRIPTION表格")
                 if status_callback:
@@ -174,7 +174,7 @@ class TestSpecTablesService:
                     self._safe_callback_call(status_callback, "正在填充Test Method表格...")
                 
                 # 使用win32com填充Test Method表格
-                self._fill_method_table_win32com(method_table, filtered_steps)
+                self._fill_method_table_win32com(method_table, document_path, word_app)
             else:
                 logger.warning("未找到TEST METHODS/REQUIREMENTS表格")
                 if status_callback:
@@ -459,9 +459,9 @@ class TestSpecTablesService:
         except Exception as e:
             logger.warning(f"设置表格格式时出错: {e}")
     
-    def _fill_description_table(self, target_table, document_path: str, word_app_instance=None) -> None:
+    def _fill_description_table_win32com(self, target_table, document_path: str, word_app_instance=None) -> None:
         """
-        填充Test Description表格
+        使用win32com填充Test Description表格
         
         根据要求：动态获取Matrix页面表格中的首列和第6列及之后的组别列，
         行截止到"Time"所在行的上一行，列截止于"Notes"所在列的前一列。
@@ -650,97 +650,193 @@ class TestSpecTablesService:
                 except:
                     pass
 
-    def _fill_method_table_win32com(self, table, steps: list) -> None:
+    def _fill_method_table_win32com(self, target_table, document_path: str, word_app_instance=None) -> None:
         """
         使用win32com填充Test Method表格
 
-        根据要求：表格只有两行三列，需要依据matrix数据结构的行数和列数进行增减。
-        把matrix的第1,3,4,5列（Test, TestMethod, Condition, Requirement），
-        行截取到"Sample size"前面一行填充进来。
-
+        根据要求：动态获取Matrix页面表格中的第0,2,3,4列，
+        行截止到"Sample size"所在行的上一行。
+        表格列数为固定的3列，第一列为Test Item，第二列为Test Method，第三列为Condition。
+        
         Args:
-            table: Word表格对象（win32com对象）
-            steps: 步骤数据列表
+            target_table: Word表格对象（win32com对象）
+            document_path: Word文档路径
+            word_app_instance: Word应用程序实例，如果为None则创建新的实例
         """
-        logger.info(f"开始使用win32com填充Test Method表格，共{len(steps)}个步骤")
-
-        # 调整表格行数以匹配步骤数量
-        current_rows = table.Rows.Count
-        if len(steps) > current_rows:
-            # 添加行
-            for _ in range(len(steps) - current_rows):
-                table.Rows.Add()
-            logger.info(f"添加了 {len(steps) - current_rows} 行")
-        elif len(steps) < current_rows:
-            # 删除多余行（从后往前删除）
-            for _ in range(current_rows - len(steps)):
-                if table.Rows.Count > len(steps) and len(steps) > 0:
-                    table.Rows(table.Rows.Count).Delete()
-            logger.info(f"删除了 {current_rows - len(steps)} 行")
-
-        # 确保每行有3列
-        for row_idx in range(1, min(len(steps) + 1, table.Rows.Count + 1)):  # 遍历所有需要填充的行
-            current_cols = table.Rows(row_idx).Cells.Count
-            if current_cols < 3:
-                # 添加列直到有3列
-                for _ in range(3 - current_cols):
-                    table.Columns.Add()
-                logger.info(f"添加了 {3 - current_cols} 列")
-            elif current_cols > 3:
-                # 删除多余列（保留前3列）
-                for _ in range(current_cols - 3):
-                    if table.Columns.Count > 3:
-                        table.Columns(table.Columns.Count).Delete()
-                logger.info(f"删除了 {current_cols - 3} 列")
-
-        logger.info(f"最终表格行数: {table.Rows.Count}, 列数: {table.Columns.Count}")
-
-        # 填充数据 - 使用Matrix的第1,3,4列（Test, TestMethod, Condition）
-        for i, step in enumerate(steps):
-            if i < table.Rows.Count:
-                row = table.Rows(i + 1)  # Win32COM索引从1开始
-
-                # 确保有3列
-                if row.Cells.Count >= 3:
-                    # 第一列：Test Item
-                    test_item = step.get("Test", "")
-                    if test_item:  # 只有当内容不为空时才设置
-                        row.Cells(1).Range.Text = str(test_item).rstrip('\x07')  # 移除段落标记
-                        logger.debug(f"第{i+1}行第1列填充: {test_item}")
-
-                    # 第二列：Test Method
-                    test_method = step.get("TestMethod", "")
-                    if test_method:  # 只有当内容不为空时才设置
-                        row.Cells(2).Range.Text = str(test_method).rstrip('\x07')  # 移除段落标记
-                        logger.debug(f"第{i+1}行第2列填充: {test_method}")
-
-                    # 第三列：Condition
-                    condition = step.get("Condition", "")
-                    if condition:  # 只有当内容不为空时才设置
-                        row.Cells(3).Range.Text = str(condition).rstrip('\x07')  # 移除段落标记
-                        logger.debug(f"第{i+1}行第3列填充: {condition}")
-
-        # 应用表格格式设置
-        self._apply_table_formatting(table)
-
-        # 查找并设置"Sample size"行的背景色为浅蓝色
-        try:
-            for i in range(1, table.Rows.Count + 1):
-                row = table.Rows(i)
-                first_cell = row.Cells(1)
-                cell_text = first_cell.Range.Text.strip().lower()
-                if cell_text.startswith("sample"):
-                    # 找到Sample行，设置背景色为浅蓝色 (RGB 135,206,235) -> BGR 0xEBCE87
-                    for j in range(1, row.Cells.Count + 1):
-                        cell = row.Cells(j)
-                        # 设置单元格背景色为浅蓝色 (RGB 135,206,235) - 在BGR格式中为 0xEBCE87
-                        cell.Shading.BackgroundPatternColor = 0xEBCE87
-                    logger.info(f"已为Sample size行({i})设置浅蓝色背景")
+        logger.info("开始使用win32com填充Test Method表格")
+        
+        # 从MatrixService获取当前数据
+        from src.features.matrix.service.matrix_service import MatrixService
+        matrix_service = MatrixService()
+        
+        # 获取表头行
+        header_row = matrix_service.data_model.headers if hasattr(matrix_service.data_model, 'headers') else []
+        
+        logger.info(f"Matrix表头: {header_row}")
+        
+        # 确定列范围：第0,2,3,4列
+        col_indices = [0, 2, 3, 4]  # 对应第1,3,4,5列
+        
+        logger.info(f"填充列索引: {col_indices}")
+        
+        # 固定目标列数为3（Test Item, Test Method, Condition）
+        target_cols = 3
+        
+        # 获取数据行，直到"Sample size"行的上一行
+        data_rows = matrix_service.data_model.rows if hasattr(matrix_service.data_model, 'rows') else []
+        rows_to_process = []
+        
+        sample_row_found = False
+        for row in data_rows:
+            if len(row) > 0:
+                # 检查首列是否包含"Sample size"或"sample"相关内容
+                first_cell_value = str(row[0]).lower() if row[0] else ""
+                if "sample" in first_cell_value:
+                    sample_row_found = True
+                    logger.info(f"找到Sample行: {row[0]}")
                     break
-        except Exception as e:
-            logger.warning(f"设置Sample size行背景色时出错: {e}")
+            rows_to_process.append(row)
 
-        logger.info("Test Method表格填充完成")
+        logger.info(f"处理 {len(rows_to_process)} 行数据，包含标题行")
+        
+        # 使用现有的Word应用程序实例或创建新的实例
+        import win32com.client
+        if word_app_instance is None:
+            word_app = win32com.client.Dispatch("Word.Application")
+            word_app.Visible = False  # 隐藏Word窗口
+            word_app.DisplayAlerts = False  # 关闭警告提示
+            need_to_quit = True  # 标记需要在退出时关闭应用
+        else:
+            word_app = word_app_instance
+            word_app.DisplayAlerts = False  # 关闭警告提示
+            need_to_quit = False  # 不需要关闭外部传入的应用实例
+        
+        try:
+            # 打开文档
+            word_doc = word_app.Documents.Open(document_path)
+            
+            # 检查是否成功找到表格
+            if not target_table:
+                logger.warning("未找到TEST METHODS/REQUIREMENTS表格")
+                return
+            
+            # 调整表格行数以匹配数据行数
+            current_rows = target_table.Rows.Count
+            required_rows = len(rows_to_process)
+            logger.info(f"当前表格行数: {current_rows}, 需要行数: {required_rows}")
+            
+            if required_rows > current_rows:
+                # 添加新行，同时保持原有格式
+                for _ in range(required_rows - current_rows):
+                    target_table.Rows.Add()
+                logger.info(f"添加了 {required_rows - current_rows} 行")
+            elif required_rows < current_rows:
+                # 删除多余行，但至少保留1行
+                for _ in range(current_rows - required_rows):
+                    if target_table.Rows.Count > required_rows and required_rows > 0:
+                        target_table.Rows(target_table.Rows.Count).Delete()
+                logger.info(f"删除了 {current_rows - required_rows} 行")
+        
+            # 保持表格至少有3列，但不删除现有列
+            logger.info(f"当前表格列数: {target_table.Columns.Count}, 需要列数: {target_cols}")
+            
+            current_cols = target_table.Columns.Count
+            if current_cols < target_cols:
+                # 添加缺失的列，但不删除现有列
+                for _ in range(target_cols - current_cols):
+                    target_table.Columns.Add()
+                logger.info(f"添加了 {target_cols - current_cols} 列")
+                # 添加列后立即重新应用表格格式，确保表格适应窗口
+                self._apply_table_formatting(target_table)
+            else:
+                logger.info(f"保持现有 {current_cols} 列，不删除任何列")
+            
+            logger.info(f"最终表格尺寸 - 行数: {target_table.Rows.Count}, 列数: {target_table.Columns.Count}")
+            
+            # 填充数据（包含标题行）
+            for i, row_data in enumerate(rows_to_process):
+                actual_row_index = i  # 从0开始
+                if actual_row_index < target_table.Rows.Count:
+                    row = target_table.Rows(actual_row_index + 1)  # Win32COM索引从1开始
+                    
+                    # 第一列：Test Item（来自Matrix的第1列，索引0）
+                    if len(row_data) > col_indices[0] and row_data[col_indices[0]]:
+                        test_item = row_data[col_indices[0]] if row_data[col_indices[0]] else ""
+                        if test_item:
+                            row.Cells(1).Range.Text = str(test_item).rstrip('\x07')  # 移除段落标记
+                            logger.debug(f"第{actual_row_index+1}行第1列填充: {test_item}")
+                    
+                    # 第二列：Test Method（来自Matrix的第3列，索引2）
+                    if len(row_data) > col_indices[1] and row_data[col_indices[1]]:
+                        test_method = row_data[col_indices[1]] if row_data[col_indices[1]] else ""
+                        if test_method:
+                            row.Cells(2).Range.Text = str(test_method).rstrip('\x07')  # 移除段落标记
+                            logger.debug(f"第{actual_row_index+1}行第2列填充: {test_method}")
+                    
+                    # 第三列：Condition（来自Matrix的第4列，索引3）
+                    if len(row_data) > col_indices[2] and row_data[col_indices[2]]:
+                        condition = row_data[col_indices[2]] if row_data[col_indices[2]] else ""
+                        if condition:
+                            row.Cells(3).Range.Text = str(condition).rstrip('\x07')  # 移除段落标记
+                            logger.debug(f"第{actual_row_index+1}行第3列填充: {condition}")
+
+                    # 第四列：Requirements（来自Matrix的第5列，索引4）
+                    if len(row_data) > col_indices[3] and row_data[col_indices[3]]:
+                        requirements = row_data[col_indices[3]] if row_data[col_indices[3]] else ""
+                        if requirements:
+                            row.Cells(4).Range.Text = str(requirements).rstrip('\x07')  # 移除段落标记
+                            logger.debug(f"第{actual_row_index+1}行第4列填充: {requirements}")
+                    
+                    # 保持原有的单元格格式，而不是强制设置格式
+                    # 只对内容进行处理，保留原始表格样式
+                    actual_cols = min(target_cols, row.Cells.Count)
+                    for j in range(actual_cols):
+                        # 确保单元格存在
+                        if j + 1 <= row.Cells.Count:
+                            cell = row.Cells(j + 1)  # Win32COM索引从1开始
+                            # 保留原有格式，只做必要的格式调整
+                            # 保持原有的字体、对齐方式等格式
+                            try:
+                                # 保持原有的格式，仅在必要时设置
+                                pass
+                            except:
+                                logger.warning(f"无法保留第{actual_row_index+1}行第{j+1}列的格式")
+            
+            # 最后再应用一次表格格式设置，确保整体格式正确
+            self._apply_table_formatting(target_table)
+
+            # 查找并设置"Sample size"行的背景色为浅蓝色
+            try:
+                for i in range(1, target_table.Rows.Count + 1):
+                    row = target_table.Rows(i)
+                    first_cell = row.Cells(1)
+                    cell_text = first_cell.Range.Text.strip().lower()
+                    if cell_text.startswith("sample"):
+                        # 找到Sample行，设置背景色为浅蓝色 (RGB 135,206,235) -> BGR 0xEBCE87
+                        for j in range(1, row.Cells.Count + 1):
+                            cell = row.Cells(j)
+                            # 设置单元格背景色为浅蓝色 (RGB 135,206,235) - 在BGR格式中为 0xEBCE87
+                            cell.Shading.BackgroundPatternColor = 0xEBCE87
+                        logger.info(f"已为Sample size行({i})设置浅蓝色背景")
+                        break
+            except Exception as e:
+                logger.warning(f"设置Sample size行背景色时出错: {e}")
+
+            # 保存文档
+            word_doc.Save()
+            logger.info(f"文档已保存: {document_path}")
+        
+        except Exception as e:
+            logger.error(f"使用win32com操作Word文档时出错: {e}")
+            import traceback
+            logger.error(f"错误堆栈: {traceback.format_exc()}")
+        finally:
+            # 只在需要时关闭Word应用（即外部没有传入实例的情况下）
+            if need_to_quit:
+                try:
+                    word_app.Quit()
+                except:
+                    pass
 
     def _fill_method_table(self, table, steps: list) -> None:
         """
