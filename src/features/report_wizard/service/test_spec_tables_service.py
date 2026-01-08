@@ -213,97 +213,6 @@ class TestSpecTablesService:
             except:
                 pass
 
-    def _find_table_by_paragraph(self, doc, target_text: str) -> Optional[Table]:
-        """
-        根据段落文本查找对应的表格
-        
-        Args:
-            doc: Word文档对象
-            target_text: 目标段落文本
-            
-        Returns:
-            找到的表格对象，如果未找到则返回None
-        """
-        logger.info(f"正在查找包含 '{target_text}' 的段落...")
-        # 遍历所有段落
-        for i, paragraph in enumerate(doc.paragraphs):
-            # 检查段落文本是否包含目标文本且为粗体大写格式
-            para_text = paragraph.text.strip()
-            if target_text.upper() in para_text.upper() and self._is_bold_uppercase(paragraph):
-                logger.info(f"找到目标段落: {para_text}")
-                
-                # 查找该段落之后的表格
-                # 遍历文档的XML元素，查找紧跟在该段落之后的表格
-                body_elements = list(doc.element.body)
-                para_element = paragraph._element
-                
-                para_idx = -1
-                for idx, elem in enumerate(body_elements):
-                    if elem == para_element:
-                        para_idx = idx
-                        break
-                
-                # 在段落之后查找表格元素
-                if para_idx != -1:
-                    for j in range(para_idx + 1, len(body_elements)):
-                        element = body_elements[j]
-                        # 检查是否为表格元素
-                        if element.tag.endswith('tbl'):
-                            # 创建表格对象并返回
-                            from docx.table import Table
-                            table = Table(element, doc)
-                            logger.info(f"找到紧跟在段落后的表格")
-                            return table
-        
-        # 如果通过段落查找失败，尝试通过表格内容查找
-        for table in doc.tables:
-            for row in table.rows:
-                for cell in row.cells:
-                    if target_text.upper() in cell.text.upper() and self._is_bold_uppercase_in_cell(cell):
-                        logger.info(f"在表格中找到目标文本: {target_text}")
-                        return table
-        
-        logger.warning(f"未找到包含 '{target_text}' 的段落或表格")
-        return None
-
-    def _is_bold_uppercase(self, paragraph: Paragraph) -> bool:
-        """
-        检查段落是否为粗体且全部大写
-        
-        Args:
-            paragraph: 段落对象
-            
-        Returns:
-            是否为粗体且全部大写
-        """
-        try:
-            # 检查段落是否包含粗体文本
-            for run in paragraph.runs:
-                if run.bold and run.text.isupper():
-                    return True
-            # 如果没有runs，直接检查文本是否大写
-            return paragraph.text.isupper()
-        except:
-            return paragraph.text.isupper()
-
-    def _is_bold_uppercase_in_cell(self, cell) -> bool:
-        """
-        检查单元格中是否包含粗体且全部大写的文本
-        
-        Args:
-            cell: 单元格对象
-            
-        Returns:
-            是否包含粗体且全部大写的文本
-        """
-        try:
-            for paragraph in cell.paragraphs:
-                for run in paragraph.runs:
-                    if run.bold and run.text.isupper():
-                        return True
-            return False
-        except:
-            return True
 
     def _find_table_by_paragraph_win32com(self, word_doc, paragraph_keyword: str):
         """
@@ -587,7 +496,7 @@ class TestSpecTablesService:
                         test_item = row_data[0] if row_data[0] else ""
                         if test_item:
                             row.Cells(1).Range.Text = str(test_item).rstrip('\x07')  # 移除段落标记
-                            logger.debug(f"第{actual_row_index+1}行第1列填充: {test_item}")
+                            # logger.debug(f"第{actual_row_index+1}行第1列填充: {test_item}")
                     
                     # 其余列：各组别列内容（从第6列开始到Notes列前一列）
                     for j in range(group_columns_count):
@@ -597,7 +506,7 @@ class TestSpecTablesService:
                             # 确保单元格存在
                             if j + 2 <= row.Cells.Count:
                                 row.Cells(j + 2).Range.Text = cell_content  # Win32COM索引从1开始，第一列是索引1
-                                logger.debug(f"第{actual_row_index+1}行第{j+2}列填充: {cell_content}")
+                                # logger.debug(f"第{actual_row_index+1}行第{j+2}列填充: {cell_content}")
                     
                     # 保持原有的单元格格式，而不是强制设置格式
                     # 只对内容进行处理，保留原始表格样式
@@ -605,7 +514,6 @@ class TestSpecTablesService:
                     for j in range(actual_cols):
                         # 确保单元格存在
                         if j + 1 <= row.Cells.Count:
-                            cell = row.Cells(j + 1)  # Win32COM索引从1开始
                             # 保留原有格式，只做必要的格式调整
                             # 保持原有的字体、对齐方式等格式
                             try:
@@ -737,21 +645,21 @@ class TestSpecTablesService:
                         target_table.Rows(target_table.Rows.Count).Delete()
                 logger.info(f"删除了 {current_rows - required_rows} 行")
         
-            # 保持表格至少有3列，但不删除现有列
-            logger.info(f"当前表格列数: {target_table.Columns.Count}, 需要列数: {target_cols}")
-            
-            current_cols = target_table.Columns.Count
-            if current_cols < target_cols:
-                # 添加缺失的列，但不删除现有列
-                for _ in range(target_cols - current_cols):
-                    target_table.Columns.Add()
-                logger.info(f"添加了 {target_cols - current_cols} 列")
-                # 添加列后立即重新应用表格格式，确保表格适应窗口
-                self._apply_table_formatting(target_table)
-            else:
-                logger.info(f"保持现有 {current_cols} 列，不删除任何列")
-            
-            logger.info(f"最终表格尺寸 - 行数: {target_table.Rows.Count}, 列数: {target_table.Columns.Count}")
+            # # 保持表格至少有3列，但不删除现有列
+            # logger.info(f"当前表格列数: {target_table.Columns.Count}, 需要列数: {target_cols}")
+            #
+            # current_cols = target_table.Columns.Count
+            # if current_cols < target_cols:
+            #     # 添加缺失的列，但不删除现有列
+            #     for _ in range(target_cols - current_cols):
+            #         target_table.Columns.Add()
+            #     logger.info(f"添加了 {target_cols - current_cols} 列")
+            #     # 添加列后立即重新应用表格格式，确保表格适应窗口
+            #     self._apply_table_formatting(target_table)
+            # else:
+            #     logger.info(f"保持现有 {current_cols} 列，不删除任何列")
+            #
+            # logger.info(f"最终表格尺寸 - 行数: {target_table.Rows.Count}, 列数: {target_table.Columns.Count}")
             
             # 填充数据（包含标题行）
             for i, row_data in enumerate(rows_to_process):
@@ -764,28 +672,28 @@ class TestSpecTablesService:
                         test_item = row_data[col_indices[0]] if row_data[col_indices[0]] else ""
                         if test_item:
                             row.Cells(1).Range.Text = str(test_item).rstrip('\x07')  # 移除段落标记
-                            logger.debug(f"第{actual_row_index+1}行第1列填充: {test_item}")
+                            # logger.debug(f"第{actual_row_index+1}行第1列填充: {test_item}")
                     
                     # 第二列：Test Method（来自Matrix的第3列，索引2）
                     if len(row_data) > col_indices[1] and row_data[col_indices[1]]:
                         test_method = row_data[col_indices[1]] if row_data[col_indices[1]] else ""
                         if test_method:
                             row.Cells(2).Range.Text = str(test_method).rstrip('\x07')  # 移除段落标记
-                            logger.debug(f"第{actual_row_index+1}行第2列填充: {test_method}")
+                            # logger.debug(f"第{actual_row_index+1}行第2列填充: {test_method}")
                     
                     # 第三列：Condition（来自Matrix的第4列，索引3）
                     if len(row_data) > col_indices[2] and row_data[col_indices[2]]:
                         condition = row_data[col_indices[2]] if row_data[col_indices[2]] else ""
                         if condition:
                             row.Cells(3).Range.Text = str(condition).rstrip('\x07')  # 移除段落标记
-                            logger.debug(f"第{actual_row_index+1}行第3列填充: {condition}")
+                            # logger.debug(f"第{actual_row_index+1}行第3列填充: {condition}")
 
                     # 第四列：Requirements（来自Matrix的第5列，索引4）
                     if len(row_data) > col_indices[3] and row_data[col_indices[3]]:
                         requirements = row_data[col_indices[3]] if row_data[col_indices[3]] else ""
                         if requirements:
                             row.Cells(4).Range.Text = str(requirements).rstrip('\x07')  # 移除段落标记
-                            logger.debug(f"第{actual_row_index+1}行第4列填充: {requirements}")
+                            # logger.debug(f"第{actual_row_index+1}行第4列填充: {requirements}")
                     
                     # 保持原有的单元格格式，而不是强制设置格式
                     # 只对内容进行处理，保留原始表格样式
@@ -793,7 +701,6 @@ class TestSpecTablesService:
                     for j in range(actual_cols):
                         # 确保单元格存在
                         if j + 1 <= row.Cells.Count:
-                            cell = row.Cells(j + 1)  # Win32COM索引从1开始
                             # 保留原有格式，只做必要的格式调整
                             # 保持原有的字体、对齐方式等格式
                             try:
@@ -804,23 +711,6 @@ class TestSpecTablesService:
             
             # 最后再应用一次表格格式设置，确保整体格式正确
             self._apply_table_formatting(target_table)
-
-            # 查找并设置"Sample size"行的背景色为浅蓝色
-            try:
-                for i in range(1, target_table.Rows.Count + 1):
-                    row = target_table.Rows(i)
-                    first_cell = row.Cells(1)
-                    cell_text = first_cell.Range.Text.strip().lower()
-                    if cell_text.startswith("sample"):
-                        # 找到Sample行，设置背景色为浅蓝色 (RGB 135,206,235) -> BGR 0xEBCE87
-                        for j in range(1, row.Cells.Count + 1):
-                            cell = row.Cells(j)
-                            # 设置单元格背景色为浅蓝色 (RGB 135,206,235) - 在BGR格式中为 0xEBCE87
-                            cell.Shading.BackgroundPatternColor = 0xEBCE87
-                        logger.info(f"已为Sample size行({i})设置浅蓝色背景")
-                        break
-            except Exception as e:
-                logger.warning(f"设置Sample size行背景色时出错: {e}")
 
             # 保存文档
             word_doc.Save()
@@ -838,124 +728,3 @@ class TestSpecTablesService:
                 except:
                     pass
 
-    def _fill_method_table(self, table, steps: list) -> None:
-        """
-        填充Test Method表格
-
-        根据要求：表格只有两行三列，需要依据matrix数据结构的行数和列数进行增减。
-        把matrix的第1,3,4,5列（Test, TestMethod, Condition, Requirement），
-        行截取到"Sample size"前面一行填充进来。
-
-        Args:
-            table: Word表格对象（python-docx对象）
-            steps: 步骤数据列表
-        """
-        logger.info(f"开始填充Test Method表格，共{len(steps)}个步骤")
-
-        # 调整表格行数以匹配步骤数量
-        current_rows = len(table.rows)
-        if len(steps) > current_rows:
-            # 添加行
-            for _ in range(len(steps) - current_rows):
-                table.add_row()
-            logger.info(f"添加了 {len(steps) - current_rows} 行")
-        elif len(steps) < current_rows:
-            # 删除多余行（从后往前删除）
-            for _ in range(current_rows - len(steps)):
-                if len(table.rows) > len(steps) and len(steps) > 0:
-                    # 通过删除行的XML元素来删除行
-                    table._tbl.remove(table.rows[-1]._tr)
-            logger.info(f"删除了 {current_rows - len(steps)} 行")
-
-        # 确保每行有3列
-        for row in table.rows:
-            current_cols = len(row.cells)
-            if current_cols < 3:
-                # 添加列直到有3列
-                for _ in range(3 - current_cols):
-                    row.cells[-1]._tc.addnext(row.cells[-1]._tc.clone())
-                logger.info(f"添加了 {3 - current_cols} 列")
-            elif current_cols > 3:
-                # 删除多余列（保留前3列）
-                for _ in range(current_cols - 3):
-                    if len(row.cells) > 3:
-                        row._tr.remove(row.cells[-1]._tc)
-                logger.info(f"删除了 {current_cols - 3} 列")
-
-        logger.info(f"最终表格行数: {len(table.rows)}, 列数: {len(table.rows[0].cells) if table.rows else 0}")
-
-        # 填充数据 - 使用Matrix的第1,3,4列（Test, TestMethod, Condition）
-        for i, step in enumerate(steps):
-            if i < len(table.rows):
-                row = table.rows[i]
-
-                # 确保有3列
-                if len(row.cells) >= 3:
-                    # 第一列：Test Item
-                    test_item = step.get("Test", "")
-                    if test_item:  # 只有当内容不为空时才设置
-                        row.cells[0].text = str(test_item)
-                        logger.debug(f"第{i+1}行第1列填充: {test_item}")
-
-                    # 第二列：Test Method
-                    test_method = step.get("TestMethod", "")
-                    if test_method:  # 只有当内容不为空时才设置
-                        row.cells[1].text = str(test_method)
-                        logger.debug(f"第{i+1}行第2列填充: {test_item}")
-
-                    # 第三列：Condition
-                    condition = step.get("Condition", "")
-                    if condition:  # 只有当内容不为空时才设置
-                        row.cells[2].text = str(condition)
-                        logger.debug(f"第{i+1}行第3列填充: {condition}")
-
-        logger.info("Test Method表格填充完成")
-    
-    def _set_last_row_shading_win32com(self, table, total_rows: int) -> None:
-        """
-        设置表格最后一行的底纹为浅蓝色（RGB 135,206,235）- win32com版本
-
-        Args:
-            table: Word表格对象（win32com对象）
-            total_rows: 总行数
-        """
-        logger.info(f"设置表格最后一行底纹为浅蓝色，总行数: {total_rows}")
-        if total_rows <= 0 or table.Rows.Count < total_rows:
-            logger.warning(f"无法设置底纹，总行数: {total_rows}, 实际行数: {table.Rows.Count}")
-            return
-
-        # 获取最后一行（基于实际数据行数）
-        last_row_idx = min(total_rows, table.Rows.Count)
-        if last_row_idx > 0:
-            last_row = table.Rows(last_row_idx)
-            for i in range(1, last_row.Cells.Count + 1):
-                cell = last_row.Cells(i)
-                # 设置单元格背景色为浅蓝色 (RGB 135,206,235) - 在BGR格式中为 0xEBCE87
-                cell.Shading.BackgroundPatternColor = 0xEBCE87  # 浅蓝色的十六进制值 (BGR格式)
-                logger.debug(f"设置单元格背景色为浅蓝色")
-    
-    def _set_last_row_shading(self, table, total_rows: int) -> None:
-        """
-        设置表格最后一行的底纹为蓝色 - python-docx版本
-
-        Args:
-            table: Word表格对象
-            total_rows: 总行数
-        """
-        logger.info(f"设置表格最后一行底纹为蓝色，总行数: {total_rows}")
-        if total_rows <= 0 or len(table.rows) < total_rows:
-            logger.warning(f"无法设置底纹，总行数: {total_rows}, 实际行数: {len(table.rows)}")
-            return
-
-        # 获取最后一行（基于实际数据行数）
-        last_row_idx = min(total_rows, len(table.rows)) - 1
-        if last_row_idx >= 0:
-            last_row = table.rows[last_row_idx]
-            for cell in last_row.cells:
-                # 设置单元格背景色为蓝色
-                shading_elm = OxmlElement('w:shd')
-                shading_elm.set(qn('w:fill'), '0070C0')  # 蓝色的十六进制值
-                shading_elm.set(qn('w:val'), 'clear')
-                shading_elm.set(qn('w:color'), 'auto')
-                cell._tc.get_or_add_tcPr().append(shading_elm)
-                logger.debug(f"设置单元格底纹为蓝色")
