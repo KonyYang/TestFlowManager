@@ -172,14 +172,14 @@ class TestResultService:
                 self._safe_callback_call(progress_callback, 30)
             
             if status_callback:
-                self._safe_callback_call(status_callback, "正在查找TEST RESULTS段落...")
+                self._safe_callback_call(status_callback, "正在查找Group # Test Results段落...")
             
-            # 查找TEST RESULTS段落（带有粗体和下划线的段落）
-            test_results_paragraph = self._find_test_results_paragraph(word_doc)
+            # 查找Group # Test Results段落
+            test_results_paragraph = self._find_group_test_results_paragraph(word_doc)
             if not test_results_paragraph:
-                logger.warning("未找到TEST RESULTS段落")
+                logger.warning("未找到Group # Test Results段落")
                 if status_callback:
-                    self._safe_callback_call(status_callback, "警告: 未找到TEST RESULTS段落")
+                    self._safe_callback_call(status_callback, "警告: 未找到Group # Test Results段落")
                 return False
             
             # 根据组别数量复制表格
@@ -254,9 +254,9 @@ class TestResultService:
             except:
                 pass
 
-    def _find_test_results_paragraph(self, word_doc):
+    def _find_group_test_results_paragraph(self, word_doc):
         """
-        查找带有粗体和下划线的TEST RESULTS段落
+        查找带有"Group # Test Results"的段落
         
         Args:
             word_doc: Word文档对象
@@ -268,14 +268,12 @@ class TestResultService:
             paragraph = word_doc.Paragraphs(i)
             para_text = paragraph.Range.Text.strip()
             
-            # 检查段落文本是否包含TEST RESULTS（不区分大小写）
-            if 'TEST RESULTS' in para_text.upper():
-                # 检查段落是否为粗体且有下划线
-                if paragraph.Range.Font.Bold and paragraph.Range.Font.Underline:
-                    logger.info(f"找到TEST RESULTS段落: {para_text}")
-                    return paragraph
+            # 检查段落文本是否包含"Group # Test Results"（不区分大小写）
+            if 'Group # Test Results' in para_text:
+                logger.info(f"找到Group # Test Results段落: {para_text}")
+                return paragraph
         
-        logger.warning("未找到TEST RESULTS段落")
+        logger.warning("未找到Group # Test Results段落")
         return None
 
     def _find_first_test_result_table_index(self, word_doc):
@@ -288,8 +286,8 @@ class TestResultService:
         Returns:
             表格索引（从1开始），如果未找到返回-1
         """
-        # 查找TEST RESULTS段落
-        test_results_para = self._find_test_results_paragraph(word_doc)
+        # 查找Group # Test Results段落
+        test_results_para = self._find_group_test_results_paragraph(word_doc)
         if not test_results_para:
             return -1
         
@@ -323,38 +321,75 @@ class TestResultService:
         # 模板从第4个表格开始
         first_table_index = 4
         if first_table_index > word_doc.Tables.Count:
-            logger.warning(f"文档中没有第 {first_table_index} 个表格，无法复制")
+            logger.warning("文档中没有第 {} 个表格，无法复制".format(first_table_index))
             return
         
-        # 获取第一个Test Result表格
-        first_table = word_doc.Tables(first_table_index)
+        # 获取第4个表格
+        table4 = word_doc.Tables(first_table_index)
+        
+        # 获取第4个表格前的段落（包含"Group # Test Results"）
+        table4_start_pos = table4.Range.Start
+        search_range = word_doc.Range(0, table4_start_pos)
+        
+        # 查找包含"Group # Test Results"的段落
+        found_range = search_range.Duplicate
+        found = found_range.Find.Execute(FindText="Group # Test Results", Forward=True)
+        
+        if not found:
+            logger.warning("未找到包含 'Group # Test Results' 的段落")
+            # 如果没找到特定段落，使用原来的简单方法
+            # 需要复制的次数 = 总数 - 1（因为已有1个模板）
+            copy_times = needed_count - 1
+            if copy_times <= 0:
+                return  # 不需要复制
+            
+            # 复制表格
+            for i in range(copy_times):
+                # 复制第一个表格
+                table4.Range.Copy()
+                
+                # 找到插入位置（在第4个表格之后）
+                table4_end_pos = table4.Range.End
+                # 在第4个表格后插入一个空白段落
+                doc_range = word_doc.Range(table4_end_pos, table4_end_pos)
+                doc_range.InsertParagraph()
+                # 获取刚插入的段落位置作为粘贴位置
+                paste_pos = table4_end_pos + 1  # 段落标记位置
+                paste_range = word_doc.Range(paste_pos, paste_pos)
+                
+                paste_range.Paste()
+                
+                logger.info("已复制第 {} 个Test Result表格".format(i + 1))
+            return
+        
+        # 确定要复制的完整范围（标题段落 + 第4个表格）
+        copy_start_pos = found_range.Start
+        copy_end_pos = table4.Range.End
+        
+        # 创建复制范围
+        copy_range = word_doc.Range(copy_start_pos, copy_end_pos)
         
         # 需要复制的次数 = 总数 - 1（因为已有1个模板）
         copy_times = needed_count - 1
         if copy_times <= 0:
             return  # 不需要复制
         
-        # 复制表格
+        # 复制表格和标题段落
         for i in range(copy_times):
-            # 复制第一个表格
-            first_table.Range.Copy()
+            # 获取第4个表格的结束位置
+            table4_end_pos = table4.Range.End
+            # 在第4个表格后插入一个空白段落
+            doc_range = word_doc.Range(table4_end_pos, table4_end_pos)
+            doc_range.InsertParagraph()
+            # 获取刚插入的段落位置作为粘贴位置
+            paste_pos = table4_end_pos + 1  # 段落标记位置
+            paste_range = word_doc.Range(paste_pos, paste_pos)
             
-            # 找到插入位置（在最后一个表格之后）
-            last_table_index = first_table_index + i
-            if last_table_index <= word_doc.Tables.Count:
-                last_table = word_doc.Tables(last_table_index)
-                
-                # 在最后表格后插入新表格
-                insertion_range = last_table.Range
-                insertion_range.Collapse(0)  # 移动到范围末尾
-                insertion_range.InsertParagraph()
-                insertion_range.Paste()
-            else:
-                # 如果索引超出范围，则在文档末尾插入
-                word_doc.Range().InsertParagraph()
-                word_doc.Range(word_doc.Range.End - 1, word_doc.Range.End - 1).Paste()
+            # 粘贴复制的内容
+            copy_range.Copy()
+            paste_range.Paste()
             
-            logger.info(f"已复制第 {i + 1} 个Test Result表格")
+            logger.info("已复制第 {} 个Test Result表格及其标题".format(i + 1))
 
     def _update_group_title(self, word_doc, table_index: int, group_name: str):
         """
@@ -365,12 +400,22 @@ class TestResultService:
             table_index: 表格索引
             group_name: 组别名称
         """
-        table = word_doc.Tables(table_index)
-        
-        # 查找包含"Group # Test Results"的段落
         # 从文档开头到表格开始位置之间搜索
+        table = word_doc.Tables(table_index)
         search_range = word_doc.Range(0, table.Range.Start)
         
+        # 查找包含"Group # Test Results"的段落
+        found_range = search_range.Duplicate
+        found = found_range.Find.Execute(FindText="Group # Test Results", Forward=True)
+        
+        if found:
+            # 替换#为实际组名
+            new_text = found_range.Text.replace('#', group_name)
+            found_range.Text = new_text
+            logger.info("已更新组别标题: {}".format(new_text))
+            return
+        
+        # 如果没有找到确切的模板文本，尝试查找其他可能的格式
         # 遍历搜索范围内的所有段落
         for i in range(1, search_range.Paragraphs.Count + 1):
             try:
@@ -382,34 +427,10 @@ class TestResultService:
                     # 替换#为实际组名
                     new_text = para_text.replace('#', group_name)
                     paragraph.Range.Text = new_text
-                    logger.info(f"已更新组别标题: {new_text}")
+                    logger.info("已更新组别标题: {}".format(new_text))
                     return
             except Exception as e:
-                logger.warning(f"处理段落 {i} 时出错: {e}")
-                continue
-        
-        # 如果没有找到确切的模板文本，尝试查找其他可能的格式
-        for i in range(1, min(table_index, word_doc.Paragraphs.Count + 1)):
-            try:
-                para = word_doc.Paragraphs(i)
-                para_text = para.Range.Text.strip()
-                if 'Group' in para_text and 'Test Results' in para_text:
-                    # 尝试替换其中的占位符
-                    import re
-                    # 匹配 "Group X Test Results" 或类似格式，并将X替换为实际组名
-                    if '#' in para_text:
-                        new_text = para_text.replace('#', group_name)
-                        para.Range.Text = new_text
-                        logger.info(f"已更新组别标题: {new_text}")
-                        return
-                    elif re.search(r'Group\s+\w+\s+Test\s+Results', para_text, re.IGNORECASE):
-                        # 如果找到"Group X Test Results"格式，替换X为实际组名
-                        new_text = re.sub(r'(Group\s+)\w+(\s+Test\s+Results)', rf'\g<1>{group_name}\g<2>', para_text)
-                        para.Range.Text = new_text
-                        logger.info(f"已更新组别标题: {new_text}")
-                        return
-            except Exception as e:
-                logger.warning(f"处理段落 {i} 时出错: {e}")
+                logger.warning("处理段落 {} 时出错: {}".format(i, e))
                 continue
 
     def _fill_test_result_table_from_dict(self, table, step_list: List[Dict[str, Any]]):
@@ -446,14 +467,8 @@ class TestResultService:
                 if table.Columns.Count > required_cols:
                     table.Columns(table.Columns.Count).Delete()
         
-        # 填充标题行
-        header_row = table.Rows(1)
-        header_cells = ['Step Number', 'Test', 'Requirement', 'Step Description', 'Processed Requirement', 'Result']
-        for j, header_text in enumerate(header_cells):
-            if j + 1 <= header_row.Cells.Count:
-                header_row.Cells(j + 1).Range.Text = header_text
-        
-        # 填充数据行
+        # 跳过标题行，只填充数据行
+        # 保持模板中原有的标题行格式和内容不变
         for i, step in enumerate(step_list):
             row_index = i + 2  # +2 because index starts at 1 and first row is header
             row = table.Rows(row_index)

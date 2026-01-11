@@ -1,6 +1,6 @@
 """
 Test Spec Tables服务模块
-提供填充Test Description和Test Method表格的业务逻辑服务
+提供填充Test Description、Test Method和Test Result表格的业务逻辑服务
 """
 
 from typing import Dict, Any, Callable, Optional
@@ -22,7 +22,7 @@ import win32com.client
 class TestSpecTablesService:
     """
     Test Spec Tables服务类
-    提供填充Test Description和Test Method表格的业务逻辑服务
+    提供填充Test Description、Test Method和Test Result表格的业务逻辑服务
     """
 
     def __init__(self):
@@ -57,7 +57,7 @@ class TestSpecTablesService:
             logger.error(f"回调调用失败: {e}")
             return None
 
-    def fill_test_description_and_methods(
+    def fill_all_test_spec_tables(
         self, 
         document_path: str, 
         matrix_data_structure: MatrixDataStructure,
@@ -65,7 +65,7 @@ class TestSpecTablesService:
         status_callback: Optional[Callable[[str], None]] = None
     ) -> bool:
         """
-        填充Test Description和Test Method表格
+        填充Test Description、Test Method和Test Result表格
         
         Args:
             document_path: Word文档路径
@@ -76,7 +76,7 @@ class TestSpecTablesService:
         Returns:
             bool: 是否成功
         """
-        logger.info(f"开始填充Test Description和Test Method表格，文档路径: {document_path}")
+        logger.info(f"开始填充Test Description、Test Method和Test Result表格，文档路径: {document_path}")
         word_app = None
         word_doc = None
         try:
@@ -159,7 +159,7 @@ class TestSpecTablesService:
             if status_callback:
                 self._safe_callback_call(status_callback, "处理完成！表格已成功填充。")
             
-            logger.info(f"Test Description和Test Method表格填充完成")
+            logger.info(f"Test Description、Test Method和Test Result表格填充完成")
             
             # 现在使用相同的matrix_data_structure生成Test Result表格
             if status_callback:

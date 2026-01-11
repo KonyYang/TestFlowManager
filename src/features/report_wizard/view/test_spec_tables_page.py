@@ -124,7 +124,7 @@ class TestSpecTablesWorker(QThread):
             service = TestSpecTablesService()
             
             # 执行填充操作 - 使用从Matrix服务获取的数据结构
-            success = service.fill_test_description_and_methods(
+            success = service.fill_all_test_spec_tables(
                 self.document_path,
                 self.matrix_data_structure,  # 使用从Matrix服务获取的数据结构
                 self.progress_updated,
