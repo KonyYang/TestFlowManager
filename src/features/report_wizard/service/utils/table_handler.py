@@ -222,10 +222,23 @@ class TableHandler:
                             available_width = page_width - left_margin - right_margin
                             
                             # 平均分配每列宽度，确保不超过最大限制
+                            # 对于多列表格，设置更小的列宽以避免超过页面宽度
                             col_width = min(available_width * 0.9 / total_cols, 1584) if total_cols > 0 else 1584  # 使用90%的可用宽度，最大不超过1584
                             
+                            # 对于超过10列的表格，进一步减小列宽以确保表格不会超出页面
+                            if total_cols > 10:
+                                col_width = min(col_width, 60)  # 对于多列表格，最大列宽设为60磅
+                            
                             for i in range(1, total_cols + 1):
-                                target_table.Columns(i).Width = col_width
+                                try:
+                                    target_table.Columns(i).Width = col_width
+                                except:
+                                    # 如果设置单个列宽失败，尝试设置整个表格宽度
+                                    try:
+                                        target_table.PreferredWidth = available_width * 0.9
+                                        target_table.PreferredWidthType = 3  # wdPreferredWidthPercent
+                                    except:
+                                        pass
                             
                             logger.info(f"手动设置每列宽度为 {col_width} 磅")
                         except Exception as e3:
@@ -233,6 +246,23 @@ class TableHandler:
                     success = True
                 except Exception as e3:
                     logger.warning(f"AutoFit()失败: {e3}")
+                    
+            # 如果以上方法都失败，尝试方法4: 专门针对多列表格的处理
+            if not success:
+                try:
+                    total_cols = target_table.Columns.Count
+                    if total_cols > 10:  # 对于多列表格，使用特殊的处理方式
+                        # 设置表格为窄列模式
+                        for i in range(1, total_cols + 1):
+                            try:
+                                # 尝试设置较小的固定宽度
+                                target_table.Columns(i).SetWidth(12.0, 0)  # 12磅，wdRulerPageFit = 0
+                            except:
+                                pass  # 如果设置单列宽度失败，继续下一行
+                        logger.info(f"已为多列表格({total_cols}列)设置窄列模式")
+                        success = True
+                except Exception as e4:
+                    logger.warning(f"多列表格处理失败: {e4}")
 
             # 设置所有单元格垂直对齐方式为居中
             try:

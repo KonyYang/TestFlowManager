@@ -239,6 +239,12 @@ class TestSpecTablesService:
         if group_columns_count < 0:
             group_columns_count = 0
         
+        # 为了避免表格过宽，限制最大组别列数
+        max_group_columns = 15  # 限制最大组别列数为15，这样总列数最多为16（1列Test Item + 15组别列）
+        if group_columns_count > max_group_columns:
+            group_columns_count = max_group_columns
+            logger.warning(f"组别列数量超过最大限制，调整为 {max_group_columns} 列")
+        
         logger.info(f"组别列数量: {group_columns_count}, 起始列索引: {start_col_index}, 结束列索引: {end_col_index}")
         
         # 总列数 = 首列(Test Item) + 组别列数量
@@ -294,13 +300,39 @@ class TestSpecTablesService:
         
         current_cols = target_table.Columns.Count
         if current_cols < target_cols:
-            # 添加新列，同时保持原有格式
-            for _ in range(target_cols - current_cols):
-                target_table.Columns.Add()
-            logger.info(f"添加了 {target_cols - current_cols} 列")
-            # 添加列后立即重新应用表格格式，确保表格适应窗口
-            from .utils.table_handler import TableHandler
-            TableHandler.apply_table_formatting(target_table)
+            # 检查是否会超过Word表格的合理列数限制（Word最大允许63列，但为了页面显示效果，我们限制在合理范围内）
+            cols_to_add = target_cols - current_cols
+            if cols_to_add > 0:
+                # 为了避免表格过宽，限制最大列数不超过20列
+                max_allowed_cols = 20
+                if target_table.Columns.Count + cols_to_add > max_allowed_cols:
+                    cols_to_add = max_allowed_cols - target_table.Columns.Count
+                    logger.warning(f"需要的列数超过最大限制，调整为添加 {cols_to_add} 列，总共 {max_allowed_cols} 列")
+                
+                if cols_to_add > 0:
+                    # 在添加新列前，先调整现有列的宽度，为新列留出空间
+                    # 将所有现有列的宽度设置为较小值，以避免表格过宽
+                    try:
+                        # 尝试将现有列的宽度设置为较小值（0.2英寸），以便为新列腾出空间
+                        for i in range(1, target_table.Columns.Count + 1):
+                            try:
+                                target_table.Columns(i).SetWidth(18.0, 1)  # 18磅约等于0.25英寸
+                            except:
+                                pass  # 如果设置宽度失败，继续处理
+                    except:
+                        pass  # 如果整体设置失败，继续添加列
+                    
+                    # 添加新列，同时保持原有格式
+                    for _ in range(cols_to_add):
+                        try:
+                            target_table.Columns.Add()
+                        except Exception as e:
+                            logger.warning(f"添加列时出错，可能已达到最大列数限制: {e}")
+                            break
+                    logger.info(f"添加了 {cols_to_add} 列")
+                    # 添加列后立即重新应用表格格式，确保表格适应窗口
+                    from .utils.table_handler import TableHandler
+                    TableHandler.apply_table_formatting(target_table)
         elif current_cols > target_cols:
             for _ in range(current_cols - target_cols):
                 if target_table.Columns.Count > target_cols:
