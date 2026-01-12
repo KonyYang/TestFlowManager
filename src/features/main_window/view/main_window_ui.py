@@ -24,6 +24,9 @@ from src.features.report_wizard.controller.report_wizard_controller import Repor
 # 导入文档解析器相关组件
 from src.features.document_parser.controller.document_parser_controller import DocumentParserController
 
+# 导入报告更新相关组件
+from src.features.report_updater.controller.report_updater_controller import ReportUpdaterController
+
 # 添加QApplication导入
 from PyQt5.QtWidgets import QApplication
 import os
@@ -47,6 +50,8 @@ class MainWindow(QMainWindow):
         self.report_wizard_controller = ReportWizardController(self)
         # 初始化文档解析控制器
         self.document_parser_controller = DocumentParserController(self)
+        # 初始化报告更新控制器
+        self.report_updater_controller = ReportUpdaterController(self)
         # 保存窗口状态信息
         self.is_custom_sized = False
         self.custom_geometry = None
@@ -366,7 +371,16 @@ class MainWindow(QMainWindow):
     def _on_update_report(self) -> None:
         """处理更新报告事件"""
         logger.debug("Update report action triggered")
-        # TODO: 实现更新报告功能
+        
+        # 获取当前项目路径
+        current_project_path = getattr(self.controller, '_current_project_path', None)
+        
+        # 设置项目路径到报告更新控制器
+        self.report_updater_controller.set_project_path(current_project_path)
+        
+        # 显示报告更新对话框
+        self.report_updater_controller.show_report_updater_dialog()
+        
         self._update_status()
 
     def _on_convert_customer_version(self) -> None:

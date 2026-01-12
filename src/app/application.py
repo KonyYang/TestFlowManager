@@ -7,6 +7,11 @@
 import sys
 import os
 import logging
+
+# 添加项目根目录到 Python 路径，这样可以正确导入模块
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, project_root)
+
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
 from src.features.main_window.view.main_window_ui import MainWindow

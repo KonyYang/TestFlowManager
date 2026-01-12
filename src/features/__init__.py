@@ -2,14 +2,13 @@
 功能特性模块初始化文件
 """
 
-# 导入主要功能模块
-from . import ltr_manager
-from . import main_window
+# 不自动导入所有模块以避免循环导入
+# 各模块将在需要时单独导入
 
-# 从各功能模块导入主要的类
-from .ltr_manager import LTRViewerController, LTRViewerData, LTRBaseService
-from .main_window import MainWindowController, MainWindow
+__all__ = []  # 空列表，不自动导出任何内容
 
-__all__ = ['ltr_manager', 'main_window',
-           'LTRViewerController', 'LTRViewerData', 'LTRBaseService',
-           'MainWindowController', 'MainWindow']
+# 仅在需要时导入report_updater，避免循环导入
+def lazy_import_report_updater():
+    """懒加载report_updater模块"""
+    from . import report_updater
+    return report_updater
