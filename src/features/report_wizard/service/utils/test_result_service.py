@@ -114,7 +114,10 @@ class TestResultService:
         matrix_structure: MatrixDataStructure, 
         document_path: str,
         progress_callback=None,
-        status_callback=None
+        status_callback=None,
+        word_app_instance=None,
+        word_doc_instance=None,
+        should_save_doc=True
     ) -> bool:
         """
         使用Matrix数据结构生成Test Result表格
@@ -140,13 +143,23 @@ class TestResultService:
                     self._safe_callback_call(status_callback, f"错误: 文档不存在 - {document_path}")
                 return False
             
-            # 使用win32com打开Word文档
-            import win32com.client
-            word_app = win32com.client.Dispatch("Word.Application")
-            word_app.Visible = False  # 隐藏Word窗口
-            word_app.DisplayAlerts = False  # 关闭警告提示
-            
-            word_doc = word_app.Documents.Open(document_path)
+            # 使用传入的Word文档实例（如果提供），否则使用传入的应用程序实例或创建新的实例
+            if word_doc_instance is not None:
+                # 使用传入的Word文档实例
+                word_doc = word_doc_instance
+                word_app = word_doc.Application
+            elif word_app_instance is not None:
+                # 使用传入的Word应用程序实例
+                word_app = word_app_instance
+                word_doc = word_app.Documents.Open(document_path)
+            else:
+                # 使用win32com打开Word文档
+                import win32com.client
+                word_app = win32com.client.Dispatch("Word.Application")
+                word_app.Visible = False  # 隐藏Word窗口
+                word_app.DisplayAlerts = False  # 关闭警告提示
+                
+                word_doc = word_app.Documents.Open(document_path)
             logger.info(f"成功打开文档，包含 {word_doc.Paragraphs.Count} 个段落和 {word_doc.Tables.Count} 个表格")
             
             if progress_callback:
@@ -227,9 +240,12 @@ class TestResultService:
             if status_callback:
                 self._safe_callback_call(status_callback, "正在保存文档...")
             
-            # 保存文档
-            word_doc.Save()
-            logger.info(f"文档已保存: {document_path}")
+            # 根据参数决定是否保存文档
+            if should_save_doc:
+                word_doc.Save()
+                logger.info(f"文档已保存: {document_path}")
+            else:
+                logger.info(f"跳过保存文档，由调用者处理: {document_path}")
             
             if progress_callback:
                 self._safe_callback_call(progress_callback, 100)
@@ -248,9 +264,12 @@ class TestResultService:
                 self._safe_callback_call(status_callback, f"错误: {str(e)}")
             return False
         finally:
-            # 关闭Word应用
+            # 只有在我们创建了Word应用实例时才关闭它
+            # 如果使用了传入的实例，不要关闭它，因为它可能还在其他地方使用
+            # 同样，文档实例也不应关闭，因为它由调用者管理
             try:
-                word_app.Quit()
+                if word_app_instance is None and word_doc_instance is None and word_app is not None:
+                    word_app.Quit()
             except:
                 pass
 

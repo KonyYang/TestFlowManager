@@ -151,7 +151,7 @@ class TestSpecTablesPage(QFrame):
     content_updated = pyqtSignal(str)  # 传递更新的文档路径
     # 导航信号
     # previous_clicked = pyqtSignal()  # 已禁用上一步功能
-    next_clicked = pyqtSignal()
+    # next_clicked = pyqtSignal()
     finish_clicked = pyqtSignal()
     cancel_clicked = pyqtSignal()
     
@@ -346,13 +346,17 @@ class TestSpecTablesPage(QFrame):
         if success:
             self.status_label.setText("处理完成！表格已成功填充。")
             self.progress_bar.setValue(100)
+            
+            # 处理成功后直接关闭向导
+            parent_wizard = self.parent()
+            if parent_wizard and hasattr(parent_wizard, 'accept'):
+                parent_wizard.accept()
         else:
             self.status_label.setText("处理失败，请检查日志。")
-        
-        # 如果成功，可以触发下一步
-        if success:
-            # 发送信号通知向导可以继续下一步
-            self.next_clicked.emit()
+            # 处理失败后也直接关闭向导
+            parent_wizard = self.parent()
+            if parent_wizard and hasattr(parent_wizard, 'accept'):
+                parent_wizard.accept()
     
     def get_current_data(self):
         """获取当前页面的数据"""
@@ -399,7 +403,7 @@ class TestSpecTablesPage(QFrame):
         layout.addWidget(progress_group)
         
         # 底部说明
-        info_label = QLabel("提示：处理完成后将自动进入下一步")
+        info_label = QLabel("提示：处理完成后将自动关闭向导")
         info_label.setStyleSheet("font-size: 14px; color: #666666; margin-top: 10px;")
         layout.addWidget(info_label)
         

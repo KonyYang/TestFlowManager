@@ -78,16 +78,11 @@ class ReportWizardDialog(QDialog):
         self.next_button = QPushButton("下一步")
         self.next_button.clicked.connect(self.go_to_next_page)
         
-        self.finish_button = QPushButton("完成")
-        self.finish_button.clicked.connect(self.finish_wizard)
-        self.finish_button.setEnabled(False)  # 初始时禁用完成按钮
-        
         self.cancel_button = QPushButton("取消")
         self.cancel_button.clicked.connect(self.reject)
         
         # button_layout.addWidget(self.prev_button)  # 已禁用上一步按钮
         button_layout.addWidget(self.next_button)
-        button_layout.addWidget(self.finish_button)
         button_layout.addStretch()
         button_layout.addWidget(self.cancel_button)
         
@@ -139,8 +134,8 @@ class ReportWizardDialog(QDialog):
             matrix_service=self.matrix_service  # 传递Matrix服务
         )
         
-        # 连接TestSpecTablesPage的next_clicked信号到向导的下一步功能
-        test_spec_page.next_clicked.connect(self.go_to_next_page)
+        # 注释掉next_clicked信号连接，因为现在处理完成后直接关闭向导
+        # test_spec_page.next_clicked.connect(self.go_to_next_page)
         
         self.pages.append(test_spec_page)
         self.page_container.addWidget(test_spec_page)
@@ -240,23 +235,6 @@ class ReportWizardDialog(QDialog):
             
             logger.info(f"已跳转到第 {self.current_page_index + 1} 页")
     
-    def finish_wizard(self):
-        """完成向导"""
-        # 获取所有页面的数据
-        all_data = self.get_all_data()
-        
-        # 获取正文内容页面的文档路径
-        body_content_page = self.pages[1]  # 假设正文内容页面是第二个页面
-        document_path = body_content_page.get_document_path()
-        
-        if document_path:
-            print(f"完成向导，文档路径: {document_path}")
-            print(f"页眉数据: {all_data.get('header_data')}")
-        else:
-            print("完成向导，但未选择文档")
-            
-        self.accept()  # 关闭对话框
-    
     def update_navigation_buttons(self):
         """更新导航按钮状态"""
         # 更新进度标签
@@ -268,8 +246,7 @@ class ReportWizardDialog(QDialog):
         # 更新下一步按钮状态
         self.next_button.setEnabled(self.current_page_index < len(self.pages) - 1)
         
-        # 更新完成按钮状态
-        self.finish_button.setEnabled(self.current_page_index == len(self.pages) - 1)
+
     
     def get_page_title(self) -> str:
         """获取当前页面标题"""

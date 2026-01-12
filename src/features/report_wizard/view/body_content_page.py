@@ -24,7 +24,7 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
     content_updated = pyqtSignal(str)  # 传递更新的文档路径
     # 导航信号
     # previous_clicked = pyqtSignal()  # 已禁用上一步功能
-    next_clicked = pyqtSignal()
+    # next_clicked = pyqtSignal()
     finish_clicked = pyqtSignal()
     cancel_clicked = pyqtSignal()
     

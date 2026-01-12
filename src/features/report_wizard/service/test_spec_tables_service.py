@@ -149,9 +149,9 @@ class TestSpecTablesService:
             if status_callback:
                 self._safe_callback_call(status_callback, "正在保存文档...")
             
-            # 保存文档
-            word_doc.Save()
-            logger.info(f"文档已保存: {document_path}")
+            # 注意：暂不保存文档，等待后续Test Result处理完成后统一保存
+            # word_doc.Save()
+            logger.info(f"Test Description和Test Method表格填充完成，等待Test Result处理完成")
             
             if progress_callback:
                 self._safe_callback_call(progress_callback, 100)
@@ -165,18 +165,27 @@ class TestSpecTablesService:
             if status_callback:
                 self._safe_callback_call(status_callback, "正在生成Test Result表格...")
             
-            # 使用TestResultService生成Test Result表格
+            # 使用TestResultService生成Test Result表格，传递Word应用程序实例和文档实例以避免重新打开文档
+            # 设置should_save_doc=False，因为我们稍后会统一保存
             result = self.test_result_service.generate_test_result_with_structure(
                 matrix_structure=matrix_data_structure,
                 document_path=document_path,
                 progress_callback=progress_callback,
-                status_callback=status_callback
+                status_callback=status_callback,
+                word_app_instance=word_app,
+                word_doc_instance=word_doc,
+                should_save_doc=False
             )
             
             if result:
                 logger.info("Test Result表格生成完成")
             else:
                 logger.error("Test Result表格生成失败")
+            
+            # 在所有处理完成后，保存文档
+            if word_doc:
+                word_doc.Save()
+                logger.info(f"文档最终保存: {document_path}")
                 
             return True
             
@@ -271,6 +280,7 @@ class TestSpecTablesService:
         
         # 直接使用传入的Word应用程序实例
         word_app = word_app_instance
+        word_app.Visible = False  # 确保Word应用程序不可见
         word_app.DisplayAlerts = False  # 关闭警告提示
         
         # 检查是否成功找到表格
@@ -460,6 +470,7 @@ class TestSpecTablesService:
         
         # 直接使用传入的Word应用程序实例
         word_app = word_app_instance
+        word_app.Visible = False  # 确保Word应用程序不可见
         word_app.DisplayAlerts = False  # 关闭警告提示
         
         # 检查是否成功找到表格
