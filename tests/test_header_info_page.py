@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 # 添加项目路径以导入模块
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/features/report_wizard', '..', '..', '..')))
 
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt, QDate

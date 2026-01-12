@@ -22,7 +22,7 @@ class ReportWizardDialog(QDialog):
     # 自定义信号
     wizard_finished = pyqtSignal(str)  # 传递生成的报告路径
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, project_path=None):
         """初始化报告向导对话框"""
         super().__init__(parent)
         self.setWindowTitle("报告生成向导")
@@ -36,6 +36,9 @@ class ReportWizardDialog(QDialog):
         
         # Matrix服务引用
         self.matrix_service = None
+        
+        # 项目路径
+        self.project_path = project_path
         
         # 初始化UI
         self.init_ui()
@@ -184,7 +187,7 @@ class ReportWizardDialog(QDialog):
                 # 创建报告文档
                 logger.info("开始创建报告文档")
                 try:
-                    document_path = service.create_report_from_template(header_data)
+                    document_path = service.create_report_from_template(header_data, project_path=self.project_path)
                     logger.info(f"报告文档创建成功: {document_path}")
                     
                     # 设置正文内容页面的文档路径

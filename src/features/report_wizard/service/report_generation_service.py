@@ -25,6 +25,22 @@ class ReportGenerationService:
         """初始化报告生成服务"""
         self.template_path = r"D:\TestFlowManager\Template\E-3707_H Laboratory Test Report_241216.docx"
         self.default_output_dir = r"D:\outfile"
+    
+    def _sanitize_filename(self, filename: str) -> str:
+        """
+        清理文件名中的非法字符
+        
+        Args:
+            filename: 原始文件名
+            
+        Returns:
+            清理后的文件名
+        """
+        import re
+        # 替换Windows文件名中的非法字符
+        illegal_chars = r'[<>:"/\\|?*]'
+        sanitized = re.sub(illegal_chars, '_', filename)
+        return sanitized
 
     def validate_template_exists(self) -> bool:
         """
@@ -38,13 +54,14 @@ class ReportGenerationService:
             return False
         return True
 
-    def create_report_from_template(self, header_data: HeaderData, output_dir: Optional[str] = None) -> str:
+    def create_report_from_template(self, header_data: HeaderData, output_dir: Optional[str] = None, project_path: Optional[str] = None) -> str:
         """
         基于模板创建报告文件
         
         Args:
             header_data: 页眉数据
             output_dir: 输出目录，如果为None则使用默认目录
+            project_path: 项目路径，用于确定保存位置
             
         Returns:
             str: 生成的报告文件路径
@@ -57,26 +74,91 @@ class ReportGenerationService:
                 raise FileNotFoundError(f"模板文件不存在: {self.template_path}")
 
             # 确定输出目录
-            if output_dir is None:
-                output_dir = self.default_output_dir
+            logger.info(f"项目路径(project_path): {project_path}")
+            logger.info(f"项目路径是否存在: {project_path and os.path.exists(project_path) if project_path else False}")
+            logger.info(f"传入的输出目录(output_dir): {output_dir}")
+            
+            if project_path and os.path.exists(project_path):
+                # 从项目路径中提取DL编号作为子文件夹名称
+                import json
+                from pathlib import Path
+                
+                # 查找项目中的JSON文件以获取DL编号
+                json_files = list(Path(project_path).glob("*.json"))
+                logger.info(f"在项目路径中找到的JSON文件: {json_files}")
+                
+                if json_files:
+                    json_file_path = json_files[0]
+                    with open(json_file_path, 'r', encoding='utf-8') as f:
+                        project_data = json.load(f)
+                        dl_number = project_data.get("DL", "")
+                        logger.info(f"从JSON文件中获取的DL编号: {dl_number}")
+                        
+                        if dl_number:
+                            # 在项目路径下查找以DL编号开头的子文件夹
+                            matching_folders = [f for f in os.listdir(project_path) 
+                                              if os.path.isdir(os.path.join(project_path, f)) 
+                                              and f.startswith(dl_number)]
+                            
+                            if matching_folders:
+                                # 如果找到匹配的文件夹，使用第一个
+                                output_dir = os.path.join(project_path, matching_folders[0])
+                                logger.info(f"找到以DL编号开头的文件夹: {output_dir}")
+                            else:
+                                # 如果没找到匹配的文件夹，使用项目文件夹本身
+                                logger.info(f"未找到以DL编号开头的文件夹，使用项目路径本身: {project_path}")
+                                output_dir = project_path
+                        else:
+                            # 如果JSON中没有DL字段，使用项目路径本身
+                            logger.info(f"JSON中未找到DL字段，使用项目路径本身: {project_path}")
+                            output_dir = project_path
+                else:
+                    # 如果找不到JSON文件，使用项目路径本身
+                    logger.info(f"项目路径中未找到JSON文件，使用项目路径本身")
+                    output_dir = project_path
+            else:
+                # 如果没有项目路径，使用默认输出目录
+                logger.info(f"没有项目路径，使用默认输出目录")
+                output_dir = self.default_output_dir if output_dir is None else output_dir
+            
+            logger.info(f"最终确定的输出目录: {output_dir}")
             
             # 确保输出目录存在
             os.makedirs(output_dir, exist_ok=True)
 
             # 生成输出文件名
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            if header_data.report_no:
-                filename = f"{header_data.report_no}_Report_{timestamp}.docx"
+            # 根据要求，格式为：报告编号 报告标题 Report_Rev_版本号
+            if header_data.report_no and header_data.report_title:
+                # 获取版本号，如果没有则默认为A
+                version = header_data.version if header_data.version else "A"
+                # 替换版本号中的"Rev."前缀（如果存在）
+                version_clean = version.replace("Rev.", "").strip()
+                filename = f"{header_data.report_no} {header_data.report_title} Report_Rev_{version_clean}.docx"
+                # 清理文件名中的非法字符
+                filename = self._sanitize_filename(filename)
+            elif header_data.report_no:
+                # 如果只有报告编号
+                version = header_data.version if header_data.version else "A"
+                version_clean = version.replace("Rev.", "").strip()
+                filename = f"{header_data.report_no} Report_Rev_{version_clean}.docx"
+                filename = self._sanitize_filename(filename)
             else:
+                # 如果没有报告编号，使用时间戳
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"Test_Report_{timestamp}.docx"
             
             output_path = os.path.join(output_dir, filename)
+            
+            # 规范化路径以避免斜杠问题
+            output_path = os.path.normpath(output_path)
+            template_path_normalized = os.path.normpath(self.template_path)
 
             # 复制模板到输出位置
-            shutil.copy2(self.template_path, output_path)
+            shutil.copy2(template_path_normalized, output_path)
             logger.info(f"模板已从 {self.template_path} 复制到: {output_path}")
 
             # 创建页眉修改器实例
+            # 使用规范化路径
             header_modifier = HeaderModifier(output_path)
             try:
                 # 打开文档进行修改
@@ -163,7 +245,9 @@ class ReportGenerationService:
                 word_app.DisplayAlerts = False
 
                 # 使用win32com打开最终文档并保存
-                win_doc = word_app.Documents.Open(output_path)
+                # 规范化路径以避免斜杠问题
+                normalized_path = os.path.normpath(output_path)
+                win_doc = word_app.Documents.Open(normalized_path)
 
                 # 保存文档
                 win_doc.Save()
@@ -253,33 +337,97 @@ class ReportGenerationService:
             logger.error(f"加载项目数据失败: {e}")
             return None
 
-    def get_generated_report_path(self, header_data: HeaderData, output_dir: Optional[str] = None) -> str:
+    def get_generated_report_path(self, header_data: HeaderData, output_dir: Optional[str] = None, project_path: Optional[str] = None) -> str:
         """
         获取将要生成的报告文件路径（不实际生成文件）
         
         Args:
             header_data: 页眉数据
             output_dir: 输出目录，如果为None则使用默认目录
+            project_path: 项目路径，用于确定保存位置
             
         Returns:
             str: 将要生成的报告文件路径
         """
         try:
             # 确定输出目录
-            if output_dir is None:
-                output_dir = self.default_output_dir
+            logger.info(f"项目路径(project_path): {project_path}")
+            logger.info(f"项目路径是否存在: {project_path and os.path.exists(project_path) if project_path else False}")
+            logger.info(f"传入的输出目录(output_dir): {output_dir}")
+            
+            if project_path and os.path.exists(project_path):
+                # 从项目路径中提取DL编号作为子文件夹名称
+                import json
+                from pathlib import Path
+                
+                # 查找项目中的JSON文件以获取DL编号
+                json_files = list(Path(project_path).glob("*.json"))
+                logger.info(f"在项目路径中找到的JSON文件: {json_files}")
+                
+                if json_files:
+                    json_file_path = json_files[0]
+                    with open(json_file_path, 'r', encoding='utf-8') as f:
+                        project_data = json.load(f)
+                        dl_number = project_data.get("DL", "")
+                        logger.info(f"从JSON文件中获取的DL编号: {dl_number}")
+                        
+                        if dl_number:
+                            # 在项目路径下查找以DL编号开头的子文件夹
+                            matching_folders = [f for f in os.listdir(project_path) 
+                                              if os.path.isdir(os.path.join(project_path, f)) 
+                                              and f.startswith(dl_number)]
+                            
+                            if matching_folders:
+                                # 如果找到匹配的文件夹，使用第一个
+                                output_dir = os.path.join(project_path, matching_folders[0])
+                                logger.info(f"找到以DL编号开头的文件夹: {output_dir}")
+                            else:
+                                # 如果没找到匹配的文件夹，使用项目文件夹本身
+                                logger.info(f"未找到以DL编号开头的文件夹，使用项目路径本身: {project_path}")
+                                output_dir = project_path
+                        else:
+                            # 如果JSON中没有DL字段，使用项目路径本身
+                            logger.info(f"JSON中未找到DL字段，使用项目路径本身: {project_path}")
+                            output_dir = project_path
+                else:
+                    # 如果找不到JSON文件，使用项目路径本身
+                    logger.info(f"项目路径中未找到JSON文件，使用项目路径本身")
+                    output_dir = project_path
+            else:
+                # 如果没有项目路径，使用默认输出目录
+                logger.info(f"没有项目路径，使用默认输出目录")
+                output_dir = self.default_output_dir if output_dir is None else output_dir
+            
+            logger.info(f"最终确定的输出目录: {output_dir}")
             
             # 确保输出目录存在
             os.makedirs(output_dir, exist_ok=True)
 
             # 生成输出文件名
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            if header_data.report_no:
-                filename = f"{header_data.report_no}_Report_{timestamp}.docx"
+            # 根据要求，格式为：报告编号 报告标题 Report_Rev_版本号
+            if header_data.report_no and header_data.report_title:
+                # 获取版本号，如果没有则默认为A
+                version = header_data.version if header_data.version else "A"
+                # 替换版本号中的"Rev."前缀（如果存在）
+                version_clean = version.replace("Rev.", "").strip()
+                filename = f"{header_data.report_no} {header_data.report_title} Report_Rev_{version_clean}.docx"
+                # 清理文件名中的非法字符
+                filename = self._sanitize_filename(filename)
+            elif header_data.report_no:
+                # 如果只有报告编号
+                version = header_data.version if header_data.version else "A"
+                version_clean = version.replace("Rev.", "").strip()
+                filename = f"{header_data.report_no} Report_Rev_{version_clean}.docx"
+                filename = self._sanitize_filename(filename)
             else:
+                # 如果没有报告编号，使用时间戳
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"Test_Report_{timestamp}.docx"
             
             output_path = os.path.join(output_dir, filename)
+            
+            # 规范化路径以避免斜杠问题
+            output_path = os.path.normpath(output_path)
             return output_path
 
         except Exception as e:

@@ -44,7 +44,7 @@ class ReportWizardController:
 
     def show_wizard(self):
         """显示报告向导对话框"""
-        self.view = ReportWizardDialog(self.parent_window)
+        self.view = ReportWizardDialog(self.parent_window, project_path=self.current_project_path)
         
         # 设置Matrix服务（如果存在）
         if self.matrix_service:
@@ -89,7 +89,7 @@ class ReportWizardController:
                         output_path = document_path
                     else:
                         # 如果用户没有选择文档，则生成新报告
-                        output_path = self.service.create_report_from_template(header_data)
+                        output_path = self.service.create_report_from_template(header_data, project_path=self.current_project_path)
 
                     # 显示成功消息
                     from PyQt5.QtWidgets import QMessageBox
