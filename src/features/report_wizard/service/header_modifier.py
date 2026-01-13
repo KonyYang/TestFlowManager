@@ -89,26 +89,28 @@ class HeaderModifier:
             # 查找包含样品接收日期的段落
             sample_received_pattern_start = "Samples were received at the laboratory on"
             sample_received_pattern_end = "Prior to testing, the samples were examined at low magnification and judged to be acceptable for testing."
+            
+            # 完整的目标句子，包含要保留的最后部分
+            full_pattern = r'(Samples were received at the laboratory on )(.+?)(\.\s*Prior to testing,\s*the samples were examined at low magnification and judged to be acceptable for testing\.\s*(?:The results of testing only apply to the samples as received in the laboratory\.)?)'
 
             found = False
             for para in doc_to_use.paragraphs:
-                if sample_received_pattern_start in para.text and sample_received_pattern_end in para.text:
+                if sample_received_pattern_start in para.text:
                     original_text = para.text
                     logger.info(f"找到样品接收日期段落: '{original_text}'")
 
-                    # 使用正则表达式查找并替换日期部分
+                    # 使用正则表达式查找并替换日期部分，保留完整的后续文本
                     import re
-                    # 匹配 "Samples were received at the laboratory on [任意日期]. Prior to testing..." 模式
-                    pattern = r'(Samples were received at the laboratory on )(.+?)(\. Prior to testing, the samples were examined at low magnification and judged to be acceptable for testing\.)'
-                    match = re.search(pattern, para.text)
+                    # 匹配 "Samples were received at the laboratory on [任意日期]. Prior to testing..." 模式，以及可能的后续句子
+                    match = re.search(full_pattern, para.text)
 
                     if match:
                         # 保留前后部分，替换中间的日期部分
                         before_date = match.group(1)  # "Samples were received at the laboratory on "
                         current_date = match.group(2)  # 当前日期
-                        after_date = match.group(3)    # ". Prior to testing..."
+                        after_date = match.group(3)    # ". Prior to testing..." 包括后续句子
                         
-                        # 创建新的段落文本
+                        # 创建新的段落文本，保留原有的后续句子
                         new_text = before_date + formatted_date + after_date
                         para.text = new_text
                         
@@ -120,17 +122,21 @@ class HeaderModifier:
                         # 如果正则表达式未匹配，尝试更简单的替换方法
                         # 找到开始和结束位置，直接替换中间部分
                         start_pos = para.text.find(sample_received_pattern_start)
-                        end_pos = para.text.find(sample_received_pattern_end)
                         
-                        if start_pos != -1 and end_pos != -1:
-                            end_pos += len(sample_received_pattern_end)
-                            before_part = para.text[:start_pos + len(sample_received_pattern_start)]
-                            after_part = para.text[end_pos:]
-                            
-                            # 移除开始部分末尾的空格并添加新日期
-                            para.text = before_part.strip() + " " + formatted_date + "." + after_part
-                            logger.info(f"使用简单替换方法更新样品接收日期: '{formatted_date}'")
-                            found = True
+                        if start_pos != -1:
+                            # 找到日期开始位置后的部分
+                            after_start = para.text[start_pos + len(sample_received_pattern_start):]
+                            # 查找第一个句号，表示日期结束
+                            dot_pos = after_start.find('.')
+                            if dot_pos != -1:
+                                current_date = after_start[:dot_pos].strip()
+                                # 获取剩余部分，包含后续句子
+                                remaining_text = after_start[dot_pos+1:]
+                                
+                                # 重新构造完整句子，保留后续部分
+                                para.text = sample_received_pattern_start + " " + formatted_date + "." + remaining_text
+                                logger.info(f"使用简单替换方法更新样品接收日期: '{current_date}' -> '{formatted_date}'")
+                                found = True
 
             if not found:
                 logger.warning("未找到包含样品接收日期的段落")
@@ -140,12 +146,13 @@ class HeaderModifier:
                         logger.info(f"找到包含样品接收信息的段落: '{para.text}'")
                         original_text = para.text
                         
-                        # 尝试使用正则表达式匹配各种可能的格式
+                        # 尝试使用更全面的正则表达式匹配各种可能的格式，确保保留所有后续文本
                         import re
-                        # 匹配 "Samples were received at the laboratory on [任意日期]. Prior to..." 或类似格式
+                        # 匹配 "Samples were received at the laboratory on [任意日期]." 及其后的完整句子
                         patterns = [
-                            r'(Samples were received at the laboratory on )(.+?)(\. Prior to)',
-                            r'(Samples were received at the laboratory on )(.+?)(\. Prior)',
+                            r'(Samples were received at the laboratory on )(.+?)(\.\s*Prior to testing,\s*the samples were examined at low magnification and judged to be acceptable for testing\.\s*(?:The results of testing only apply to the samples as received in the laboratory\.)?)',
+                            r'(Samples were received at the laboratory on )(.+?)(\.\s*Prior to)',
+                            r'(Samples were received at the laboratory on )(.+?)(\.\s*Prior)',
                             r'(Samples were received at the laboratory on )(.+?)(\.)'
                         ]
                         
