@@ -153,9 +153,31 @@ class ReportGenerationService:
             output_path = os.path.normpath(output_path)
             template_path_normalized = os.path.normpath(self.template_path)
 
-            # 复制模板到输出位置
-            shutil.copy2(template_path_normalized, output_path)
-            logger.info(f"模板已从 {self.template_path} 复制到: {output_path}")
+            # 确保目标文件未被占用，等待并重试
+            max_retries = 5
+            retry_delay = 1  # 秒
+            for attempt in range(max_retries):
+                try:
+                    # 检查目标文件是否存在并尝试访问
+                    if os.path.exists(output_path):
+                        # 尝试重命名文件以检查是否被占用
+                        temp_path = output_path + ".tmp_check"
+                        os.rename(output_path, temp_path)
+                        os.rename(temp_path, output_path)  # 恢复原名
+                    
+                    # 如果到达这里，说明文件未被占用，可以安全复制
+                    shutil.copy2(template_path_normalized, output_path)
+                    logger.info(f"模板已从 {self.template_path} 复制到: {output_path}")
+                    break  # 成功复制，跳出循环
+                except PermissionError as e:
+                    if attempt < max_retries - 1:
+                        logger.warning(f"文件访问被拒绝，等待 {retry_delay} 秒后重试... (尝试 {attempt + 1}/{max_retries})")
+                        import time
+                        time.sleep(retry_delay)
+                        retry_delay *= 2  # 指数退避
+                    else:
+                        logger.error(f"复制模板文件失败，已达到最大重试次数: {e}")
+                        raise
 
             # 创建页眉修改器实例
             # 使用规范化路径
@@ -191,24 +213,71 @@ class ReportGenerationService:
                 # 修改正文中样品接收日期 (使用python-docx修改)
                 # 添加date_lab_received_samples字段到header_dict
                 header_dict["date_lab_received_samples"] = header_data.date_lab_received_samples
-                success4 = header_modifier.modify_sample_received_date(header_dict, doc=header_modifier.doc)
+                # 根据是否有项目数据决定调用哪个方法
+                if project_path and os.path.exists(project_path):
+                    logger.info(f"项目已打开: {project_path}，检查JSON文件...")
+                    # 有项目数据时，使用占位符替换方式
+                    import json
+                    from pathlib import Path
+                    # 尝试从项目路径加载完整的项目数据用于占位符替换
+                    json_files = list(Path(project_path).glob("*.json"))
+                    if json_files:
+                        logger.info(f"找到JSON文件: {json_files[0]}，使用占位符替换方式")
+                        json_file_path = json_files[0]
+                        with open(json_file_path, 'r', encoding='utf-8') as f:
+                            project_data = json.load(f)
+                            # 使用update_document_content方法，传入完整的项目数据，跳过保存以供后续操作使用
+                            success4 = header_modifier.update_document_content(project_data, skip_save=True)
+                    else:
+                        logger.info("未找到JSON文件，使用传统方式调用modify_sample_received_date")
+                        # 如果没有找到JSON文件，使用传统方式
+                        success4 = header_modifier.modify_sample_received_date(header_dict, doc=header_modifier.doc)
+                    
+                    # 如果使用了update_document_content，说明已经通过win32com修改了文档，
+                    # 不需要再通过python-docx保存，因为文档已被win32com打开
+                    if json_files:  # 表示使用了update_document_content
+                        logger.info("已通过win32com更新文档内容，跳过python-docx保存")
+                    else:
+                        # ✅ 确保 python-docx 修改已保存，为 win32com 操作提供最新输入
+                        try:
+                            save_docx_document(header_modifier.doc, output_path)  # 保存当前修改，确保 win32com 可读取
+                            logger.info("✅ python-docx 修改已保存")
+                        except Exception as e:
+                            logger.error(f"保存 python-docx 修改失败: {e}")
+                            return False
+                else:
+                    logger.info("项目未打开，使用传统方式调用modify_sample_received_date")
+                    # 没有项目数据时，使用传统方式
+                    success4 = header_modifier.modify_sample_received_date(header_dict, doc=header_modifier.doc)
+                    
+                    # ✅ 确保 python-docx 修改已保存，为 win32com 操作提供最新输入
+                    try:
+                        save_docx_document(header_modifier.doc, output_path)  # 保存当前修改，确保 win32com 可读取
+                        logger.info("✅ python-docx 修改已保存")
+                    except Exception as e:
+                        logger.error(f"保存 python-docx 修改失败: {e}")
+                        return False
+                
                 if success4:
                     logger.info("样品接收日期已成功修改")
                 else:
                     logger.warning("样品接收日期修改失败，这可能是正常的，如果文档中没有相关段落")
                 
-                # ✅ 确保 python-docx 修改已保存，为 win32com 操作提供最新输入
-                try:
-                    save_docx_document(header_modifier.doc, output_path)  # 保存当前修改，确保 win32com 可读取
-                    logger.info("✅ python-docx 修改已保存")
-                except Exception as e:
-                    logger.error(f"保存 python-docx 修改失败: {e}")
-                    return False
-
                 # ----------------------------------
                 # ✅ 第二步：使用 win32com 进行页眉页脚操作
                 # ----------------------------------
                 logger.info("开始执行 win32com 修改...")
+                
+                # 检查是否使用了update_document_content且skip_save=True
+                # 如果是这种情况，文档已经在header_modifier.win_document中打开
+                used_update_content = project_path and os.path.exists(project_path) and \
+                                    len(list(Path(project_path).glob("*.json"))) > 0
+                
+                if used_update_content:
+                    logger.info("检测到已使用update_document_content，复用已打开的文档")
+                    # 在这种情况下，header_modifier.win_document 已经指向打开的文档
+                    # 我们可以直接使用它进行页眉修改，而不是打开新的文档
+                    # 需要调整modify_header和modify_second_header方法来使用已有的win_document
                 
                 # 修改首页页眉 (使用win32com修改)
                 success = header_modifier.modify_header(header_dict)
@@ -231,30 +300,41 @@ class ReportGenerationService:
                 # ----------------------------------
                 logger.info("开始执行最终保存...")
 
-                # 使用win32com打开文档并保存
-                word_app = header_modifier.word_app
-                if word_app is None:
-                    from src.utils.word_utils import get_shared_word_app
-                    word_app = get_shared_word_app()
+                # 如果使用了update_document_content且skip_save=True，文档已经在header_modifier.win_document中
+                # 否则按照原来的方式获取word_app并打开文档
+                if used_update_content and header_modifier.win_document:
+                    # 使用已有的文档引用
+                    logger.info("使用已有的文档引用进行最终保存")
+                    win_doc = header_modifier.win_document
+                    output_path_for_save = output_path  # 使用当前路径
+                else:
+                    # 使用原来的方式
+                    word_app = header_modifier.word_app
                     if word_app is None:
-                        logger.error("无法获取Word应用程序实例")
-                        return False
+                        from src.utils.word_utils import get_shared_word_app
+                        word_app = get_shared_word_app()
+                        if word_app is None:
+                            logger.error("无法获取Word应用程序实例")
+                            return False
 
-                # 确保Word应用程序不可见
-                word_app.Visible = False
-                word_app.DisplayAlerts = False
+                    # 确保Word应用程序不可见
+                    word_app.Visible = False
+                    word_app.DisplayAlerts = False
 
-                # 使用win32com打开最终文档并保存
-                # 规范化路径以避免斜杠问题
-                normalized_path = os.path.normpath(output_path)
-                win_doc = word_app.Documents.Open(normalized_path)
+                    # 使用win32com打开最终文档并保存
+                    # 规范化路径以避免斜杠问题
+                    normalized_path = os.path.normpath(output_path)
+                    win_doc = word_app.Documents.Open(normalized_path)
+                    output_path_for_save = normalized_path
 
                 # 保存文档
                 win_doc.Save()
                 logger.info(f"✅ 文档已通过 win32com 成功保存至: {output_path}")
 
-                # 关闭文档
-                win_doc.Close(SaveChanges=False)
+                # 如果不是复用的文档，需要关闭文档
+                if not (used_update_content and header_modifier.win_document):
+                    win_doc.Close(SaveChanges=False)
+                # 如果是复用的文档，不要在这里关闭，因为在cleanup中会处理
 
                 logger.info("✅ 页眉修改步骤已完成，文档已保存")
 
@@ -270,19 +350,24 @@ class ReportGenerationService:
                     pass  # 如果清理失败，则跳过
                 
                 # 确保Word应用程序在操作完成后正确关闭
-                try:
-                    if 'word_app' in locals() and word_app is not None:
-                        # 关闭所有文档
-                        for doc in word_app.Documents:
-                            try:
-                                doc.Close(SaveChanges=False)
-                            except:
-                                pass
-                        # 退出Word应用
-                        word_app.Quit()
-                        logger.debug("Word application quit after report generation")
-                except Exception as e:
-                    logger.error(f"关闭Word应用程序时出错: {e}")
+                # 但仅在未使用文档复用的情况下才关闭Word应用
+                used_update_content = project_path and os.path.exists(project_path) and \
+                                    len(list(Path(project_path).glob("*.json"))) > 0
+                
+                if not (used_update_content and header_modifier and header_modifier.win_document):
+                    try:
+                        if 'word_app' in locals() and word_app is not None:
+                            # 关闭所有文档
+                            for doc in word_app.Documents:
+                                try:
+                                    doc.Close(SaveChanges=False)
+                                except:
+                                    pass
+                            # 退出Word应用
+                            word_app.Quit()
+                            logger.debug("Word application quit after report generation")
+                    except Exception as e:
+                        logger.error(f"关闭Word应用程序时出错: {e}")
                 
             pythoncom.CoUninitialize()
 

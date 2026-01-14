@@ -16,7 +16,7 @@ class TestHeaderDataVersion(unittest.TestCase):
     def test_from_json_default_version(self):
         """测试从JSON加载时的默认版本号"""
         json_data = {}
-        header_data = HeaderData.from_json(json_data)
+        header_data = HeaderData. from_json(json_data)
         self.assertEqual(header_data.version, "A")
     
     def test_increment_version_simple(self):

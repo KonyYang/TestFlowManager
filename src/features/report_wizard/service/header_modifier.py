@@ -10,6 +10,7 @@ from pathlib import Path
 from docx import Document
 from datetime import datetime
 import pythoncom
+import win32com.client
 from src.core.logger import logger
 from src.utils.word_utils import get_shared_word_app
 
@@ -40,7 +41,11 @@ class HeaderModifier:
         :param header_data: 页眉数据字典，包含 report_no, version, date, tester 等字段
         :return: 是否成功
         """
-        return HeaderManager.modify_first_header(self.file_path, header_data, self.word_app)
+        # 如果已有win_document（说明文档已被打开），直接使用它
+        if self.win_document:
+            return HeaderManager.modify_first_header_with_document(self.win_document, header_data)
+        else:
+            return HeaderManager.modify_first_header(self.file_path, header_data, self.word_app)
 
     def modify_revision_record_date(self, header_data: Dict[str, Any], is_customer_report: bool = False, doc=None) -> bool:
         """
@@ -68,6 +73,7 @@ class HeaderModifier:
         :param doc: python-docx Document 对象，如果为None则使用self.doc
         :return: 是否成功
         """
+        logger.info("使用传统方式修改样品接收日期")
         try:
             # 从header_data中获取样品接收日期
             sample_received_date_str = header_data.get("date_lab_received_samples", "")
@@ -185,6 +191,163 @@ class HeaderModifier:
             logger.error(f"修改样品接收日期失败: {e}", exc_info=True)
             return False
 
+    def update_document_content(self, data: Optional[Dict[str, Any]] = None, document_path: str = None, skip_save: bool = False) -> bool:
+        """
+        根据是否有数据来决定更新文档内容的方式
+        如果提供了数据，则使用占位符替换方式；否则使用传统方式
+        
+        :param data: 包含替换数据的字典，如果为None则使用传统方式
+        :param document_path: 要处理的文档路径，如果不提供则使用 self.file_path
+        :param skip_save: 是否跳过保存操作，如果为True则不保存文档，供后续操作使用
+        :return: 是否成功
+        """
+        if data:
+            # 有数据时，使用新的占位符替换方式
+            logger.info("检测到项目数据，使用占位符替换方式更新文档内容")
+            return self.replace_document_placeholders(data, document_path, skip_save)
+        else:
+            # 没有数据时，使用传统的样品接收日期修改方式
+            logger.info("未检测到项目数据，使用传统方式更新样品接收日期")
+            # 直接调用 _modify_sample_received_date_fallback 方法
+            target_path = document_path if document_path else self.file_path
+            return self._modify_sample_received_date_fallback(target_path)
+
+    def replace_document_placeholders(self, data: Dict[str, Any], document_path: str = None, skip_save: bool = False) -> bool:
+        """
+        使用 win32com.client 根据 JSON 数据替换 Word 文档中的占位符
+        
+        :param data: 包含替换数据的字典
+        :param document_path: 要处理的文档路径，如果不提供则使用 self.file_path
+        :param skip_save: 是否跳过保存操作，如果为True则不保存文档，供后续操作使用
+        :return: 是否成功
+        """
+        win_document = None
+        try:
+            # 确定要处理的文档路径
+            target_path = document_path if document_path else self.file_path
+            
+            logger.info(f"开始使用占位符替换方式更新文档: {target_path}")
+            
+            # 获取共享的 Word 应用程序实例
+            word_app = get_shared_word_app()
+            if not word_app:
+                logger.error("无法获取Word应用程序实例")
+                return False
+            
+            # 确保Word应用程序不可见
+            word_app.Visible = False
+            word_app.DisplayAlerts = False
+            
+            # 打开文档
+            win_document = word_app.Documents.Open(os.path.normpath(target_path))
+            
+            # 保存对win_document的引用，以便后续操作使用
+            if skip_save:
+                self.win_document = win_document
+            
+            # 提取所需字段
+            original_date = data.get("date_lab_received_samples", "")
+            gs_info = data.get("applicable_specifications", "")
+            product_name = data.get("product_description", "")
+            test_description = data.get("tests_to_be_performed", "")
+            
+            logger.info(f"从项目数据中提取字段: date='{original_date}', gs_info='{gs_info}', product_name='{product_name}', test_description='{test_description}'")
+            
+            # 使用 DateHandler 格式化日期
+            formatted_date = DateHandler.format_date_to_month_day_year(original_date)
+            
+            # 执行替换
+            replacements = {
+                "[RECEIVED SAMPLES DATE]": formatted_date,
+                "[GS-XX-XXXX (Rev.X, DATE)]": gs_info,
+                "[PRODUCT NAME]": product_name,
+                "[TEST DESCRIPTION]": test_description
+            }
+            
+            for find_text, replace_text in replacements.items():
+                if find_text and replace_text:  # 只处理非空的替换
+                    logger.debug(f"替换占位符: '{find_text}' -> '{replace_text}'")
+                    # 使用 Word 的查找替换功能
+                    find_obj = win_document.Content.Find
+                    find_obj.ClearFormatting()
+                    find_obj.Text = find_text
+                    find_obj.Replacement.ClearFormatting()
+                    find_obj.Replacement.Text = replace_text
+                    # 执行替换所有匹配项
+                    find_obj.Execute(Replace=2, Forward=True)  # wdReplaceAll = 2
+            
+            # 根据skip_save参数决定是否保存文档
+            if not skip_save:
+                win_document.Save()
+                logger.info(f"✅ 文档占位符替换完成并已保存: {target_path}")
+            else:
+                logger.info(f"✅ 文档占位符替换完成，跳过保存: {target_path}")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"替换文档占位符失败: {e}", exc_info=True)
+            return False
+        finally:
+            # 根据skip_save参数决定是否关闭文档
+            # 如果skip_save为True，意味着文档需要供后续操作使用，因此不关闭
+            # 如果skip_save为False，可以安全关闭文档
+            if win_document and skip_save is False:
+                try:
+                    win_document.Close()
+                except:
+                    pass  # 如果关闭失败，跳过
+
+    def _modify_sample_received_date_fallback(self, document_path: str) -> bool:
+        """
+        使用win32com.client的传统方式修改样品接收日期
+        这是用于没有项目数据时的备选方案
+        """
+        logger.info(f"使用传统方式（fallback）修改样品接收日期: {document_path}")
+        try:
+            # 获取共享的 Word 应用程序实例
+            word_app = get_shared_word_app()
+            if not word_app:
+                logger.error("无法获取Word应用程序实例")
+                return False
+            
+            # 确保Word应用程序不可见
+            word_app.Visible = False
+            word_app.DisplayAlerts = False
+            
+            # 打开文档
+            win_document = word_app.Documents.Open(os.path.normpath(document_path))
+            
+            # 查找包含样品接收信息的段落并使用当前日期替换
+            # 这是简化版本，实际可根据需要扩展
+            import re
+            sample_received_pattern = r"(Samples were received at the laboratory on )(.+?)(\. Prior to testing)"
+            
+            # 遍历文档中的所有段落
+            for para in win_document.Paragraphs:
+                original_text = para.Range.Text
+                if "Samples were received at the laboratory on" in original_text:
+                    # 使用当前日期替换
+                    from datetime import datetime
+                    current_date = datetime.now().strftime("%b %d, %Y")  # 格式如 "Dec 20, 2024"
+                    
+                    # 使用正则表达式替换日期
+                    new_text = re.sub(sample_received_pattern, 
+                                     rf"\g<1>{current_date}\g<3>", 
+                                     original_text)
+                    
+                    if new_text != original_text:
+                        para.Range.Text = new_text
+                        logger.info(f"样品接收日期已更新: '{original_text}' -> '{new_text}'")
+                        break
+            
+            logger.info(f"✅ 传统方式文档更新完成: {document_path}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"传统方式更新文档失败: {e}", exc_info=True)
+            return False
+
     def modify_second_header(self, header_data: Dict[str, Any]) -> bool:
         """
         使用 win32com.client 精准填写 Word 第二节页眉中的 "Report No." 字段，
@@ -193,7 +356,11 @@ class HeaderModifier:
         :param header_data: 页眉数据字典，包含 report_no 等字段
         :return: 是否成功
         """
-        return HeaderManager.modify_second_header(self.file_path, header_data, self.word_app)
+        # 如果已有win_document（说明文档已被打开），直接使用它
+        if self.win_document:
+            return HeaderManager.modify_second_header_with_document(self.win_document, header_data)
+        else:
+            return HeaderManager.modify_second_header(self.file_path, header_data, self.word_app)
 
     def cleanup(self):
         """清理资源"""
