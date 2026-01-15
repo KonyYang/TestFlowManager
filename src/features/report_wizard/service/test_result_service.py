@@ -103,9 +103,9 @@ class TestResultService:
         if not requirement or not isinstance(requirement, str):
             return requirement
         
-        requirement_lower = requirement.lower().strip()
-        if requirement_lower in ['no detrimental condition', 'no damage']:
-            return ''
+        # requirement_lower = requirement.lower().strip()
+        # if requirement_lower in ['no detrimental condition', 'no damage']:
+        #     return ''
         
         return requirement
 
@@ -499,9 +499,7 @@ class TestResultService:
             test_item = step.get('Test', '')
             requirement = step.get('Requirement', '')
             step_desc = step.get('StepDescription', '')
-            test_method = step.get('TestMethod', '')
-            condition = step.get('Condition', '')
-            
+
             # 过滤requirement
             filtered_requirement = self._filter_requirement(requirement)
             
@@ -509,8 +507,11 @@ class TestResultService:
             processed_requirement = self._replace_greater_lesser_symbols(filtered_requirement)
             processed_requirement = self._clean_text(processed_requirement)
             
+            # 打印获取的值
+            print(f"DEBUG: requirement='{requirement}', filtered_requirement='{filtered_requirement}', processed_requirement='{processed_requirement}'")
+            
             # 填充单元格
-            cells = [step_number, test_item, filtered_requirement, step_desc, processed_requirement, 'Pass']
+            cells = [step_number, test_item, requirement, step_desc, processed_requirement, 'Pass']
             
             for j, cell_value in enumerate(cells):
                 if j + 1 <= row.Cells.Count:

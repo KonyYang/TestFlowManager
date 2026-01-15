@@ -208,6 +208,13 @@ class ReportGenerationService:
                 success3 = header_modifier.modify_revision_record_date(header_dict, doc=header_modifier.doc)
                 if success3:
                     logger.info("修订记录表格日期已成功修改")
+                    # 立即保存修订记录表格的修改
+                    try:
+                        save_docx_document(header_modifier.doc, output_path)
+                        logger.info("修订记录表格修改已即时保存")
+                    except Exception as e:
+                        logger.error(f"保存修订记录表格修改失败: {e}")
+                        return False
                 else:
                     logger.error("修订记录表格日期修改失败")
                 

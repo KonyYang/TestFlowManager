@@ -6,19 +6,9 @@ Test Spec Tables服务模块
 from typing import Dict, Any, Callable, Optional
 from src.core.logger import logger
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
-from .utils.test_result_service import TestResultService
+from src.features.report_wizard.service.test_result_service import TestResultService
 from .utils.sample_data_extractor import SampleDataExtractor
 from .test_sample_info_service import TestSampleInfoService
-from docx import Document
-from docx.shared import Inches, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
-from docx.oxml.shared import OxmlElement, qn
-from docx.text.paragraph import Paragraph
-from docx.table import Table
-import re
-import inspect
-import win32com.client
 
 
 class TestSpecTablesService:
@@ -241,13 +231,13 @@ class TestSpecTablesService:
             # 仅在我们创建了实例时才关闭它们，如果是由外部传入的实例，则不应关闭
             try:
                 # 只有当word_doc_instance为None时，表示是我们创建的实例，才需要关闭
-                if word_doc_instance is None and word_doc:
+                if word_doc:
                     word_doc.Close()
             except:
                 pass
             try:
                 # 只有当word_app_instance为None时，表示是我们创建的实例，才需要关闭
-                if word_app_instance is None and word_app:
+                if word_app:
                     word_app.Quit()
             except:
                 pass
