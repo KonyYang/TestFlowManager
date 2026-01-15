@@ -353,7 +353,7 @@ class LTRApplicationService:
     def _extract_requested_testing_info(self, doc) -> Dict[str, str]:
         return self.extractor._extract_requested_testing_info(doc)
 
-    def _extract_test_sample_info(self, doc) -> str:
+    def _extract_test_sample_info(self, doc) -> Dict[str, str]:
         return self.extractor._extract_test_sample_info(doc)
 
     def _quit_word_app(self):

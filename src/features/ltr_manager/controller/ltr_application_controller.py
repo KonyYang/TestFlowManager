@@ -117,8 +117,24 @@ class LTRApplicationController:
                 'data': self.application_data.to_dict()
             }
 
-            # 创建并显示对话框，传递临时文件夹路径
-            dialog = LTRApplicationDialog(dialog_data, self.parent_view, self, temp_folder_path)
+            # 获取从Word文档提取的完整数据（如果存在的话）
+            # 如果application_data是从Word文档处理得到的，它应该包含原始的提取数据
+            extracted_word_data = None
+            if hasattr(self.application_data, 'file_path') and self.application_data.file_path:
+                # 如果有文件路径，重新处理一次以获取完整的提取数据
+                try:
+                    # 使用extractor提取完整的数据
+                    from src.features.ltr_manager.service.application_processing.data_extractor import LTRApplicationDataExtractor
+                    extractor = LTRApplicationDataExtractor()
+                    extracted_word_data = extractor.extract_application_data(self.application_data.file_path)
+                    logger.debug(f"从Word文档重新提取的数据: {extracted_word_data}")
+                except Exception as e:
+                    logger.warning(f"重新提取Word文档数据失败: {e}")
+                    # 如果重新提取失败，使用当前application_data中的数据
+                    extracted_word_data = self.application_data.to_dict()
+
+            # 创建并显示对话框，传递临时文件夹路径和提取的Word文档数据
+            dialog = LTRApplicationDialog(dialog_data, self.parent_view, self, temp_folder_path, extracted_word_data)
             logger.debug(f"LTRApplicationDialog创建完成，传递的temp_folder_path: {temp_folder_path}")
             result = dialog.exec_()
             
@@ -161,7 +177,7 @@ class LTRApplicationController:
                 QMessageBox.critical(self.parent_view, "错误", f"显示申请单对话框时出错: {str(e)}")
             return None
 
-    def apply_ltr_number(self, form_data: Dict[str, Any], parent=None, temp_folder_path: Optional[str] = None) -> Dict[str, Any]:
+    def apply_ltr_number(self, form_data: Dict[str, Any], parent=None, temp_folder_path: Optional[str] = None, extracted_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         处理LTR编号申请请求
 
@@ -169,6 +185,7 @@ class LTRApplicationController:
             form_data: 表单数据
             parent: 父窗口
             temp_folder_path: 临时文件夹路径（可选）
+            extracted_data: 从Word文档提取的完整数据（可选）
 
         Returns:
             处理结果
@@ -202,6 +219,16 @@ class LTRApplicationController:
                         result['ltr_number'],
                         self.selected_filename  # 传递选中的文件名
                     )
+                    
+                    # 如果有从Word文档提取的完整数据，合并到application_data中
+                    if extracted_data:
+                        # 保留从UI获取的数据，同时添加从Word文档提取的详细信息
+                        for key, value in extracted_data.items():
+                            # 只有当application_data中没有该字段或字段为空时才使用提取的数据
+                            if key not in application_data or not application_data[key]:
+                                application_data[key] = value
+                        logger.debug(f"已合并从Word文档提取的数据")
+                    
                     logger.debug(f"收集到的申请数据: {application_data}")
                     
                     # 检查申请数据中的file_path
@@ -256,12 +283,25 @@ class LTRApplicationController:
                             logger.warning("LTR number is empty, not dispatching failure event")
             # 只在成功申请LTR编号的情况下返回成功结果
             elif result.get("success"):
+                # 创建完整的application_data用于事件通知
+                application_data = self.ltr_data_manager.collect_application_data(
+                    form_data, 
+                    result.get('ltr_number', ''),
+                    self.selected_filename
+                )
+                
+                # 如果有从Word文档提取的完整数据，合并到application_data中
+                if extracted_data:
+                    for key, value in extracted_data.items():
+                        if key not in application_data or not application_data[key]:
+                            application_data[key] = value
+                    
                 # LTR编号申请成功但用户选择不创建项目文件夹
                 # 仍然需要发布事件通知其他组件
                 event_dispatcher.dispatch("ltr.application.processed", {
                     "dl_number": result.get('ltr_number', ''),
                     "status": "success",
-                    "application_data": form_data,
+                    "application_data": application_data,
                     "project_path": None  # 添加project_path字段，即使为None
                 })
                 

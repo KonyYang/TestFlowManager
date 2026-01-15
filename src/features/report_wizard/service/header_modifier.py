@@ -372,8 +372,13 @@ class HeaderModifier:
                     _ = self.win_document.Name
                     # 如果能成功访问，则关闭文档
                     self.win_document.Close()
+                except pythoncom.com_error:
+                    # 如果COM连接已断开，则跳过关闭
+                    logger.debug("Word文档COM连接已断开，跳过关闭")
+                    pass
                 except (AttributeError, Exception):
                     # 如果文档已断开连接，则跳过关闭
+                    logger.debug("Word文档连接已断开，跳过关闭")
                     pass
                 self.win_document = None
             
@@ -383,6 +388,9 @@ class HeaderModifier:
                 try:
                     # 确保Word应用保持不可见状态
                     self.word_app.Visible = False
+                except pythoncom.com_error:
+                    logger.debug("Word应用程序COM连接已断开，跳过设置可见性")
+                    pass  # 如果设置不可见失败，则跳过
                 except:
                     pass  # 如果设置不可见失败，则跳过
         except Exception as e:

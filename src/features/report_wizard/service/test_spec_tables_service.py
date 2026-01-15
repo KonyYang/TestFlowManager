@@ -7,6 +7,8 @@ from typing import Dict, Any, Callable, Optional
 from src.core.logger import logger
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 from .utils.test_result_service import TestResultService
+from .utils.sample_data_extractor import SampleDataExtractor
+from .test_sample_info_service import TestSampleInfoService
 from docx import Document
 from docx.shared import Inches, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -28,6 +30,7 @@ class TestSpecTablesService:
     def __init__(self):
         """初始化Test Spec Tables服务"""
         self.test_result_service = TestResultService()
+        self.test_sample_info_service = TestSampleInfoService()
         pass
     
     def _safe_callback_call(self, callback, *args):
@@ -182,11 +185,48 @@ class TestSpecTablesService:
             else:
                 logger.error("Test Result表格生成失败")
             
-            # 在所有处理完成后，保存文档
-            if word_doc:
-                word_doc.Save()
-                logger.info(f"文档最终保存: {document_path}")
+            # 现在填充测试样品信息表格
+            # 从matrix_data_structure或相关数据源中提取测试样品信息
+            try:
+                # 从JSON数据中提取测试样品信息
+                sample_data = []
+                # 尝试从matrix_data_structure中获取数据，如果没有则从其他地方获取
+                if hasattr(matrix_data_structure, 'header_data'):
+                    # 从header_data中提取测试样品信息
+                    header_data = matrix_data_structure.header_data if hasattr(matrix_data_structure, 'header_data') else {}
+                    sample_data = SampleDataExtractor.extract_sample_info_from_json(header_data)
+                else:
+                    # 如果matrix_data_structure没有header_data，尝试从其他途径获取
+                    # 这里假设我们从某个全局数据源或上下文获取JSON数据
+                    # 暂时创建示例数据
+                    pass
                 
+                if sample_data:
+                    logger.info(f"开始填充测试样品信息表格，共 {len(sample_data)} 条数据")
+                    # 使用TestSampleInfoService填充测试样品信息表格
+                    sample_result = self.test_sample_info_service.fill_test_sample_info_table(
+                        document_path=document_path,
+                        sample_data=sample_data,
+                        word_app_instance=word_app,
+                        word_doc_instance=word_doc  # 传递文档实例以避免重复打开
+                    )
+                    
+                    if sample_result:
+                        logger.info("测试样品信息表格填充完成")
+                    else:
+                        logger.error("测试样品信息表格填充失败")
+                else:
+                    logger.info("没有找到测试样品信息数据，跳过填充")
+            except Exception as e:
+                logger.error(f"填充测试样品信息表格时出错: {e}")
+                import traceback
+                logger.error(f"错误堆栈: {traceback.format_exc()}")
+            
+            # 在所有处理完成后，不保存文档，由调用者负责保存
+            # if word_doc:
+            #     word_doc.Save()
+            #     logger.info(f"文档最终保存: {document_path}")
+            
             return True
             
         except Exception as e:
@@ -198,13 +238,16 @@ class TestSpecTablesService:
             return False
         finally:
             # 确保Word应用和文档被正确关闭
+            # 仅在我们创建了实例时才关闭它们，如果是由外部传入的实例，则不应关闭
             try:
-                if word_doc:
+                # 只有当word_doc_instance为None时，表示是我们创建的实例，才需要关闭
+                if word_doc_instance is None and word_doc:
                     word_doc.Close()
             except:
                 pass
             try:
-                if word_app:
+                # 只有当word_app_instance为None时，表示是我们创建的实例，才需要关闭
+                if word_app_instance is None and word_app:
                     word_app.Quit()
             except:
                 pass
@@ -413,6 +456,85 @@ class TestSpecTablesService:
             logger.warning(f"设置Sample size行背景色时出错: {e}")
 
         # 注意：不要在这里保存文档，因为主方法会处理保存
+
+    def fill_test_sample_info_table_from_json(
+        self,
+        document_path: str,
+        json_data: Dict[str, Any],
+        progress_callback: Optional[Callable[[int], None]] = None,
+        status_callback: Optional[Callable[[str], None]] = None,
+        word_app_instance=None,
+        word_doc_instance=None
+    ) -> bool:
+        """
+        从JSON数据填充测试样品信息表格
+        
+        Args:
+            document_path: Word文档路径
+            json_data: JSON数据字典
+            progress_callback: 进度回调函数
+            status_callback: 状态回调函数
+            word_app_instance: Word应用程序实例（可选）
+            word_doc_instance: Word文档实例（可选）
+            
+        Returns:
+            bool: 是否成功
+        """
+        logger.info(f"开始从JSON数据填充测试样品信息表格，文档路径: {document_path}")
+        
+        try:
+            if status_callback:
+                self._safe_callback_call(status_callback, "正在提取测试样品信息...")
+            
+            # 从JSON数据中提取测试样品信息
+            sample_data = SampleDataExtractor.extract_sample_info_from_json(json_data)
+            
+            if not sample_data:
+                logger.warning("未从JSON数据中提取到测试样品信息")
+                if status_callback:
+                    self._safe_callback_call(status_callback, "警告: 未找到测试样品信息数据")
+                return True  # 不算错误，只是没有数据填充
+            
+            if status_callback:
+                self._safe_callback_call(status_callback, f"提取到 {len(sample_data)} 条测试样品信息")
+            
+            if progress_callback:
+                self._safe_callback_call(progress_callback, 50)
+            
+            if status_callback:
+                self._safe_callback_call(status_callback, "正在填充测试样品信息表格...")
+            
+            # 使用TestSampleInfoService填充测试样品信息表格
+            result = self.test_sample_info_service.fill_test_sample_info_table(
+                document_path=document_path,
+                sample_data=sample_data,
+                word_app_instance=word_app_instance,
+                word_doc_instance=word_doc_instance  # 传递Word文档实例以避免重复打开文档
+            )
+            
+            # 注意：fill_test_sample_info_table不会保存文档，保存由调用者处理
+            
+            if result:
+                logger.info("测试样品信息表格填充完成")
+                if status_callback:
+                    self._safe_callback_call(status_callback, "测试样品信息表格填充完成")
+            else:
+                logger.error("测试样品信息表格填充失败")
+                if status_callback:
+                    self._safe_callback_call(status_callback, "错误: 测试样品信息表格填充失败")
+            
+            if progress_callback:
+                self._safe_callback_call(progress_callback, 100)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"填充测试样品信息表格时出错: {e}")
+            import traceback
+            logger.error(f"错误堆栈: {traceback.format_exc()}")
+            if status_callback:
+                self._safe_callback_call(status_callback, f"错误: {str(e)}")
+            return False
 
     def _fill_method_table_win32com(self, target_table, document_path: str, word_app_instance=None) -> None:
         """

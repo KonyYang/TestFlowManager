@@ -13,6 +13,7 @@ from src.core.logger import logger
 from src.features.report_wizard.service.header_modifier import HeaderModifier
 from src.utils.word_utils import open_docx_document, save_docx_document
 from src.features.report_wizard.model.header_data import HeaderData
+from src.features.report_wizard.service.test_spec_tables_service import TestSpecTablesService
 
 
 class ReportGenerationService:
@@ -263,18 +264,32 @@ class ReportGenerationService:
                 else:
                     logger.warning("样品接收日期修改失败，这可能是正常的，如果文档中没有相关段落")
                 
+                  # 检查是否使用了update_document_content且skip_save=True
+                # 如果是这种情况，文档已经在header_modifier.win_document中打开
+                has_project_json = project_path and os.path.exists(project_path) and \
+                                    len(list(Path(project_path).glob("*.json"))) > 0
+                
+                # 在转换到win32com之前，确保python-docx的所有修改都已保存到磁盘
+                # 这是关键步骤，确保修订记录表格的修改被持久化
+                # 但如果已使用update_document_content（skip_save=True），文档已在win32com中打开，无需再次保存
+                if not has_project_json:
+                    logger.info("在进行win32com操作前，确保python-docx修改已保存到磁盘...")
+                    try:
+                        save_docx_document(header_modifier.doc, output_path)
+                        logger.info("✅ python-docx 修改已保存到磁盘，包括修订记录表格日期")
+                    except Exception as e:
+                        logger.error(f"保存python-docx修改到磁盘失败: {e}")
+                        return False
+                else:
+                    logger.info("已使用update_document_content，文档已在win32com中打开，跳过python-docx保存")
+                
                 # ----------------------------------
                 # ✅ 第二步：使用 win32com 进行页眉页脚操作
                 # ----------------------------------
                 logger.info("开始执行 win32com 修改...")
                 
-                # 检查是否使用了update_document_content且skip_save=True
-                # 如果是这种情况，文档已经在header_modifier.win_document中打开
-                used_update_content = project_path and os.path.exists(project_path) and \
-                                    len(list(Path(project_path).glob("*.json"))) > 0
-                
-                if used_update_content:
-                    logger.info("检测到已使用update_document_content，复用已打开的文档")
+                if has_project_json:
+                    logger.info("检测到项目JSON文件，文档已在win32com中打开")
                     # 在这种情况下，header_modifier.win_document 已经指向打开的文档
                     # 我们可以直接使用它进行页眉修改，而不是打开新的文档
                     # 需要调整modify_header和modify_second_header方法来使用已有的win_document
@@ -302,11 +317,14 @@ class ReportGenerationService:
 
                 # 如果使用了update_document_content且skip_save=True，文档已经在header_modifier.win_document中
                 # 否则按照原来的方式获取word_app并打开文档
-                if used_update_content and header_modifier.win_document:
+                word_app_created_locally = False  # 标记是否在本地创建了word_app实例
+                if has_project_json and header_modifier.win_document:
                     # 使用已有的文档引用
                     logger.info("使用已有的文档引用进行最终保存")
                     win_doc = header_modifier.win_document
                     output_path_for_save = output_path  # 使用当前路径
+                    # 在这种情况下，word_app应该已经存在于header_modifier中
+                    word_app = header_modifier.word_app
                 else:
                     # 使用原来的方式
                     word_app = header_modifier.word_app
@@ -316,6 +334,7 @@ class ReportGenerationService:
                         if word_app is None:
                             logger.error("无法获取Word应用程序实例")
                             return False
+                        word_app_created_locally = True  # 标记本地创建了实例
 
                     # 确保Word应用程序不可见
                     word_app.Visible = False
@@ -327,12 +346,71 @@ class ReportGenerationService:
                     win_doc = word_app.Documents.Open(normalized_path)
                     output_path_for_save = normalized_path
 
+                # 填充测试样品信息表格
+                try:
+                    # 创建TestSpecTablesService实例来填充测试样品信息表格
+                    test_spec_service = TestSpecTablesService()
+                    
+                    # 从项目数据中提取测试样品信息
+                    project_data = None
+                    if project_path and os.path.exists(project_path):
+                        import json
+                        from pathlib import Path
+                        json_files = list(Path(project_path).glob("*.json"))
+                        if json_files:
+                            with open(json_files[0], 'r', encoding='utf-8') as f:
+                                project_data = json.load(f)
+                    
+                    if project_data:
+                        logger.info("开始填充测试样品信息表格...")
+                        # 传递Word应用程序实例和文档实例，确保它们存在
+                        word_app_to_pass = word_app if 'word_app' in locals() or 'word_app' in globals() else None
+                        word_doc_to_pass = win_doc if 'win_doc' in locals() or 'win_doc' in globals() else None
+                        sample_info_result = test_spec_service.fill_test_sample_info_table_from_json(
+                            document_path=output_path,
+                            json_data=project_data,
+                            word_app_instance=word_app_to_pass,
+                            word_doc_instance=word_doc_to_pass  # 传递Word文档实例以避免重复打开文档
+                        )
+                        
+                        if sample_info_result:
+                            logger.info("测试样品信息表格填充完成")
+                        else:
+                            logger.error("测试样品信息表格填充失败")
+                    else:
+                        logger.info("未找到项目数据，跳过测试样品信息表格填充")
+                except Exception as e:
+                    logger.error(f"填充测试样品信息表格时出错: {e}")
+                    import traceback
+                    logger.error(f"错误堆栈: {traceback.format_exc()}")
+
                 # 保存文档
-                win_doc.Save()
-                logger.info(f"✅ 文档已通过 win32com 成功保存至: {output_path}")
+                try:
+                    win_doc.Save()
+                    logger.info(f"✅ 文档已通过 win32com 成功保存至: {output_path}")
+                except pythoncom.com_error as save_error:
+                    logger.error(f"保存文档时出错: {save_error}")
+                    # 检查COM对象是否仍然可用
+                    try:
+                        # 检查文档对象是否仍然有效
+                        doc_name = win_doc.Name  # 尝试访问文档属性来确认连接
+                        win_doc.Save()
+                        logger.info(f"✅ 重新连接后保存文档成功")
+                    except pythoncom.com_error as reconnect_error:
+                        logger.error(f"重新连接并保存也失败: {reconnect_error}")
+                        # 如果COM连接完全断开，尝试通过python-docx保存
+                        logger.info("尝试使用python-docx保存文档...")
+                        try:
+                            # 使用python-docx打开并保存文档
+                            doc = open_docx_document(output_path)
+                            save_docx_document(doc, output_path)
+                            logger.info(f"✅ 使用python-docx成功保存文档")
+                        except Exception as fallback_error:
+                            logger.error(f"使用python-docx保存也失败: {fallback_error}")
+                            raise save_error
 
                 # 如果不是复用的文档，需要关闭文档
-                if not (used_update_content and header_modifier.win_document):
+                if not (has_project_json and header_modifier.win_document):
                     win_doc.Close(SaveChanges=False)
                 # 如果是复用的文档，不要在这里关闭，因为在cleanup中会处理
 
@@ -349,14 +427,14 @@ class ReportGenerationService:
                 except:
                     pass  # 如果清理失败，则跳过
                 
-                # 确保Word应用程序在操作完成后正确关闭
-                # 但仅在未使用文档复用的情况下才关闭Word应用
-                used_update_content = project_path and os.path.exists(project_path) and \
-                                    len(list(Path(project_path).glob("*.json"))) > 0
-                
-                if not (used_update_content and header_modifier and header_modifier.win_document):
+                # 确保Word应用程序实例在操作完成后正确释放
+                # 根据word_app_created_locally标记来决定是否需要释放实例以平衡计数
+                # 使用默认值防止变量未定义
+                word_app_created_locally = locals().get('word_app_created_locally', False)
+                if word_app_created_locally:
                     try:
-                        if 'word_app' in locals() and word_app is not None:
+                        # 检查word_app变量是否在局部作用域中定义
+                        if 'word_app' in locals() and 'word_app' in globals() and word_app is not None:
                             # 关闭所有文档
                             for doc in word_app.Documents:
                                 try:
@@ -368,6 +446,14 @@ class ReportGenerationService:
                             logger.debug("Word application quit after report generation")
                     except Exception as e:
                         logger.error(f"关闭Word应用程序时出错: {e}")
+                    finally:
+                        # 释放Word应用程序实例以平衡计数
+                        try:
+                            from src.utils.word_utils import release_word_app
+                            release_word_app()
+                            logger.debug("Released Word application instance to balance count")
+                        except Exception as e:
+                            logger.error(f"释放Word实例时出错: {e}")
                 
             pythoncom.CoUninitialize()
 

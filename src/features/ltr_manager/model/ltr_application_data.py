@@ -37,6 +37,15 @@ class LTRApplicationData:
     sample_information: str = ""
     tests_to_be_performed: str = ""
     applicable_specifications: str = ""
+    
+    # 样品详细信息
+    product_name: str = ""       # 产品名称
+    part_number: str = ""        # 料号
+    lot_info: str = ""           # 批次
+    base_material: str = ""      # 基材
+    contact_plating: str = ""    # 接触镀层
+    contact_lubricant: str = ""  # 润滑油
+    housing_material: str = ""   # 塑材
 
     # 其他信息
     project_leader: str = ""
@@ -74,6 +83,13 @@ class LTRApplicationData:
             'sample_information': self.sample_information,
             'tests_to_be_performed': self.tests_to_be_performed,
             'applicable_specifications': self.applicable_specifications,
+            'product_name': self.product_name,              # 产品名称
+            'part_number': self.part_number,                # 料号
+            'lot_info': self.lot_info,                      # 批次
+            'base_material': self.base_material,            # 基材
+            'contact_plating': self.contact_plating,        # 接触镀层
+            'contact_lubricant': self.contact_lubricant,    # 润滑油
+            'housing_material': self.housing_material,      # 塑材
             'project_leader': self.project_leader,
             'failed_item': self.failed_item,
             'sample_deposition': self.sample_deposition,

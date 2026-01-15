@@ -30,18 +30,21 @@ class LTRApplicationDialog(BaseInfoDialog):
     用于显示和编辑LTR申请单信息
     """
 
-    def __init__(self, application_data, parent=None, parent_controller=None, temp_folder_path: Optional[str] = None):
+    def __init__(self, application_data, parent=None, parent_controller=None, temp_folder_path: Optional[str] = None, extracted_word_data: Optional[Dict[str, Any]] = None):
         """
         初始化LTR申请单对话框
 
         Args:
             application_data: 包含申请单数据的字典
             parent: 父窗口
+            extracted_word_data: 从Word文档提取的完整数据（可选）
         """
         self.parent_controller = parent_controller
         self.application_data = application_data
         # 保存临时文件夹路径
         self.temp_folder_path = temp_folder_path
+        # 保存从Word文档提取的完整数据
+        self.extracted_word_data = extracted_word_data
 
         self.dl_number = application_data.get('dl_number', '')
         self.original_data = application_data.get('data', {})
@@ -118,8 +121,8 @@ class LTRApplicationDialog(BaseInfoDialog):
         if self.controller and hasattr(self.controller, 'apply_ltr_number'):
             logger.debug("Controller found, calling apply_ltr_number")
             try:
-                # 传递临时文件夹路径给控制器
-                result = self.controller.apply_ltr_number(form_data, self, self.temp_folder_path)
+                # 传递临时文件夹路径和提取的Word文档数据给控制器
+                result = self.controller.apply_ltr_number(form_data, self, self.temp_folder_path, self.extracted_word_data)
                 logger.debug(f"apply_ltr_number result: {result}")
 
                 # 根据结果决定是否关闭对话框
