@@ -24,6 +24,7 @@ class ReportUpdaterController:
         self.parent = parent
         self.data_model = ReportUpdaterData()
         self.service = ReportUpdaterService()  # 添加服务实例
+        self.current_project_path = None  # 存储当前项目路径
         self.view: Optional[ReportUpdaterDialog] = None
         logger.info("ReportUpdaterController initialized")
     
@@ -35,12 +36,18 @@ class ReportUpdaterController:
             project_path: 项目路径，如果为None则表示没有打开项目
         """
         if project_path and os.path.exists(project_path):
+            self.current_project_path = project_path
             self.data_model.set_project_path(project_path)
+            # 重新创建服务实例以使用新的项目路径
+            self.service = ReportUpdaterService(project_path=project_path)
             logger.info(f"Project path set to: {project_path}")
         else:
             # 没有项目打开，使用默认路径
+            self.current_project_path = None
             self.data_model.is_project_loaded = False
             self.data_model.config.base_directory = "D:\\OutFile"
+            # 重新创建服务实例以使用默认配置
+            self.service = ReportUpdaterService()
             logger.info("No project loaded, using default path: D:\\OutFile")
     
     def show_report_updater_dialog(self) -> bool:
