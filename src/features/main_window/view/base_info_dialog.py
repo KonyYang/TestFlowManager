@@ -55,10 +55,10 @@ class BaseInfoDialog(QDialog):
         """设置用户界面"""
         self.setWindowTitle(title)
         # 设置更小的最小尺寸并根据DPI进行适配
-        min_width, min_height = WindowUtils.get_scaled_window_size(1000, 1000)
+        min_width, min_height = WindowUtils.get_scaled_window_size(1000, 600)
         self.setMinimumSize(min_width, min_height)
         # 设置更小的初始尺寸并根据DPI进行适播
-        init_width, init_height = WindowUtils.get_scaled_window_size(1000, 1200)
+        init_width, init_height = WindowUtils.get_scaled_window_size(1000, 800)
         self.resize(init_width, init_height)
 
         # 创建主布局
@@ -239,9 +239,9 @@ class BaseInfoDialog(QDialog):
             elif item_data.get('editor_type') == 'multiline':
                 text_edit = QTextEdit()
                 # 根据DPI调整最大高度
-                # 仅对"Description P/N"字段应用4行显示，其他多行文本字段保持原来的一行显示
+                # 仅对"Description P/N"字段应用2行显示，其他多行文本字段保持原来的一行显示
                 if item_data['key'] == 'sample_information':  # "Description P/N"字段
-                    max_height = WindowUtils.get_scaled_size(120)  # 4行大约需要120像素高度
+                    max_height = WindowUtils.get_scaled_size(60)  # 2行大约需要60像素高度
                 else:  # 其他多行文本字段保持原来的一行显示
                     max_height = WindowUtils.get_scaled_size(30)  # 保持原来的一行显示
                 text_edit.setMaximumHeight(max_height)

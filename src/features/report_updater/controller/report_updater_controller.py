@@ -103,20 +103,12 @@ class ReportUpdaterController:
                     QMessageBox.warning(self.parent, "警告", "请先选择要更新的报告文件！")
                     return False
             
-            # 获取设备数据 - 这里可以连接到实际的设备数据源
-            # 为了演示，我们使用模拟数据
-            equipment_data = [
-                {"id": "EQ001", "name": "测试设备1", "status": "Active", "notes": "最新设备"},
-                {"id": "EQ002", "name": "测试设备2", "status": "Maintenance", "notes": "维护中"},
-                {"id": "EQ003", "name": "测试设备3", "status": "Active", "notes": "备用设备"}
-            ]
-            
-            # 使用服务层执行实际的更新操作
-            success = self.service.update_equipment_list(selected_report, equipment_data)
+            # 直接使用服务层执行实际的更新操作，不需要传入设备数据
+            # 因为新的实现会从外部源（Excel文件）获取设备数据
+            success = self.service.update_equipment_list(selected_report)
             
             if success:
                 # 更新数据模型
-                self.data_model.update_equipment_list(equipment_data)
                 QMessageBox.information(self.parent, "成功", f"设备列表已成功更新到报告:\n{os.path.basename(selected_report)}")
                 logger.info(f"Equipment list updated successfully in {selected_report}")
             else:

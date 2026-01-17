@@ -4,9 +4,62 @@
 """
 import os
 import json
+import re
 from typing import Dict, List, Optional, Any
 from datetime import datetime
+from collections import OrderedDict
+import pandas as pd
+from docx import Document
+from docx.shared import Inches
+from docx.oxml.shared import OxmlElement, qn
+import win32com.client as win32
 from src.core.logger import logger
+
+
+class EquipmentConfigManager:
+    """设备更新配置管理器"""
+    
+    def __init__(self):
+        self.config_path = os.path.join(os.path.dirname(__file__), "..", "config", "equipment_config.json")
+        self.config_path = os.path.abspath(self.config_path)
+        self.config = self._load_config()
+    
+    def _load_config(self):
+        """加载设备更新配置"""
+        if os.path.exists(self.config_path):
+            with open(self.config_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        else:
+            # 默认配置
+            return {
+                "equipment_data_sources": {
+                    "excel_file_path": "D:\\Source\\FCI Dongguan product test laboratory equipment list for report- Huan Revised.xls",
+                    "source_doc_path": "D:\\OutFile\\EquipmentID.docx",
+                    "default_output_path": "D:\\OutFile\\"
+                },
+                "equipment_table_settings": {
+                    "section_keyword": "EQUIPMENTS",
+                    "target_columns_mapping": {
+                        "item_col": 1,
+                        "manufacturer_col": 2,
+                        "id_number_col": 3,
+                        "last_cal_col": 4,
+                        "cal_due_col": 5
+                    }
+                }
+            }
+
+    def get_config(self):
+        """获取配置"""
+        return self.config
+
+    def update_config(self, new_config: dict):
+        """更新配置"""
+        self.config.update(new_config)
+        # 确保目录存在
+        os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
+        with open(self.config_path, 'w', encoding='utf-8') as f:
+            json.dump(self.config, f, indent=4, ensure_ascii=False)
 
 
 class ReportUpdaterService:
@@ -14,28 +67,29 @@ class ReportUpdaterService:
     
     def __init__(self):
         """初始化报告更新服务"""
+        self.config_manager = EquipmentConfigManager()
+        self.config = self.config_manager.get_config()
         logger.info("ReportUpdaterService initialized")
     
-    def update_equipment_list(self, report_path: str, equipment_data: List[Dict[str, Any]]) -> bool:
+    def update_equipment_list(self, report_path: str, equipment_data: List[Dict[str, Any]] = None) -> bool:
         """
         更新报告中的设备列表
 
         Args:
             report_path: 报告文件路径
-            equipment_data: 设备数据列表
+            equipment_data: 设备数据列表（可选，如果不提供则从Excel源获取）
 
         Returns:
             更新是否成功
         """
         try:
             logger.info(f"Starting equipment list update for report: {report_path}")
-            logger.info(f"Equipment data size: {len(equipment_data)}")
             
             # 根据文件类型选择相应的处理方式
             file_extension = os.path.splitext(report_path)[1].lower()
             
             if file_extension in ['.docx', '.doc']:
-                return self._update_equipment_list_in_word(report_path, equipment_data)
+                return self._update_equipment_list_in_word_with_excel_source(report_path, equipment_data)
             elif file_extension in ['.xlsx', '.xls']:
                 return self._update_equipment_list_in_excel(report_path, equipment_data)
             elif file_extension == '.pdf':
@@ -47,6 +101,330 @@ class ReportUpdaterService:
                 
         except Exception as e:
             logger.error(f"Error updating equipment list in report {report_path}: {e}")
+            return False
+
+    def _extract_equipment_ids_from_doc(self, doc_path: str) -> List[str]:
+        """
+        从文档中提取设备ID，查找所有非表格中的段落内容
+        """
+        try:
+            logger.debug(f"Extracting equipment IDs from document: {doc_path}")
+            doc = Document(doc_path)
+            unique_ids = OrderedDict()
+            
+            # 检查文档级段落（不在表格中的段落）
+            for i, paragraph in enumerate(doc.paragraphs):
+                para_text = paragraph.text.strip()
+                # 检查段落是否包含设备ID模式（如Q-XXXX或L-XXXX或DG-开头）
+                if para_text and (re.search(r'(Q-\\d{4}|L-\\d{4})', para_text, re.IGNORECASE) or "DG-" in para_text.upper()):
+                    clean_text = para_text.replace('\\r\\n', '').replace('\\n', '').strip()
+                    # 添加去重逻辑
+                    if clean_text not in unique_ids:
+                        unique_ids[clean_text] = True
+                        logger.debug(f"Found equipment ID in paragraph {i}: {clean_text}")
+            
+            # 还要检查表格中的内容（以防设备ID在表格中）
+            for i, table in enumerate(doc.tables):
+                for row in table.rows:
+                    for cell in row.cells:
+                        cell_text = cell.text.strip()
+                        if cell_text and (re.search(r'(Q-\\d{4}|L-\\d{4})', cell_text, re.IGNORECASE) or "DG-" in cell_text.upper()):
+                            clean_text = cell_text.replace('\\r\\n', '').replace('\\n', '').strip()
+                            if clean_text not in unique_ids:
+                                unique_ids[clean_text] = True
+                                logger.debug(f"Found equipment ID in table {i}: {clean_text}")
+            
+            ids_list = list(unique_ids.keys())
+            logger.info(f"Total {len(ids_list)} unique equipment IDs extracted")
+            return ids_list
+        except Exception as e:
+            logger.error(f"Error reading source document: {e}")
+            return []
+
+    def _find_equipment_table_win32com(self, word_doc, paragraph_keyword: str = "EQUIPMENTS"):
+        """
+        使用win32com在Word文档中根据段落关键字查找紧跟其后的表格
+
+        Args:
+            word_doc: win32com Word文档对象
+            paragraph_keyword: 段落中的关键字（如"EQUIPMENTS"）
+
+        Returns:
+            找到的表格对象，如果未找到则返回None
+        """
+        print(f"Using win32com to find table after paragraph with keyword '{paragraph_keyword}'")
+
+        # 遍历文档中的所有段落
+        print(f"DEBUG: Total paragraphs in document: {word_doc.Paragraphs.Count}")
+        for i in range(1, word_doc.Paragraphs.Count + 1):
+            paragraph = word_doc.Paragraphs(i)
+            para_text = paragraph.Range.Text.strip()
+            
+            # 使用更灵活的正则表达式一次性匹配各种格式
+            pattern = r'\d+\s*\.?\s*' + re.escape(paragraph_keyword.replace('7.', ''))
+            if re.search(pattern, para_text, re.IGNORECASE):
+                table_positions = []
+                for j in range(1, word_doc.Tables.Count + 1):
+                    doc_table = word_doc.Tables(j)
+                    # 记录表格在文档中的位置
+                    table_positions.append((doc_table.Range.Start, doc_table))
+                    print(f"DEBUG: Table {j} starts at position {doc_table.Range.Start}")
+
+                # 按表格起始位置排序
+                table_positions.sort(key=lambda x: x[0])
+
+                # 查找紧跟在此段落后的第一个表格
+                paragraph_end_pos = paragraph.Range.End
+                print(f"DEBUG: Paragraph ends at position {paragraph_end_pos}")
+                for pos, table in table_positions:
+                    print(f"DEBUG: Checking table at position {pos}, paragraph ends at {paragraph_end_pos}")
+                    if pos >= paragraph_end_pos:
+                        print(f"DEBUG: Found table after paragraph at position {pos}")
+                        print(f"Found table after paragraph")
+                        return table
+
+        print(f"Table with keyword '{paragraph_keyword}' not found")
+        return None
+
+    def _format_date(self, date_value):
+        """将日期格式转换为 DD-MMM-YYYY 格式，例如 02-Aug-2024"""
+        try:
+            # 检查是否已经是datetime对象
+            if isinstance(date_value, datetime):
+                return date_value.strftime('%d-%b-%Y')
+            # 检查是否是字符串格式的日期
+            elif isinstance(date_value, str) and date_value.strip():
+                # 尝试解析常见的日期格式
+                for fmt in ('%Y-%m-%d', '%Y/%m/%d', '%d/%m/%Y', '%d-%m-%Y', '%m/%d/%Y', '%m-%d-%Y', '%d.%m.%Y', '%Y.%m.%d'):
+                    try:
+                        parsed_date = datetime.strptime(date_value.strip(), fmt)
+                        return parsed_date.strftime('%d-%b-%Y')
+                    except ValueError:
+                        continue
+                # 如果上述格式都不匹配，可能包含时间信息，尝试去除时间部分
+                date_part = date_value.split()[0]  # 取日期部分
+                for fmt in ('%Y-%m-%d', '%Y/%m/%d', '%d/%m/%Y', '%d-%m-%Y', '%m/%d/%Y', '%m-%d-%Y', '%d.%m.%Y', '%Y.%m.%d'):
+                    try:
+                        parsed_date = datetime.strptime(date_part, fmt)
+                        return parsed_date.strftime('%d-%b-%Y')
+                    except ValueError:
+                        continue
+            return str(date_value).strip() if str(date_value).strip() else date_value
+        except Exception as e:
+            logger.error(f"Date formatting error: {e}")
+            return str(date_value).strip() if str(date_value).strip() else date_value
+
+    def _find_matching_row_in_excel(self, df, equipment_id):
+        """在Excel数据中查找匹配的设备ID行"""
+        logger.debug(f"Searching for equipment ID: {equipment_id}")
+        print(f"DEBUG: Searching for equipment ID: {equipment_id}")
+        # 创建正则表达式模式，匹配Q-XXXX或L-XXXX格式
+        pattern = r'(Q-\\d{4}|L-\\d{4})'
+        
+        for index, row in df.iterrows():
+            excel_value = str(row.iloc[3]).strip()  # D列为索引3
+            equipment_id_clean = equipment_id.replace('\\r\\n', '').replace('\\n', '').strip()
+            
+            print(f"DEBUG: Comparing - Row {index}: equipment_id_clean='{equipment_id_clean}', excel_value='{excel_value}', lower_match={equipment_id_clean.lower() == excel_value.lower()}, pattern_match={bool(re.search(pattern, equipment_id_clean, re.IGNORECASE))}")
+            
+            # 完全匹配或部分匹配
+            if equipment_id_clean.lower() == excel_value.lower():
+                print(f"DEBUG: Exact match found for {equipment_id} at row {index}")
+                logger.debug(f"Exact match found for {equipment_id} at row {index}")
+                return index
+            elif re.search(pattern, equipment_id_clean, re.IGNORECASE) and equipment_id_clean.lower() in excel_value.lower():
+                print(f"DEBUG: Pattern match found for {equipment_id} at row {index}")
+                logger.debug(f"Pattern match found for {equipment_id} at row {index}")
+                return index
+        
+        print(f"DEBUG: No match found for equipment ID: {equipment_id}")
+        logger.debug(f"No match found for equipment ID: {equipment_id}")
+        return None
+
+    def _update_equipment_list_in_word_with_excel_source(self, report_path: str, equipment_data: List[Dict[str, Any]] = None) -> bool:
+        """
+        从Excel源获取数据并更新Word文档中的设备列表
+        """
+        try:
+            logger.info(f"Updating equipment list in Word document with Excel source: {report_path}")
+
+            # 从配置中获取文件路径
+            excel_file_path = self.config["equipment_data_sources"]["excel_file_path"]
+            source_doc_path = self.config["equipment_data_sources"]["source_doc_path"]
+            section_keyword = self.config["equipment_table_settings"]["section_keyword"]
+
+            logger.debug(f"Using Excel file: {excel_file_path}")
+            logger.debug(f"Using source document: {source_doc_path}")
+            logger.debug(f"Looking for section keyword: {section_keyword}")
+
+            # 检查必要的源文件是否存在
+            if not os.path.exists(excel_file_path):
+                logger.error(f"Excel file does not exist: {excel_file_path}")
+                return False
+            
+            if not os.path.exists(source_doc_path):
+                logger.error(f"Source document does not exist: {source_doc_path}")
+                return False
+
+            # 使用win32com打开Word文档
+            logger.debug("Initializing Word application via COM...")
+            word_app = win32.gencache.EnsureDispatch('Word.Application')
+            word_app.Visible = False  # 不显示Word界面
+            word_app.DisplayAlerts = False  # 关闭警告提示
+
+            # 打开文档
+            logger.debug(f"Opening document: {report_path}")
+            word_doc = word_app.Documents.Open(report_path)
+
+            # 使用win32com查找指定的关键字标题和表格
+            logger.info(f"Finding '{section_keyword}' section and table using win32com...")
+            print(f"DEBUG: About to call _find_equipment_table_win32com with keyword '{section_keyword}'")
+            target_table = self._find_equipment_table_win32com(word_doc, section_keyword)
+
+            if target_table is None:
+                logger.warning(f"Could not find '{section_keyword}' section or table!")
+                print(f"DEBUG: Could not find table with keyword '{section_keyword}'")
+                word_doc.Close()
+                word_app.Quit()
+                return False
+            else:
+                logger.info("Successfully found equipment table using win32com")
+                print(f"DEBUG: Successfully found equipment table with {target_table.Rows.Count} rows")
+                logger.info(f"Table has {target_table.Rows.Count} rows initially")
+
+            # 从Excel中读取设备列表
+            logger.info(f"Reading Excel file: {excel_file_path}")
+            excel_df = pd.read_excel(excel_file_path, sheet_name='All Equip.', header=None)
+            logger.info(f"Loaded Excel data with {len(excel_df)} rows and {len(excel_df.columns)} columns")
+
+            # 从源文档中提取设备ID
+            logger.info("Extracting equipment IDs from source document...")
+            print(f"DEBUG: Extracting equipment IDs from source document: {source_doc_path}")
+            equipment_ids = self._extract_equipment_ids_from_doc(source_doc_path)
+            logger.info(f"Found {len(equipment_ids)} unique equipment IDs")
+            print(f"DEBUG: Found {len(equipment_ids)} unique equipment IDs: {equipment_ids}")
+            if equipment_ids:
+                logger.debug(f"Equipment IDs: {equipment_ids[:5]}...")  # 只显示前5个
+
+            if not equipment_ids:
+                logger.warning("No equipment IDs found in source document!")
+                word_doc.Close()
+                word_app.Quit()
+                return False
+
+            # 将设备ID填入表格（第三列，即ID Number列）
+            logger.info("Filling table with equipment IDs from source document...")
+            row_start = 2  # 从第二行开始（win32com索引从1开始，所以第二行是索引2）
+
+            for i, equipment_id in enumerate(equipment_ids):
+                # 如果表格行数不够，添加新行
+                if row_start + i > target_table.Rows.Count:
+                    target_table.Rows.Add()
+                    logger.debug(f"Added new row {target_table.Rows.Count} to accommodate equipment ID")
+
+                # 将设备ID写入表格单元格（第3列，win32com索引从1开始，所以第3列是索引3）
+                # 保留原始格式，只替换文本内容
+                target_table.Cell(row_start + i, 3).Range.Text = equipment_id.replace('\\r\\n', '').replace('\\n', '').strip()
+                print(f"DEBUG: Filled equipment ID '{equipment_id}' in row {row_start + i}, column 3")
+                logger.debug(f"Filled equipment ID '{equipment_id}' in row {row_start + i}, column 3")
+
+            # 从Excel获取数据并填充表格其他列
+            print(f"\n🔄 Step 6: Filling table with equipment data from Excel...")
+            col_map = self.config["equipment_table_settings"]["target_columns_mapping"]
+            for row_idx in range(row_start, target_table.Rows.Count + 1):  # 从第二行开始
+                # 获取第三列的设备ID（ID Number列）
+                equipment_id = target_table.Cell(row_idx, 3).Range.Text.rstrip('\x07\x0B')  # 移除特殊字符
+                equipment_id = equipment_id.rstrip('\r\x07').strip()  # 清理文本
+                
+                if equipment_id == "":
+                    print(f"Row {row_idx}: Empty equipment ID, skipping")
+                    logger.debug(f"Row {row_idx}: Empty equipment ID, skipping")
+                    continue
+                    
+                print(f"Processing row {row_idx} with equipment ID: {equipment_id}")
+                logger.debug(f"Processing row {row_idx} with equipment ID: {equipment_id}")
+                
+                # 在Excel中查找匹配的设备ID
+                matched_row_idx = self._find_matching_row_in_excel(excel_df, equipment_id)
+                
+                if matched_row_idx is not None:
+                    try:
+                        # 填充设备信息，保留原始格式
+                        # A列 -> Item列 (索引0) - win32com第一列是索引1
+                        item_value = str(excel_df.iloc[matched_row_idx, 0]).strip()
+                        if item_value and item_value != "nan":
+                            target_table.Cell(row_idx, col_map["item_col"]).Range.Text = item_value
+                            print(f"  Filled Item: {item_value}")
+                            logger.debug(f"  Filled Item: {item_value}")
+                        
+                        # C列 -> Manufacturer列 (索引2) - win32com第三列是索引3
+                        manufacturer_value = str(excel_df.iloc[matched_row_idx, 2]).strip()
+                        if manufacturer_value and manufacturer_value != "nan":
+                            target_table.Cell(row_idx, col_map["manufacturer_col"]).Range.Text = manufacturer_value
+                            print(f"  Filled Manufacturer: {manufacturer_value}")
+                            logger.debug(f"  Filled Manufacturer: {manufacturer_value}")
+                        
+                        # D列 -> ID Number列 (索引3) - 已经是设备ID，保持不变
+                        
+                        # E列 -> Last Cal.列 (索引4) - win32com第五列是索引5
+                        last_cal_value = str(excel_df.iloc[matched_row_idx, 4]).strip()
+                        if last_cal_value and last_cal_value != "nan":
+                            formatted_date = self._format_date(last_cal_value)
+                            target_table.Cell(row_idx, col_map["last_cal_col"]).Range.Text = formatted_date
+                            print(f"  Filled Last Cal.: {formatted_date}")
+                            logger.debug(f"  Filled Last Cal.: {formatted_date}")
+                        
+                        # F列 -> Cal. Due列 (索引5) - win32com第六列是索引6
+                        cal_due_value = str(excel_df.iloc[matched_row_idx, 5]).strip()
+                        if cal_due_value and cal_due_value != "nan":
+                            formatted_due_date = self._format_date(cal_due_value)
+                            target_table.Cell(row_idx, col_map["cal_due_col"]).Range.Text = formatted_due_date
+                            print(f"  Filled Cal. Due: {formatted_due_date}")
+                            logger.debug(f"  Filled Cal. Due: {formatted_due_date}")
+                            
+                    except IndexError as e:
+                        print(f"Error accessing Excel data for row {matched_row_idx}: {e}")
+                        logger.error(f"Error accessing Excel data for row {matched_row_idx}: {e}")
+                else:
+                    # 未找到匹配项，在Item列中标记
+                    target_table.Cell(row_idx, col_map["item_col"]).Range.Text = "Not Found"
+                    print(f"  ❌ No match found for equipment ID: {equipment_id}")
+                    logger.warning(f"  No match found for equipment ID: {equipment_id}")
+
+            # 为新增的行添加边框
+            logger.info("Adding borders to new table rows...")
+            for row_idx in range(row_start, target_table.Rows.Count + 1):  # 从第二行开始
+                for col_idx in range(1, target_table.Columns.Count + 1):  # 遍历所有列
+                    cell = target_table.Cell(row_idx, col_idx)
+                    # 设置所有四个边框
+                    cell.Borders(1).Visible = True  # wdBorderLeft
+                    cell.Borders(2).Visible = True  # wdBorderRight
+                    cell.Borders(3).Visible = True  # wdBorderTop
+                    cell.Borders(4).Visible = True  # wdBorderBottom
+            logger.info(f"Borders added to {target_table.Rows.Count - row_start + 1} new rows")
+
+            # 保存文档
+            logger.info("Saving updated document...")
+            word_doc.Save()
+            logger.info("Document saved successfully")
+            
+            word_doc.Close()
+            word_app.Quit()
+            logger.info(f"Successfully updated equipment list in {report_path}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error updating equipment list in Word document {report_path}: {e}")
+            import traceback
+            traceback.print_exc()
+            try:
+                # 确保文档和应用程序被正确关闭
+                if 'word_doc' in locals():
+                    word_doc.Close()
+                if 'word_app' in locals():
+                    word_app.Quit()
+            except:
+                pass
             return False
     
     def _update_equipment_list_in_word(self, report_path: str, equipment_data: List[Dict[str, Any]]) -> bool:

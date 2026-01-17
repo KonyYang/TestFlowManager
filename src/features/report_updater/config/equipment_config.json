@@ -1,0 +1,17 @@
+{
+    "equipment_data_sources": {
+        "excel_file_path": "D:\\Source\\FCI Dongguan product test laboratory equipment list for report- Huan Revised.xls",
+        "source_doc_path": "D:\\OutFile\\EquipmentID.docx",
+        "default_output_path": "D:\\OutFile\\"
+    },
+    "equipment_table_settings": {
+        "section_keyword": "7.EQUIPMENTS",
+        "target_columns_mapping": {
+            "item_col": 1,
+            "manufacturer_col": 2,
+            "id_number_col": 3,
+            "last_cal_col": 4,
+            "cal_due_col": 5
+        }
+    }
+}
