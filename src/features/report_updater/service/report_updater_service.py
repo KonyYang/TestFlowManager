@@ -8,7 +8,7 @@ import re
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from collections import OrderedDict
-import pandas as pd
+from openpyxl import load_workbook
 from docx import Document
 from docx.shared import Inches
 from docx.oxml.shared import OxmlElement, qn
@@ -89,9 +89,15 @@ class ReportUpdaterService:
     def __init__(self, project_path: str = None):
         """初始化报告更新服务"""
         self.config_manager = EquipmentConfigManager()
-        # 如果提供了项目路径，设置到配置管理器中
+        # 优先使用传入的项目路径，否则从状态管理器获取当前项目路径
         if project_path:
             self.config_manager.project_path = project_path
+        else:
+            # 从状态管理器获取当前项目路径
+            from src.core.state_manager import state_manager
+            current_project = state_manager.get_state("current_project")
+            if current_project:
+                self.config_manager.project_path = current_project
         self.config = self.config_manager.get_config()
         logger.info("ReportUpdaterService initialized")
     
@@ -349,8 +355,18 @@ class ReportUpdaterService:
 
             # 从Excel中读取设备列表
             logger.info(f"Reading Excel file: {excel_file_path}")
-            excel_df = pd.read_excel(excel_file_path, sheet_name='All Equip.', header=None)
-            logger.info(f"Loaded Excel data with {len(excel_df)} rows and {len(excel_df.columns)} columns")
+            # 使用openpyxl读取Excel文件
+            workbook = load_workbook(excel_file_path, read_only=True)
+            sheet = workbook['All Equip.']
+            
+            # 将数据转换为列表形式
+            excel_data = []
+            for row in sheet.iter_rows(values_only=True):
+                excel_data.append(list(row))
+
+            # 转换为类似DataFrame的结构（列表的列表）
+            excel_df = excel_data
+            logger.info(f"Loaded Excel data with {len(excel_df)} rows and {len(excel_df[0]) if len(excel_df) > 0 else 0} columns")
 
             # 从源文档中提取设备ID
             logger.info("Extracting equipment IDs from source document...")

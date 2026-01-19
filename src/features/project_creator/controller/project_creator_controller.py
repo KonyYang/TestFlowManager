@@ -512,6 +512,12 @@ class ProjectCreatorController:
                 # 设置项目路径到状态管理器
                 state_manager.set_state("current_project", project_path)
                 
+                # 通知其他组件项目已打开
+                event_dispatcher.dispatch("project.opened", {
+                    "project_path": project_path,
+                    "dl_number": dl_number
+                })
+                
                 # 更新主窗口标题显示项目信息
                 if self.parent_view:
                     logger.debug(f"Setting main window title in _open_matrix_editor_with_ltr_number to: TestFlow Manager - 项目: {dl_number}")

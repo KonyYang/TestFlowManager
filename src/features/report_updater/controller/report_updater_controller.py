@@ -23,8 +23,11 @@ class ReportUpdaterController:
         """
         self.parent = parent
         self.data_model = ReportUpdaterData()
-        self.service = ReportUpdaterService()  # 添加服务实例
-        self.current_project_path = None  # 存储当前项目路径
+        # 从状态管理器获取当前项目路径
+        from src.core.state_manager import state_manager
+        current_project = state_manager.get_state("current_project")
+        self.service = ReportUpdaterService(project_path=current_project)  # 添加服务实例
+        self.current_project_path = current_project  # 存储当前项目路径
         self.view: Optional[ReportUpdaterDialog] = None
         logger.info("ReportUpdaterController initialized")
     

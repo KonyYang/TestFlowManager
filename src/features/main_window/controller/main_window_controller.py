@@ -60,6 +60,7 @@ class MainWindowController:
         event_dispatcher.subscribe("state.changed", self._on_state_changed)
         event_dispatcher.subscribe("ltr.application.confirmed", self._on_ltr_application_confirmed)
         event_dispatcher.subscribe("ltr.application.processed", self._on_ltr_application_processed)
+        event_dispatcher.subscribe("project.opened", self._on_project_opened)
 
     # 添加事件处理方法
     def _on_ltr_processing_started(self, data):
@@ -102,6 +103,38 @@ class MainWindowController:
                 logger.debug(f"Set LTR number {dl_number} to Matrix controller")
         else:
             self.service.update_status(f"LTR申请单处理失败: {dl_number}")
+
+    def _on_project_opened(self, data):
+        """处理项目打开事件"""
+        project_path = data.get("project_path")
+        dl_number = data.get("dl_number")
+        
+        logger.debug(f"_on_project_opened called with project_path={project_path}, dl_number={dl_number}")
+        
+        if project_path and dl_number:
+            # 更新状态
+            self.service.update_status(f"当前项目: {dl_number}")
+            
+            # 更新窗口标题显示项目信息
+            self.view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
+            
+            # 保存当前项目路径到控制器属性
+            self._current_project_path = project_path
+            
+            # 设置LTR编号到Matrix控制器
+            if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
+                self.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
+                logger.debug(f"Set LTR number {dl_number} to Matrix controller")
+                
+            # 触发Matrix自动导入功能
+            QTimer.singleShot(0, self._trigger_matrix_auto_import)
+            
+            logger.info(f"Project opened successfully: {project_path} with DL number: {dl_number}")
+            
+            # 确保报告更新控制器的项目路径也被更新
+            # 通过视图访问报告更新控制器并更新项目路径
+            if hasattr(self.view, 'report_updater_controller'):
+                self.view.report_updater_controller.set_project_path(project_path)
 
     def _on_state_changed(self, data):
         """处理状态变更事件"""
@@ -475,6 +508,12 @@ class MainWindowController:
             
             # 保存当前项目路径到控制器属性
             self._current_project_path = project_path
+            
+            # 通知其他组件项目已打开
+            event_dispatcher.dispatch("project.opened", {
+                "project_path": project_path,
+                "dl_number": dl_number
+            })
             
             # 设置LTR编号到Matrix控制器
             if dl_number:

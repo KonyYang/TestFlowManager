@@ -34,9 +34,10 @@ class ReportUpdaterDialog(QDialog):
         self.selected_report = selected_report  # 已选择的报告文件
         
         # 设置窗口属性，将选中的文件名显示在标题中
-        window_title = f"报告更新工具 - {os.path.basename(self.selected_report) if self.selected_report else '未选择报告'}"
+        window_title = f"报告更新 - {os.path.basename(self.selected_report) if self.selected_report else '未选择报告'}"
         self.setWindowTitle(window_title)
-        self.setMinimumSize(300, 150)
+        self.setMinimumSize(500, 350)
+        self.resize(800, 400)
         
         # 应用全局字体
         global_font = FontUtils.get_scaled_font(9)
@@ -48,18 +49,21 @@ class ReportUpdaterDialog(QDialog):
         """设置用户界面"""
         layout = QVBoxLayout()
         
-        # 创建更新功能组
-        update_layout = QVBoxLayout()
+        # 创建按钮网格布局
+        button_grid_layout = QGridLayout()
         
-        # 更新设备列表按钮
+        # 更新设备列表按钮 - 位于第0行第0列
         self.update_equipment_btn = QPushButton("更新设备列表")
+        self.update_equipment_btn.setFixedWidth(150)  # 设置固定宽度
         self.update_equipment_btn.clicked.connect(self.on_update_equipment_clicked)
-        update_layout.addWidget(self.update_equipment_btn)
+        button_grid_layout.addWidget(self.update_equipment_btn, 0, 0)  # 行0，列0
         
-        # 添加其他更新按钮预留位置
-        # (将来可以添加更多更新功能)
+        # 预留更多按钮的位置
+        # 示例：button_grid_layout.addWidget(new_button, row, col)
         
-        layout.addLayout(update_layout)
+        # 设置网格布局对齐方式为靠上靠左
+        button_grid_layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+        layout.addLayout(button_grid_layout)
         
         # 添加按钮布局
         button_layout = QHBoxLayout()
