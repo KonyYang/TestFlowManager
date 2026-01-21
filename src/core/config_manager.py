@@ -93,6 +93,11 @@ class ConfigManager:
                 if 'Defaults' in paths_config:
                     for key, value in paths_config['Defaults'].items():
                         self.set(f"defaults.{key.lower()}", value)
+                        
+                # 加载设备数据源配置
+                if 'EquipmentDataSources' in paths_config:
+                    for key, value in paths_config['EquipmentDataSources'].items():
+                        self.set(f"equipment_data_sources.{key.lower()}", value)
             else:
                 print(f"[DEBUG] Paths config file not found: {paths_path}")
         except Exception as e:

@@ -13,6 +13,7 @@ from docx import Document
 from docx.shared import Inches
 from docx.oxml.shared import OxmlElement, qn
 import win32com.client as win32
+import win32com.client.gencache as gencache
 from src.core.logger import logger
 from src.core.config_manager import config_manager
 
@@ -251,8 +252,8 @@ class ReportUpdaterService:
         # 创建正则表达式模式，匹配Q-XXXX或L-XXXX格式
         pattern = r'(Q-\\d{4}|L-\\d{4})'
         
-        for index, row in df.iterrows():
-            excel_value = str(row.iloc[3]).strip()  # D列为索引3
+        for index, row in enumerate(df):
+            excel_value = str(row[3]).strip()  # D列为索引3
             equipment_id_clean = equipment_id.replace('\\r\\n', '').replace('\\n', '').strip()
             
             # print(f"DEBUG: Comparing - Row {index}: equipment_id_clean='{equipment_id_clean}', excel_value='{excel_value}', lower_match={equipment_id_clean.lower() == excel_value.lower()}, pattern_match={bool(re.search(pattern, equipment_id_clean, re.IGNORECASE))}")
@@ -326,7 +327,7 @@ class ReportUpdaterService:
 
             # 使用win32com打开Word文档
             logger.debug("Initializing Word application via COM...")
-            word_app = win32.gencache.EnsureDispatch('Word.Application')
+            word_app = gencache.EnsureDispatch('Word.Application')
             word_app.Visible = False  # 不显示Word界面
             word_app.DisplayAlerts = False  # 关闭警告提示
 
@@ -355,15 +356,79 @@ class ReportUpdaterService:
 
             # 从Excel中读取设备列表
             logger.info(f"Reading Excel file: {excel_file_path}")
-            # 使用openpyxl读取Excel文件
-            workbook = load_workbook(excel_file_path, read_only=True)
-            sheet = workbook['All Equip.']
             
-            # 将数据转换为列表形式
-            excel_data = []
-            for row in sheet.iter_rows(values_only=True):
-                excel_data.append(list(row))
-
+            file_extension = os.path.splitext(excel_file_path)[1].lower()
+            
+            # 使用win32com直接读取Excel文件，避免pandas初始化问题
+            try:
+                import win32com.client as win32_excel
+                # 启动Excel应用程序
+                excel_app = win32_excel.Dispatch('Excel.Application')
+                excel_app.Visible = False  # 不显示Excel界面
+                excel_app.DisplayAlerts = False  # 关闭警告提示
+                
+                # 以只读模式打开工作簿，避免密码保护问题
+                workbook = excel_app.Workbooks.Open(excel_file_path, UpdateLinks=0, ReadOnly=True)
+                worksheet = workbook.Sheets('All Equip.')
+                
+                # 获取数据范围
+                used_range = worksheet.UsedRange
+                rows = used_range.Rows.Count
+                cols = used_range.Columns.Count
+                
+                # 读取数据到列表
+                excel_data = []
+                for row in range(1, rows + 1):
+                    row_data = []
+                    for col in range(1, cols + 1):
+                        try:
+                            cell_value = worksheet.Cells(row, col).Value
+                            # 处理None值
+                            if cell_value is None:
+                                cell_value = ""
+                            row_data.append(str(cell_value) if cell_value is not None else "")
+                        except:
+                            row_data.append("")
+                    excel_data.append(row_data)
+                
+                # 关闭工作簿和Excel应用程序
+                workbook.Close(SaveChanges=False)  # 确保不保存更改
+                excel_app.Quit()
+                
+                logger.info(f"Successfully loaded Excel data with {len(excel_data)} rows and {len(excel_data[0]) if len(excel_data) > 0 else 0} columns using win32com")
+                
+            except Exception as e:
+                logger.error(f"Error reading Excel file with win32com: {e}")
+                import traceback
+                logger.error(f"Full traceback: {traceback.format_exc()}")
+                
+                # 如果win32com方法失败，尝试使用openpyxl作为备选方案（仅对xlsx文件）
+                if file_extension == '.xlsx':
+                    try:
+                        logger.info("Trying fallback method using openpyxl...")
+                        from openpyxl import load_workbook
+                        # 以只读模式打开，避免密码问题
+                        workbook = load_workbook(excel_file_path, read_only=True)
+                        sheet = workbook['All Equip.']
+                        
+                        excel_data = []
+                        for row in sheet.iter_rows(values_only=True):
+                            processed_row = []
+                            for cell in row:
+                                if cell is None:
+                                    processed_row.append("")
+                                else:
+                                    processed_row.append(str(cell))
+                            excel_data.append(processed_row)
+                        logger.info("Successfully loaded Excel data using openpyxl fallback method")
+                    except Exception as fallback_error:
+                        logger.error(f"Fallback method also failed: {fallback_error}")
+                        return False
+                else:
+                    # 对于.xls文件，如果我们不能使用win32com，也没有其他好方法
+                    logger.error(f"Cannot read {file_extension} file without win32com or pandas")
+                    return False
+            
             # 转换为类似DataFrame的结构（列表的列表）
             excel_df = excel_data
             logger.info(f"Loaded Excel data with {len(excel_df)} rows and {len(excel_df[0]) if len(excel_df) > 0 else 0} columns")
@@ -422,14 +487,14 @@ class ReportUpdaterService:
                     try:
                         # 填充设备信息，保留原始格式
                         # A列 -> Item列 (索引0) - win32com第一列是索引1
-                        item_value = str(excel_df.iloc[matched_row_idx, 0]).strip()
+                        item_value = str(excel_df[matched_row_idx][0]).strip()
                         if item_value and item_value != "nan":
                             target_table.Cell(row_idx, col_map["item_col"]).Range.Text = item_value
                             # print(f"  Filled Item: {item_value}")
                             # logger.debug(f"  Filled Item: {item_value}")
                         
                         # C列 -> Manufacturer列 (索引2) - win32com第三列是索引3
-                        manufacturer_value = str(excel_df.iloc[matched_row_idx, 2]).strip()
+                        manufacturer_value = str(excel_df[matched_row_idx][2]).strip()
                         if manufacturer_value and manufacturer_value != "nan":
                             target_table.Cell(row_idx, col_map["manufacturer_col"]).Range.Text = manufacturer_value
                             # print(f"  Filled Manufacturer: {manufacturer_value}")
@@ -438,7 +503,7 @@ class ReportUpdaterService:
                         # D列 -> ID Number列 (索引3) - 已经是设备ID，保持不变
                         
                         # E列 -> Last Cal.列 (索引4) - win32com第五列是索引5
-                        last_cal_value = str(excel_df.iloc[matched_row_idx, 4]).strip()
+                        last_cal_value = str(excel_df[matched_row_idx][4]).strip()
                         if last_cal_value and last_cal_value != "nan":
                             formatted_date = self._format_date(last_cal_value)
                             target_table.Cell(row_idx, col_map["last_cal_col"]).Range.Text = formatted_date
@@ -446,12 +511,12 @@ class ReportUpdaterService:
                             # logger.debug(f"  Filled Last Cal.: {formatted_date}")
                         
                         # F列 -> Cal. Due列 (索引5) - win32com第六列是索引6
-                        cal_due_value = str(excel_df.iloc[matched_row_idx, 5]).strip()
+                        cal_due_value = str(excel_df[matched_row_idx][5]).strip()
                         if cal_due_value and cal_due_value != "nan":
                             formatted_due_date = self._format_date(cal_due_value)
                             target_table.Cell(row_idx, col_map["cal_due_col"]).Range.Text = formatted_due_date
-                            # print(f"  Filled Cal. Due: {formatted_due_date}")
-                            # logger.debug(f"  Filled Cal. Due: {formatted_due_date}")
+                            # print(f"  Filled Cal. Due: {formatted_date}")
+                            # logger.debug(f"  Filled Cal. Due: {formatted_date}")
                             
                     except IndexError as e:
                         print(f"Error accessing Excel data for row {matched_row_idx}: {e}")
