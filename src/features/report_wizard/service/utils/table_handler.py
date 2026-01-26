@@ -289,6 +289,148 @@ class TableHandler:
             logger.warning(f"设置表格格式时出错: {e}")
 
     @staticmethod
+    def modify_revision_record_date_win32com(win_document, header_data: Dict[str, Any], is_customer_report: bool = False) -> bool:
+        """
+        使用win32com修改正文 'REVISION RECORD' 表格中的日期
+        
+        :param win_document: win32com Word文档对象
+        :param header_data: 页眉数据字典，包含 completion_date 等字段
+        :param is_customer_report: 是否是客户报告，默认为 False
+        :return: 是否成功
+        """
+        try:
+            # 优先使用completion_date，如果不存在则使用date
+            completion_date_str = header_data.get("completion_date", "")
+            if not completion_date_str:
+                completion_date_str = header_data.get("date", "")
+            
+            if not completion_date_str:
+                logger.warning("header_data 中未找到 completion_date 或 date 字段！")
+                return False
+
+            # 格式化日期
+            formatted_date = DateHandler.format_date_to_standard(completion_date_str)
+
+            # 查找修订记录表格
+            target_title = "REVISION RECORD" if is_customer_report else "8. REVISION RECORD"
+            target_table = None
+            
+            # 首先按标题查找表格
+            for i in range(1, win_document.Paragraphs.Count + 1):
+                paragraph = win_document.Paragraphs(i)
+                para_text = paragraph.Range.Text.strip()
+                
+                if target_title in para_text:
+                    # 查找紧随其后的表格
+                    para_end_pos = paragraph.Range.End
+                    for j in range(1, win_document.Tables.Count + 1):
+                        table = win_document.Tables(j)
+                        if table.Range.Start >= para_end_pos:
+                            target_table = table
+                            break
+                    
+                    if target_table:
+                        break
+            
+            # 如果按标题未找到，尝试查找包含"REVISION"和"RECORD"的表格
+            if not target_table:
+                for i in range(1, win_document.Paragraphs.Count + 1):
+                    paragraph = win_document.Paragraphs(i)
+                    para_text = paragraph.Range.Text.strip()
+                    
+                    if "REVISION" in para_text.upper() and ("RECORD" in para_text.upper() or "record" in para_text.lower()):
+                        # 查找紧随其后的表格
+                        para_end_pos = paragraph.Range.End
+                        for j in range(1, win_document.Tables.Count + 1):
+                            table = win_document.Tables(j)
+                            if table.Range.Start >= para_end_pos:
+                                target_table = table
+                                break
+                        
+                        if target_table:
+                            break
+            
+            # 如果还是没找到，尝试查找包含日期列的表格
+            if not target_table:
+                for j in range(1, win_document.Tables.Count + 1):
+                    table = win_document.Tables(j)
+                    # 检查表格是否包含日期相关字段
+                    for row_idx in range(1, min(3, table.Rows.Count + 1)):  # 检查前几行
+                        for col_idx in range(1, table.Columns.Count + 1):
+                            cell_text = table.Cell(row_idx, col_idx).Range.Text.strip()
+                            if "DATE" in cell_text.upper():
+                                target_table = table
+                                break
+                        if target_table:
+                            break
+                    if target_table:
+                        break
+
+            if not target_table:
+                logger.warning(f"未找到包含 '{target_title}' 的表格")
+                return False
+
+            if target_table.Rows.Count < 2 or target_table.Columns.Count < 4:
+                logger.warning("目标表格行列不足，无法操作！")
+                return False
+            
+            # 修改第二行（索引2）的日期列，通常是第3列（索引3）或第4列（索引4）
+            try:
+                # 首先检查表头，找到日期列
+                header_row = target_table.Rows(1)
+                date_column_idx = -1
+                for i in range(1, header_row.Cells.Count + 1):
+                    cell_text = header_row.Cells(i).Range.Text.strip()
+                    if "DATE" in cell_text.upper():
+                        date_column_idx = i
+                        break
+                
+                # 如果找到了日期列标题，就在该列设置日期；否则默认在第3列设置
+                target_col = 3 if date_column_idx == -1 else date_column_idx
+                target_row = 2  # 通常在第二行（索引2）更新日期
+                
+                # 修改第一行数据（索引2）的日期列
+                target_table.Cell(target_row, target_col).Range.Text = formatted_date
+                
+                logger.info(f"修订记录表格日期已更新为: {formatted_date}")
+            except Exception as cell_error:
+                logger.error(f"更新修订记录表格日期时出错: {cell_error}")
+                # 备选方案：尝试更新第3列和第4列
+                try:
+                    target_table.Cell(2, 3).Range.Text = formatted_date
+                    target_table.Cell(2, 4).Range.Text = formatted_date
+                    logger.info(f"修订记录表格日期已通过备选方案更新为: {formatted_date}")
+                except Exception as backup_error:
+                    logger.error(f"备选更新修订记录表格日期时也出错: {backup_error}")
+                    return False
+
+            # 如果是客户报告，处理额外的行
+            if is_customer_report:
+                # 确保表格至少有4行
+                while target_table.Rows.Count < 4:
+                    target_table.Rows.Add()
+
+                # 如果表格行数过多，移除多余行
+                if target_table.Rows.Count > 4:
+                    for i in range(target_table.Rows.Count, 4, -1):
+                        try:
+                            target_table.Rows(i).Delete()
+                        except:
+                            pass  # 忽略删除失败
+
+                # 清空第3和第4行的内容
+                for i in range(3, 5):
+                    if i <= target_table.Rows.Count:
+                        for cell in target_table.Rows(i).Cells:
+                            cell.Range.Text = ""
+
+            return True
+
+        except Exception as e:
+            logger.error(f"修改修订记录日期失败: {e}", exc_info=True)
+            return False
+
+    @staticmethod
     def find_table_by_paragraph_win32com(word_doc, paragraph_keyword: str):
         """
         使用win32com在Word文档中根据段落关键字查找紧跟其后的表格

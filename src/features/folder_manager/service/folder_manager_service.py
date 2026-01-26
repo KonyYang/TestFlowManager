@@ -385,4 +385,4 @@ class FolderManagerService:
             except Exception as e:
                 logger.error(f"清理临时文件夹失败: {e}")
         
-        return subfolder_path
+        return target_folder
