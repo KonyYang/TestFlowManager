@@ -341,13 +341,13 @@ class HeaderModifier:
             # 计算总替换次数
             total_replacements = sum(replacement_stats.values())
 
-            # 输出替换统计
-            logger.info(f"替换完成统计:")
+            # 输出替换统计（调试级别）
+            logger.debug(f"替换完成统计:")
             for placeholder, count in replacement_stats.items():
                 status = "✅" if count > 0 else "❌"
-                logger.info(f"   {status} '{placeholder}': 替换了 {count} 次")
+                logger.debug(f"   {status} '{placeholder}': 替换了 {count} 次")
 
-            logger.info(f"总计替换次数: {total_replacements}")
+            logger.debug(f"总计替换次数: {total_replacements}")
 
             if total_replacements == 0:
                 logger.warning("警告: 未找到任何占位符进行替换，请检查模板文件！")
@@ -357,13 +357,7 @@ class HeaderModifier:
             # # 先保存文档到原始路径，确保修改生效
             # win_document.Save()
             # logger.info(f"✅ 文档占位符替换完成并已保存到原始路径: {target_path}")
-            
-            # # 另存文档为指定名称
-            # if output_path is None:
-            #     output_path = os.path.join(os.path.dirname(target_path), "test_contact.docx")
-            # win_document.SaveAs2(output_path)
-            # logger.info(f"✅ 文档占位符替换完成并已另存为: {output_path}")
-            
+
             return True
             
         except Exception as e:

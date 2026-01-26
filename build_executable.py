@@ -43,6 +43,8 @@ def copy_required_files():
         # 复制到 dist/config
         shutil.copytree(config_src, dist_dir / "config", dirs_exist_ok=True)
         print("复制配置文件到 dist/config")
+    else:
+        print("警告: 配置文件目录不存在: ", config_src)
     
     # 复制模板文件夹
     # 首先尝试从D:\Template复制
@@ -63,8 +65,29 @@ def copy_required_files():
             print("未找到模板文件目录，创建空的Template目录")
             dist_template_dir.mkdir(exist_ok=True)
     
+    # 复制资源文件夹（图标等）
+    resources_src = project_root / "src" / "app" / "resources"
+    dist_resources_dir = dist_dir / "resources"
+    if resources_src.exists():
+        shutil.copytree(resources_src, dist_resources_dir, dirs_exist_ok=True)
+        print(f"复制资源文件到 {dist_resources_dir}")
+    else:
+        print("警告: 资源文件目录不存在: ", resources_src)
+    
+    # 复制字体和样式文件（如果有）
+    fonts_dirs = [project_root / "fonts", project_root / "styles"]
+    for font_dir in fonts_dirs:
+        if font_dir.exists():
+            dist_font_dir = dist_dir / font_dir.name
+            shutil.copytree(font_dir, dist_font_dir, dirs_exist_ok=True)
+            print(f"复制{font_dir.name}文件到 {dist_font_dir}")
+        else:
+            print(f"信息: {font_dir.name}目录不存在，跳过")
+    
     # 创建README.txt文件
     version = get_version()
+    from datetime import datetime
+    current_date = datetime.now().strftime('%Y-%m-%d')
     readme_content = f'''TestFlowManager 使用说明
 ========================
 
@@ -96,7 +119,7 @@ def copy_required_files():
 
 版本信息:
 - 当前版本: {version}
-- 发布日期: 2025-12-03
+- 发布日期: {current_date}
 
 技术支持:
 如有任何问题，请联系技术支持团队：Even.Yang@fci.com
@@ -139,11 +162,13 @@ def build_executable():
         if result.returncode == 0:
             print("可执行文件构建成功!")
             print(result.stdout)
-            # 重命名生成的exe文件以包含版本号
+            # 重命名生成的exe文件以包含版本号和时间戳
             version = get_version()
+            from datetime import datetime
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             dist_dir = Path.cwd() / "dist"
             old_exe = dist_dir / "TestFlowManager.exe"
-            new_exe = dist_dir / f"TestFlowManager_v{version}.exe"
+            new_exe = dist_dir / f"TestFlowManager_v{version}_{timestamp}.exe"
             
             if old_exe.exists():
                 # 如果新文件已存在，先删除它
@@ -152,7 +177,7 @@ def build_executable():
                     print(f"已删除已存在的文件: {new_exe.name}")
                 
                 old_exe.rename(new_exe)
-                print(f"已将可执行文件重命名为: TestFlowManager_v{version}.exe")
+                print(f"已将可执行文件重命名为: TestFlowManager_v{version}_{timestamp}.exe")
             
             return True
         else:
@@ -187,7 +212,7 @@ def main():
     print(f"项目根目录: {project_root}")
     
     # 检查必要的文件是否存在
-    required_files = ["TestFlowManager.spec", "src/app/application.py"]
+    required_files = ["TestFlowManager.spec", "src/app/application.py", "version.txt"]
     missing_files = [f for f in required_files if not (project_root / f).exists()]
     
     if missing_files:
