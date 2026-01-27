@@ -5,6 +5,7 @@ LTR基础服务模块
 """
 import os
 import re
+import time
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from src.core.logger import logger
@@ -58,6 +59,22 @@ class LTRBaseService:
                     )
                 except Exception as e:
                     logger.error(f"显示错误消息时出错: {e}")
+                return None
+
+            # 检查文件是否被其他进程占用
+            if not self.check_file_not_locked(ltr_file_path):
+                logger.error(f"LTR文件被占用: {ltr_file_path}")
+                # 显示错误消息给用户
+                try:
+                    from PyQt5.QtWidgets import QMessageBox
+                    # 尝试使用全局消息框
+                    QMessageBox.warning(
+                        None, 
+                        "文件被占用", 
+                        f"LTR文件当前被其他用户或程序占用，请稍后再试：\n{ltr_file_path}"
+                    )
+                except Exception as e:
+                    logger.error(f"显示文件占用错误消息时出错: {e}")
                 return None
 
             if with_password:
@@ -465,3 +482,28 @@ class LTRBaseService:
             LTR文件路径
         """
         return self.ltr_file_path
+
+    def check_file_not_locked(self, file_path: str) -> bool:
+        """
+        检查文件是否未被锁定（即未被其他进程占用）
+
+        Args:
+            file_path: 要检查的文件路径
+
+        Returns:
+            如果文件未被锁定返回True，否则返回False
+        """
+        try:
+            # 尝试以二进制读写模式打开文件，如果成功说明文件未被其他进程以读写模式占用
+            # 使用二进制模式可以避免文本编码问题
+            with open(file_path, 'r+b') as f:
+                pass
+            return True
+        except (IOError, PermissionError):
+            # 文件被占用，无法以读写模式打开，说明其他用户已经以读写模式打开了它
+            logger.warning(f"文件被占用: {file_path}")
+            return False
+        except Exception as e:
+            # 其他异常情况
+            logger.warning(f"检查文件占用状态时出错: {e}")
+            return False

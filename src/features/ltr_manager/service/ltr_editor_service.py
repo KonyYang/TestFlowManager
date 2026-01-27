@@ -57,18 +57,11 @@ class LTREditorService(LTRBaseService):
             # 2. 检查LTR文件是否被占用
             ltr_file_path = self.get_ltr_file_path()
             if ltr_file_path and os.path.exists(ltr_file_path):
-                try:
-                    # 尝试以独占模式打开文件来检查是否被占用
-                    with open(ltr_file_path, 'r+b') as test_file:
-                        pass  # 文件可以被打开，没有被独占锁定
-                except PermissionError:
-                    # 文件被其他进程独占锁定
+                if not self.check_file_not_locked(ltr_file_path):
                     logger.warning(f"LTR文件被占用: {ltr_file_path}")
                     if parent:
-                        QMessageBox.warning(parent, "文件被占用", "文件已经被占用，请稍后再试。")
+                        QMessageBox.warning(parent, "文件被占用", f"LTR文件当前被其他用户或程序占用，请稍后再试：\n{ltr_file_path}")
                     return False
-                except Exception as e:
-                    logger.warning(f"检查文件占用状态时出错: {e}")
 
             # 3. 使用密码打开LTR文件（读写模式）
             workbook = self.open_ltr_file(with_password=True)

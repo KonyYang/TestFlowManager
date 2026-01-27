@@ -104,6 +104,12 @@ class LTRNumberGenerator:
                         QMessageBox.critical(self.parent, "错误", f"LTR文件不存在: {ltr_file_path}")
                     return False
 
+            # 检查文件是否被其他进程占用
+            if not self.ltr_service.check_file_not_locked(ltr_file_path):
+                if self.parent:
+                    QMessageBox.warning(self.parent, "文件被占用", f"LTR文件当前被其他用户或程序占用，请稍后再试：\n{ltr_file_path}")
+                return False
+
             self.workbook = self.ltr_service.open_ltr_file(with_password=True)
             if not self.workbook:
                 if self.parent:
