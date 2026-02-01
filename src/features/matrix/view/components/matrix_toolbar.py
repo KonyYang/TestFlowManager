@@ -22,6 +22,7 @@ class MatrixToolbar(QWidget):
         self.generate_test_status_btn = QPushButton("生成Test Status")
         self.update_standard_versions_btn = QPushButton("更新标准版本")
         self.generate_test_record_btn = QPushButton("生成Test Record")
+        self.generate_cost_sheet_btn = QPushButton("生成费用表")
         
         self.layout_.addWidget(self.import_btn)
         self.layout_.addWidget(self.standardize_and_fill_btn)
@@ -29,6 +30,7 @@ class MatrixToolbar(QWidget):
         self.layout_.addWidget(self.basic_info_btn)
         self.layout_.addWidget(self.generate_test_status_btn)
         self.layout_.addWidget(self.generate_test_record_btn)
+        self.layout_.addWidget(self.generate_cost_sheet_btn)
         
         self.layout_.addStretch()  # 添加弹性空间
         
@@ -44,3 +46,4 @@ class MatrixToolbar(QWidget):
         self.generate_test_status_btn.clicked.connect(handlers.on_export_clicked)
         self.update_standard_versions_btn.clicked.connect(handlers.on_update_standards_clicked)
         self.generate_test_record_btn.clicked.connect(handlers.on_generate_test_record_clicked)
+        self.generate_cost_sheet_btn.clicked.connect(handlers.on_generate_cost_sheet_clicked)

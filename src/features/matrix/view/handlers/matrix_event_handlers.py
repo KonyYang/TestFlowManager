@@ -324,3 +324,70 @@ class MatrixEventHandlers:
         except Exception as e:
             logger.error(f"生成Test Record时出错: {e}", exc_info=True)
             QMessageBox.warning(self.view, "错误", f"生成Test Record时出错: {str(e)}")
+
+    def on_generate_cost_sheet_clicked(self):
+        """处理生成费用表按钮点击事件"""
+        try:
+            logger.info("开始生成费用表")
+            
+            # 同步表格数据到模型
+            self.view._sync_table_to_model()
+            
+            # 获取Matrix数据结构
+            from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
+            matrix_data_structure = MatrixDataStructure()
+            
+            # 从Matrix数据中提取必要的信息
+            # 首先尝试从当前项目获取DL编号和其他信息
+            dl_number = getattr(self.controller, 'dl_number', 'DL-UNKNOWN')
+            project_data_file_path = getattr(self.controller, 'project_data_file_path', None)
+            
+            # 尝试从项目数据文件中加载更多信息
+            requested_by = ""
+            location = ""
+            product_description = ""
+            tests_to_be_performed = ""
+            
+            if project_data_file_path and os.path.exists(project_data_file_path):
+                try:
+                    import json
+                    with open(project_data_file_path, 'r', encoding='utf-8') as f:
+                        project_data = json.load(f)
+                    
+                    # 从项目数据中提取所需字段
+                    requested_by = project_data.get('requested_by', '')
+                    location = project_data.get('location', '')
+                    product_description = project_data.get('product_description', '')
+                    tests_to_be_performed = project_data.get('tests_to_be_performed', '')
+                except Exception as e:
+                    logger.warning(f"读取项目数据文件失败: {e}")
+            
+            # 解析Matrix数据结构
+            matrix_data_structure.parse_matrix_to_structure(self.controller.data_model.rows)
+            
+            # 创建费用表导出服务实例
+            from src.features.matrix.service.export.service.fee_sheet_export_service import FeeSheetExportService
+            fee_sheet_service = FeeSheetExportService()
+            
+            # 调用服务生成费用表
+            success = fee_sheet_service.export_fee_sheet(
+                matrix_data_structure=matrix_data_structure,
+                dl_number=dl_number,
+                requested_by=requested_by,
+                location=location,
+                product_description=product_description,
+                tests_to_be_performed=tests_to_be_performed
+            )
+            
+            if success:
+                logger.info("费用表生成成功")
+                from PyQt5.QtWidgets import QMessageBox
+                QMessageBox.information(self.view, "成功", f"费用表已成功生成并保存到:\n{fee_sheet_service.output_dir}")
+            else:
+                logger.error("费用表生成失败")
+                QMessageBox.warning(self.view, "错误", "费用表生成失败，请检查日志")
+                
+        except Exception as e:
+            logger.error(f"生成费用表时出错: {e}", exc_info=True)
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.warning(self.view, "错误", f"生成费用表时出错: {str(e)}")

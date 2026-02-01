@@ -303,6 +303,10 @@ class MatrixDialog(QWidget):
         """生成Test Record文档 - View层事件触发"""
         self.event_handlers.on_generate_test_record_clicked()
 
+    def _generate_cost_sheet(self):
+        """生成费用表 - View层事件触发"""
+        self.event_handlers.on_generate_cost_sheet_clicked()
+
     def _auto_import_matrix_from_project(self):
         """
         从项目文件夹自动导入matrix.xlsx文件

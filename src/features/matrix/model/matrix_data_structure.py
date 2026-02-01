@@ -121,18 +121,6 @@ class MatrixDataStructure:
                 self.group_col_indices[cleaned_group_name] = col_index
                 self.group_steps[cleaned_group_name] = []
 
-    # 该方法已被新的 _restructure_group_steps 方法替代
-    # 保留空实现以防止其他地方调用时报错
-    def _extract_test_items(self, matrix_data: List[List[str]], sample_size_row_index: int) -> None:
-        """
-        从Matrix数据中提取测试项（已废弃）
-        
-        Args:
-            matrix_data: Matrix数据
-            sample_size_row_index: 样本大小行索引
-        """
-        pass
-
     def _restructure_group_steps(self, matrix_data: List[List[str]], sample_size_row_index: int) -> None:
         """
         重构各测试组别的步骤内容信息
