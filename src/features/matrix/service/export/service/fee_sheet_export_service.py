@@ -129,7 +129,16 @@ class FeeSheetExportService:
                 if not tests_list:
                     continue
                 
-                num_tests = len(tests_list)
+                # 去重：对于每个组别，同名的test只需要保留一次
+                unique_tests = []
+                seen_tests = set()
+                for test_info in tests_list:
+                    test_name = test_info.get('test', '').strip().lower()
+                    if test_name and test_name not in seen_tests:
+                        unique_tests.append(test_info)
+                        seen_tests.add(test_name)
+                
+                num_tests = len(unique_tests)
                 
                 # 获取第5行和第6行的列数
                 max_cols = used_range.Columns.Count
@@ -138,7 +147,7 @@ class FeeSheetExportService:
                 if group_idx == 0:
                     # Group 1使用第6行作为第一个测试项目，但A列合并需要包含第5行
                     # 首先在第6行填入第一个测试项目
-                    worksheet.Cells(current_row, 3).Value = tests_list[0].get('test', '')
+                    worksheet.Cells(current_row, 3).Value = unique_tests[0].get('test', '') if unique_tests else ''
                     
                     # 如果该组有多个测试项目，需要插入新的行来存放额外的测试项目
                     # 使用Insert方法插入新行而不是覆盖现有行
@@ -159,9 +168,9 @@ class FeeSheetExportService:
                             row_to_insert.Insert()
                             
                             # 填入对应的测试项目名称
-                            if i + 1 < len(tests_list):
-                                worksheet.Cells(insert_position, 3).Value = tests_list[i + 1].get('test', '')
-                                logger.debug(f"  在第{insert_position}行C列插入新行并填入测试项目: {tests_list[i + 1].get('test', '')}")
+                            if i + 1 < len(unique_tests):
+                                worksheet.Cells(insert_position, 3).Value = unique_tests[i + 1].get('test', '')
+                                logger.debug(f"  在第{insert_position}行C列插入新行并填入测试项目: {unique_tests[i + 1].get('test', '')}")
                     
                     # Group 1的A列合并需要包含第5行到当前最后一行
                     # 所以合并范围是第5行到第(current_row + num_tests - 1)行
@@ -210,9 +219,9 @@ class FeeSheetExportService:
                         row_to_insert.Insert()
                         
                         # 填入对应的测试项目名称
-                        if i < len(tests_list):
-                            worksheet.Cells(insert_position, 3).Value = tests_list[i].get('test', '')
-                            logger.debug(f"  在第{insert_position}行插入新行并填入测试项目: {tests_list[i].get('test', '')}")
+                        if i < len(unique_tests):
+                            worksheet.Cells(insert_position, 3).Value = unique_tests[i].get('test', '')
+                            logger.debug(f"  在第{insert_position}行插入新行并填入测试项目: {unique_tests[i].get('test', '')}")
                     
                     # 计算合并范围：起始行(new_group_start) 到 结束行(new_group_start + num_tests)
                     # 如果有n个测试项目，总共需要n+1行（1个起始行 + n个测试项目行）
@@ -230,7 +239,7 @@ class FeeSheetExportService:
                     # 更新当前行号，为下一组留出空间
                     current_row = actual_end_row + 1  # 跳过已使用的行
                     
-                logger.debug(f"  组别{group_name}填充完成")
+                logger.debug(f"  组别{group_name}填充完成，原始测试数: {len(tests_list)}, 去重后测试数: {num_tests}")
             
             # 尝试恢复原始行高，以防止插入操作影响原有行的行高
             for row, height in original_heights.items():
