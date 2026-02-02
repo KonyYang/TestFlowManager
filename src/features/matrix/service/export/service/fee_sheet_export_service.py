@@ -249,6 +249,21 @@ class FeeSheetExportService:
                     # 如果无法设置行高，跳过
                     continue
             
+            # 设置插入行的自适应高度
+            # 从第6行开始到当前行-1（即最后一个插入的行）
+            if current_row > 6:
+                try:
+                    # 自动调整从第6行到最后一行的行高
+                    auto_fit_range = worksheet.Range(
+                        worksheet.Cells(6, 1),
+                        worksheet.Cells(current_row - 1, max_cols)
+                    )
+                    # 自动调整行高以适应内容
+                    auto_fit_range.EntireRow.AutoFit()
+                    logger.info(f"已设置第6行到第{current_row - 1}行的自适应行高")
+                except Exception as e:
+                    logger.warning(f"设置自适应行高时出错: {e}")
+            
             logger.info("测试组别数据填充完成")
             return True
             

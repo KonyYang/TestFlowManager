@@ -249,10 +249,10 @@ def initialize_fee_evaluation_form(template_dir: str, target_folder: str, new_fi
         # 数据传输
         try:
             # 示例映射关系（请根据实际需求调整）
-            ws.Range("B2").Value = dl_number
-            ws.Range("E2").Value = f"{product_description} {tests_to_be_performed}"
-            ws.Range("B3").Value = requested_by
-            ws.Range("E3").Value = location
+            ws.Range("D2").Value = dl_number
+            ws.Range("G2").Value = f"{product_description} {tests_to_be_performed}"
+            ws.Range("D3").Value = requested_by
+            ws.Range("G3").Value = location
 
             logger.info("数据已成功写入费用评估表")
         except Exception as e:
