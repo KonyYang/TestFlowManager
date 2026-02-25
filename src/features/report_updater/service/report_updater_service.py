@@ -302,11 +302,34 @@ class ReportUpdaterService:
             # 检查必要的源文件是否存在
             if not os.path.exists(excel_file_path):
                 logger.error(f"Excel file does not exist: {excel_file_path}")
+                # 提供详细的错误信息，包括配置来源
+                import sys
+                config_source = "生产环境配置(D:\\TestFlowManager\\config\\paths.ini)" if getattr(sys, 'frozen', False) else "开发环境配置(src/app/config/paths.ini)"
+                error_details = [
+                    f"配置来源: {config_source}",
+                    f"Excel文件路径: {excel_file_path}",
+                    f"当前工作目录: {os.getcwd()}"
+                ]
+                
+                from PyQt5.QtWidgets import QMessageBox
+                msg_box = QMessageBox()
+                msg_box.setIcon(QMessageBox.Critical)
+                msg_box.setWindowTitle("Excel文件未找到")
+                msg_box.setText("无法找到设备数据源Excel文件")
+                msg_box.setInformativeText("\n".join(error_details))
+                msg_box.setDetailedText(
+                    f"详细信息:\n"
+                    f"- 配置文件路径: {self._get_actual_config_path()}\n"
+                    f"- Excel文件路径: {excel_file_path}\n"
+                    f"- 文件是否存在: {os.path.exists(excel_file_path)}\n"
+                    f"- 当前运行模式: {'可执行文件模式' if getattr(sys, 'frozen', False) else '开发模式'}"
+                )
+                msg_box.exec_()
                 return False
             
             if not os.path.exists(source_doc_path):
                 logger.error(f"Source document does not exist: {source_doc_path}")
-                 # 检查是否在项目目录下查找，以确定错误信息的类型
+                # 检查是否在项目目录下查找，以确定错误信息的类型
                 project_dir = os.path.dirname(source_doc_path)
                 if hasattr(self.config_manager, 'project_path') and self.config_manager.project_path and project_dir == self.config_manager.project_path:
                     # 在项目目录下查找但未找到，显示项目相关错误信息
@@ -315,13 +338,32 @@ class ReportUpdaterService:
                     # 在默认路径下查找但未找到，显示默认路径错误信息
                     error_message = "默认路径下没有找到EquipmentID.docx"
                 
+                # 提供详细的错误信息
+                import sys
+                config_source = "生产环境配置(D:\\TestFlowManager\\config\\paths.ini)" if getattr(sys, 'frozen', False) else "开发环境配置(src/app/config/paths.ini)"
+                error_details = [
+                    f"错误类型: {error_message}",
+                    f"配置来源: {config_source}",
+                    f"查找路径: {source_doc_path}",
+                    f"项目路径: {getattr(self.config_manager, 'project_path', '无')}",
+                    f"当前工作目录: {os.getcwd()}"
+                ]
+                
                 # 弹出提醒信息，根据项目状态显示不同的错误信息。然后退出。
                 from PyQt5.QtWidgets import QMessageBox
                 msg_box = QMessageBox()
                 msg_box.setIcon(QMessageBox.Warning)
                 msg_box.setWindowTitle("文件未找到")
                 msg_box.setText(error_message)
-                msg_box.setInformativeText(f"系统在以下位置查找文件:\n{source_doc_path}")
+                msg_box.setInformativeText("\n".join(error_details))
+                msg_box.setDetailedText(
+                    f"详细调试信息:\n"
+                    f"- 配置文件实际路径: {self._get_actual_config_path()}\n"
+                    f"- 源文档路径: {source_doc_path}\n"
+                    f"- 文件是否存在: {os.path.exists(source_doc_path)}\n"
+                    f"- 项目路径设置: {getattr(self.config_manager, 'project_path', '未设置')}\n"
+                    f"- 运行模式: {'可执行文件模式' if getattr(sys, 'frozen', False) else '开发模式'}"
+                )
                 msg_box.exec_()
                 return False
 
@@ -832,6 +874,26 @@ class ReportUpdaterService:
         except Exception as e:
             logger.error(f"Error scanning for equipment tables in {report_path}: {e}")
             return []
+    
+    def _get_actual_config_path(self) -> str:
+        """获取实际使用的配置文件路径"""
+        try:
+            from src.core.config_manager import config_manager
+            # 通过反射获取实际的配置文件路径
+            import sys
+            if getattr(sys, 'frozen', False):
+                # 可执行文件模式
+                production_path = os.path.join("D:", "TestFlowManager", "config", "paths.ini")
+                if os.path.exists(production_path):
+                    return production_path
+                else:
+                    executable_dir = os.path.dirname(sys.executable)
+                    return os.path.join(executable_dir, "config", "paths.ini")
+            else:
+                # 开发模式
+                return os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "app", "config", "paths.ini")
+        except Exception as e:
+            return f"无法确定配置路径: {e}"
     
     def get_report_metadata(self, report_path: str) -> Dict[str, Any]:
         """

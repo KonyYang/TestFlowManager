@@ -222,22 +222,16 @@ def initialize_fee_evaluation_form(template_dir: str, target_folder: str, new_fi
         sheet_names = [sheet.Name for sheet in wb.Sheets]
         logger.debug(f"当前工作簿包含的工作表: {sheet_names}")
 
-        # 检查目标工作表是否存在
-        target_sheet_name = "Testing Prices "
-        if target_sheet_name not in sheet_names:
-            logger.error(f"未找到名为 '{target_sheet_name}' 的工作表")
+        # 直接使用第一个工作表（与费用表生成逻辑保持一致）
+        try:
+            ws = wb.Sheets(1)
+            logger.info(f"使用第一个工作表: {ws.Name}")
+        except Exception as e:
+            logger.error(f"获取第一个工作表失败: {e}")
             wb.Close(SaveChanges=False)
             release_excel_app()
             return False
 
-        # 获取目标工作表
-        try:
-            ws = wb.Sheets(target_sheet_name)
-        except Exception as e:
-            logger.error(f"获取工作表失败: {e}")
-            wb.Close(SaveChanges=False)
-            release_excel_app()
-            return False
 
         # 提取数据
         dl_number = application_data.get("DL", "")

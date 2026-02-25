@@ -94,10 +94,14 @@ class ConfigManager:
                     for key, value in paths_config['Defaults'].items():
                         self.set(f"defaults.{key.lower()}", value)
                         
-                # 加载设备数据源配置
-                if 'EquipmentDataSources' in paths_config:
-                    for key, value in paths_config['EquipmentDataSources'].items():
-                        self.set(f"equipment_data_sources.{key.lower()}", value)
+                # 加载设备数据源配置（兼容大小写）
+                equipment_sections = ['EquipmentDataSources', 'EQUIPMENT_DATA_SOURCES', 'equipmentdatasources']
+                for section_name in equipment_sections:
+                    if section_name in paths_config:
+                        print(f"[INFO] Loading equipment data sources from section: {section_name}")
+                        for key, value in paths_config[section_name].items():
+                            self.set(f"equipment_data_sources.{key.lower()}", value)
+                        break  # 找到第一个匹配的节就停止
             else:
                 print(f"[DEBUG] Paths config file not found: {paths_path}")
         except Exception as e:

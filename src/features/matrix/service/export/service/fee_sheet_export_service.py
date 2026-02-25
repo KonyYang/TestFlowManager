@@ -25,6 +25,23 @@ class FeeSheetExportService:
         self.output_dir = r"D:\OutFile"
         self.excel_app = None
 
+    def _sanitize_filename(self, filename: str) -> str:
+        """
+        清理文件名中的非法字符
+        :param filename: 原始文件名
+        :return: 清理后的文件名
+        """
+        import re
+        # 移除Windows文件系统中的非法字符
+        illegal_chars = r'[<>:"/\|?*]'
+        sanitized = re.sub(illegal_chars, '_', filename)
+        # 移除首尾空格和点号
+        sanitized = sanitized.strip('. ')
+        # 限制长度
+        if len(sanitized) > 100:
+            sanitized = sanitized[:100]
+        return sanitized
+
     def _get_group_tests_from_matrix(self, matrix_data_structure: MatrixDataStructure) -> Dict[str, List[Dict[str, Any]]]:
         """
         从Matrix数据结构获取每个组别的测试项目信息
@@ -61,6 +78,91 @@ class FeeSheetExportService:
 
         return group_tests_info
 
+    def _find_fee_sheet_folder_and_file(self, project_path: str, dl_number: str) -> Optional[tuple]:
+        """
+        在项目目录下查找包含DL编号的子文件夹，并在其中查找费用表文件
+        :param project_path: 项目路径
+        :param dl_number: DL编号
+        :return: (子文件夹路径, 费用表文件路径)的元组，如果未找到子文件夹则返回None
+        """
+        try:
+            logger.debug(f"在项目路径 {project_path} 中查找包含 '{dl_number}' 的子文件夹")
+            
+            # 查找包含DL编号的子文件夹
+            if not os.path.exists(project_path):
+                logger.warning(f"项目路径不存在: {project_path}")
+                return None
+                
+            # 遍历项目目录下的所有子文件夹
+            for item in os.listdir(project_path):
+                item_path = os.path.join(project_path, item)
+                if os.path.isdir(item_path) and dl_number in item:
+                    logger.debug(f"找到包含DL编号的子文件夹: {item}")
+                    folder_path = item_path
+                    
+                    # 在该子文件夹中查找包含"Testing Fee Evaluation"且以dl_number开头的Excel文件
+                    fee_sheet_path = None
+                    for file in os.listdir(item_path):
+                        if (file.lower().endswith(('.xls', '.xlsx')) and 
+                            "testing fee evaluation" in file.lower() and
+                            file.startswith(dl_number)):
+                            fee_sheet_path = os.path.join(item_path, file)
+                            logger.info(f"找到费用表文件: {fee_sheet_path}")
+                            break
+                    
+                    if fee_sheet_path:
+                        logger.debug(f"在子文件夹 {item} 中找到费用表文件")
+                        return (folder_path, fee_sheet_path)
+                    else:
+                        logger.debug(f"在子文件夹 {item} 中未找到费用表文件")
+                        return (folder_path, None)
+            
+            logger.info(f"未找到包含 '{dl_number}' 的子文件夹")
+            return None
+            
+        except Exception as e:
+            logger.error(f"查找费用表文件夹和文件时出错: {e}", exc_info=True)
+            return None
+    
+    def _find_existing_fee_sheet(self, project_path: str, dl_number: str) -> Optional[str]:
+        """
+        在项目目录下查找已存在的费用表文件（保持向后兼容）
+        :param project_path: 项目路径
+        :param dl_number: DL编号
+        :return: 找到的费用表文件路径，未找到则返回None
+        """
+        try:
+            logger.debug(f"在项目路径 {project_path} 中查找包含 '{dl_number}' 的子文件夹")
+            
+            # 查找包含DL编号的子文件夹
+            if not os.path.exists(project_path):
+                logger.warning(f"项目路径不存在: {project_path}")
+                return None
+                
+            # 遍历项目目录下的所有子文件夹
+            for item in os.listdir(project_path):
+                item_path = os.path.join(project_path, item)
+                if os.path.isdir(item_path) and dl_number in item:
+                    logger.debug(f"找到包含DL编号的子文件夹: {item}")
+                    
+                    # 在该子文件夹中查找包含"Testing Fee Evaluation"且以dl_number开头的Excel文件
+                    for file in os.listdir(item_path):
+                        if (file.lower().endswith(('.xls', '.xlsx')) and 
+                            "testing fee evaluation" in file.lower() and
+                            file.startswith(dl_number)):
+                            fee_sheet_path = os.path.join(item_path, file)
+                            logger.info(f"找到费用表文件: {fee_sheet_path}")
+                            return fee_sheet_path
+                    
+                    logger.debug(f"在子文件夹 {item} 中未找到符合条件的费用表文件")
+            
+            logger.info(f"未找到包含 '{dl_number}' 且含有费用表的子文件夹")
+            return None
+            
+        except Exception as e:
+            logger.error(f"查找现有费用表文件时出错: {e}", exc_info=True)
+            return None
+    
     def _find_fee_sheet_templates(self) -> List[str]:
         """
         查找费用表模板文件
@@ -78,6 +180,23 @@ class FeeSheetExportService:
         
         logger.info(f"找到 {len(fee_sheet_templates)} 个费用表模板文件")
         return fee_sheet_templates
+
+    def _sanitize_filename(self, filename: str) -> str:
+        """
+        清理文件名中的非法字符
+        :param filename: 原始文件名
+        :return: 清理后的文件名
+        """
+        import re
+        # 移除Windows文件系统中的非法字符
+        illegal_chars = r'[<>:"/\|?*]'
+        sanitized = re.sub(illegal_chars, '_', filename)
+        # 移除首尾空格和点号
+        sanitized = sanitized.strip('. ')
+        # 限制长度
+        if len(sanitized) > 100:
+            sanitized = sanitized[:100]
+        return sanitized
 
     def _fill_group_tests_data(self, worksheet, group_tests_info: Dict[str, List[Dict[str, Any]]]) -> bool:
         """
@@ -129,16 +248,9 @@ class FeeSheetExportService:
                 if not tests_list:
                     continue
                 
-                # 去重：对于每个组别，同名的test只需要保留一次
-                unique_tests = []
-                seen_tests = set()
-                for test_info in tests_list:
-                    test_name = test_info.get('test', '').strip().lower()
-                    if test_name and test_name not in seen_tests:
-                        unique_tests.append(test_info)
-                        seen_tests.add(test_name)
-                
-                num_tests = len(unique_tests)
+                # 不进行去重，显示所有步骤（包括重复的步骤）
+                all_tests = tests_list
+                num_tests = len(all_tests)
                 
                 # 获取第5行和第6行的列数
                 max_cols = used_range.Columns.Count
@@ -147,7 +259,7 @@ class FeeSheetExportService:
                 if group_idx == 0:
                     # Group 1使用第6行作为第一个测试项目，但A列合并需要包含第5行
                     # 首先在第6行填入第一个测试项目
-                    worksheet.Cells(current_row, 3).Value = unique_tests[0].get('test', '') if unique_tests else ''
+                    worksheet.Cells(current_row, 3).Value = all_tests[0].get('test', '') if all_tests else ''
                     
                     # 如果该组有多个测试项目，需要插入新的行来存放额外的测试项目
                     # 使用Insert方法插入新行而不是覆盖现有行
@@ -168,9 +280,9 @@ class FeeSheetExportService:
                             row_to_insert.Insert()
                             
                             # 填入对应的测试项目名称
-                            if i + 1 < len(unique_tests):
-                                worksheet.Cells(insert_position, 3).Value = unique_tests[i + 1].get('test', '')
-                                logger.debug(f"  在第{insert_position}行C列插入新行并填入测试项目: {unique_tests[i + 1].get('test', '')}")
+                            if i + 1 < len(all_tests):
+                                worksheet.Cells(insert_position, 3).Value = all_tests[i + 1].get('test', '')
+                                logger.debug(f"  在第{insert_position}行C列插入新行并填入测试项目: {all_tests[i + 1].get('test', '')}")
                     
                     # Group 1的A列合并需要包含第5行到当前最后一行
                     # 所以合并范围是第5行到第(current_row + num_tests - 1)行
@@ -219,9 +331,9 @@ class FeeSheetExportService:
                         row_to_insert.Insert()
                         
                         # 填入对应的测试项目名称
-                        if i < len(unique_tests):
-                            worksheet.Cells(insert_position, 3).Value = unique_tests[i].get('test', '')
-                            logger.debug(f"  在第{insert_position}行插入新行并填入测试项目: {unique_tests[i].get('test', '')}")
+                        if i < len(all_tests):
+                            worksheet.Cells(insert_position, 3).Value = all_tests[i].get('test', '')
+                            logger.debug(f"  在第{insert_position}行插入新行并填入测试项目: {all_tests[i].get('test', '')}")
                     
                     # 计算合并范围：起始行(new_group_start) 到 结束行(new_group_start + num_tests)
                     # 如果有n个测试项目，总共需要n+1行（1个起始行 + n个测试项目行）
@@ -239,7 +351,7 @@ class FeeSheetExportService:
                     # 更新当前行号，为下一组留出空间
                     current_row = actual_end_row + 1  # 跳过已使用的行
                     
-                logger.debug(f"  组别{group_name}填充完成，原始测试数: {len(tests_list)}, 去重后测试数: {num_tests}")
+                logger.debug(f"  组别{group_name}填充完成，测试数: {num_tests}（包含所有步骤）")
             
             # 尝试恢复原始行高，以防止插入操作影响原有行的行高
             for row, height in original_heights.items():
@@ -271,12 +383,12 @@ class FeeSheetExportService:
             logger.error(f"填充测试组别数据时出错: {e}", exc_info=True)
             return False
 
-    def export_fee_sheet(self, matrix_data_structure: MatrixDataStructure, 
+    def export_fee_sheet(self, matrix_data_structure: MatrixDataStructure,
                          dl_number: str = "DL-UNKNOWN", 
                          requested_by: str = "", 
                          location: str = "",
                          product_description: str = "",
-                         tests_to_be_performed: str = "") -> bool:
+                         tests_to_be_performed: str = "") -> tuple:
         """
         导出费用表
         :param matrix_data_structure: Matrix数据结构
@@ -290,14 +402,112 @@ class FeeSheetExportService:
         try:
             logger.info("开始导出费用表")
             
-            # 创建输出目录
-            os.makedirs(self.output_dir, exist_ok=True)
+            # 获取当前项目路径
+            from src.core.state_manager import state_manager
+            current_project = state_manager.get_state("current_project")
             
-            # 查找费用表模板
-            templates = self._find_fee_sheet_templates()
-            if not templates:
-                logger.error("未找到费用表模板文件")
-                return False
+            # 确定输出目录和文件名
+            if current_project and os.path.exists(current_project):
+                # 项目已打开，使用项目名称作为DL编号
+                project_name = os.path.basename(current_project)
+                if project_name.startswith("DL-"):
+                    dl_number = project_name
+                
+                logger.info(f"检测到已打开项目: {current_project}")
+                logger.info(f"使用项目名称作为DL编号: {dl_number}")
+                
+                # 在项目目录下查找子文件夹和现有费用表文件
+                found_folder_info = self._find_fee_sheet_folder_and_file(current_project, dl_number)
+                
+                if found_folder_info:
+                    folder_path, fee_sheet_path = found_folder_info
+                    if fee_sheet_path:
+                        # 找到已存在的费用表文件，直接操作该文件
+                        logger.info(f"找到已存在的费用表文件: {fee_sheet_path}")
+                        output_path = fee_sheet_path
+                        output_dir = folder_path
+                        # 跳过模板复制步骤，直接使用现有文件
+                        use_existing_file = True
+                        
+                        # 从子文件夹名称中提取product_description
+                        folder_name = os.path.basename(folder_path)
+                        if folder_name.startswith(dl_number):
+                            product_description = folder_name[len(dl_number):].strip()
+                            logger.debug(f"从子文件夹名称提取的product_description: {product_description}")
+                    else:
+                        # 找到子文件夹但未找到费用表文件，需要生成新文件
+                        logger.info(f"在子文件夹 {folder_path} 中未找到费用表文件，将生成新文件")
+                        output_dir = folder_path
+                        
+                        # 构造费用表文件名
+                        folder_name = os.path.basename(folder_path)
+                        fee_sheet_filename = f"{folder_name} Testing Fee Evaluation.xls"
+                        output_file_name = fee_sheet_filename
+                        
+                        # 构建目标文件路径
+                        output_path = os.path.abspath(os.path.join(output_dir, output_file_name))
+                        logger.debug(f"目标文件绝对路径: {output_path}")
+                        
+                        use_existing_file = False
+                        
+                        # 从子文件夹名称中提取product_description
+                        folder_name = os.path.basename(folder_path)
+                        if folder_name.startswith(dl_number):
+                            product_description = folder_name[len(dl_number):].strip()
+                            logger.debug(f"从子文件夹名称提取的product_description: {product_description}")
+                else:
+                    # 未找到包含DL编号的子文件夹，需要创建新文件夹
+                    logger.info("未找到包含DL编号的子文件夹，将创建新文件夹并生成新文件")
+                    
+                    # 参考excel_initializer的路径构建思路
+                    # 构造项目子文件夹名称
+                    project_subfolder_name = f"{dl_number} {product_description} {tests_to_be_performed}".strip()
+                    # 清理文件名中的非法字符
+                    project_subfolder_name = self._sanitize_filename(project_subfolder_name)
+                    
+                    # 构建目标文件夹路径
+                    output_dir = os.path.abspath(os.path.join(current_project, project_subfolder_name))
+                    logger.debug(f"目标文件夹绝对路径: {output_dir}")
+                    
+                    # 确保目标文件夹存在
+                    os.makedirs(output_dir, exist_ok=True)
+                    
+                    # 构造费用表文件名
+                    project_subfolder_name = f"{dl_number} {product_description} {tests_to_be_performed}".strip()
+                    project_subfolder_name = self._sanitize_filename(project_subfolder_name)
+                    fee_sheet_filename = f"{project_subfolder_name} Testing Fee Evaluation.xls"
+                    output_file_name = fee_sheet_filename
+                    
+                    # 构建目标文件路径
+                    output_path = os.path.abspath(os.path.join(output_dir, output_file_name))
+                    logger.debug(f"目标文件绝对路径: {output_path}")
+                    
+                    use_existing_file = False
+                    
+                logger.info(f"费用表将保存到项目路径: {output_path}")
+            else:
+                # 没有打开项目，使用默认输出逻辑
+                logger.info("未检测到打开的项目，使用默认输出路径")
+                os.makedirs(self.output_dir, exist_ok=True)
+                
+                # 生成输出文件名
+                timestamp = time.strftime("%Y%m%d_%H%M%S")
+                templates = self._find_fee_sheet_templates()
+                if not templates:
+                    logger.error("未找到费用表模板文件")
+                    return False
+                
+                template_path = templates[0]  # 使用第一个模板
+                file_name = os.path.basename(template_path)
+                name_part, ext = os.path.splitext(file_name)
+                output_file_name = f"{dl_number}_{name_part}_FeeSheet_{timestamp}{ext}"
+                output_path = os.path.join(self.output_dir, output_file_name)
+                output_dir = self.output_dir
+                
+                logger.info(f"费用表将保存到默认路径: {output_path}")
+            
+            # 确保输出目录存在
+            os.makedirs(output_dir, exist_ok=True)
             
             # 获取测试项目信息
             group_tests_info = self._get_group_tests_from_matrix(matrix_data_structure)
@@ -305,41 +515,62 @@ class FeeSheetExportService:
             # 初始化COM
             pythoncom.CoInitialize()
             
-            # 处理每个模板文件
-            for template_path in templates:
-                logger.info(f"正在处理模板: {template_path}")
+            # 处理文件
+            logger.info(f"正在处理费用表文件: {output_path}")
+            
+            # 只有在需要生成新文件时才复制模板
+            if not use_existing_file:
+                # 查找费用表模板
+                templates = self._find_fee_sheet_templates()
+                if not templates:
+                    logger.error("未找到费用表模板文件")
+                    return False
                 
-                # 生成输出文件名
-                timestamp = time.strftime("%Y%m%d_%H%M%S")
-                file_name = os.path.basename(template_path)
-                name_part, ext = os.path.splitext(file_name)
-                output_file_name = f"{dl_number}_{name_part}_FeeSheet_{timestamp}{ext}"
-                output_path = os.path.join(self.output_dir, output_file_name)
+                # 如果是默认输出模式，重新生成文件名
+                if not (current_project and os.path.exists(current_project)):
+                    timestamp = time.strftime("%Y%m%d_%H%M%S")
+                    template_path = templates[0]
+                    file_name = os.path.basename(template_path)
+                    name_part, ext = os.path.splitext(file_name)
+                    output_file_name = f"{dl_number}_{name_part}_FeeSheet_{timestamp}{ext}"
+                    output_path = os.path.join(output_dir, output_file_name)
+                else:
+                    template_path = templates[0]
                 
                 # 复制模板
                 shutil.copy2(template_path, output_path)
-                
-                # 使用win32com打开Excel
-                excel_app = None
-                wb = None
-                ws = None
+                logger.info(f"已复制模板文件到: {output_path}")
+            
+            # 使用win32com打开Excel（无论是否使用现有文件都要执行）
+            excel_app = None
+            wb = None
+            ws = None
+            try:
+                excel_app = win32.Dispatch("Excel.Application")
+                # 有些版本的Excel可能不支持直接设置Visible和DisplayAlerts属性
                 try:
-                    excel_app = win32.Dispatch("Excel.Application")
-                    # 有些版本的Excel可能不支持直接设置Visible和DisplayAlerts属性
-                    try:
-                        excel_app.Visible = False
-                    except:
-                        pass  # 如果不能设置Visible属性，就跳过
-                    try:
-                        excel_app.DisplayAlerts = False
-                    except:
-                        pass  # 如果不能设置DisplayAlerts属性，就跳过
-                    
-                    # 打开文件
-                    wb = excel_app.Workbooks.Open(output_path)
-                    ws = wb.Sheets(1)
-                    
-                    # 填充数据，保留原有格式
+                    excel_app.Visible = False
+                except:
+                    pass  # 如果不能设置Visible属性，就跳过
+                try:
+                    excel_app.DisplayAlerts = False
+                except:
+                    pass  # 如果不能设置DisplayAlerts属性，就跳过
+                
+                # 打开文件
+                wb = excel_app.Workbooks.Open(output_path)
+                ws = wb.Sheets(1)
+                
+                # 填充测试组别数据（这是主要功能，无论是否使用现有文件都要执行）
+                success = self._fill_group_tests_data(ws, group_tests_info)
+                
+                if not success:
+                    logger.warning(f"填充测试组别数据失败: {output_path}")
+                    return False
+                
+                # 只有在不是使用现有文件时才填充基本信息
+                if not use_existing_file:
+                    # 填充基本信息，保留原有格式
                     # D2 (第2行第4列) - 只设置Value，不改变格式
                     if dl_number:
                         ws.Range("D2").Value = dl_number
@@ -354,40 +585,35 @@ class FeeSheetExportService:
                     if location:
                         ws.Range("G3").Value = location
                     
-                    # 填充测试组别数据
-                    success = self._fill_group_tests_data(ws, group_tests_info)
-                    
-                    if not success:
-                        logger.warning(f"填充测试组别数据失败: {output_path}")
-                        continue
-                    
-                    logger.info(f"数据已填充到: {output_path}，格式已保留")
-                    
-                    # 保存
-                    wb.Save()
-                    
-                except Exception as e:
-                    logger.error(f"处理文件时出错: {e}", exc_info=True)
-                    return False
-                finally:
-                    # 正确关闭工作簿和Excel应用
-                    if wb:
-                        try:
-                            wb.Close(SaveChanges=True)
-                        except:
-                            pass
-                    if excel_app:
-                        try:
-                            excel_app.Quit()
-                        except:
-                            pass
+                    logger.info(f"基本信息和测试组别数据已填充到: {output_path}，格式已保留")
+                else:
+                    logger.info(f"使用现有费用表文件: {output_path}，已填充测试组别数据")
+                
+                # 保存
+                wb.Save()
+                
+            except Exception as e:
+                logger.error(f"处理文件时出错: {e}", exc_info=True)
+                return False
+            finally:
+                # 正确关闭工作簿和Excel应用
+                if wb:
+                    try:
+                        wb.Close(SaveChanges=True)
+                    except:
+                        pass
+                if excel_app:
+                    try:
+                        excel_app.Quit()
+                    except:
+                        pass
         
             # 在所有文件处理完成后取消COM初始化
             pythoncom.CoUninitialize()
             
             logger.info("费用表导出完成！")
-            return True
+            return (True, output_path)
             
         except Exception as e:
             logger.error(f"导出费用表时出错: {e}", exc_info=True)
-            return False
+            return (False, None)

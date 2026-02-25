@@ -369,8 +369,8 @@ class MatrixEventHandlers:
             from src.features.matrix.service.export.service.fee_sheet_export_service import FeeSheetExportService
             fee_sheet_service = FeeSheetExportService()
             
-            # 调用服务生成费用表
-            success = fee_sheet_service.export_fee_sheet(
+            # 调用服务生成费用表，获取返回的实际保存路径
+            success, save_path = fee_sheet_service.export_fee_sheet(
                 matrix_data_structure=matrix_data_structure,
                 dl_number=dl_number,
                 requested_by=requested_by,
@@ -381,13 +381,12 @@ class MatrixEventHandlers:
             
             if success:
                 logger.info("费用表生成成功")
-                from PyQt5.QtWidgets import QMessageBox
-                QMessageBox.information(self.view, "成功", f"费用表已成功生成并保存到:\n{fee_sheet_service.output_dir}")
+                # 直接使用服务返回的实际保存路径
+                QMessageBox.information(self.view, "成功", f"费用表已成功生成并保存到:\n{save_path}")
             else:
                 logger.error("费用表生成失败")
                 QMessageBox.warning(self.view, "错误", "费用表生成失败，请检查日志")
                 
         except Exception as e:
             logger.error(f"生成费用表时出错: {e}", exc_info=True)
-            from PyQt5.QtWidgets import QMessageBox
             QMessageBox.warning(self.view, "错误", f"生成费用表时出错: {str(e)}")

@@ -5,6 +5,7 @@ Excel工具模块
 import os
 from openpyxl import Workbook
 from typing import List, Optional, Any
+import pythoncom
 from src.core.logger import logger
 
 # 共享的Excel应用实例
@@ -19,15 +20,43 @@ def get_shared_excel_app():
 
     if _shared_excel_app is None:
         try:
-            import pythoncom
-            if not _excel_initialized:
+            # 确保COM库已初始化
+            try:
                 pythoncom.CoInitialize()
                 _excel_initialized = True
+            except pythoncom.com_error:
+                # 如果已经初始化，则忽略
+                pass
+            
             import win32com.client
             _shared_excel_app = win32com.client.Dispatch("Excel.Application")
-            _shared_excel_app.Visible = False
-            _shared_excel_app.DisplayAlerts = False
-            logger.debug("Created new shared Excel application instance")
+            
+            # 等待Excel应用程序完全就绪
+            import time
+            time.sleep(0.5)
+            
+            # 安全地设置Excel属性，捕获可能的错误
+            try:
+                _shared_excel_app.Visible = False
+            except:
+                # 如果无法设置Visible属性，继续执行
+                pass
+            
+            try:
+                _shared_excel_app.DisplayAlerts = False
+            except:
+                # 如果无法设置DisplayAlerts属性，继续执行
+                pass
+                
+            # 确认Excel应用程序确实可用
+            try:
+                # 尝试访问一个简单的属性来确认Excel已准备好
+                _ = _shared_excel_app.Version
+                logger.debug("Created new shared Excel application instance")
+            except Exception as e:
+                logger.error(f"Excel application not ready: {e}")
+                return None
+                
         except Exception as e:
             logger.error(f"Failed to initialize Excel application: {e}")
             return None
@@ -65,7 +94,6 @@ def release_excel_app():
         # 反初始化COM
         if _excel_initialized:
             try:
-                import pythoncom
                 pythoncom.CoUninitialize()
                 _excel_initialized = False
                 logger.debug("COM library uninitialized")
