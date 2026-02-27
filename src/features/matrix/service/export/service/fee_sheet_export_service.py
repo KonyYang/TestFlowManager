@@ -504,6 +504,9 @@ class FeeSheetExportService:
                 output_path = os.path.join(self.output_dir, output_file_name)
                 output_dir = self.output_dir
                 
+                # 在默认输出模式下总是生成新文件
+                use_existing_file = False
+                
                 logger.info(f"费用表将保存到默认路径: {output_path}")
             
             # 确保输出目录存在
@@ -526,16 +529,7 @@ class FeeSheetExportService:
                     logger.error("未找到费用表模板文件")
                     return False
                 
-                # 如果是默认输出模式，重新生成文件名
-                if not (current_project and os.path.exists(current_project)):
-                    timestamp = time.strftime("%Y%m%d_%H%M%S")
-                    template_path = templates[0]
-                    file_name = os.path.basename(template_path)
-                    name_part, ext = os.path.splitext(file_name)
-                    output_file_name = f"{dl_number}_{name_part}_FeeSheet_{timestamp}{ext}"
-                    output_path = os.path.join(output_dir, output_file_name)
-                else:
-                    template_path = templates[0]
+                template_path = templates[0]
                 
                 # 复制模板
                 shutil.copy2(template_path, output_path)
