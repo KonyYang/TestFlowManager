@@ -565,9 +565,9 @@ class TestSpecTablesService:
         sample_row_found = False
         for row in data_rows:
             if len(row) > 0:
-                # 检查首列是否包含"Sample size"或"sample"相关内容
-                first_cell_value = str(row[0]).lower() if row[0] else ""
-                if "sample" in first_cell_value:
+                # 检查首列是否以"Sample"开头（统一与 TEST DESCRIPTION 表格的判断逻辑）
+                first_cell_value = str(row[0]).strip() if row[0] else ""
+                if first_cell_value.lower().startswith("sample"):
                     sample_row_found = True
                     logger.info(f"找到Sample行: {row[0]}")
                     break
