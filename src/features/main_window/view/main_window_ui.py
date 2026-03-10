@@ -1,35 +1,27 @@
 # src/features/main_window/view/main_window_ui.py
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMenuBar, QMenu, QAction, QStatusBar, QToolBar, QTabWidget
-from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtGui import QScreen, QIcon
-
-from src.core import config_manager
-from src.core.logger import logger
-from src.features.main_window.controller.main_window_controller import MainWindowController
-from PyQt5.QtGui import QFont
-from src.core.font_utils import FontUtils
-from src.core.window_utils import WindowUtils  # 导入窗口工具类
-
-# 导入Matrix相关组件
-from src.features.matrix.controller.matrix_project_controller import MatrixProjectController
-from src.features.matrix.view.matrix_dialog import MatrixDialog
-from src.features.matrix.controller.matrix_controller import MatrixController
-
-# 导入客户报告生成相关组件
-from src.features.customer_report_generator.controller.customer_report_controller import CustomerReportController
-
-# 导入报告向导相关组件
-from src.features.report_wizard.controller.report_wizard_controller import ReportWizardController
-
-# 导入文档解析器相关组件
-from src.features.document_parser.controller.document_parser_controller import DocumentParserController
-
-# 导入报告更新相关组件
-from src.features.report_updater.controller.report_updater_controller import ReportUpdaterController
-
-# 添加QApplication导入
-from PyQt5.QtWidgets import QApplication
+"""
+主窗口界面模块
+定义主窗口的用户界面
+"""
 import os
+from typing import Optional
+from PyQt5.QtWidgets import (
+    QMainWindow, QMenuBar, QToolBar, QStatusBar, QLabel,
+    QAction, QVBoxLayout, QWidget, QTabWidget, QMessageBox,
+    QFileDialog, QApplication
+)
+from PyQt5.QtGui import QIcon, QFont, QScreen
+from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtCore import QRect, pyqtSignal
+from src.core.logger import logger
+from src.core.font_utils import FontUtils
+from src.features.main_window.controller.main_window_controller import MainWindowController
+from src.features.matrix.view.matrix_dialog import MatrixDialog
+from src.features.matrix.controller.matrix_project_controller import MatrixProjectController
+from src.features.customer_report_generator.controller.customer_report_controller import CustomerReportController
+from src.features.report_wizard.controller.report_wizard_controller import ReportWizardController
+from src.features.document_parser.controller.document_parser_controller import DocumentParserController
+from src.features.report_updater.controller.report_updater_controller import ReportUpdaterController
 
 
 class MainWindow(QMainWindow):
@@ -37,38 +29,72 @@ class MainWindow(QMainWindow):
     主窗口类
     应用程序的主窗口界面
     """
+    
+    # 自定义信号，用于通知启动进度
+    startup_progress = pyqtSignal(int, str)
 
-    def __init__(self):
+    def __init__(self, splash_screen=None):
         super().__init__()
-        self.controller = MainWindowController(self)
-        # 初始化Matrix控制器
-        self.matrix_project_controller = MatrixProjectController(self)
-        self.matrix_controller = MatrixController(self)
-        # 初始化客户报告生成控制器
-        self.customer_report_controller = CustomerReportController(self)
-        # 初始化报告向导控制器
-        self.report_wizard_controller = ReportWizardController(self)
-        # 初始化文档解析控制器
-        self.document_parser_controller = DocumentParserController(self)
-        # 初始化报告更新控制器
-        self.report_updater_controller = ReportUpdaterController(self)
+        self.splash_screen = splash_screen
+        self.controller = None
+        self.matrix_project_controller = None
+        self.matrix_controller = None
+        self.customer_report_controller = None
+        self.report_wizard_controller = None
+        self.document_parser_controller = None
+        self.report_updater_controller = None
+        
         # 保存窗口状态信息
         self.is_custom_sized = False
         self.custom_geometry = None
         self.fullscreen_geometry = None
-        self._setup_ui()
-        self._setup_menu()
-        self._setup_toolbar()
-        self._setup_status_bar()
-
-        # 初始化控制器
-        self.controller.initialize()
-
+        
+        # 分步初始化
+        self._initialize_step_by_step()
+        
         # 更新界面状态
         self._update_status()
 
-    def _setup_ui(self) -> None:
-        """设置用户界面"""
+    def _initialize_step_by_step(self):
+        """分步初始化主窗口组件"""
+        try:
+            # 步骤1: 基础UI设置
+            self._notify_progress(0, "正在初始化基础界面...")
+            self._setup_basic_ui()
+            
+            # 步骤2: 控制器初始化
+            self._notify_progress(1, "正在初始化控制器...")
+            self._initialize_controllers()
+            
+            # 步骤3: 菜单和工具栏
+            self._notify_progress(2, "正在设置菜单和工具栏...")
+            self._setup_menu()
+            self._setup_toolbar()
+            self._setup_status_bar()
+            
+            # 步骤4: 标签页设置
+            self._notify_progress(3, "正在设置功能标签页...")
+            self._setup_tabs()
+            
+            # 步骤5: 初始化控制器
+            self._notify_progress(4, "正在初始化业务逻辑...")
+            if self.controller:
+                self.controller.initialize()
+                
+            logger.info("主窗口分步初始化完成")
+            
+        except Exception as e:
+            logger.error(f"主窗口初始化过程中出错: {e}")
+            raise
+
+    def _notify_progress(self, step, message):
+        """通知启动进度"""
+        if self.splash_screen:
+            self.splash_screen.update_progress(step, message)
+        self.startup_progress.emit(step, message)
+
+    def _setup_basic_ui(self):
+        """设置基础用户界面"""
         # 设置窗口属性
         self.setWindowTitle("TestFlow Manager")
         
@@ -76,7 +102,7 @@ class MainWindow(QMainWindow):
         self._set_window_icon()
         
         # 设置窗口为满屏显示
-        screen_geometry = QScreen.availableGeometry(QApplication.primaryScreen())
+        screen_geometry = QApplication.primaryScreen().availableGeometry()
         self.setGeometry(screen_geometry)
         self.fullscreen_geometry = screen_geometry
         
@@ -93,18 +119,48 @@ class MainWindow(QMainWindow):
         self.tab_widget = QTabWidget()
         self.tab_widget.setFont(FontUtils.get_scaled_font(8))
         
+        layout.addWidget(self.tab_widget)
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
+
+    def _initialize_controllers(self):
+        """初始化控制器"""
+        # 初始化主控制器
+        self.controller = MainWindowController(self)
+        
+        # 初始化Matrix控制器
+        self.matrix_project_controller = MatrixProjectController(self)
+        self.matrix_controller = self.matrix_project_controller.matrix_controller
+        
+        # 初始化客户报告生成控制器
+        self.customer_report_controller = CustomerReportController(self)
+        
+        # 初始化报告向导控制器
+        self.report_wizard_controller = ReportWizardController(self)
+        
+        # 初始化文档解析控制器
+        self.document_parser_controller = DocumentParserController(self)
+        
+        # 初始化报告更新控制器
+        self.report_updater_controller = ReportUpdaterController(self)
+
+    def _setup_tabs(self):
+        """设置标签页"""
         # 创建Matrix编辑器标签页
         self.matrix_tab = QWidget()
         self._setup_matrix_tab()
         self.tab_widget.addTab(self.matrix_tab, "Matrix编辑器")
         
-        # 添加更多标签页用于其他功能...
-        # self.other_tab = QWidget()
-        # self.tab_widget.addTab(self.other_tab, "其他功能")
+        # 可以在这里添加更多标签页...
+
+    def _setup_matrix_tab(self):
+        """设置Matrix编辑器标签页"""
+        layout = QVBoxLayout(self.matrix_tab)
+        layout.setContentsMargins(0, 0, 0, 0)
         
-        layout.addWidget(self.tab_widget)
-        central_widget.setLayout(layout)
-        self.setCentralWidget(central_widget)
+        # 创建Matrix对话框实例（嵌入到主窗口中而不是独立窗口）
+        self.matrix_dialog = MatrixDialog(parent=self, service=self.matrix_controller.service)
+        layout.addWidget(self.matrix_dialog)
         
     def _set_window_icon(self):
         """设置窗口图标"""
@@ -122,15 +178,6 @@ class MainWindow(QMainWindow):
                 logger.warning(f"窗口图标文件不存在: {icon_path}")
         except Exception as e:
             logger.error(f"设置窗口图标时出错: {e}")
-        
-    def _setup_matrix_tab(self):
-        """设置Matrix编辑器标签页"""
-        layout = QVBoxLayout(self.matrix_tab)
-        layout.setContentsMargins(0, 0, 0, 0)
-        
-        # 创建Matrix对话框实例（嵌入到主窗口中而不是独立窗口）
-        self.matrix_dialog = MatrixDialog(parent=self, service=self.matrix_controller.service)
-        layout.addWidget(self.matrix_dialog)
         
     def showEvent(self, event):
         """窗口显示事件"""
@@ -156,7 +203,7 @@ class MainWindow(QMainWindow):
             self.is_custom_sized = True
             if not self.custom_geometry:
                 # 计算30%大小的窗口几何信息
-                screen_geometry = QScreen.availableGeometry(QApplication.primaryScreen())
+                screen_geometry = QApplication.primaryScreen().availableGeometry()
                 width = int(screen_geometry.width() * 0.3)
                 height = int(screen_geometry.height() * 0.3)
                 x = (screen_geometry.width() - width) // 2

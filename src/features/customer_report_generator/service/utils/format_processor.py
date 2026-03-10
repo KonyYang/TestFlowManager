@@ -16,39 +16,61 @@ class FormatProcessor:
     def remove_number_and_dot_in_formatted_paragraphs(template_doc):
         """
         清理章节标题格式（去除数字和点）
+        优化版本 2：完全避免使用 Previous() 方法，直接在原段落内删除空行
         """
         try:
-            # 遍历模板文档中的每个段落
-            for i in range(1, template_doc.Paragraphs.Count + 1):
-                paragraph = template_doc.Paragraphs(i)
-                paragraph_range = paragraph.Range
+            import time
+            start_time = time.time()
+            total_paragraphs = template_doc.Paragraphs.Count
+            logger.debug(f"[PERF] 开始清理章节标题格式，文档段落数：{total_paragraphs}")
                 
+            # 优化：一次性获取所有段落集合，减少 COM 访问次数
+            paragraphs = template_doc.Paragraphs
+            step1_time = time.time()
+            logger.debug(f"[PERF] 步骤 1 - 获取段落集合完成，耗时：{step1_time - start_time:.3f}秒")
+                
+            bold_underline_count = 0
+            modified_count = 0
+                
+            # 遍历模板文档中的每个段落
+            for i in range(1, paragraphs.Count + 1):
+                paragraph = paragraphs.Item(i)
+                paragraph_range = paragraph.Range
+                    
                 # 检查段落是否为粗体且带单下划线
                 if (paragraph_range.Font.Bold and 
                     paragraph_range.Font.Underline == 1):  # wdUnderlineSingle = 1
-                    
+                    bold_underline_count += 1
+                        
                     para_text = paragraph_range.Text
-                    
+                        
                     # 检查段落是否以数字和"."开头
                     if len(para_text) >= 2 and para_text[0].isdigit() and para_text[1] == '.':
+                        modified_count += 1
                         # 删除前两个字符
                         new_start = paragraph_range.Start + 2
                         remove_range = template_doc.Range(paragraph_range.Start, new_start)
                         remove_range.Text = "\n"
-                        
-                        # 删除新增的空行
-                        try:
-                            prev_paragraph = paragraph.Previous()
-                            if prev_paragraph is not None:
-                                prev_paragraph.Range.Delete()
-                        except:
-                            # 忽略Previous方法可能出现的异常
-                            pass
-            
-            logger.debug("章节标题格式清理完成")
+                            
+                        # 优化：不删除前一段落，而是直接处理当前段落的换行符
+                        # 将开头的"\n"替换为空，这样就消除了额外的空行
+                        if para_text.startswith('.\n') or para_text.startswith('.\r'):
+                            # 只保留内容，去掉开头的数字、点和换行
+                            clean_range = template_doc.Range(paragraph_range.Start, paragraph_range.Start + 2)
+                            clean_range.Text = ""
+                
+            end_time = time.time()
+                
+            logger.debug(f"[PERF] 章节标题格式清理完成")
+            logger.debug(f"[PERF] 总段落数：{total_paragraphs}")
+            logger.debug(f"[PERF] 粗体下划线段落数：{bold_underline_count}")
+            logger.debug(f"[PERF] 修改段落数：{modified_count}")
+            logger.debug(f"[PERF] 总耗时：{end_time - start_time:.2f}秒")
             return True
         except Exception as e:
-            logger.error(f"清理章节标题格式时出错: {e}")
+            logger.error(f"清理章节标题格式时出错：{e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return False
 
     @staticmethod

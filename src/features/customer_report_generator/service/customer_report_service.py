@@ -193,13 +193,9 @@ class CustomerReportService:
             if not self._modify_header():
                 return False, "修改页眉信息失败"
             
-            # 复制核心内容
+            # 复制核心内容（包含修订记录）
             if not self._copy_purpose_to_equipments_content():
                 return False, "复制核心内容失败"
-
-            # 复制修订记录和报告结束标记
-            if not self._copy_revision_record():
-                return False, "复制修订记录失败"
 
             # 清理章节标题格式
             if not self._remove_number_and_dot_in_formatted_paragraphs():

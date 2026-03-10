@@ -42,6 +42,27 @@ def initialize_numpy():
     except Exception as e:
         logger.warning(f"NumPy初始化处理失败: {e}")
 
+def create_main_window(splash_screen=None):
+    """创建主窗口的工厂函数
+    
+    Args:
+        splash_screen: 启动进度窗口实例
+    """
+    try:
+        logger.info("开始创建主窗口...")
+        main_window = MainWindow(splash_screen)
+        
+        # 设置应用程序图标
+        icon_path = os.path.join(os.path.dirname(__file__), "resources", "icons", "app_icon.ico")
+        if os.path.exists(icon_path):
+            main_window.setWindowIcon(QIcon(icon_path))
+            
+        logger.info("主窗口创建完成")
+        return main_window
+    except Exception as e:
+        logger.error(f"创建主窗口时出错: {e}")
+        raise
+
 def main():
     """主函数"""
     try:
@@ -68,18 +89,28 @@ def main():
         if hasattr(os, 'uname'):
             logger.info(f"系统信息: {os.uname()}")
 
-        # 创建主窗口
-        main_window = MainWindow()
-        
-        # 为主窗口设置相同的图标
-        if os.path.exists(icon_path):
-            main_window.setWindowIcon(QIcon(icon_path))
-            
-        logger.info("主窗口已创建")
-        
-        # 显示主窗口
-        main_window.show()
-        logger.info("主窗口已显示")
+        # 尝试显示启动进度窗口
+        splash_screen = None
+        try:
+            from src.common.widgets.splash_screen import create_splash_screen, show_startup_progress
+            splash_screen = create_splash_screen()
+            logger.info("启动进度窗口创建成功")
+        except Exception as e:
+            logger.warning(f"创建启动进度窗口失败，将直接启动主窗口: {e}")
+            splash_screen = None
+
+        if splash_screen:
+            # 使用启动进度窗口的方式启动
+            logger.info("使用启动进度窗口启动应用程序")
+            def main_window_factory():
+                return create_main_window(splash_screen)
+            show_startup_progress(splash_screen, main_window_factory)
+        else:
+            # 直接启动主窗口（备用方案）
+            logger.info("直接启动主窗口")
+            main_window = create_main_window(None)
+            main_window.show()
+            logger.info("主窗口已显示")
         
         # 运行应用程序
         logger.info("进入应用程序主循环")
