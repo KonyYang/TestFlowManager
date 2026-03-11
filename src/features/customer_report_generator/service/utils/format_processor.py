@@ -16,7 +16,7 @@ class FormatProcessor:
     def remove_number_and_dot_in_formatted_paragraphs(template_doc):
         """
         清理章节标题格式（去除数字和点）
-        优化版本 2：完全避免使用 Previous() 方法，直接在原段落内删除空行
+        优化版本：使用 Find 方法快速定位章节标题，直接删除前两个字符
         """
         try:
             import time
@@ -24,46 +24,48 @@ class FormatProcessor:
             total_paragraphs = template_doc.Paragraphs.Count
             logger.debug(f"[PERF] 开始清理章节标题格式，文档段落数：{total_paragraphs}")
                 
-            # 优化：一次性获取所有段落集合，减少 COM 访问次数
-            paragraphs = template_doc.Paragraphs
-            step1_time = time.time()
-            logger.debug(f"[PERF] 步骤 1 - 获取段落集合完成，耗时：{step1_time - start_time:.3f}秒")
+            # 定义需要查找的章节标题
+            chapter_titles = [
+                "1. PURPOSE",
+                "2. CONCLUSIONS",
+                "3. SAMPLE DESCRIPTION",
+                "4. TEST DESCRIPTION",
+                "5. TEST METHODS/REQUIREMENTS",
+                "6. TEST RESULTS",
+                "8. REVISION RECORD"
+            ]
                 
-            bold_underline_count = 0
             modified_count = 0
+            step1_start = time.time()
                 
-            # 遍历模板文档中的每个段落
-            for i in range(1, paragraphs.Count + 1):
-                paragraph = paragraphs.Item(i)
-                paragraph_range = paragraph.Range
-                    
-                # 检查段落是否为粗体且带单下划线
-                if (paragraph_range.Font.Bold and 
-                    paragraph_range.Font.Underline == 1):  # wdUnderlineSingle = 1
-                    bold_underline_count += 1
+            # 使用 Find 方法按顺序快速查找每个章节标题
+            # 从文档开头开始，找到后从该位置继续找下一个
+            search_start = template_doc.Content.Start
+                
+            for title in chapter_titles:
+                source_range = template_doc.Range(search_start, template_doc.Content.End)
+                find_obj = source_range.Find
+                find_obj.Text = title
+                find_obj.MatchCase = True
+                found = find_obj.Execute()
                         
-                    para_text = paragraph_range.Text
+                if found:
+                    # 找到章节标题后，直接删除前两个字符（数字和点）
+                    # source_range 已经定位到了 "1. PURPOSE" 的 "1"
+                    delete_range = template_doc.Range(source_range.Start, source_range.Start + 2)
+                    delete_range.Text = ""
+                    modified_count += 1
                         
-                    # 检查段落是否以数字和"."开头
-                    if len(para_text) >= 2 and para_text[0].isdigit() and para_text[1] == '.':
-                        modified_count += 1
-                        # 删除前两个字符
-                        new_start = paragraph_range.Start + 2
-                        remove_range = template_doc.Range(paragraph_range.Start, new_start)
-                        remove_range.Text = "\n"
-                            
-                        # 优化：不删除前一段落，而是直接处理当前段落的换行符
-                        # 将开头的"\n"替换为空，这样就消除了额外的空行
-                        if para_text.startswith('.\n') or para_text.startswith('.\r'):
-                            # 只保留内容，去掉开头的数字、点和换行
-                            clean_range = template_doc.Range(paragraph_range.Start, paragraph_range.Start + 2)
-                            clean_range.Text = ""
+                    # 更新搜索起点为当前位置之后
+                    search_start = source_range.Start
+                
+            step1_end = time.time()
+            logger.debug(f"[PERF] 步骤 1 - 使用 Find 方法查找并清理章节标题完成，耗时：{step1_end - step1_start:.2f}秒")
                 
             end_time = time.time()
                 
             logger.debug(f"[PERF] 章节标题格式清理完成")
             logger.debug(f"[PERF] 总段落数：{total_paragraphs}")
-            logger.debug(f"[PERF] 粗体下划线段落数：{bold_underline_count}")
             logger.debug(f"[PERF] 修改段落数：{modified_count}")
             logger.debug(f"[PERF] 总耗时：{end_time - start_time:.2f}秒")
             return True
