@@ -367,9 +367,11 @@ class ReportUpdaterService:
                 msg_box.exec_()
                 return False
 
-            # 使用win32com打开Word文档
+            # 使用 win32com 打开 Word 文档
             logger.debug("Initializing Word application via COM...")
-            word_app = gencache.EnsureDispatch('Word.Application')
+            # 注意：使用 Dispatch 而不是 gencache.EnsureDispatch 以避免缓存文件损坏问题
+            # 如果遇到问题，可以手动清理 win32com 缓存目录：%TEMP%\\gen_py\\
+            word_app = win32.Dispatch('Word.Application')
             word_app.Visible = False  # 不显示Word界面
             word_app.DisplayAlerts = False  # 关闭警告提示
 
