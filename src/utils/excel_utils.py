@@ -140,15 +140,15 @@ def close_workbook(workbook: Any, save_changes: bool = False) -> bool:
 
 def open_excel_file(file_path: str, read_only: bool = True, password: Optional[str] = None) -> Any:
     """
-    通用打开Excel文件函数，使用Excel COM接口打开文件
+    通用打开 Excel 文件函数，使用 Excel COM 接口打开文件
 
     Args:
-        file_path: Excel文件路径
+        file_path: Excel 文件路径
         read_only: 是否以只读模式打开
         password: 文件密码（可选）
 
     Returns:
-        Excel工作簿对象，如果打开失败则返回None
+        Excel 工作簿对象，如果打开失败则返回 None
     """
     try:
         # 检查文件是否存在
@@ -161,23 +161,36 @@ def open_excel_file(file_path: str, read_only: bool = True, password: Optional[s
             logger.error("Failed to get Excel application instance")
             return None
 
-        # 先隐藏Excel应用程序以提高性能
+        # 先隐藏 Excel 应用程序以提高性能
         excel_app.Visible = False
         excel_app.DisplayAlerts = False
         excel_app.EnableEvents = False
 
+        logger.debug(f"准备以只读模式={read_only}打开文件：{file_path}")
+        
         # 以指定模式打开文件
+        # 关键参数说明：
+        # - UpdateLinks: 0 (不更新链接)
+        # - ReadOnly: read_only (只读模式)
+        # - Format: None (自动检测格式)
+        # - WriteResPassword: "" (写入密码)
+        # - Password: password (读取密码)
+        # - Origin: None (编码类型)
+        # - Delimiter: None (分隔符)
+        # - AddToMru: False (不添加到最近文件列表)
+        # - CorruptLoad: 2 (xlNormalLoad，正常加载)
         wb = excel_app.Workbooks.Open(
-            file_path,
-            0,
-            read_only, # 只读模式或者读写模式
-            None,      # 格式参数
-            "", password,  # 这里使用了"DGLAB"密码
-            False,  # 是否将文件添加到最近文件列表
-            None,   # 编码类型
-            2       # 忽略建议只读标志
+            Filename=file_path,
+            UpdateLinks=0,
+            ReadOnly=read_only,
+            Format=None,
+            WriteResPassword="",
+            Password=password if password else "",
+            Origin=None,
+            Delimiter=None,
+            AddToMru=False,
+            CorruptLoad=2  # xlNormalLoad
         )
-
 
         logger.debug(f"Successfully opened workbook: {file_path} (read_only={read_only})")
         return wb

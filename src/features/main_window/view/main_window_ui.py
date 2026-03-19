@@ -332,6 +332,15 @@ class MainWindow(QMainWindow):
         body_content_action.triggered.connect(self._on_edit_body_content)
         body_content_action.setFont(global_font)
         tools_menu.addAction(body_content_action)
+        
+        # 添加分隔符
+        tools_menu.addSeparator()
+        
+        # 添加测试文件加密菜单项
+        encrypt_files_action = QAction("测试文件加密", self)
+        encrypt_files_action.triggered.connect(self._on_encrypt_test_files)
+        encrypt_files_action.setFont(global_font)
+        tools_menu.addAction(encrypt_files_action)
 
         # 帮助菜单
         help_menu = menubar.addMenu("帮助")
@@ -445,17 +454,61 @@ class MainWindow(QMainWindow):
         """处理正文内容编辑事件"""
         logger.debug("Edit body content action triggered")
         # 调用文档解析控制器显示正文内容编辑器
-        # 这里可以先弹出文件选择对话框让用户选择Word文档
+        # 这里可以先弹出文件选择对话框让用户选择 Word 文档
         from PyQt5.QtWidgets import QFileDialog
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "选择Word文档", "", "Word文档 (*.doc *.docx)"
+            self, "选择 Word 文档", "", "Word 文档 (*.doc *.docx)"
         )
         if file_path:
-            logger.info(f"用户选择了文件: {file_path}")
+            logger.info(f"用户选择了文件：{file_path}")
             self.document_parser_controller.show_body_content_editor(file_path)
         else:
             logger.info("用户取消了文件选择")
         self._update_status()
+        
+    def _on_encrypt_test_files(self) -> None:
+        """处理测试文件加密事件"""
+        print("\n" + "="*60)
+        print("【_on_encrypt_test_files】开始执行")
+        print("="*60)
+            
+        logger.debug("Encrypt test files action triggered")
+            
+        try:
+            # 导入文件加密控制器
+            print("[1] 正在导入控制器...")
+            from src.features.file_encryption.controller.file_encryption_controller import FileEncryptionController
+            print("✅ 控制器导入成功")
+                
+            # 创建控制器实例
+            print("[2] 正在创建控制器实例...")
+            encryption_controller = FileEncryptionController(self)
+            print("✅ 控制器实例创建成功")
+                
+            # 显示文件夹选择对话框
+            print("[3] 正在显示文件夹选择对话框...")
+            folder_path = encryption_controller.show_folder_selection()
+                
+            if folder_path:
+                print(f"✅ 用户选择了：{folder_path}")
+                # 启动加密任务（使用标准 threading 模块）
+                print("[4] 正在启动加密任务...")
+                encryption_controller.start_encryption_task(folder_path)
+                print("✅ 加密任务已启动")
+            else:
+                print("❌ 用户取消了选择")
+                
+            self._update_status()
+            print("✅ 状态已更新")
+                
+        except Exception as e:
+            print(f"\n❌ 【异常捕获】_on_encrypt_test_files 失败：{e}")
+            print(f"错误类型：{type(e).__name__}")
+            import traceback
+            print(f"详细堆栈:\n{traceback.format_exc()}")
+            logger.error(f"加密功能执行失败：{e}", exc_info=True)
+            
+        print("="*60)
 
     def _on_exit(self) -> None:
         """处理退出事件"""

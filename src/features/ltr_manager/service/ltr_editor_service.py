@@ -54,16 +54,20 @@ class LTREditorService(LTRBaseService):
                     QMessageBox.warning(parent, "更新失败", f"DL编号格式无效: {dl_number}")
                 return False
 
-            # 2. 检查LTR文件是否被占用
+            # 2. 检查 LTR 文件是否被占用
             ltr_file_path = self.get_ltr_file_path()
             if ltr_file_path and os.path.exists(ltr_file_path):
+                logger.debug(f"[编辑模式] 检查文件是否被占用：{ltr_file_path}")
                 if not self.check_file_not_locked(ltr_file_path):
-                    logger.warning(f"LTR文件被占用: {ltr_file_path}")
+                    logger.warning(f"LTR 文件被占用：{ltr_file_path}")
                     if parent:
-                        QMessageBox.warning(parent, "文件被占用", f"LTR文件当前被其他用户或程序占用，请稍后再试：\n{ltr_file_path}")
+                        QMessageBox.warning(parent, "文件被占用", f"LTR 文件当前被其他用户或程序占用，请稍后再试：\n{ltr_file_path}")
                     return False
-
-            # 3. 使用密码打开LTR文件（读写模式）
+                else:
+                    logger.debug(f"[编辑模式] 文件未被占用，可以继续")
+            
+            # 3. 使用密码打开 LTR 文件（读写模式）
+            logger.debug(f"[编辑模式] 准备以读写模式打开 LTR 文件：{ltr_file_path}")
             workbook = self.open_ltr_file(with_password=True)
             if workbook is None:
                 logger.error("无法以读写模式打开LTR文件")
@@ -115,17 +119,17 @@ class LTREditorService(LTRBaseService):
 
             # 7. 保存工作簿
             workbook.Save()
-            logger.info(f"成功更新DL编号 {dl_number} 的数据")
+            logger.info(f"[编辑模式] 成功更新 DL 编号 {dl_number} 的数据")
 
             # 8. 显示成功消息
             if parent:
-                QMessageBox.information(parent, "更新成功", f"DL编号 {dl_number} 的数据已成功更新。")
+                QMessageBox.information(parent, "更新成功", f"DL 编号 {dl_number} 的数据已成功更新。")
             return True
 
         except Exception as e:
-            logger.error(f"更新LTR数据失败: {e}")
+            logger.error(f"[编辑模式] 更新 LTR 数据失败：{e}", exc_info=True)
             if parent:
-                QMessageBox.critical(parent, "更新失败", f"更新数据时发生错误: {str(e)}")
+                QMessageBox.critical(parent, "更新失败", f"更新数据时发生错误：{str(e)}")
             return False
         finally:
             # 恢复屏幕更新

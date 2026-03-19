@@ -61,22 +61,10 @@ class LTRBaseService:
                     logger.error(f"显示错误消息时出错: {e}")
                 return None
 
-            # 检查文件是否被其他进程占用
-            if not self.check_file_not_locked(ltr_file_path):
-                logger.error(f"LTR文件被占用: {ltr_file_path}")
-                # 显示错误消息给用户
-                try:
-                    from PyQt5.QtWidgets import QMessageBox
-                    # 尝试使用全局消息框
-                    QMessageBox.warning(
-                        None, 
-                        "文件被占用", 
-                        f"LTR文件当前被其他用户或程序占用，请稍后再试：\n{ltr_file_path}"
-                    )
-                except Exception as e:
-                    logger.error(f"显示文件占用错误消息时出错: {e}")
-                return None
-
+            # 注意：不再调用 check_file_not_locked() 进行预检查
+            # 因为该方法的读写模式检测不准确，直接让 open_excel_file 处理
+            logger.debug(f"准备打开 LTR 文件：{ltr_file_path}")
+            
             if with_password:
                 ltr_password = config_manager.get("passwords.ltr_password")
                 print(f"[DEBUG] Password from config: {ltr_password}")

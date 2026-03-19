@@ -55,20 +55,12 @@ class SplashScreen(QSplashScreen):
             layout.setContentsMargins(30, 30, 30, 30)
             layout.setSpacing(20)
             
-            # 标题标签
-            self.title_label = QLabel("TestFlow Manager")
-            title_font = QFont("Microsoft YaHei", 16, QFont.Bold)
-            self.title_label.setFont(title_font)
-            self.title_label.setAlignment(Qt.AlignCenter)
-            self.title_label.setStyleSheet("color: #2C3E50; padding: 10px;")
-            layout.addWidget(self.title_label)
-            
             # 状态标签
             self.status_label = QLabel("正在启动应用程序...")
             status_font = QFont("Microsoft YaHei", 10)
             self.status_label.setFont(status_font)
             self.status_label.setAlignment(Qt.AlignCenter)
-            self.status_label.setStyleSheet("color: #34495E; padding: 5px;")
+            self.status_label.setStyleSheet("color: #34495E; padding: 10px;")
             layout.addWidget(self.status_label)
             
             # 进度条
@@ -76,6 +68,7 @@ class SplashScreen(QSplashScreen):
             self.progress_bar.setRange(0, len(self.progress_steps) - 1)
             self.progress_bar.setValue(0)
             self.progress_bar.setTextVisible(True)
+            self.progress_bar.setMinimumHeight(30)
             self.progress_bar.setStyleSheet("""
                 QProgressBar {
                     border: 2px solid #BDC3C7;
@@ -84,6 +77,7 @@ class SplashScreen(QSplashScreen):
                     color: #2C3E50;
                     font-weight: bold;
                     background-color: #ECF0F1;
+                    font-size: 12px;
                 }
                 QProgressBar::chunk {
                     background-color: #4A90E2;
@@ -92,18 +86,10 @@ class SplashScreen(QSplashScreen):
             """)
             layout.addWidget(self.progress_bar)
             
-            # 版本信息
-            self.version_label = QLabel("版本 1.0.0")
-            version_font = QFont("Microsoft YaHei", 8)
-            self.version_label.setFont(version_font)
-            self.version_label.setAlignment(Qt.AlignCenter)
-            self.version_label.setStyleSheet("color: #7F8C8D; padding: 5px;")
-            layout.addWidget(self.version_label)
-            
             self.main_widget.setLayout(layout)
             
             # 设置窗口大小和位置
-            self.main_widget.setFixedSize(400, 200)
+            self.main_widget.setFixedSize(600, 250)
             screen = self.screen().availableGeometry()
             self.main_widget.move(
                 (screen.width() - self.main_widget.width()) // 2,
