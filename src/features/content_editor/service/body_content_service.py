@@ -12,7 +12,7 @@ from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from src.core.logger import logger
-from src.utils.word_utils import get_shared_word_app
+from src.utils.word_utils import get_shared_word_app, release_word_app
 
 
 class BodyContentService:
@@ -521,6 +521,7 @@ class BodyContentService:
         Returns:
             是否成功更新
         """
+        doc = None
         try:
             # 使用win32com.client进行精确操作
             word_app = get_shared_word_app()
@@ -549,9 +550,10 @@ class BodyContentService:
 
             if found:
                 doc.Save()
-            
+
             # 关闭文档
             doc.Close()
+            doc = None
 
             return found
 
@@ -559,20 +561,17 @@ class BodyContentService:
             logger.error(f"更新关键词后段落时出错: {e}")
             return False
         finally:
-            # 确保Word应用程序在操作完成后正确关闭
+            # 共享 Word 实例由 word_utils 管理；此处仅确保本方法打开的文档被关闭
+            if doc is not None:
+                try:
+                    doc.Close(SaveChanges=False)
+                except Exception:
+                    pass
+            # 与本方法内的 get_shared_word_app() 成对，避免引用计数泄漏
             try:
-                if 'word_app' in locals() and word_app is not None:
-                    # 关闭所有文档
-                    for doc in word_app.Documents:
-                        try:
-                            doc.Close(SaveChanges=False)
-                        except:
-                            pass
-                    # 退出Word应用
-                    word_app.Quit()
-                    logger.debug("Word application quit after paragraph update")
-            except Exception as e:
-                logger.error(f"关闭Word应用程序时出错: {e}")
+                release_word_app()
+            except Exception:
+                pass
 
     def _find_next_paragraph(self, word_app, current_paragraph) -> Optional:
         """
@@ -611,21 +610,16 @@ class BodyContentService:
     
     def __del__(self):
         """
-        析构函数，确保Word应用程序资源被正确释放
+        释放对共享 Word 实例的引用。
+
+        不在此调用 Quit：word_app 来自 get_shared_word_app() 的全局单例，
+        退出进程时由 cleanup_word_resources() 统一清理；若在析构时重复 Quit，
+        COM 可能已断开，会触发 RPC 断开错误。
         """
         try:
-            if hasattr(self, 'word_app') and self.word_app is not None:
-                # 关闭所有文档
-                for doc in self.word_app.Documents:
-                    try:
-                        doc.Close(SaveChanges=False)
-                    except:
-                        pass
-                # 退出Word应用
-                self.word_app.Quit()
-                logger.debug("BodyContentService: Word application quit on destruction")
-        except Exception as e:
-            logger.error(f"在析构函数中关闭Word应用程序时出错: {e}")
+            release_word_app()
+        except Exception:
+            pass
 
     def get_all_content_sections(self, file_path: str) -> Dict[str, str]:
         """

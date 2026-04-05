@@ -71,6 +71,7 @@ def main():
         
         # 设置应用程序属性
         app = QApplication(sys.argv)
+        app.setStyle("Fusion")
         app.setApplicationName("TestFlowManager")
         app.setApplicationVersion("1.0.0")
         
