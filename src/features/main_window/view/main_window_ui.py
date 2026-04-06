@@ -1070,10 +1070,14 @@ class MainWindow(QMainWindow):
         # 连接表格项变更信号
         self.matrix_table_widget.itemChanged.connect(self._on_item_changed)
         
-        layout.addWidget(self.matrix_table_widget)
+        # Matrix是默认首页，需要立即加载数据
+        # 使用QTimer延迟执行，确保UI完全初始化后再加载数据
+        from PyQt5.QtCore import QTimer
+        QTimer.singleShot(0, self._initialize_matrix_table)
         
         # 在初始化后自动导入项目中的matrix.xlsx文件（如果存在）
-        self.matrix_import_export_manager.auto_import_matrix_from_project()
+        # 注意：auto_import已在_initialize_matrix_table中调用，这里注释掉避免重复
+        # self.matrix_import_export_manager.auto_import_matrix_from_project()
     
     def _on_matrix_item_selection_changed(self):
         """Matrix 表格选择项变化时的处理"""
@@ -1351,6 +1355,20 @@ class MainWindow(QMainWindow):
                     logger.debug("Matrix表格数据加载完成")
                 except Exception as e:
                     logger.error(f"延迟加载Matrix表格失败: {e}")
+    
+    def _initialize_matrix_table(self):
+        """初始化Matrix表格数据 - 启动时调用"""
+        try:
+            logger.debug("开始初始化Matrix表格数据")
+            # 先更新表格结构
+            self.matrix_table_manager.update_table()
+            # 标记为已初始化
+            self._matrix_table_initialized = True
+            # 尝试自动导入项目中的matrix.xlsx
+            self.matrix_import_export_manager.auto_import_matrix_from_project()
+            logger.debug("Matrix表格初始化完成")
+        except Exception as e:
+            logger.error(f"初始化Matrix表格失败: {e}", exc_info=True)
 
     def closeEvent(self, event) -> None:
         logger.info("MainWindow closing")
