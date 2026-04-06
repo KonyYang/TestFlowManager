@@ -90,28 +90,11 @@ def main():
         if hasattr(os, 'uname'):
             logger.info(f"系统信息: {os.uname()}")
 
-        # 尝试显示启动进度窗口
-        splash_screen = None
-        try:
-            from src.common.widgets.splash_screen import create_splash_screen, show_startup_progress
-            splash_screen = create_splash_screen()
-            logger.info("启动进度窗口创建成功")
-        except Exception as e:
-            logger.warning(f"创建启动进度窗口失败，将直接启动主窗口: {e}")
-            splash_screen = None
-
-        if splash_screen:
-            # 使用启动进度窗口的方式启动
-            logger.info("使用启动进度窗口启动应用程序")
-            def main_window_factory():
-                return create_main_window(splash_screen)
-            show_startup_progress(splash_screen, main_window_factory)
-        else:
-            # 直接启动主窗口（备用方案）
-            logger.info("直接启动主窗口")
-            main_window = create_main_window(None)
-            main_window.show()
-            logger.info("主窗口已显示")
+        # 直接启动主窗口（启动已优化至<0.1秒，无需进度提示）
+        logger.info("直接启动主窗口")
+        main_window = create_main_window(None)
+        main_window.show()
+        logger.info("主窗口已显示")
         
         # 运行应用程序
         logger.info("进入应用程序主循环")

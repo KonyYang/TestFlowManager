@@ -51,7 +51,7 @@ class ImportExportManager:
                         self.controller.data_model.merged_cells_info = result['merged_cells']
                         
                     # 更新表格显示
-                    self.view._update_table()
+                    self.view._matrix_update_table()
                     logger.info("成功自动导入项目中的matrix.xlsx文件")
                 else:
                     logger.warning("matrix.xlsx文件中没有有效数据")

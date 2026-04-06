@@ -155,14 +155,40 @@ class MainWindowController:
             self.service.update_status(new_value)
 
     def _trigger_matrix_auto_import(self):
-        """触发Matrix编辑器自动导入项目中的matrix.xlsx文件"""
+        """触发Matrix编辑器自动导入项目中的matrix.xlsx文件并更新显示"""
         try:
-            # 调用Matrix对话框的自动导入方法
-            if hasattr(self.view, 'matrix_dialog') and self.view.matrix_dialog:
-                self.view.matrix_dialog._auto_import_matrix_from_project()
-                logger.debug("Triggered auto import of matrix.xlsx in MatrixDialog")
+            # 调用主窗口的Matrix自动导入方法
+            if hasattr(self.view, 'matrix_import_export_manager') and self.view.matrix_import_export_manager:
+                self.view._matrix_auto_import_from_project()
+                logger.debug("Triggered auto import of matrix.xlsx in MainWindow")
+                
+                # 延迟更新表格显示，确保数据已加载
+                from PyQt5.QtCore import QTimer
+                QTimer.singleShot(50, self._update_matrix_display)
+                
+                # 切换回 Matrix 页面（索引为 0）
+                QTimer.singleShot(100, self._switch_to_matrix_page)
         except Exception as e:
             logger.error(f"Failed to trigger matrix auto import: {e}")
+    
+    def _update_matrix_display(self):
+        """更新 Matrix 表格显示"""
+        try:
+            if hasattr(self.view, '_matrix_update_table'):
+                self.view._matrix_update_table()
+                logger.debug("Successfully updated Matrix table display")
+        except Exception as e:
+            logger.error(f"Failed to update Matrix display: {e}")
+    
+    def _switch_to_matrix_page(self):
+        """切换到 Matrix 编辑器页面"""
+        try:
+            # Matrix 编辑器是第一个页面，索引为 0
+            if hasattr(self.view, '_nav_list') and self.view._nav_list:
+                self.view._nav_list.setCurrentRow(0)
+                logger.debug("Switched to Matrix editor page (index 0)")
+        except Exception as e:
+            logger.error(f"Failed to switch to Matrix page: {e}")
 
     def initialize(self) -> bool:
         """

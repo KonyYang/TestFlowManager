@@ -190,8 +190,8 @@ class MatrixController:
                 logger.info(f"检测到{len(path_parts)}层路径结构，将文件保存到当前目录: {matrix_file_path}")
             
             # 同步表格数据到模型
-            if self.parent and hasattr(self.parent, 'matrix_dialog'):
-                self.parent.matrix_dialog._sync_table_to_model()
+            if self.parent and hasattr(self.parent, 'matrix_data_sync_manager'):
+                self.parent._matrix_sync_table_to_model()
             
             # 更新导出控制器的数据模型
             self.export_controller.update_data_model(self.service.data_model)
@@ -221,8 +221,8 @@ class MatrixController:
         """
         try:
             # 同步表格数据到模型
-            if self.parent and hasattr(self.parent, 'matrix_dialog'):
-                self.parent.matrix_dialog._sync_table_to_model()
+            if self.parent and hasattr(self.parent, 'matrix_data_sync_manager'):
+                self.parent._matrix_sync_table_to_model()
             
             # 获取当前项目路径作为默认保存路径
             from src.core.state_manager import state_manager
@@ -305,8 +305,8 @@ class MatrixController:
         """
         try:
             # 同步表格数据到模型
-            if self.parent and hasattr(self.parent, 'matrix_dialog'):
-                self.parent.matrix_dialog._sync_table_to_model()
+            if self.parent and hasattr(self.parent, 'matrix_data_sync_manager'):
+                self.parent._matrix_sync_table_to_model()
             
             # 更新导出控制器的数据模型
             self.export_controller.update_data_model(self.service.data_model)
@@ -333,8 +333,8 @@ class MatrixController:
         """
         try:
             # 同步表格数据到模型
-            if self.parent and hasattr(self.parent, 'matrix_dialog'):
-                self.parent.matrix_dialog._sync_table_to_model()
+            if self.parent and hasattr(self.parent, 'matrix_data_sync_manager'):
+                self.parent._matrix_sync_table_to_model()
             
             # 更新导出控制器的数据模型
             self.export_controller.update_data_model(self.service.data_model)

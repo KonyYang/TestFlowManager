@@ -31,9 +31,9 @@ def get_shared_excel_app():
             import win32com.client
             _shared_excel_app = win32com.client.Dispatch("Excel.Application")
             
-            # 等待Excel应用程序完全就绪
+            # 减少等待时间,从0.5秒降至0.2秒
             import time
-            time.sleep(0.5)
+            time.sleep(0.2)
             
             # 安全地设置Excel属性，捕获可能的错误
             try:

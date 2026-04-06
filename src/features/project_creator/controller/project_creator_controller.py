@@ -518,6 +518,11 @@ class ProjectCreatorController:
                     "dl_number": dl_number
                 })
                 
+                # 触发Matrix自动导入功能（延迟执行，确保UI已就绪）
+                from PyQt5.QtCore import QTimer
+                if self.parent_view and hasattr(self.parent_view, '_matrix_auto_import_from_project'):
+                    QTimer.singleShot(100, lambda: self._trigger_matrix_update_after_project_creation(project_path))
+                
                 # 更新主窗口标题显示项目信息
                 if self.parent_view:
                     logger.debug(f"Setting main window title in _open_matrix_editor_with_ltr_number to: TestFlow Manager - 项目: {dl_number}")
@@ -582,9 +587,9 @@ class ProjectCreatorController:
                     self.matrix_project_controller.matrix_controller.initialize_with_ltr_data()
                     
                     # 更新Matrix视图以反映新数据
-                    if (hasattr(self.parent_view, 'matrix_dialog') and 
-                        self.parent_view.matrix_dialog is not None):
-                        self.parent_view.matrix_dialog._update_table()
+                    if (hasattr(self.parent_view, 'matrix_table_manager') and 
+                        self.parent_view.matrix_table_manager is not None):
+                        self.parent_view._matrix_update_table()
             else:
                 logger.warning("No project path or DL number provided")
                 
@@ -617,3 +622,44 @@ class ProjectCreatorController:
             # 显示错误消息给用户
             if self.parent_view:
                 QMessageBox.critical(self.parent_view, "错误", f"打开Matrix编辑器时出错: {str(e)}")
+    
+    def _trigger_matrix_update_after_project_creation(self, project_path):
+        """
+        在项目创建完成后触发 Matrix 更新
+        
+        Args:
+            project_path: 项目路径
+        """
+        try:
+            logger.info(f"Triggering Matrix update after project creation: {project_path}")
+            
+            # 设置当前项目到状态管理器
+            from src.core.state_manager import state_manager
+            state_manager.set_state("current_project", project_path)
+            
+            # 调用主窗口的 Matrix 自动导入方法
+            if hasattr(self.parent_view, '_matrix_auto_import_from_project'):
+                self.parent_view._matrix_auto_import_from_project()
+                logger.debug("Successfully triggered Matrix auto-import in main window")
+            
+            # 如果主窗口有 Matrix 表格管理器，也更新表格显示
+            if hasattr(self.parent_view, '_matrix_update_table'):
+                self.parent_view._matrix_update_table()
+                logger.debug("Successfully updated Matrix table display")
+            
+            # 切换回 Matrix 页面（索引为 0）
+            from PyQt5.QtCore import QTimer
+            if hasattr(self.parent_view, '_nav_list'):
+                QTimer.singleShot(100, lambda: self._switch_to_matrix_page())
+                
+        except Exception as e:
+            logger.error(f"Failed to trigger Matrix update after project creation: {e}", exc_info=True)
+    
+    def _switch_to_matrix_page(self):
+        """切换到 Matrix 编辑器页面"""
+        try:
+            if hasattr(self.parent_view, '_nav_list') and self.parent_view._nav_list:
+                self.parent_view._nav_list.setCurrentRow(0)
+                logger.debug("Switched to Matrix editor page after project creation")
+        except Exception as e:
+            logger.error(f"Failed to switch to Matrix page: {e}")

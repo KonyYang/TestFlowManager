@@ -35,13 +35,13 @@ class MatrixEventHandlers:
                 keyword = filter_params['keyword']
                 
                 # 同步表格数据到模型
-                self.view._sync_table_to_model()
+                self.view._matrix_sync_table_to_model()
                 
                 # 触发Controller层处理
                 result = self.controller.import_from_spec(file_path, page_number, keyword)
                 if result and result.get("success", False):
                     # 更新表格显示
-                    self.view._update_table()
+                    self.view._matrix_update_table()
                     QMessageBox.information(self.view, "成功", "数据已成功导入")
                 else:
                     error_msg = result.get("error", "导入失败") if result else "导入失败"
@@ -53,7 +53,7 @@ class MatrixEventHandlers:
             logger.info("开始标准化填充Matrix")
             
             # 同步表格数据到模型
-            self.view._sync_table_to_model()
+            self.view._matrix_sync_table_to_model()
             
             # 先执行标准化操作
             init_result = self.controller.initialize_matrix()
@@ -68,7 +68,7 @@ class MatrixEventHandlers:
             update_result = self.controller.update_standard_versions()
             
             # 更新表格显示
-            self.view._update_table()
+            self.view._matrix_update_table()
             
             # 只要有执行操作就弹出信息
             if extract_result or update_result["success"]:
@@ -84,7 +84,7 @@ class MatrixEventHandlers:
         try:
             logger.debug("开始显示基本信息对话框")
             # 同步表格数据到模型
-            self.view._sync_table_to_model()
+            self.view._matrix_sync_table_to_model()
 
             # 获取项目数据文件路径
             project_data_file_path = getattr(self.controller, 'project_data_file_path', None)
@@ -178,9 +178,9 @@ class MatrixEventHandlers:
             if file_path:
                 logger.debug(f"选择的文件路径: {file_path}")
                 # 同步表格数据到模型
-                self.view._sync_table_to_model()
+                self.view._matrix_sync_table_to_model()
                 # 导出前先保存合并单元格信息
-                self.view._save_merged_cells_info()
+                self.view._matrix_save_merged_cells_info()
                 # 触发Controller层处理
                 logger.debug("开始调用控制器导出方法")
                 result = self.controller.export_to_excel(file_path, export_type)
@@ -239,14 +239,14 @@ class MatrixEventHandlers:
             logger.info("开始更新标准版本号")
             
             # 同步表格数据到模型
-            self.view._sync_table_to_model()
+            self.view._matrix_sync_table_to_model()
             
             # 调用控制器更新标准版本号
             result = self.controller.update_standard_versions()
             
             if result["success"]:
                 # 更新表格显示
-                self.view._update_table()
+                self.view._matrix_update_table()
                 
                 # 显示更新详情
                 details = result["details"]
@@ -308,7 +308,7 @@ class MatrixEventHandlers:
             logger.info("开始生成Test Record文档")
             
             # 同步表格数据到模型
-            self.view._sync_table_to_model()
+            self.view._matrix_sync_table_to_model()
             
             # 创建Test Record控制器实例
             controller = TestRecordController(matrix_service=self.controller)
@@ -331,7 +331,7 @@ class MatrixEventHandlers:
             logger.info("开始生成费用表")
             
             # 同步表格数据到模型
-            self.view._sync_table_to_model()
+            self.view._matrix_sync_table_to_model()
             
             # 获取Matrix数据结构
             from src.features.matrix.model.matrix_data_structure import MatrixDataStructure

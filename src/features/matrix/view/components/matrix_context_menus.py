@@ -17,52 +17,63 @@ class MatrixContextMenus:
         """显示单元格右键菜单"""
         logger.debug(f"显示单元格右键菜单，位置: {position}")
         
-        # 创建单元格菜单
-        menu = QMenu()
+        # 防御性检查：确保view和表格控件仍然有效
+        if not self.view or not hasattr(self.view, 'matrix_table_widget') or not self.view.matrix_table_widget:
+            logger.warning("视图或表格控件已销毁，取消显示单元格菜单")
+            return
         
-        # 添加单元格相关菜单项
-        merge_or_split_action = QAction("合并或拆分单元格", self.view)
-        copy_cells_action = QAction("复制单元格", self.view)
-        paste_cells_action = QAction("粘贴单元格", self.view)
-        
-        # 如果可以撤销或重做，添加相应的菜单项
-        if self.controller.can_undo_cell_operation():
-            undo_action = QAction(f"撤销 {self.controller.get_undo_cell_operation_text()}", self.view)
-            undo_action.triggered.connect(self.view._undo_cell_operation)
-            menu.addAction(undo_action)
+        try:
+            # 创建单元格菜单
+            menu = QMenu()
             
-        if self.controller.can_redo_cell_operation():
-            redo_action = QAction(f"重做 {self.controller.get_redo_cell_operation_text()}", self.view)
-            redo_action.triggered.connect(self.view._redo_cell_operation)
-            menu.addAction(redo_action)
+            # 添加单元格相关菜单项
+            merge_or_split_action = QAction("合并或拆分单元格", self.view)
+            copy_cells_action = QAction("复制单元格", self.view)
+            paste_cells_action = QAction("粘贴单元格", self.view)
             
-        if self.controller.can_undo_cell_operation() or self.controller.can_redo_cell_operation():
+            # 如果可以撤销或重做，添加相应的菜单项
+            if self.controller.can_undo_cell_operation():
+                undo_action = QAction(f"撤销 {self.controller.get_undo_cell_operation_text()}", self.view)
+                undo_action.triggered.connect(self.view._undo_cell_operation)
+                menu.addAction(undo_action)
+                
+            if self.controller.can_redo_cell_operation():
+                redo_action = QAction(f"重做 {self.controller.get_redo_cell_operation_text()}", self.view)
+                redo_action.triggered.connect(self.view._redo_cell_operation)
+                menu.addAction(redo_action)
+                
+            if self.controller.can_undo_cell_operation() or self.controller.can_redo_cell_operation():
+                menu.addSeparator()
+            
+            # 连接动作到处理函数
+            merge_or_split_action.triggered.connect(self.view._merge_or_split_cells)
+            copy_cells_action.triggered.connect(self._copy_cells)
+            paste_cells_action.triggered.connect(self._paste_cells)
+            
+            # 保存菜单项引用以便动态更新
+            self.merge_or_split_action = merge_or_split_action
+            
+            # 添加动作到菜单
+            menu.addAction(merge_or_split_action)
             menu.addSeparator()
-        
-        # 连接动作到处理函数
-        merge_or_split_action.triggered.connect(self.view._merge_or_split_cells)
-        copy_cells_action.triggered.connect(self._copy_cells)
-        paste_cells_action.triggered.connect(self._paste_cells)
-        
-        # 保存菜单项引用以便动态更新
-        self.merge_or_split_action = merge_or_split_action
-        
-        # 添加动作到菜单
-        menu.addAction(merge_or_split_action)
-        menu.addSeparator()
-        menu.addAction(copy_cells_action)
-        menu.addAction(paste_cells_action)
-        
-        # 检查是否有复制的数据，如果没有则禁用粘贴功能
-        if not hasattr(self.view, '_copied_cells_data') or self.view._copied_cells_data is None:
-            paste_cells_action.setEnabled(False)
-        
-        # 在鼠标位置显示菜单
-        menu.exec_(QCursor.pos())
+            menu.addAction(copy_cells_action)
+            menu.addAction(paste_cells_action)
+            
+            # 检查是否有复制的数据，如果没有则禁用粘贴功能
+            if not hasattr(self.view, '_copied_cells_data') or self.view._copied_cells_data is None:
+                paste_cells_action.setEnabled(False)
+            
+            # 在鼠标位置显示菜单
+            menu.exec_(QCursor.pos())
+            
+        except RuntimeError as e:
+            logger.error(f"显示单元格菜单时发生运行时错误（可能是对象已销毁）: {e}")
+        except Exception as e:
+            logger.error(f"显示单元格菜单时发生未知错误: {e}", exc_info=True)
 
     def _copy_cells(self):
         """复制选中的单元格"""
-        selected_ranges = self.view.table_widget.selectedRanges()
+        selected_ranges = self.view.matrix_table_widget.selectedRanges()
         if not selected_ranges:
             return
             
@@ -80,7 +91,7 @@ class MatrixContextMenus:
         for row in range(range_.rowCount()):
             row_data = []
             for col in range(range_.columnCount()):
-                item = self.view.table_widget.item(range_.topRow() + row, range_.leftColumn() + col)
+                item = self.view.matrix_table_widget.item(range_.topRow() + row, range_.leftColumn() + col)
                 row_data.append(item.text() if item else "")
             self.view._copied_cells_data['data'].append(row_data)
         
@@ -92,7 +103,7 @@ class MatrixContextMenus:
         if not hasattr(self.view, '_copied_cells_data') or self.view._copied_cells_data is None:
             return
             
-        selected_ranges = self.view.table_widget.selectedRanges()
+        selected_ranges = self.view.matrix_table_widget.selectedRanges()
         if not selected_ranges:
             return
             
@@ -105,116 +116,149 @@ class MatrixContextMenus:
         copied_cols = self.view._copied_cells_data['cols']
         
         # 计算实际粘贴范围（要考虑边界限制）
-        actual_rows = min(copied_rows, self.view.table_widget.rowCount() - range_.topRow())
-        actual_cols = min(copied_cols, self.view.table_widget.columnCount() - range_.leftColumn())
+        actual_rows = min(copied_rows, self.view.matrix_table_widget.rowCount() - range_.topRow())
+        actual_cols = min(copied_cols, self.view.matrix_table_widget.columnCount() - range_.leftColumn())
         
         # 粘贴数据
         for row in range(actual_rows):
             for col in range(actual_cols):
-                item = self.view.table_widget.item(range_.topRow() + row, range_.leftColumn() + col)
+                item = self.view.matrix_table_widget.item(range_.topRow() + row, range_.leftColumn() + col)
                 if item:
                     item.setText(copied_data[row][col])
                 else:
                     new_item = QTableWidgetItem(copied_data[row][col])
-                    self.view.table_widget.setItem(range_.topRow() + row, range_.leftColumn() + col, new_item)
+                    self.view.matrix_table_widget.setItem(range_.topRow() + row, range_.leftColumn() + col, new_item)
         
         logger.debug(f"已粘贴 {actual_rows}x{actual_cols} 单元格区域")
 
     def show_row_context_menu(self, position):
         """显示行右键菜单"""
         logger.debug(f"显示行右键菜单，位置: {position}")
-        # 获取点击的行索引
-        row = self.view.table_widget.verticalHeader().logicalIndexAt(position)
         
-        # 如果没有点击到有效行，直接返回
-        if row < 0:
-            logger.debug("未点击到有效行")
+        # 防御性检查：确保view和表格控件仍然有效
+        if not self.view or not hasattr(self.view, 'matrix_table_widget') or not self.view.matrix_table_widget:
+            logger.warning("视图或表格控件已销毁，取消显示行菜单")
             return
+        
+        try:
+            # 获取点击的行索引
+            row = self.view.matrix_table_widget.verticalHeader().logicalIndexAt(position)
             
-        # 创建行菜单
-        menu = QMenu()
-        
-        # 添加行相关菜单项
-        add_row_action = QAction("添加行", self.view)
-        insert_row_action = QAction("插入行", self.view)
-        move_row_action = QAction("移动行", self.view)
-        copy_row_action = QAction("复制行", self.view)
-        paste_row_action = QAction("粘贴行", self.view)
-        remove_row_action = QAction("删除行", self.view)
-        
-        # 连接动作到处理函数
-        add_row_action.triggered.connect(self.view._add_row)
-        insert_row_action.triggered.connect(self.view._insert_row)
-        move_row_action.triggered.connect(lambda: self.view._move_row_at(row))
-        copy_row_action.triggered.connect(lambda: self.view._copy_row(row))
-        paste_row_action.triggered.connect(lambda: self.view._paste_row(row))
-        remove_row_action.triggered.connect(self.view._remove_row)
-        
-        # 如果没有复制的数据，禁用粘贴功能
-        if self.view.copied_row_data is None:
-            paste_row_action.setEnabled(False)
-        
-        # 添加动作到菜单
-        menu.addAction(add_row_action)
-        menu.addAction(insert_row_action)
-        menu.addAction(move_row_action)
-        menu.addAction(copy_row_action)
-        menu.addAction(paste_row_action)
-        menu.addAction(remove_row_action)
-        
-        # 在鼠标位置显示菜单
-        menu.exec_(QCursor.pos())
+            # 如果没有点击到有效行，直接返回
+            if row < 0 or row >= self.view.matrix_table_widget.rowCount():
+                logger.debug(f"未点击到有效行 (row={row}, total_rows={self.view.matrix_table_widget.rowCount()})")
+                return
+                
+            # 创建行菜单
+            menu = QMenu()
+            
+            # 添加行相关菜单项
+            add_row_action = QAction("添加行", self.view)
+            insert_row_action = QAction("插入行", self.view)
+            move_row_action = QAction("移动行", self.view)
+            copy_row_action = QAction("复制行", self.view)
+            paste_row_action = QAction("粘贴行", self.view)
+            remove_row_action = QAction("删除行", self.view)
+            
+            # 连接动作到处理函数
+            add_row_action.triggered.connect(self.view._add_row)
+            insert_row_action.triggered.connect(self.view._insert_row)
+            move_row_action.triggered.connect(lambda: self.view._move_row_at(row))
+            copy_row_action.triggered.connect(lambda: self.view._copy_row(row))
+            paste_row_action.triggered.connect(lambda: self.view._paste_row(row))
+            remove_row_action.triggered.connect(self.view._remove_row)
+            
+            # 如果没有复制的数据，禁用粘贴功能
+            if not hasattr(self.view, 'copied_row_data') or self.view.copied_row_data is None:
+                paste_row_action.setEnabled(False)
+            
+            # 添加动作到菜单
+            menu.addAction(add_row_action)
+            menu.addAction(insert_row_action)
+            menu.addAction(move_row_action)
+            menu.addAction(copy_row_action)
+            menu.addAction(paste_row_action)
+            menu.addAction(remove_row_action)
+            
+            # 在鼠标位置显示菜单
+            menu.exec_(QCursor.pos())
+            
+        except RuntimeError as e:
+            logger.error(f"显示行菜单时发生运行时错误（可能是对象已销毁）: {e}")
+        except Exception as e:
+            logger.error(f"显示行菜单时发生未知错误: {e}", exc_info=True)
         
     def show_col_context_menu(self, position):
         """显示列右键菜单"""
         logger.debug(f"显示列右键菜单，位置: {position}")
-        # 获取点击的列索引
-        col = self.view.table_widget.horizontalHeader().logicalIndexAt(position)
         
-        # 如果没有点击到有效列，直接返回
-        if col < 0:
-            logger.debug("未点击到有效列")
+        # 防御性检查：确保view和表格控件仍然有效
+        if not self.view or not hasattr(self.view, 'matrix_table_widget') or not self.view.matrix_table_widget:
+            logger.warning("视图或表格控件已销毁，取消显示列菜单")
             return
+        
+        try:
+            # 获取点击的列索引
+            col = self.view.matrix_table_widget.horizontalHeader().logicalIndexAt(position)
             
-        # 创建列菜单
-        menu = QMenu()
-        
-        # 添加列相关菜单项
-        add_col_action = QAction("添加列", self.view)
-        insert_col_action = QAction("插入列", self.view)
-        move_col_action = QAction("移动列", self.view)
-        copy_col_action = QAction("复制列", self.view)
-        paste_col_action = QAction("粘贴列", self.view)
-        remove_col_action = QAction("删除列", self.view)
-        
-        # 连接动作到处理函数
-        add_col_action.triggered.connect(self.view._add_column)
-        insert_col_action.triggered.connect(self.view._insert_column)
-        move_col_action.triggered.connect(lambda: self.view._move_column(col))
-        copy_col_action.triggered.connect(lambda: self.view._copy_column(col))
-        paste_col_action.triggered.connect(lambda: self.view._paste_column(col))
-        remove_col_action.triggered.connect(self.view._remove_column)
-        
-        # 如果没有复制的数据，禁用粘贴功能
-        if self.view.copied_col_data is None:
-            paste_col_action.setEnabled(False)
-        
-        # 添加动作到菜单
-        menu.addAction(add_col_action)
-        menu.addAction(insert_col_action)
-        menu.addAction(move_col_action)
-        menu.addAction(copy_col_action)
-        menu.addAction(paste_col_action)
-        menu.addAction(remove_col_action)
-        
-        # 在鼠标位置显示菜单
-        menu.exec_(QCursor.pos())
+            # 如果没有点击到有效列，直接返回
+            if col < 0 or col >= self.view.matrix_table_widget.columnCount():
+                logger.debug(f"未点击到有效列 (col={col}, total_cols={self.view.matrix_table_widget.columnCount()})")
+                return
+                
+            # 创建列菜单
+            menu = QMenu()
+            
+            # 添加列相关菜单项
+            add_col_action = QAction("添加列", self.view)
+            insert_col_action = QAction("插入列", self.view)
+            move_col_action = QAction("移动列", self.view)
+            copy_col_action = QAction("复制列", self.view)
+            paste_col_action = QAction("粘贴列", self.view)
+            remove_col_action = QAction("删除列", self.view)
+            
+            # 连接动作到处理函数
+            add_col_action.triggered.connect(self.view._add_column)
+            insert_col_action.triggered.connect(self.view._insert_column)
+            move_col_action.triggered.connect(lambda: self.view._move_column(col))
+            copy_col_action.triggered.connect(lambda: self.view._copy_column(col))
+            paste_col_action.triggered.connect(lambda: self.view._paste_column(col))
+            remove_col_action.triggered.connect(self.view._remove_column)
+            
+            # 如果没有复制的数据，禁用粘贴功能
+            if not hasattr(self.view, 'copied_col_data') or self.view.copied_col_data is None:
+                paste_col_action.setEnabled(False)
+            
+            # 添加动作到菜单
+            menu.addAction(add_col_action)
+            menu.addAction(insert_col_action)
+            menu.addAction(move_col_action)
+            menu.addAction(copy_col_action)
+            menu.addAction(paste_col_action)
+            menu.addAction(remove_col_action)
+            
+            # 在鼠标位置显示菜单（使用exec_而不是popup，避免异步问题）
+            menu.exec_(QCursor.pos())
+            
+        except RuntimeError as e:
+            logger.error(f"显示列菜单时发生运行时错误（可能是对象已销毁）: {e}")
+        except Exception as e:
+            logger.error(f"显示列菜单时发生未知错误: {e}", exc_info=True)
         
     def update_cell_menu_actions(self):
         """更新单元格菜单项状态"""
-        selected_ranges = self.view.table_widget.selectedRanges()
-        logger.debug(f"更新菜单状态，当前选中区域数: {len(selected_ranges)}")
+        # 防御性检查：确保view和表格控件仍然有效
+        if not self.view or not hasattr(self.view, 'matrix_table_widget') or not self.view.matrix_table_widget:
+            return
         
-        # 更新合并或拆分菜单项状态
-        if self.merge_or_split_action:
-            self.merge_or_split_action.setEnabled(len(selected_ranges) > 0)
+        try:
+            selected_ranges = self.view.matrix_table_widget.selectedRanges()
+            logger.debug(f"更新菜单状态，当前选中区域数: {len(selected_ranges)}")
+            
+            # 更新合并或拆分菜单项状态
+            if self.merge_or_split_action:
+                self.merge_or_split_action.setEnabled(len(selected_ranges) > 0)
+        except RuntimeError as e:
+            logger.error(f"更新菜单状态时发生运行时错误（可能是对象已销毁）: {e}")
+        except Exception as e:
+            logger.error(f"更新菜单状态时发生未知错误: {e}", exc_info=True)
