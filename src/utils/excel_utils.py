@@ -173,19 +173,24 @@ def open_excel_file(file_path: str, read_only: bool = True, password: Optional[s
         # - UpdateLinks: 0 (不更新链接)
         # - ReadOnly: read_only (只读模式)
         # - Format: None (自动检测格式)
-        # - WriteResPassword: "" (写入密码)
-        # - Password: password (读取密码)
+        # - WriteResPassword: password (写入密码，用于读写模式)
+        # - Password: "" (读取密码，用于只读模式)
         # - Origin: None (编码类型)
         # - Delimiter: None (分隔符)
         # - AddToMru: False (不添加到最近文件列表)
         # - CorruptLoad: 2 (xlNormalLoad，正常加载)
+        # 
+        # Excel有两种密码保护：
+        # - Password: 打开文件时需要的密码（只读保护）
+        # - WriteResPassword: 修改文件时需要的密码（写入保护）
+        # 当以读写模式打开时，应该使用WriteResPassword参数
         wb = excel_app.Workbooks.Open(
             Filename=file_path,
             UpdateLinks=0,
             ReadOnly=read_only,
             Format=None,
-            WriteResPassword="",
-            Password=password if password else "",
+            WriteResPassword=password if (password and not read_only) else "",
+            Password=password if (password and read_only) else "",
             Origin=None,
             Delimiter=None,
             AddToMru=False,
