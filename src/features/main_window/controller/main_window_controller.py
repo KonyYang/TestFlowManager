@@ -118,6 +118,10 @@ class MainWindowController:
             # 更新窗口标题显示项目信息
             self.view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
             
+            # 更新顶栏DL编号显示
+            if hasattr(self.view, 'update_dl_number_display'):
+                self.view.update_dl_number_display(dl_number)
+            
             # 保存当前项目路径到控制器属性
             self._current_project_path = project_path
             
@@ -545,6 +549,10 @@ class MainWindowController:
             if dl_number:
                 self.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
                 logger.debug(f"Set LTR number {dl_number} to Matrix controller")
+            
+            # 更新顶栏DL编号显示
+            if hasattr(self.view, 'update_dl_number_display'):
+                self.view.update_dl_number_display(dl_number)
             
             # 更新窗口标题显示项目信息
             self.view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")

@@ -468,6 +468,10 @@ class ProjectCreatorController:
             logger.debug(f"Setting main window title to: TestFlow Manager - 项目: {dl_number}")
             self.parent_view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
             logger.debug(f"Main window title after setting: {self.parent_view.windowTitle()}")
+            
+            # 更新顶栏DL编号显示
+            if hasattr(self.parent_view, 'update_dl_number_display'):
+                self.parent_view.update_dl_number_display(dl_number)
         # 使用QTimer延迟执行UI操作，避免在事件处理中直接操作UI
         from PyQt5.QtCore import QTimer
         QTimer.singleShot(0, lambda: self._open_matrix_editor_with_ltr_number(dl_number, project_path))
@@ -528,6 +532,10 @@ class ProjectCreatorController:
                     logger.debug(f"Setting main window title in _open_matrix_editor_with_ltr_number to: TestFlow Manager - 项目: {dl_number}")
                     self.parent_view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
                     logger.debug(f"Main window title after setting in _open_matrix_editor_with_ltr_number: {self.parent_view.windowTitle()}")
+                    
+                    # 更新顶栏DL编号显示
+                    if hasattr(self.parent_view, 'update_dl_number_display'):
+                        self.parent_view.update_dl_number_display(dl_number)
                 
                 # 根据DL编号构造项目根目录路径
                 from src.core.config_manager import config_manager

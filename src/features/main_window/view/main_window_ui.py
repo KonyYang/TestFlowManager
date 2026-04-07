@@ -229,6 +229,9 @@ class MainWindow(QMainWindow):
         self._page_stack: Optional[QStackedWidget] = None
         self._nav_entries: List[Tuple[str, str, str]] = []
         
+        # DL编号显示标签
+        self._dl_number_label: Optional[QLabel] = None
+        
         # 侧栏导航动作映射（索引 -> 动作函数）
         self._nav_actions = {}
         
@@ -400,12 +403,33 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(20, 0, 16, 0)
         layout.setSpacing(16)
 
-        # 左侧：简洁应用图标
+        # 左侧：应用图标 + DL编号
+        left_widget = QWidget()
+        left_layout = QHBoxLayout(left_widget)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(12)
+        
         brand_icon = QLabel()
         brand_icon.setText("🔬")
         brand_icon.setStyleSheet("font-size: 36px;")
         brand_icon.setToolTip("TestFlow Manager")
-        layout.addWidget(brand_icon)
+        left_layout.addWidget(brand_icon)
+        
+        # DL编号标签（初始为空）
+        self._dl_number_label = QLabel("")
+        self._dl_number_label.setObjectName("LimsDLNumberLabel")
+        self._dl_number_label.setStyleSheet("""
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 20px;
+            font-weight: bold;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        """)
+        self._dl_number_label.setVisible(False)  # 初始隐藏
+        left_layout.addWidget(self._dl_number_label)
+        
+        layout.addWidget(left_widget)
 
         # 中间面包屑
         self._breadcrumb_label = QLabel("📁 项目管理 / Matrix 编辑器")
@@ -448,26 +472,6 @@ class MainWindow(QMainWindow):
         close_btn.setToolTip("关闭应用")
         close_btn.clicked.connect(self.close)
         
-        # 用户信息
-        user_widget = QWidget()
-        user_layout = QHBoxLayout(user_widget)
-        user_layout.setContentsMargins(12, 4, 12, 4)
-        user_layout.setSpacing(8)
-        user_widget.setStyleSheet("""
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 16px;
-        """)
-        
-        user_icon = QLabel("👤")
-        user_icon.setStyleSheet("font-size: 22px;")
-        user_name = QLabel("管理员")
-        user_name.setStyleSheet("color: rgba(255,255,255,0.9); font-size: 17px;")
-        
-        user_layout.addWidget(user_icon)
-        user_layout.addWidget(user_name)
-        
-        actions_layout.addWidget(user_widget)
-        actions_layout.addSpacing(8)
         actions_layout.addWidget(fullscreen_btn)
         actions_layout.addWidget(minimize_btn)
         actions_layout.addWidget(self._maximize_btn)
@@ -489,6 +493,22 @@ class MainWindow(QMainWindow):
             self.showMaximized()
         else:
             self.showFullScreen()
+    
+    def update_dl_number_display(self, dl_number: str) -> None:
+        """
+        更新顶栏左侧的DL编号显示
+        
+        Args:
+            dl_number: DL编号，如果为空则隐藏标签
+        """
+        if self._dl_number_label:
+            if dl_number and dl_number.strip():
+                self._dl_number_label.setText(f"📋 {dl_number}")
+                self._dl_number_label.setVisible(True)
+                self._dl_number_label.setToolTip(f"当前项目: {dl_number}")
+            else:
+                self._dl_number_label.setText("")
+                self._dl_number_label.setVisible(False)
 
     def _on_header_mouse_press(self, event: QMouseEvent):
         """鼠标按下：开始拖拽"""
@@ -523,30 +543,7 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(0, 0, 0, 16)
         layout.setSpacing(0)
 
-        # 顶部用户信息区
-        user_header = QWidget()
-        user_header.setStyleSheet("""
-            background: rgba(255, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        """)
-        user_header_layout = QHBoxLayout(user_header)
-        user_header_layout.setContentsMargins(24, 24, 24, 24)
-        
-        user_avatar = QLabel("👤")
-        user_avatar.setStyleSheet("font-size: 48px;")
-        
-        user_info_layout = QVBoxLayout()
-        user_name = QLabel("管理员")
-        user_name.setStyleSheet("color: #ffffff; font-weight: bold; font-size: 20px;")
-        user_role = QLabel("TestFlow Manager")
-        user_role.setStyleSheet("color: rgba(255,255,255,0.6); font-size: 16px;")
-        user_info_layout.addWidget(user_name)
-        user_info_layout.addWidget(user_role)
-        
-        user_header_layout.addWidget(user_avatar)
-        user_header_layout.addLayout(user_info_layout, 1)
-        
-        layout.addWidget(user_header)
+
 
         # 导航列表
         self._nav_list = QListWidget()
