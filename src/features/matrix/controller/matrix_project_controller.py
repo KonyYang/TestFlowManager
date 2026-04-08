@@ -49,26 +49,25 @@ class MatrixProjectController:
         else:
             logger.debug("LTR integration service unchanged, skipping update")
             
-    def open_matrix_dialog(self):
+    def open_matrix_workspace(self):
         """
-        打开Matrix对话框
-        
+        打开Matrix工作区入口
+
         Returns:
             bool: 是否成功打开
         """
         try:
-            logger.info("Opening Matrix dialog")
+            logger.info("Opening Matrix workspace entry")
             
             # 如果有LTR项目数据，先初始化Matrix
             if self.ltr_integration_service and self.ltr_integration_service.is_project_loaded():
                 logger.debug("Initializing Matrix with LTR data")
                 self.matrix_controller.initialize_with_ltr_data()
             
-            # 显示Matrix对话框
-            logger.debug("Showing Matrix dialog")
-            self.matrix_controller.show_matrix_dialog()
-            logger.info("Matrix dialog opened successfully")
-            return True
+            logger.debug("Showing Matrix workspace entry")
+            success = self.matrix_controller.activate_matrix_workspace()
+            logger.info("Matrix workspace entry opened successfully")
+            return bool(success)
             
         except Exception as e:
             logger.error(f"Failed to open matrix dialog: {e}", exc_info=True)

@@ -18,6 +18,7 @@ from src.features.main_window.view.main_window_ui import MainWindow
 from src.core.logger import logger
 from src.core.config_manager import config_manager
 from src.utils import word_utils
+import src
 
 def initialize_numpy():
     """
@@ -73,7 +74,7 @@ def main():
         app = QApplication(sys.argv)
         app.setStyle("Fusion")
         app.setApplicationName("TestFlowManager")
-        app.setApplicationVersion("1.0.0")
+        app.setApplicationVersion(src.__version__)
         
         # 设置应用程序图标
         icon_path = os.path.join(os.path.dirname(__file__), "resources", "icons", "app_icon.ico")

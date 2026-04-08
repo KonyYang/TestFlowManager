@@ -4,15 +4,13 @@ import os
 from src.core.logger import logger
 from src.features.matrix.view.matrix_filter_dialog import MatrixFilterDialog
 from src.features.test_record_generator.controller.test_record_controller import TestRecordController
-from src.core.state_manager import state_manager
 
 
 class MatrixEventHandlers:
     """Matrix事件处理器 - 处理所有用户交互事件"""
     
-    def __init__(self, view, controller):
+    def __init__(self, view, _legacy_controller=None):
         self.view = view
-        self.controller = controller
         
     def on_import_clicked(self):
         """处理导入按钮点击事件"""
@@ -35,13 +33,13 @@ class MatrixEventHandlers:
                 keyword = filter_params['keyword']
                 
                 # 同步表格数据到模型
-                self.view._matrix_sync_table_to_model()
+                self.view.sync_to_model()
                 
                 # 触发Controller层处理
-                result = self.controller.import_from_spec(file_path, page_number, keyword)
+                result = self.view.import_from_spec(file_path, page_number, keyword)
                 if result and result.get("success", False):
                     # 更新表格显示
-                    self.view._matrix_update_table()
+                    self.view.refresh_table()
                     QMessageBox.information(self.view, "成功", "数据已成功导入")
                 else:
                     error_msg = result.get("error", "导入失败") if result else "导入失败"
@@ -53,22 +51,22 @@ class MatrixEventHandlers:
             logger.info("开始标准化填充Matrix")
             
             # 同步表格数据到模型
-            self.view._matrix_sync_table_to_model()
+            self.view.sync_to_model()
             
             # 先执行标准化操作
-            init_result = self.controller.initialize_matrix()
+            init_result = self.view.initialize_matrix()
             if not init_result:
                 QMessageBox.warning(self.view, "失败", "Matrix标准化失败")
                 return
             
             # 再尝试从已导入的规格书中提取测试方法
-            extract_result = self.controller.extract_test_methods_from_spec()
+            extract_result = self.view.extract_test_methods_from_spec()
             
             # 更新标准版本号
-            update_result = self.controller.update_standard_versions()
+            update_result = self.view.update_standard_versions()
             
             # 更新表格显示
-            self.view._matrix_update_table()
+            self.view.refresh_table()
             
             # 只要有执行操作就弹出信息
             if extract_result or update_result["success"]:
@@ -84,44 +82,10 @@ class MatrixEventHandlers:
         try:
             logger.debug("开始显示基本信息对话框")
             # 同步表格数据到模型
-            self.view._matrix_sync_table_to_model()
+            self.view.sync_to_model()
 
-            # 获取项目数据文件路径
-            project_data_file_path = getattr(self.controller, 'project_data_file_path', None)
-            logger.debug(f"从service获取到的项目数据文件路径: {project_data_file_path}")
-
-            # 如果service中没有项目数据文件路径，则尝试从状态管理器获取当前项目路径并构造文件路径
-            if not project_data_file_path:
-                logger.debug("service中没有项目数据文件路径，尝试从状态管理器获取")
-                current_project = state_manager.get_state("current_project")
-                logger.debug(f"从状态管理器获取到的当前项目路径: {current_project}")
-
-                if current_project and os.path.exists(current_project):
-                    # 查找项目中的JSON文件
-                    try:
-                        # 首先在当前目录查找
-                        json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
-                        logger.debug(f"在项目目录中找到的JSON文件: {json_files}")
-                        
-                        # 如果当前目录没有找到JSON文件，则在父目录查找
-                        if not json_files:
-                            parent_path = os.path.dirname(current_project)
-                            logger.debug(f"在父目录中查找JSON文件: {parent_path}")
-                            
-                            if os.path.exists(parent_path):
-                                json_files = [f for f in os.listdir(parent_path) if f.endswith('.json')]
-                                logger.debug(f"在父目录 {parent_path} 中找到的JSON文件: {json_files}")
-                                
-                                if json_files:
-                                    # 使用父目录中的JSON文件
-                                    project_data_file_path = os.path.join(parent_path, json_files[0])
-                                    logger.debug(f"构造的项目数据文件路径: {project_data_file_path}")
-                        else:
-                            # 使用当前目录中的JSON文件
-                            project_data_file_path = os.path.join(current_project, json_files[0])
-                            logger.debug(f"构造的项目数据文件路径: {project_data_file_path}")
-                    except Exception as e:
-                        logger.error(f"查找项目中的JSON文件时出错: {e}")
+            project_data_file_path = self.view.resolve_project_data_file_path()
+            logger.debug(f"解析得到的项目数据文件路径: {project_data_file_path}")
 
             # 如果有项目数据文件路径，则读取数据并显示基本信息对话框
             if project_data_file_path and os.path.exists(project_data_file_path):
@@ -162,15 +126,10 @@ class MatrixEventHandlers:
                 default_filename = "test status.xlsx"
                 
             # 获取当前项目路径作为默认保存路径
-            current_project = state_manager.get_state("current_project")
+            current_project = self.view.get_project_path()
             logger.debug(f"当前项目路径: {current_project}")
-            if current_project and os.path.exists(current_project):
-                # 直接在项目路径下生成文件，不放在子文件夹中
-                default_path = os.path.join(current_project, default_filename)
-                logger.debug(f"构建默认路径: {default_path}")
-            else:
-                default_path = default_filename
-                logger.debug(f"使用默认文件名: {default_path}")
+            default_path = self.view.build_default_output_path(default_filename)
+            logger.debug(f"构建默认路径: {default_path}")
                 
             file_path, _ = QFileDialog.getSaveFileName(
                 self.view, "保存Test Status表", default_path, "Excel Files (*.xlsx)"
@@ -178,12 +137,12 @@ class MatrixEventHandlers:
             if file_path:
                 logger.debug(f"选择的文件路径: {file_path}")
                 # 同步表格数据到模型
-                self.view._matrix_sync_table_to_model()
+                self.view.sync_to_model()
                 # 导出前先保存合并单元格信息
-                self.view._matrix_save_merged_cells_info()
+                self.view.save_merged_cells_info()
                 # 触发Controller层处理
                 logger.debug("开始调用控制器导出方法")
-                result = self.controller.export_to_excel(file_path, export_type)
+                result = self.view.export_to_excel(file_path, export_type)
                 logger.debug(f"控制器导出方法返回结果: {result}")
                 if result:
                     QMessageBox.information(self.view, "成功", "Test Status表已成功导出到Excel")
@@ -219,7 +178,7 @@ class MatrixEventHandlers:
                             
                             if new_file_path:
                                 # 重新尝试导出
-                                result = self.controller.export_to_excel(new_file_path, export_type)
+                                result = self.view.export_to_excel(new_file_path, export_type)
                                 if result:
                                     QMessageBox.information(self.view, "成功", "Test Status表已成功导出到Excel")
                                 else:
@@ -239,14 +198,14 @@ class MatrixEventHandlers:
             logger.info("开始更新标准版本号")
             
             # 同步表格数据到模型
-            self.view._matrix_sync_table_to_model()
+            self.view.sync_to_model()
             
             # 调用控制器更新标准版本号
-            result = self.controller.update_standard_versions()
+            result = self.view.update_standard_versions()
             
             if result["success"]:
                 # 更新表格显示
-                self.view._matrix_update_table()
+                self.view.refresh_table()
                 
                 # 显示更新详情
                 details = result["details"]
@@ -308,10 +267,10 @@ class MatrixEventHandlers:
             logger.info("开始生成Test Record文档")
             
             # 同步表格数据到模型
-            self.view._matrix_sync_table_to_model()
+            self.view.sync_to_model()
             
             # 创建Test Record控制器实例
-            controller = TestRecordController(matrix_service=self.controller)
+            controller = TestRecordController(matrix_service=self.view.matrix_controller.service)
             
             # 调用控制器生成Test Record（直接使用固定路径）
             success = controller.generate_test_record(parent=self.view)
@@ -331,7 +290,7 @@ class MatrixEventHandlers:
             logger.info("开始生成费用表")
             
             # 同步表格数据到模型
-            self.view._matrix_sync_table_to_model()
+            self.view.sync_to_model()
             
             # 获取Matrix数据结构
             from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
@@ -339,8 +298,8 @@ class MatrixEventHandlers:
             
             # 从Matrix数据中提取必要的信息
             # 首先尝试从当前项目获取DL编号和其他信息
-            dl_number = getattr(self.controller, 'dl_number', 'DL-UNKNOWN')
-            project_data_file_path = getattr(self.controller, 'project_data_file_path', None)
+            dl_number = self.view.ltr_number or "DL-UNKNOWN"
+            project_data_file_path = self.view.resolve_project_data_file_path()
             
             # 尝试从项目数据文件中加载更多信息
             requested_by = ""
@@ -363,11 +322,13 @@ class MatrixEventHandlers:
                     logger.warning(f"读取项目数据文件失败: {e}")
             
             # 解析Matrix数据结构
-            matrix_data_structure.parse_matrix_to_structure(self.controller.data_model.rows)
+            matrix_data_structure.parse_matrix_to_structure(self.view.get_data_model().rows)
             
             # 创建费用表导出服务实例
             from src.features.matrix.service.export.service.fee_sheet_export_service import FeeSheetExportService
-            fee_sheet_service = FeeSheetExportService()
+            fee_sheet_service = FeeSheetExportService(
+                project_context=self.view.get_project_context()
+            )
             
             # 调用服务生成费用表，获取返回的实际保存路径
             success, save_path = fee_sheet_service.export_fee_sheet(

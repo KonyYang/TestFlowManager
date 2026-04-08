@@ -16,6 +16,7 @@ import win32com.client as win32
 import win32com.client.gencache as gencache
 from src.core.logger import logger
 from src.core.config_manager import config_manager
+from src.core.project_context import ProjectContext, get_current_project_context
 
 
 class EquipmentConfigManager:
@@ -87,18 +88,17 @@ class EquipmentConfigManager:
 class ReportUpdaterService:
     """报告更新服务类"""
     
-    def __init__(self, project_path: str = None):
+    def __init__(self, project_path: str = None, project_context: Optional[ProjectContext] = None):
         """初始化报告更新服务"""
+        self.project_context = project_context or get_current_project_context()
+        if self.project_context is None and project_path:
+            self.project_context = ProjectContext.from_project_path(project_path)
         self.config_manager = EquipmentConfigManager()
-        # 优先使用传入的项目路径，否则从状态管理器获取当前项目路径
-        if project_path:
+        # 优先使用上下文中的项目路径，兼容旧 project_path 入口
+        if self.project_context:
+            self.config_manager.project_path = self.project_context.project_path
+        elif project_path:
             self.config_manager.project_path = project_path
-        else:
-            # 从状态管理器获取当前项目路径
-            from src.core.state_manager import state_manager
-            current_project = state_manager.get_state("current_project")
-            if current_project:
-                self.config_manager.project_path = current_project
         self.config = self.config_manager.get_config()
         logger.info("ReportUpdaterService initialized")
     

@@ -24,8 +24,6 @@ from PyQt5.QtWidgets import (
     QFrame,
     QSizePolicy,
     QMessageBox,
-    QTableWidget,
-    QHeaderView,
 )
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QRect, QPoint, pyqtSignal, Qt
@@ -39,13 +37,7 @@ from src.features.customer_report_generator.controller.customer_report_controlle
 from src.features.report_wizard.controller.report_wizard_controller import ReportWizardController
 from src.features.document_parser.controller.document_parser_controller import DocumentParserController
 from src.features.report_updater.controller.report_updater_controller import ReportUpdaterController
-# Matrix UI 组件直接集成
-from src.features.matrix.view.components.matrix_toolbar import MatrixToolbar
-from src.features.matrix.view.components.matrix_context_menus import MatrixContextMenus
-from src.features.matrix.view.managers.table_manager import TableManager
-from src.features.matrix.view.managers.data_sync_manager import DataSyncManager
-from src.features.matrix.view.managers.import_export_manager import ImportExportManager
-from src.features.matrix.view.handlers.matrix_event_handlers import MatrixEventHandlers
+from src.features.matrix.view.matrix_page import MatrixPage
 
 
 # 主窗口 Lims 风格全局样式（高分辨率屏幕优化版）
@@ -238,17 +230,9 @@ class MainWindow(QMainWindow):
         # 初始化期间禁止自动触发动作
         self._initializing_nav = False
         
-        # Matrix UI 组件（直接集成到主窗口）
+        # Matrix 页面与兼容访问口
         self.matrix_tab: Optional[QWidget] = None
-        self.matrix_toolbar: Optional[MatrixToolbar] = None
-        self.matrix_table_widget: Optional[QTableWidget] = None
-        self.matrix_table_manager: Optional[TableManager] = None
-        self.matrix_data_sync_manager: Optional[DataSyncManager] = None
-        self.matrix_import_export_manager: Optional[ImportExportManager] = None
-        self.matrix_event_handlers: Optional[MatrixEventHandlers] = None
-        self.matrix_context_menus: Optional[MatrixContextMenus] = None
-        self.matrix_copied_row_data = None
-        self.matrix_copied_col_data = None
+        self.matrix_page: Optional[MatrixPage] = None
 
         self._initialize_step_by_step()
         self._update_status()
@@ -735,10 +719,50 @@ class MainWindow(QMainWindow):
             self._report_updater_controller = ReportUpdaterController(self)
         return self._report_updater_controller
 
+    def _get_matrix_page_attr(self, attr_name: str):
+        if self.matrix_page is None:
+            return None
+        return getattr(self.matrix_page, attr_name, None)
+
+    @property
+    def matrix_toolbar(self):
+        return self._get_matrix_page_attr("matrix_toolbar")
+
+    @property
+    def matrix_table_widget(self):
+        return self._get_matrix_page_attr("matrix_table_widget")
+
+    @property
+    def matrix_table_manager(self):
+        return self._get_matrix_page_attr("matrix_table_manager")
+
+    @property
+    def matrix_data_sync_manager(self):
+        return self._get_matrix_page_attr("matrix_data_sync_manager")
+
+    @property
+    def matrix_import_export_manager(self):
+        return self._get_matrix_page_attr("matrix_import_export_manager")
+
+    @property
+    def matrix_event_handlers(self):
+        return self._get_matrix_page_attr("matrix_event_handlers")
+
+    @property
+    def matrix_context_menus(self):
+        return self._get_matrix_page_attr("matrix_context_menus")
+
+    @property
+    def matrix_copied_row_data(self):
+        return self._get_matrix_page_attr("matrix_copied_row_data")
+
+    @property
+    def matrix_copied_col_data(self):
+        return self._get_matrix_page_attr("matrix_copied_col_data")
+
     def _setup_navigation_pages(self):
         """注册侧栏条目与堆叠页面（所有菜单项改为侧栏直达）。"""
         # === Matrix 编辑器（默认首页）===
-        self.matrix_tab = QWidget()
         self._setup_matrix_tab()
         self._register_nav_page(
             "📊 Matrix 编辑器", 
@@ -974,220 +998,51 @@ class MainWindow(QMainWindow):
         return page
 
     def _setup_matrix_tab(self):
-        """Matrix 主内容页 - 直接集成 Matrix UI 组件（现代化样式）"""
-        layout = QVBoxLayout(self.matrix_tab)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(12)
-        
-        # 使用外部工具栏组件
-        self.matrix_toolbar = MatrixToolbar(self.matrix_controller.service, self)
-        layout.addWidget(self.matrix_toolbar.get_widget())
-        
-        # 表格区域
-        self.matrix_table_widget = QTableWidget()
-        
-        # 设置表格样式
-        self.matrix_table_widget.setStyleSheet("""
-            QTableWidget {
-                background-color: #ffffff;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                gridline-color: #edf2f7;
-                selection-background-color: #bee3f8;
-                font-size: 16px;
-            }
-            QTableWidget::item {
-                padding: 8px 12px;
-                border-bottom: 1px solid #edf2f7;
-            }
-            QTableWidget::item:alternate {
-                background-color: #f7fafc;
-            }
-            QTableWidget::item:selected {
-                background-color: #bee3f8;
-                color: #1a3a5c;
-            }
-            QHeaderView::section {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-                    stop:0 #f7fafc, stop:1 #edf2f7);
-                color: #4a5568;
-                padding: 12px;
-                border: none;
-                border-bottom: 2px solid #cbd5e0;
-                font-weight: bold;
-                font-size: 16px;
-            }
-            QHeaderView::section:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-                    stop:0 #edf2f7, stop:1 #e2e8f0);
-            }
-        """)
-        
-        # 设置水平表头可以手动调整列宽
-        self.matrix_table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
-        # 设置垂直表头可以手动调整行高
-        self.matrix_table_widget.verticalHeader().setSectionResizeMode(QHeaderView.Interactive)
-        self.matrix_table_widget.verticalHeader().setVisible(True)  # 显示行号
-        self.matrix_table_widget.setAlternatingRowColors(True)  # 交替行颜色
-        
-        # 初始化组件管理器
-        self.matrix_table_manager = TableManager(self, self.matrix_controller.service)
-        self.matrix_data_sync_manager = DataSyncManager(self, self.matrix_controller.service)
-        self.matrix_import_export_manager = ImportExportManager(self, self.matrix_controller.service)
-        self.matrix_event_handlers = MatrixEventHandlers(self, self.matrix_controller.service)
-        self.matrix_context_menus = MatrixContextMenus(self, self.matrix_controller.service)
-        
-        # 启用单元格的右键菜单
-        self.matrix_table_widget.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.matrix_table_widget.customContextMenuRequested.connect(self.matrix_context_menus.show_cell_context_menu)
-        # 连接行头和列头的右键菜单事件
-        self.matrix_table_widget.verticalHeader().setContextMenuPolicy(Qt.CustomContextMenu)
-        self.matrix_table_widget.verticalHeader().customContextMenuRequested.connect(self.matrix_context_menus.show_row_context_menu)
-        self.matrix_table_widget.horizontalHeader().setContextMenuPolicy(Qt.CustomContextMenu)
-        self.matrix_table_widget.horizontalHeader().customContextMenuRequested.connect(self.matrix_context_menus.show_col_context_menu)
-        # 连接选择变化信号以更新菜单状态
-        self.matrix_table_widget.itemSelectionChanged.connect(self._on_matrix_item_selection_changed)
-        # 设置选择模式为连续选择
-        self.matrix_table_widget.setSelectionMode(QTableWidget.ContiguousSelection)
-        self.matrix_table_widget.setSelectionBehavior(QTableWidget.SelectItems)
-        
-        # 设置表格初始状态 - 延迟到首次访问时再更新
-        # self.matrix_table_manager.update_table()  # 注释掉启动时的立即更新
-        
-        # 连接信号到事件处理器
-        self.matrix_toolbar.connect_signals(self.matrix_event_handlers)
-        
-        # 添加表格到布局
-        layout.addWidget(self.matrix_table_widget)
-        
-        # 监听页面切换,首次显示Matrix页面时才更新表格
+        """Matrix 主内容页 - 通过 MatrixPage 接入主窗口。"""
+        if self.matrix_page is None:
+            self.matrix_page = MatrixPage(self.matrix_controller, self)
+
+        self.matrix_tab = self.matrix_page
+
         if hasattr(self, '_page_stack') and self._page_stack:
             self._page_stack.currentChanged.connect(self._on_page_changed_for_matrix)
-        
-        # 连接表格项变更信号
-        self.matrix_table_widget.itemChanged.connect(self._on_item_changed)
-        
-        # Matrix是默认首页，需要立即加载数据
-        # 使用QTimer延迟执行，确保UI完全初始化后再加载数据
-        from PyQt5.QtCore import QTimer
-        QTimer.singleShot(0, self._initialize_matrix_table)
-        
-        # 在初始化后自动导入项目中的matrix.xlsx文件（如果存在）
-        # 注意：auto_import已在_initialize_matrix_table中调用，这里注释掉避免重复
-        # self.matrix_import_export_manager.auto_import_matrix_from_project()
     
-    def _on_matrix_item_selection_changed(self):
-        """Matrix 表格选择项变化时的处理"""
-        logger.debug("Matrix 表格选择项发生变化")
-        # 更新菜单状态
-        if hasattr(self.matrix_context_menus, 'update_cell_menu_actions'):
-            self.matrix_context_menus.update_cell_menu_actions()
+    def sync_to_model(self) -> None:
+        if self.matrix_page:
+            self.matrix_page.sync_to_model()
     
-    def _matrix_sync_table_to_model(self):
-        """同步 Matrix 表格数据到模型"""
-        self.matrix_data_sync_manager.sync_table_to_model()
+    def refresh_table(self) -> None:
+        if self.matrix_page:
+            self.matrix_page.refresh_table()
     
-    def _matrix_update_table(self):
-        """更新 Matrix 表格显示"""
-        self.matrix_table_manager.update_table()
+    def save_merged_cells_info(self) -> None:
+        if self.matrix_page:
+            self.matrix_page.save_merged_cells_info()
     
-    def _matrix_save_merged_cells_info(self):
-        """保存 Matrix 合并单元格信息"""
-        self.matrix_data_sync_manager.save_merged_cells_info()
-    
-    def _matrix_auto_import_from_project(self):
-        """从项目文件夹自动导入 matrix.xlsx 文件"""
-        self.matrix_import_export_manager.auto_import_matrix_from_project()
+    def auto_import_from_project(self) -> None:
+        if self.matrix_page:
+            self.matrix_page.auto_import_from_project()
 
-    # --- Matrix 事件处理委托 (Delegate to handlers) ---
-    def _on_item_changed(self, item):
-        """处理表格项变更事件"""
-        try:
-            row = item.row()
-            col = item.column()
-            value = item.text()
-            logger.debug(f"Matrix 表格项变更: [{row},{col}] = '{value}'")
-            # 更新数据模型
-            self.matrix_controller.service.set_cell_value(row, col, value)
-        except Exception as e:
-            logger.error(f"处理 Matrix 表格项变更时出错: {e}", exc_info=True)
+    def set_matrix_project_context(self, project_context) -> None:
+        if self.matrix_page:
+            self.matrix_page.set_project_context(project_context)
 
-    def _merge_or_split_cells(self):
-        """根据选中单元格的状态执行合并或拆分操作"""
-        from src.features.matrix.service.matrix_cell_service import MatrixCellService
-        cell_service = MatrixCellService(self.matrix_controller.service)
-        cell_service.merge_or_split_cells(self.matrix_table_widget)
+    def has_matrix_workspace(self) -> bool:
+        return self.matrix_page is not None
 
-    def _undo_cell_operation(self):
-        """撤销单元格操作"""
-        self.matrix_controller.service.undo_cell_operation()
+    def activate_matrix_workspace(self) -> bool:
+        if self.matrix_page is None:
+            return False
 
-    def _redo_cell_operation(self):
-        """重做单元格操作"""
-        self.matrix_controller.service.redo_cell_operation()
+        if self._nav_list is not None:
+            self._nav_list.setCurrentRow(0)
+            return True
 
-    # --- Matrix 行/列操作委托 (Delegate to table_manager) ---
-    def _add_row(self):
-        self._matrix_sync_table_to_model()
-        self.matrix_table_manager.add_row()
+        if self._page_stack is not None:
+            self._apply_nav_index(0)
+            return True
 
-    def _insert_row(self):
-        selected_rows = self.matrix_table_widget.selectionModel().selectedRows()
-        if selected_rows:
-            self._matrix_sync_table_to_model()
-            self.matrix_table_manager.insert_row(selected_rows[0].row())
-        else:
-            QMessageBox.warning(self, "操作失败", "请选择一行")
-
-    def _move_row_at(self, row):
-        self._matrix_sync_table_to_model()
-        self.matrix_table_manager.move_row(row)
-
-    def _copy_row(self, row):
-        self.matrix_copied_row_data = self.matrix_table_manager.copy_row(row)
-
-    def _paste_row(self, row):
-        self._matrix_sync_table_to_model()
-        self.matrix_table_manager.paste_row(row)
-
-    def _remove_row(self):
-        selected_rows = self.matrix_table_widget.selectionModel().selectedRows()
-        if selected_rows:
-            self._matrix_sync_table_to_model()
-            self.matrix_table_manager.remove_row(selected_rows[0].row())
-        else:
-            QMessageBox.warning(self, "操作失败", "请选择一行")
-
-    def _add_column(self):
-        self._matrix_sync_table_to_model()
-        self.matrix_table_manager.add_column()
-
-    def _insert_column(self):
-        selected_cols = self.matrix_table_widget.selectionModel().selectedColumns()
-        if selected_cols:
-            self._matrix_sync_table_to_model()
-            self.matrix_table_manager.insert_column(selected_cols[0].column())
-        else:
-            QMessageBox.warning(self, "操作失败", "请选择一列")
-
-    def _move_column(self, col):
-        self._matrix_sync_table_to_model()
-        self.matrix_table_manager.move_column(col)
-
-    def _copy_column(self, col):
-        self.matrix_copied_col_data = self.matrix_table_manager.copy_column(col)
-
-    def _paste_column(self, col):
-        self._matrix_sync_table_to_model()
-        self.matrix_table_manager.paste_column(col)
-
-    def _remove_column(self):
-        selected_cols = self.matrix_table_widget.selectionModel().selectedColumns()
-        if selected_cols:
-            self._matrix_sync_table_to_model()
-            self.matrix_table_manager.remove_column(selected_cols[0].column())
-        else:
-            QMessageBox.warning(self, "操作失败", "请选择一列")
+        return False
 
     def _set_window_icon(self):
         """设置窗口图标"""
@@ -1280,23 +1135,20 @@ class MainWindow(QMainWindow):
 
     def _on_create_report(self) -> None:
         logger.debug("Create report action triggered")
-        current_project_path = getattr(self.controller, "_current_project_path", None)
-        self.report_wizard_controller.set_project_path(current_project_path)
+        self.report_wizard_controller.set_project_context(self.controller.project_context)
         self.report_wizard_controller.set_matrix_service(self.matrix_controller.service)
         self.report_wizard_controller.show_wizard()
         self._update_status()
 
     def _on_update_report(self) -> None:
         logger.debug("Update report action triggered")
-        current_project_path = getattr(self.controller, "_current_project_path", None)
-        self.report_updater_controller.set_project_path(current_project_path)
+        self.report_updater_controller.set_project_context(self.controller.project_context)
         self.report_updater_controller.show_report_updater_dialog()
         self._update_status()
 
     def _on_convert_customer_version(self) -> None:
         logger.debug("Convert to customer version action triggered")
-        current_project_path = getattr(self.controller, "_current_project_path", None)
-        if self.customer_report_controller.handle_generate_customer_report(current_project_path):
+        if self.customer_report_controller.handle_generate_customer_report_with_context(self.controller.project_context):
             self._update_status()
         else:
             self._update_status()
@@ -1341,29 +1193,18 @@ class MainWindow(QMainWindow):
 
     def _on_page_changed_for_matrix(self, index: int) -> None:
         """页面切换时延迟加载Matrix表格数据"""
-        # Matrix页面是索引0
-        if index == 0 and hasattr(self, 'matrix_table_manager'):
-            # 检查是否已经初始化过
-            if not getattr(self, '_matrix_table_initialized', False):
-                logger.debug("首次显示Matrix页面，延迟加载表格数据")
+        if index == 0 and self.matrix_page:
+            if not self.matrix_page._matrix_table_initialized:
                 try:
-                    self.matrix_table_manager.update_table()
-                    self._matrix_table_initialized = True
-                    logger.debug("Matrix表格数据加载完成")
+                    self.matrix_page.handle_page_activated()
                 except Exception as e:
                     logger.error(f"延迟加载Matrix表格失败: {e}")
     
     def _initialize_matrix_table(self):
         """初始化Matrix表格数据 - 启动时调用"""
         try:
-            logger.debug("开始初始化Matrix表格数据")
-            # 先更新表格结构
-            self.matrix_table_manager.update_table()
-            # 标记为已初始化
-            self._matrix_table_initialized = True
-            # 尝试自动导入项目中的matrix.xlsx
-            self.matrix_import_export_manager.auto_import_matrix_from_project()
-            logger.debug("Matrix表格初始化完成")
+            if self.matrix_page:
+                self.matrix_page.initialize_table()
         except Exception as e:
             logger.error(f"初始化Matrix表格失败: {e}", exc_info=True)
 

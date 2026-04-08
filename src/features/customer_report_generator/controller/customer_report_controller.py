@@ -5,6 +5,7 @@
 
 from PyQt5.QtWidgets import QMessageBox
 from src.core.logger import logger
+from src.core.project_context import ProjectContext
 from src.features.customer_report_generator.service.customer_report_service import CustomerReportService
 
 
@@ -23,6 +24,7 @@ class CustomerReportController:
         """
         self.parent_window = parent_window
         self.service = CustomerReportService()
+        self.project_context = None
 
     def handle_generate_customer_report(self, project_path=None):
         """
@@ -34,6 +36,12 @@ class CustomerReportController:
         Returns:
             bool: 是否成功生成客户报告
         """
+        project_context = ProjectContext.from_project_path(project_path) if project_path else None
+        return self.handle_generate_customer_report_with_context(project_context)
+
+    def handle_generate_customer_report_with_context(self, project_context=None):
+        project_path = project_context.project_path if project_context else None
+        self.project_context = project_context
         try:
             logger.debug("处理生成客户报告事件")
             

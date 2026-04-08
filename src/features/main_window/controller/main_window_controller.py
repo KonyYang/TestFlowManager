@@ -1,4 +1,4 @@
-"""
+﻿"""
 主窗口控制器模块
 处理主窗口的业务逻辑和事件
 """
@@ -17,6 +17,7 @@ from src.features.main_window.view.dialogs.dl_input_dialog import DLInputDialog
 from src.features.project_creator.controller import ProjectCreatorController
 # 添加状态管理器
 from src.core.state_manager import state_manager
+from src.core.project_context import ProjectContext
 # 添加Matrix相关导入
 from src.features.matrix.controller.matrix_project_controller import MatrixProjectController
 
@@ -51,7 +52,7 @@ class MainWindowController:
         self.matrix_project_controller = MatrixProjectController(view)
         
         # 初始化当前项目路径
-        self._current_project_path = None
+        self._project_context: Optional[ProjectContext] = None
 
         # 订阅事件
         event_dispatcher.subscribe("ltr.processing.started", self._on_ltr_processing_started)
@@ -106,39 +107,22 @@ class MainWindowController:
 
     def _on_project_opened(self, data):
         """处理项目打开事件"""
-        project_path = data.get("project_path")
-        dl_number = data.get("dl_number")
+        project_context = ProjectContext.from_event_data(data)
+        project_path = project_context.project_path if project_context else data.get("project_path")
+        dl_number = project_context.dl_number if project_context else data.get("dl_number")
         
         logger.debug(f"_on_project_opened called with project_path={project_path}, dl_number={dl_number}")
         
-        if project_path and dl_number:
-            # 更新状态
-            self.service.update_status(f"当前项目: {dl_number}")
-            
-            # 更新窗口标题显示项目信息
-            self.view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
-            
-            # 更新顶栏DL编号显示
-            if hasattr(self.view, 'update_dl_number_display'):
-                self.view.update_dl_number_display(dl_number)
-            
-            # 保存当前项目路径到控制器属性
-            self._current_project_path = project_path
-            
-            # 设置LTR编号到Matrix控制器
-            if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
-                self.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
-                logger.debug(f"Set LTR number {dl_number} to Matrix controller")
-                
-            # 触发Matrix自动导入功能
-            QTimer.singleShot(0, self._trigger_matrix_auto_import)
-            
-            logger.info(f"Project opened successfully: {project_path} with DL number: {dl_number}")
-            
-            # 确保报告更新控制器的项目路径也被更新
-            # 通过视图访问报告更新控制器并更新项目路径
-            if hasattr(self.view, 'report_updater_controller'):
-                self.view.report_updater_controller.set_project_path(project_path)
+        if project_path:
+            if self._matches_project_context(project_path, dl_number):
+                return
+            self._apply_project_context(
+                project_context or self._build_project_context(project_path, dl_number),
+                trigger_matrix_auto_import=True,
+                status_message=f"当前项目: {dl_number or os.path.basename(project_path)}",
+                log_message=f"Project opened successfully: {project_path} with DL number: {dl_number}",
+            )
+            return
 
     def _on_state_changed(self, data):
         """处理状态变更事件"""
@@ -147,6 +131,18 @@ class MainWindowController:
 
         # 根据不同的状态键进行相应处理
         if key == "current_project":
+            if new_value:
+                existing_dl_number = self.project_context.dl_number if self.project_context else None
+                if self._matches_project_context(new_value, existing_dl_number):
+                    return
+                self._apply_project_context(
+                    self._build_project_context(new_value, existing_dl_number),
+                    trigger_matrix_auto_import=True,
+                    status_message=f"当前项目: {existing_dl_number or new_value}",
+                )
+            else:
+                self._project_context = None
+            return
             self.service.update_status(f"当前项目: {new_value}")
             # 更新窗口标题显示项目信息
             if new_value:
@@ -158,12 +154,82 @@ class MainWindowController:
         elif key == "application_status":
             self.service.update_status(new_value)
 
+    @property
+    def project_context(self) -> Optional[ProjectContext]:
+        return self._project_context
+
+    @property
+    def current_project_path(self) -> Optional[str]:
+        if not self._project_context:
+            return None
+        return self._project_context.project_path
+
+    @property
+    def _current_project_path(self) -> Optional[str]:
+        """兼容旧调用，真实状态已迁移到 project_context。"""
+        return self.current_project_path
+
+    @_current_project_path.setter
+    def _current_project_path(self, project_path: Optional[str]) -> None:
+        if project_path:
+            existing_dl_number = self._project_context.dl_number if self._project_context else None
+            self._project_context = self._build_project_context(project_path, existing_dl_number)
+        else:
+            self._project_context = None
+
+    def _build_project_context(self, project_path: str, dl_number: Optional[str] = None) -> ProjectContext:
+        return ProjectContext.from_project_path(project_path, dl_number)
+
+    def _matches_project_context(self, project_path: str, dl_number: Optional[str] = None) -> bool:
+        if not self._project_context:
+            return False
+        normalized_path = os.path.normcase(os.path.normpath(project_path))
+        current_path = os.path.normcase(os.path.normpath(self._project_context.project_path))
+        return normalized_path == current_path and dl_number == self._project_context.dl_number
+
+    def _apply_project_context(
+        self,
+        project_context: ProjectContext,
+        *,
+        trigger_matrix_auto_import: bool = False,
+        status_message: Optional[str] = None,
+        log_message: Optional[str] = None,
+    ) -> None:
+        self._project_context = project_context
+
+        project_label = project_context.dl_number or os.path.basename(project_context.project_path)
+
+        if status_message:
+            self.service.update_status(status_message)
+
+        self.view.setWindowTitle(f"TestFlow Manager - 项目: {project_label}")
+
+        if hasattr(self.view, "update_dl_number_display"):
+            self.view.update_dl_number_display(project_context.dl_number)
+
+        if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
+            self.matrix_project_controller.matrix_controller.set_project_context(project_context)
+            if project_context.dl_number:
+                self.matrix_project_controller.matrix_controller.set_ltr_number(project_context.dl_number)
+                logger.debug(f"Set LTR number {project_context.dl_number} to Matrix controller")
+
+        if hasattr(self.view, "set_matrix_project_context"):
+            self.view.set_matrix_project_context(project_context)
+
+        if hasattr(self.view, "report_updater_controller"):
+            self.view.report_updater_controller.set_project_context(project_context)
+
+        if trigger_matrix_auto_import:
+            QTimer.singleShot(0, self._trigger_matrix_auto_import)
+
+        if log_message:
+            logger.info(log_message)
+
     def _trigger_matrix_auto_import(self):
         """触发Matrix编辑器自动导入项目中的matrix.xlsx文件并更新显示"""
         try:
-            # 调用主窗口的Matrix自动导入方法
-            if hasattr(self.view, 'matrix_import_export_manager') and self.view.matrix_import_export_manager:
-                self.view._matrix_auto_import_from_project()
+            if hasattr(self.view, "auto_import_from_project") and self.view.has_matrix_workspace():
+                self.view.auto_import_from_project()
                 logger.debug("Triggered auto import of matrix.xlsx in MainWindow")
                 
                 # 延迟更新表格显示，确保数据已加载
@@ -178,8 +244,8 @@ class MainWindowController:
     def _update_matrix_display(self):
         """更新 Matrix 表格显示"""
         try:
-            if hasattr(self.view, '_matrix_update_table'):
-                self.view._matrix_update_table()
+            if hasattr(self.view, "refresh_table") and self.view.has_matrix_workspace():
+                self.view.refresh_table()
                 logger.debug("Successfully updated Matrix table display")
         except Exception as e:
             logger.error(f"Failed to update Matrix display: {e}")
@@ -187,10 +253,8 @@ class MainWindowController:
     def _switch_to_matrix_page(self):
         """切换到 Matrix 编辑器页面"""
         try:
-            # Matrix 编辑器是第一个页面，索引为 0
-            if hasattr(self.view, '_nav_list') and self.view._nav_list:
-                self.view._nav_list.setCurrentRow(0)
-                logger.debug("Switched to Matrix editor page (index 0)")
+            if hasattr(self.view, "activate_matrix_workspace") and self.view.activate_matrix_workspace():
+                logger.debug("Switched to Matrix editor workspace")
         except Exception as e:
             logger.error(f"Failed to switch to Matrix page: {e}")
 
@@ -536,32 +600,13 @@ class MainWindowController:
             # 保存当前项目路径到状态
             state_manager.set_state("current_project", project_path)
             
-            # 保存当前项目路径到控制器属性
-            self._current_project_path = project_path
+            project_context = self._build_project_context(project_path, dl_number)
+            state_manager.set_state("current_project_context", project_context)
+            self._apply_project_context(project_context, status_message=f"已打开项目: {os.path.basename(project_path)}")
             
             # 通知其他组件项目已打开
-            event_dispatcher.dispatch("project.opened", {
-                "project_path": project_path,
-                "dl_number": dl_number
-            })
-            
-            # 设置LTR编号到Matrix控制器
-            if dl_number:
-                self.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
-                logger.debug(f"Set LTR number {dl_number} to Matrix controller")
-            
-            # 更新顶栏DL编号显示
-            if hasattr(self.view, 'update_dl_number_display'):
-                self.view.update_dl_number_display(dl_number)
-            
-            # 更新窗口标题显示项目信息
-            self.view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
-
-            self.service.update_status(f"已打开项目: {os.path.basename(project_path)}")
+            event_dispatcher.dispatch("project.opened", project_context.to_event_data())
             logger.info(f"Project opened successfully: {project_path}")
-
-            # 触发Matrix自动导入功能
-            QTimer.singleShot(0, self._trigger_matrix_auto_import)
 
             return True
         except Exception as e:
@@ -705,4 +750,3 @@ class MainWindowController:
             logger.info("MainWindowController shut down successfully")
         except Exception as e:
             logger.error(f"Error during MainWindowController shutdown: {e}")
-

@@ -2,6 +2,7 @@ from src.features.matrix.service.export.service.matrix_editor_export_service imp
 from src.features.matrix.service.export.service.test_status_export_service import TestStatusTableExportService
 from src.features.matrix.service.export.controller.record_data_table_export_controller import RecordDataTableExportController
 from src.core.logger import logger
+from src.core.project_context import ProjectContext
 
 
 class ExportController:
@@ -11,6 +12,7 @@ class ExportController:
         self.data_model = data_model
         self.ltr_data = ltr_data
         self.parent = parent
+        self.project_context = None
         self.excel_export_service = MatrixEditorExcelExportService(data_model)
         self.test_status_export_service = TestStatusTableExportService(data_model, ltr_data)
         # 懒加载RecordDataTableExportController，避免在初始化时重复解析数据
@@ -78,7 +80,14 @@ class ExportController:
         """懒加载RecordDataTableExportController实例"""
         if self._record_data_table_export_controller is None:
             self._record_data_table_export_controller = RecordDataTableExportController(self.data_model, self._parent)
+            if self.project_context:
+                self._record_data_table_export_controller.set_project_context(self.project_context)
         return self._record_data_table_export_controller
+
+    def set_project_context(self, project_context: ProjectContext):
+        self.project_context = project_context
+        if self._record_data_table_export_controller:
+            self._record_data_table_export_controller.set_project_context(project_context)
 
     def set_ltr_data(self, ltr_data):
         """

@@ -61,9 +61,6 @@ class MatrixService:
         self.last_imported_spec_path = self.spec_processing_service.last_imported_spec_path
         # 添加项目控制器引用
         self.project_controller = None
-        # 添加项目数据文件路径
-        self.project_data_file_path = None
-        logger.info("MatrixService initialized with project_data_file_path attribute")
         # 标记为已初始化
         self._initialized = True
 

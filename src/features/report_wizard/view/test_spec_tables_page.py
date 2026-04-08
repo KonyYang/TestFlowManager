@@ -48,10 +48,11 @@ class TestSpecTablesWorker(QThread):
                 dl_number = "DL-UNKNOWN"
                 project_data_file_path = None
                 
-                # 从Matrix服务获取项目数据文件路径
-                if hasattr(matrix_service, 'project_data_file_path') and matrix_service.project_data_file_path:
-                    project_data_file_path = matrix_service.project_data_file_path
-                    logger.debug(f"Worker: 从Matrix服务获取到项目数据文件路径: {project_data_file_path}")
+                # 优先从 ProjectContext 获取项目数据文件路径，旧属性仅保留 fallback
+                from src.core.project_context import get_current_project_data_file_path
+                project_data_file_path = get_current_project_data_file_path()
+                if project_data_file_path:
+                    logger.debug(f"Worker: 从ProjectContext解析到项目数据文件路径: {project_data_file_path}")
                     
                     # 从项目数据文件中提取DL编号
                     if project_data_file_path and os.path.exists(project_data_file_path):
@@ -205,10 +206,11 @@ class TestSpecTablesPage(QFrame):
                 dl_number = "DL-UNKNOWN"
                 project_data_file_path = None
                 
-                # 从Matrix服务获取项目数据文件路径
-                if hasattr(self.matrix_service, 'project_data_file_path') and self.matrix_service.project_data_file_path:
-                    project_data_file_path = self.matrix_service.project_data_file_path
-                    logger.debug(f"从Matrix服务获取到项目数据文件路径: {project_data_file_path}")
+                # 优先从 ProjectContext 获取项目数据文件路径，旧属性仅保留 fallback
+                from src.core.project_context import get_current_project_data_file_path
+                project_data_file_path = get_current_project_data_file_path()
+                if project_data_file_path:
+                    logger.debug(f"从ProjectContext解析到项目数据文件路径: {project_data_file_path}")
                     
                     # 从项目数据文件中提取DL编号
                     if project_data_file_path and os.path.exists(project_data_file_path):

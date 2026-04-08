@@ -1,6 +1,7 @@
 from src.features.matrix.service.export.service.llcr_cr_export_service import LLCRCRExportService
 from src.features.matrix.service.export.view.llcr_cr_record_parameters_dialog import LLCR_CR_RecordParametersDialog
 from src.core.logger import logger
+from src.core.project_context import ProjectContext, get_current_project_context, resolve_project_data_file_path
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialog
 import os
 import json
@@ -19,10 +20,17 @@ class RecordDataTableExportController:
         """
         self.data_model = data_model
         self.parent = parent
+        self.project_context = None
         self.llcr_export_service = LLCRCRExportService(data_model)
         self.cr_export_service = LLCRCRExportService(data_model)  # 使用LLCRCRExportService替代CRExportService
         # 设置Matrix数据结构到导出服务中
         self._set_matrix_data_structure()
+
+    def set_project_context(self, project_context: ProjectContext):
+        self.project_context = project_context
+
+    def get_project_context(self):
+        return self.project_context or get_current_project_context()
 
     def export_llcr(self):
         """
@@ -190,10 +198,10 @@ class RecordDataTableExportController:
                 dl_number = "DL-UNKNOWN"
                 project_data_file_path = None
                 
-                # 从data_model获取项目数据文件路径
-                if hasattr(self.data_model, 'project_data_file_path') and self.data_model.project_data_file_path:
-                    project_data_file_path = self.data_model.project_data_file_path
-                    logger.debug(f"从data_model获取到项目数据文件路径: {project_data_file_path}")
+                # 优先从 ProjectContext 获取项目数据文件路径
+                project_data_file_path = resolve_project_data_file_path(self.get_project_context())
+                if project_data_file_path:
+                    logger.debug(f"从ProjectContext解析到项目数据文件路径: {project_data_file_path}")
                     
                     # 从项目数据文件中提取DL编号
                     if os.path.exists(project_data_file_path):
@@ -267,19 +275,20 @@ class RecordDataTableExportController:
             str: DL编号，如果无法获取则返回None
         """
         try:
-            # 尝试从状态管理器获取当前项目路径
-            from src.core.state_manager import state_manager
-            current_project = state_manager.get_state("current_project")
+            project_context = self.get_project_context()
+            current_project = project_context.project_path if project_context else None
             
             if current_project and os.path.exists(current_project):
                 # 在当前项目路径中查找JSON文件
                 try:
-                    json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
-                    if json_files:
-                        project_data_file_path = os.path.join(current_project, json_files[0])
+                    if project_context and project_context.application_data_path and os.path.exists(project_context.application_data_path):
+                        project_data_file_path = project_context.application_data_path
+                    else:
+                        json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
+                        project_data_file_path = os.path.join(current_project, json_files[0]) if json_files else None
                         
                         # 从项目数据文件中提取DL编号
-                        if os.path.exists(project_data_file_path):
+                        if project_data_file_path and os.path.exists(project_data_file_path):
                             with open(project_data_file_path, 'r', encoding='utf-8') as f:
                                 project_data = json.load(f)
                                 dl_number = project_data.get("DL")

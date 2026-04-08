@@ -5,41 +5,42 @@ from src.core.logger import logger
 class DataSyncManager:
     """数据同步管理器 - 处理视图与数据模型之间的数据同步"""
     
-    def __init__(self, view, controller):
+    def __init__(self, view, _legacy_controller=None):
         self.view = view
-        self.controller = controller
         
     def sync_table_to_model(self):
         """同步表格数据到数据模型"""
         try:
             logger.debug("开始同步表格数据到模型")
+            table_widget = self.view.get_table_widget()
+            data_model = self.view.get_data_model()
             # 同步表头
             headers = []
-            for col in range(self.view.matrix_table_widget.columnCount()):
-                header_item = self.view.matrix_table_widget.horizontalHeaderItem(col)
+            for col in range(table_widget.columnCount()):
+                header_item = table_widget.horizontalHeaderItem(col)
                 headers.append(header_item.text() if header_item else f"Column {col}")
-            self.controller.data_model.headers = headers
+            data_model.headers = headers
             
             # 同步数据行
             rows = []
-            for row in range(self.view.matrix_table_widget.rowCount()):
+            for row in range(table_widget.rowCount()):
                 row_data = []
-                for col in range(self.view.matrix_table_widget.columnCount()):
-                    item = self.view.matrix_table_widget.item(row, col)
+                for col in range(table_widget.columnCount()):
+                    item = table_widget.item(row, col)
                     row_data.append(item.text() if item else "")
                 rows.append(row_data)
-            self.controller.data_model.rows = rows
+            data_model.rows = rows
             
             # 同步合并单元格信息
             self.save_merged_cells_info()
             
             # 确保导出数据模型也是最新的
-            self.controller._sync_table_to_model()
+            self.view.sync_service_exports()
             
             # 添加调试信息，显示同步后的数据概况
             try:
-                rows = self.controller.data_model.rows
-                headers = self.controller.data_model.headers
+                rows = data_model.rows
+                headers = data_model.headers
                 logger.debug(f"同步后数据概况 - 表头数量: {len(headers)}, 行数: {len(rows)}")
                 if headers:
                     logger.debug(f"表头内容: {headers}")
@@ -59,19 +60,20 @@ class DataSyncManager:
         """
         保存合并单元格信息到数据模型中，以便导出时能够恢复
         """
+        table_widget = self.view.get_table_widget()
         # 收集所有合并单元格的信息
         merged_cells_info = []
         processed_cells = set()  # 记录已处理的单元格，避免重复
         
         # 遍历表格中的所有单元格
-        for row in range(self.view.matrix_table_widget.rowCount()):
-            for col in range(self.view.matrix_table_widget.columnCount()):
+        for row in range(table_widget.rowCount()):
+            for col in range(table_widget.columnCount()):
                 # 检查是否已经处理过这个单元格
                 if (row, col) in processed_cells:
                     continue
                     
-                row_span = self.view.matrix_table_widget.rowSpan(row, col)
-                col_span = self.view.matrix_table_widget.columnSpan(row, col)
+                row_span = table_widget.rowSpan(row, col)
+                col_span = table_widget.columnSpan(row, col)
                 
                 # 如果行列跨度都大于1，说明是合并单元格
                 if row_span > 1 or col_span > 1:
@@ -89,5 +91,5 @@ class DataSyncManager:
                             processed_cells.add((r, c))
                             
         # 更新数据模型中的合并单元格信息
-        self.controller.data_model.merged_cells_info = merged_cells_info
+        self.view.get_data_model().merged_cells_info = merged_cells_info
         # 移除合并单元格信息保存的详细日志

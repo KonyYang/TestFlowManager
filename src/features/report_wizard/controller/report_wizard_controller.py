@@ -5,6 +5,7 @@
 
 from typing import Optional
 from PyQt5.QtWidgets import QApplication
+from src.core.project_context import ProjectContext
 from src.features.report_wizard.view.report_wizard_dialog import ReportWizardDialog
 from src.features.report_wizard.service.report_generation_service import ReportGenerationService
 from src.features.report_wizard.model.header_data import HeaderData
@@ -22,6 +23,7 @@ class ReportWizardController:
         self.view = None
         self.service = ReportGenerationService()
         self.current_project_path = None
+        self.project_context = None
         self.matrix_service = None
 
     def set_project_path(self, project_path: str):
@@ -32,6 +34,11 @@ class ReportWizardController:
             project_path: 项目路径
         """
         self.current_project_path = project_path
+        self.project_context = ProjectContext.from_project_path(project_path) if project_path else None
+
+    def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
+        self.project_context = project_context
+        self.current_project_path = project_context.project_path if project_context else None
 
     def set_matrix_service(self, matrix_service):
         """

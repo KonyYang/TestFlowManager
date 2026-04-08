@@ -15,6 +15,7 @@ from src.features.matrix.controller.matrix_project_controller import MatrixProje
 from src.core.event_dispatcher import event_dispatcher
 # 添加状态管理器
 from src.core.state_manager import state_manager
+from src.core.project_context import ProjectContext
 
 
 class ProjectCreatorController:
@@ -422,18 +423,9 @@ class ProjectCreatorController:
         if self.matrix_project_controller.ltr_integration_service != self.ltr_integration_service:
             # 设置Matrix项目控制器中的LTR集成服务
             self.matrix_project_controller.set_ltr_integration_service(self.ltr_integration_service)
-        
-        # 将项目数据文件路径传递给Matrix服务
-        project_data_file_path = self.ltr_integration_service.project_data_file_path
-        if (project_data_file_path and 
-            hasattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path') and
-            getattr(self.matrix_project_controller.matrix_controller.service, 'project_data_file_path', None) != project_data_file_path):
-            self.matrix_project_controller.matrix_controller.service.project_data_file_path = project_data_file_path
-            logger.info(f"已设置Matrix服务的项目数据文件路径: {project_data_file_path}")
-        elif not project_data_file_path:
-            logger.warning("未能设置Matrix服务的项目数据文件路径: 路径为空")
-        else:
-            logger.debug("Matrix服务的项目数据文件路径已正确设置，跳过")
+
+        project_context = ProjectContext.from_project_path(project_path)
+        self._apply_matrix_project_context(project_context)
         
     def open_matrix_editor(self):
         """
@@ -442,7 +434,14 @@ class ProjectCreatorController:
         Returns:
             bool: 是否成功打开
         """
-        return self.matrix_project_controller.open_matrix_dialog()
+        return self.matrix_project_controller.open_matrix_workspace()
+
+    def _apply_matrix_project_context(self, project_context: ProjectContext) -> None:
+        matrix_controller = self.matrix_project_controller.matrix_controller
+        matrix_controller.set_project_context(project_context)
+
+        if self.parent_view and hasattr(self.parent_view, "set_matrix_project_context"):
+            self.parent_view.set_matrix_project_context(project_context)
         
     def _on_ltr_application_processed(self, data):
         """
@@ -515,16 +514,15 @@ class ProjectCreatorController:
                 logger.debug(f"Project path provided: {project_path}")
                 # 设置项目路径到状态管理器
                 state_manager.set_state("current_project", project_path)
+                project_context = ProjectContext.from_project_path(project_path, dl_number)
+                state_manager.set_state("current_project_context", project_context)
                 
                 # 通知其他组件项目已打开
-                event_dispatcher.dispatch("project.opened", {
-                    "project_path": project_path,
-                    "dl_number": dl_number
-                })
+                event_dispatcher.dispatch("project.opened", project_context.to_event_data())
                 
                 # 触发Matrix自动导入功能（延迟执行，确保UI已就绪）
                 from PyQt5.QtCore import QTimer
-                if self.parent_view and hasattr(self.parent_view, '_matrix_auto_import_from_project'):
+                if self.parent_view and hasattr(self.parent_view, 'auto_import_from_project'):
                     QTimer.singleShot(100, lambda: self._trigger_matrix_update_after_project_creation(project_path))
                 
                 # 更新主窗口标题显示项目信息
@@ -567,25 +565,7 @@ class ProjectCreatorController:
                 if self.matrix_project_controller.ltr_integration_service != self.ltr_integration_service:
                     self.matrix_project_controller.set_ltr_integration_service(self.ltr_integration_service)
                 
-                # 将项目数据文件路径传递给Matrix服务（与打开项目时保持一致）
-                project_data_file_path = self.ltr_integration_service.project_data_file_path
-                logger.info(f"Project data file path to set: {project_data_file_path}")
-                
-                # 设置Matrix控制器中的项目数据文件路径
-                if project_data_file_path:
-                    self.matrix_project_controller.matrix_controller.service.project_data_file_path = project_data_file_path
-                    logger.info(f"Set project data file path {project_data_file_path} to Matrix service")
-                    
-                    # 同时设置Matrix控制器本身的属性，确保在显示基本信息对话框时能正确获取
-                    self.matrix_project_controller.matrix_controller.project_data_file_path = project_data_file_path
-                    logger.info(f"Set project data file path {project_data_file_path} to Matrix controller")
-                    
-                    # 打印调试信息，确保路径正确传递
-                    logger.debug(f"确保Matrix控制器中的项目数据文件路径已正确设置: {self.matrix_project_controller.matrix_controller.project_data_file_path}")
-                elif not project_data_file_path:
-                    logger.warning("Failed to set project data file path. Path is None or empty")
-                else:
-                    logger.debug("Project data file path already set correctly, skipping")
+                self._apply_matrix_project_context(project_context)
                 
                 logger.debug(f"Set project path {project_path} to Matrix controller via LTR integration service")
                 
@@ -595,9 +575,8 @@ class ProjectCreatorController:
                     self.matrix_project_controller.matrix_controller.initialize_with_ltr_data()
                     
                     # 更新Matrix视图以反映新数据
-                    if (hasattr(self.parent_view, 'matrix_table_manager') and 
-                        self.parent_view.matrix_table_manager is not None):
-                        self.parent_view._matrix_update_table()
+                    if self.parent_view and hasattr(self.parent_view, 'refresh_table'):
+                        self.parent_view.refresh_table()
             else:
                 logger.warning("No project path or DL number provided")
                 
@@ -607,9 +586,9 @@ class ProjectCreatorController:
             if self.parent_view:
                 QMessageBox.critical(self.parent_view, "错误", f"更新Matrix编辑器时出错: {str(e)}")
 
-    def _safe_open_matrix_dialog(self, dl_number):
+    def _safe_open_matrix_workspace(self, dl_number):
         """
-        安全地打开Matrix编辑器对话框
+        安全地打开Matrix工作区
         
         Args:
             dl_number: LTR编号
@@ -619,8 +598,8 @@ class ProjectCreatorController:
             
             # 打开Matrix编辑器
             if self.matrix_project_controller:
-                logger.debug("Calling matrix_project_controller.open_matrix_dialog()")
-                success = self.matrix_project_controller.open_matrix_dialog()
+                logger.debug("Calling matrix_project_controller.open_matrix_workspace()")
+                success = self.matrix_project_controller.open_matrix_workspace()
                 if success:
                     logger.info(f"Successfully opened Matrix editor for LTR: {dl_number}")
                 else:
@@ -630,7 +609,7 @@ class ProjectCreatorController:
             # 显示错误消息给用户
             if self.parent_view:
                 QMessageBox.critical(self.parent_view, "错误", f"打开Matrix编辑器时出错: {str(e)}")
-    
+
     def _trigger_matrix_update_after_project_creation(self, project_path):
         """
         在项目创建完成后触发 Matrix 更新
@@ -644,15 +623,15 @@ class ProjectCreatorController:
             # 设置当前项目到状态管理器
             from src.core.state_manager import state_manager
             state_manager.set_state("current_project", project_path)
+            state_manager.set_state("current_project_context", ProjectContext.from_project_path(project_path))
             
             # 调用主窗口的 Matrix 自动导入方法
-            if hasattr(self.parent_view, '_matrix_auto_import_from_project'):
-                self.parent_view._matrix_auto_import_from_project()
+            if hasattr(self.parent_view, 'auto_import_from_project'):
+                self.parent_view.auto_import_from_project()
                 logger.debug("Successfully triggered Matrix auto-import in main window")
             
-            # 如果主窗口有 Matrix 表格管理器，也更新表格显示
-            if hasattr(self.parent_view, '_matrix_update_table'):
-                self.parent_view._matrix_update_table()
+            if hasattr(self.parent_view, 'refresh_table'):
+                self.parent_view.refresh_table()
                 logger.debug("Successfully updated Matrix table display")
             
             # 切换回 Matrix 页面（索引为 0）

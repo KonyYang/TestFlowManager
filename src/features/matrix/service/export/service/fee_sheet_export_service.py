@@ -5,6 +5,7 @@
 
 from typing import Dict, Any, List, Optional
 from src.core.logger import logger
+from src.core.project_context import ProjectContext, get_current_project_context
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 import os
 import pythoncom
@@ -19,11 +20,18 @@ class FeeSheetExportService:
     提供生成费用表的业务逻辑服务
     """
 
-    def __init__(self):
+    def __init__(self, project_context: Optional[ProjectContext] = None):
         """初始化费用表导出服务"""
         self.template_dir = r"D:\TestFlowManager\Template"
         self.output_dir = r"D:\OutFile"
         self.excel_app = None
+        self.project_context = project_context
+
+    def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
+        self.project_context = project_context
+
+    def get_project_context(self) -> Optional[ProjectContext]:
+        return self.project_context or get_current_project_context()
 
     def _sanitize_filename(self, filename: str) -> str:
         """
@@ -403,8 +411,8 @@ class FeeSheetExportService:
             logger.info("开始导出费用表")
             
             # 获取当前项目路径
-            from src.core.state_manager import state_manager
-            current_project = state_manager.get_state("current_project")
+            project_context = self.get_project_context()
+            current_project = project_context.project_path if project_context else None
             
             # 确定输出目录和文件名
             if current_project and os.path.exists(current_project):

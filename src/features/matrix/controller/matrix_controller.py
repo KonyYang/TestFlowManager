@@ -3,7 +3,7 @@ from src.features.matrix.service.matrix_service import MatrixService
 from src.features.matrix.service.export.controller.export_controller import ExportController
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from src.core.logger import logger
-from src.features.matrix.view.matrix_dialog import MatrixDialog
+from src.core.project_context import ProjectContext, get_current_project_context
 import os
 
 
@@ -23,21 +23,24 @@ class MatrixController:
         self.ltr_integration_service = None
         # 初始化parent_view属性
         self.parent_view = parent
-        # 初始化项目数据文件路径
-        self.project_data_file_path = None
+        self.project_context = None
 
-    def show_matrix_dialog(self):
-        """显示Matrix编辑对话框 - Controller层协调"""
+    def activate_matrix_workspace(self):
+        """激活主窗口中的 Matrix 工作区。"""
         try:
-            logger.debug("Creating MatrixDialog instance")
-            dialog = MatrixDialog(self.parent_view, self.service, self.ltr_number)
-            # 检查dialog是否具有exec_方法，如果没有则使用show方法
-            if hasattr(dialog, 'exec_'):
-                dialog.exec_()
-            else:
-                # 对于QWidget类型的dialog，使用show方法
-                dialog.show()
-            logger.debug("MatrixDialog execution completed")
+            if (
+                self.parent_view
+                and hasattr(self.parent_view, "activate_matrix_workspace")
+                and hasattr(self.parent_view, "has_matrix_workspace")
+                and self.parent_view.has_matrix_workspace()
+            ):
+                activated = self.parent_view.activate_matrix_workspace()
+                if activated:
+                    logger.info("Activated Matrix workspace in main window")
+                    return True
+
+            logger.warning("Matrix workspace unavailable in current parent view")
+            return False
         except Exception as e:
             logger.error(f"Error showing matrix dialog: {e}", exc_info=True)
             raise
@@ -117,6 +120,13 @@ class MatrixController:
             self.ltr_integration_service = ltr_integration_service
         else:
             logger.debug("MatrixController: LTR integration service unchanged, skipping update")
+
+    def set_project_context(self, project_context: ProjectContext):
+        self.project_context = project_context
+        self.export_controller.set_project_context(project_context)
+
+    def get_project_context(self):
+        return self.project_context or get_current_project_context()
         
     def initialize_with_ltr_data(self):
         """
@@ -161,8 +171,8 @@ class MatrixController:
         """
         try:
             # 获取当前项目路径
-            from src.core.state_manager import state_manager
-            current_project = state_manager.get_state("current_project")
+            project_context = self.get_project_context()
+            current_project = project_context.project_path if project_context else None
             
             logger.info(f"开始自动导出Matrix数据，当前项目路径: {current_project}")
             
@@ -180,7 +190,10 @@ class MatrixController:
             
             # 如果路径有4层（D:\TestFlowManager\Projects\DL-2025-12-046\DL-2025-12-046），取父目录
             # 如果路径有3层（D:\TestFlowManager\Projects\DL-2025-12-046），直接使用当前目录
-            if len(path_parts) == 5:
+            if project_context and project_context.matrix_file_path and len(path_parts) != 5:
+                matrix_file_path = project_context.matrix_file_path
+                logger.info(f"使用ProjectContext中的matrix文件路径: {matrix_file_path}")
+            elif len(path_parts) == 5:
                 # 4层路径，取父目录
                 matrix_file_path = os.path.join(os.path.dirname(current_project), "matrix.xlsx")
                 logger.info(f"检测到4层路径结构，将文件保存到父目录: {matrix_file_path}")
@@ -190,8 +203,8 @@ class MatrixController:
                 logger.info(f"检测到{len(path_parts)}层路径结构，将文件保存到当前目录: {matrix_file_path}")
             
             # 同步表格数据到模型
-            if self.parent and hasattr(self.parent, 'matrix_data_sync_manager'):
-                self.parent._matrix_sync_table_to_model()
+            if self.parent and hasattr(self.parent, 'sync_to_model'):
+                self.parent.sync_to_model()
             
             # 更新导出控制器的数据模型
             self.export_controller.update_data_model(self.service.data_model)
@@ -221,15 +234,17 @@ class MatrixController:
         """
         try:
             # 同步表格数据到模型
-            if self.parent and hasattr(self.parent, 'matrix_data_sync_manager'):
-                self.parent._matrix_sync_table_to_model()
+            if self.parent and hasattr(self.parent, 'sync_to_model'):
+                self.parent.sync_to_model()
             
             # 获取当前项目路径作为默认保存路径
-            from src.core.state_manager import state_manager
-            current_project = state_manager.get_state("current_project")
+            project_context = self.get_project_context()
+            current_project = project_context.project_path if project_context else None
             
             # 构造默认文件名
-            if current_project and os.path.exists(current_project):
+            if project_context and project_context.matrix_file_path and os.path.exists(current_project):
+                default_filename = project_context.matrix_file_path
+            elif current_project and os.path.exists(current_project):
                 default_filename = os.path.join(current_project, "matrix.xlsx")
             else:
                 default_filename = "matrix.xlsx"
@@ -305,8 +320,8 @@ class MatrixController:
         """
         try:
             # 同步表格数据到模型
-            if self.parent and hasattr(self.parent, 'matrix_data_sync_manager'):
-                self.parent._matrix_sync_table_to_model()
+            if self.parent and hasattr(self.parent, 'sync_to_model'):
+                self.parent.sync_to_model()
             
             # 更新导出控制器的数据模型
             self.export_controller.update_data_model(self.service.data_model)
@@ -333,8 +348,8 @@ class MatrixController:
         """
         try:
             # 同步表格数据到模型
-            if self.parent and hasattr(self.parent, 'matrix_data_sync_manager'):
-                self.parent._matrix_sync_table_to_model()
+            if self.parent and hasattr(self.parent, 'sync_to_model'):
+                self.parent.sync_to_model()
             
             # 更新导出控制器的数据模型
             self.export_controller.update_data_model(self.service.data_model)

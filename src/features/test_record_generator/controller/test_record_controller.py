@@ -104,11 +104,16 @@ class TestRecordController:
                 dl_number = "DL-UNKNOWN"
                 project_data_file_path = None
                 
-                # 从Matrix服务获取项目数据文件路径
-                if hasattr(self.matrix_service, 'project_data_file_path') and self.matrix_service.project_data_file_path:
-                    project_data_file_path = self.matrix_service.project_data_file_path
-                    logger.debug(f"从Matrix服务获取到项目数据文件路径: {project_data_file_path}")
-                    
+                # 优先从 ProjectContext 获取项目数据文件路径，旧属性仅保留 fallback
+                from src.core.project_context import (
+                    get_current_project_context,
+                    get_current_project_data_file_path,
+                    get_current_project_path,
+                )
+                project_data_file_path = get_current_project_data_file_path()
+                if project_data_file_path:
+                    logger.debug(f"从ProjectContext解析到项目数据文件路径: {project_data_file_path}")
+                
                     # 从项目数据文件中提取DL编号
                     if os.path.exists(project_data_file_path):
                         try:
@@ -119,18 +124,21 @@ class TestRecordController:
                                 logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
                         except Exception as e:
                             logger.error(f"读取项目数据文件时出错: {e}")
-                else:
+                if not project_data_file_path:
                     # 如果Matrix服务中没有项目数据文件路径，尝试从状态管理器获取
-                    from src.core.state_manager import state_manager
-                    current_project = state_manager.get_state("current_project")
+                    project_context = get_current_project_context()
+                    current_project = project_context.project_path if project_context else get_current_project_path()
                     logger.debug(f"从状态管理器获取到当前项目路径: {current_project}")
                     
                     if current_project and os.path.exists(current_project):
                         # 在当前项目路径中查找JSON文件
                         try:
-                            json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
-                            if json_files:
-                                project_data_file_path = os.path.join(current_project, json_files[0])
+                            if project_context and project_context.application_data_path and os.path.exists(project_context.application_data_path):
+                                project_data_file_path = project_context.application_data_path
+                            else:
+                                json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
+                                project_data_file_path = os.path.join(current_project, json_files[0]) if json_files else None
+                            if project_data_file_path:
                                 logger.debug(f"在当前项目路径中找到JSON文件: {project_data_file_path}")
                                 
                                 # 从项目数据文件中提取DL编号

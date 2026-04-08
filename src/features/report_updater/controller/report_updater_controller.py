@@ -6,6 +6,7 @@ import os
 from typing import Optional, List, Dict
 from PyQt5.QtWidgets import QWidget, QMessageBox, QFileDialog, QDialog
 from src.core.logger import logger
+from src.core.project_context import ProjectContext, get_current_project_context
 from src.features.report_updater.model.report_updater_data import ReportUpdaterData
 from src.features.report_updater.view.report_updater_dialog import ReportUpdaterDialog
 from src.features.report_updater.service.report_updater_service import ReportUpdaterService
@@ -23,11 +24,10 @@ class ReportUpdaterController:
         """
         self.parent = parent
         self.data_model = ReportUpdaterData()
-        # 从状态管理器获取当前项目路径
-        from src.core.state_manager import state_manager
-        current_project = state_manager.get_state("current_project")
-        self.service = ReportUpdaterService(project_path=current_project)  # 添加服务实例
-        self.current_project_path = current_project  # 存储当前项目路径
+        self.project_context = get_current_project_context()
+        current_project = self.project_context.project_path if self.project_context else None
+        self.service = ReportUpdaterService(project_context=self.project_context, project_path=current_project)
+        self.current_project_path = current_project
         self.view: Optional[ReportUpdaterDialog] = None
         logger.info("ReportUpdaterController initialized")
     
@@ -38,20 +38,23 @@ class ReportUpdaterController:
         Args:
             project_path: 项目路径，如果为None则表示没有打开项目
         """
-        if project_path and os.path.exists(project_path):
-            self.current_project_path = project_path
-            self.data_model.set_project_path(project_path)
-            # 重新创建服务实例以使用新的项目路径
-            self.service = ReportUpdaterService(project_path=project_path)
-            logger.info(f"Project path set to: {project_path}")
+        project_context = ProjectContext.from_project_path(project_path) if project_path else None
+        self.set_project_context(project_context)
+
+    def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
+        self.project_context = project_context
+
+        if project_context and os.path.exists(project_context.project_path):
+            self.current_project_path = project_context.project_path
+            self.data_model.set_project_path(project_context.project_path)
+            self.service = ReportUpdaterService(project_context=project_context)
+            logger.info(f"Project context set to: {project_context.project_path}")
         else:
-            # 没有项目打开，使用默认路径
             self.current_project_path = None
             self.data_model.is_project_loaded = False
             self.data_model.config.base_directory = "D:\\OutFile"
-            # 重新创建服务实例以使用默认配置
             self.service = ReportUpdaterService()
-            logger.info("No project loaded, using default path: D:\\OutFile")
+            logger.info("No project context loaded, using default path: D:\\OutFile")
     
     def show_report_updater_dialog(self) -> bool:
         """
