@@ -94,7 +94,7 @@ class LTRApplicationDataExtractor:
                 
             # 为project_leader设置默认值
             from src.core.config_manager import config_manager
-            extracted_data['project_leader'] = config_manager.get("defaults.project_leader", "")
+            extracted_data['project_leader'] = config_manager.get_default("project_leader", "")
 
             # 添加文件路径字段
             extracted_data['file_path'] = doc_filepath

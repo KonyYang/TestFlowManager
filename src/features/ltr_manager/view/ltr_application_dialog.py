@@ -104,7 +104,7 @@ class LTRApplicationDialog(BaseInfoDialog):
         # 如果project_leader为空，使用配置中的默认值
         from src.core.config_manager import config_manager
         if not data.get('project_leader'):
-            data['project_leader'] = config_manager.get("defaults.project_leader", "")
+            data['project_leader'] = config_manager.get_default("project_leader", "")
 
         # 调用基类方法填充数据，但先更新self.data
         self.data = data

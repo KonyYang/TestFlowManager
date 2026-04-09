@@ -27,7 +27,7 @@ class DocumentUtils:
         """
         try:
             # 从配置中获取模板目录
-            template_dir = config_manager.get("paths.template_dir", "")
+            template_dir = config_manager.get_path("template_dir", "")
             if not template_dir or not os.path.exists(template_dir):
                 logger.warning(f"模板目录不存在: {template_dir}")
                 return ""

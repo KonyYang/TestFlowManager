@@ -22,7 +22,7 @@ class ReportWizardDialog(QDialog):
     # 自定义信号
     wizard_finished = pyqtSignal(str)  # 传递生成的报告路径
     
-    def __init__(self, parent=None, project_path=None):
+    def __init__(self, parent=None, project_path=None, project_context=None):
         """初始化报告向导对话框"""
         super().__init__(parent)
         self.setWindowTitle("报告生成向导")
@@ -35,10 +35,12 @@ class ReportWizardDialog(QDialog):
         self.pages = []
         
         # Matrix服务引用
+        self.matrix_controller = None
         self.matrix_service = None
         
         # 项目路径
         self.project_path = project_path
+        self.project_context = project_context
         
         # 初始化UI
         self.init_ui()
@@ -127,14 +129,16 @@ class ReportWizardDialog(QDialog):
             document_path = None
             logger.info("页面列表中body_content_page不存在")
         
-        logger.info(f"创建TestSpecTablesPage: 传递document_path和matrix_service参数")
+        logger.info(f"创建TestSpecTablesPage: 传递document_path和matrix_controller参数")
         logger.info(f"传递的document_path: {document_path}")
-        logger.info(f"传递的matrix_service: {self.matrix_service is not None}")
+        logger.info(f"传递的matrix_controller: {self.matrix_controller is not None}")
         
-        # 创建TestSpecTablesPage并传递文档路径和Matrix服务
+        # 创建TestSpecTablesPage并传递文档路径和Matrix控制器
         test_spec_page = TestSpecTablesPage(
             document_path=document_path,
-            matrix_service=self.matrix_service  # 传递Matrix服务
+            matrix_controller=self.matrix_controller,
+            matrix_service=self.matrix_service,
+            project_context=self.project_context,
         )
         
         # 注释掉next_clicked信号连接，因为现在处理完成后直接关闭向导
@@ -225,11 +229,17 @@ class ReportWizardDialog(QDialog):
                     if hasattr(test_spec_page, 'set_document_path'):
                         test_spec_page.set_document_path(document_path)
                         
-                    # 同时设置Matrix服务（如果可用）
-                    if self.matrix_service:
+                    # 同时设置Matrix控制器（如果可用）
+                    if self.matrix_controller:
+                        logger.info("向test_spec_page设置Matrix控制器")
+                        if hasattr(test_spec_page, 'set_matrix_controller'):
+                            test_spec_page.set_matrix_controller(self.matrix_controller)
+                    elif self.matrix_service:
                         logger.info("向test_spec_page设置Matrix服务")
                         if hasattr(test_spec_page, 'set_matrix_service'):
                             test_spec_page.set_matrix_service(self.matrix_service)
+                    if hasattr(test_spec_page, 'set_project_context'):
+                        test_spec_page.set_project_context(self.project_context)
                 else:
                     logger.warning("无法获取文档路径")
             
@@ -279,9 +289,18 @@ class ReportWizardDialog(QDialog):
         
         return all_data
     
+    def set_matrix_controller(self, matrix_controller):
+        """设置Matrix控制器"""
+        from src.core.logger import logger
+        logger.info(f"ReportWizardDialog接收到Matrix控制器: {matrix_controller is not None}")
+        self.matrix_controller = matrix_controller
+
     def set_matrix_service(self, matrix_service):
         """设置Matrix服务"""
         from src.core.logger import logger
         logger.info(f"ReportWizardDialog接收到Matrix服务: {matrix_service is not None}")
         self.matrix_service = matrix_service
+
+    def set_project_context(self, project_context):
+        self.project_context = project_context
 

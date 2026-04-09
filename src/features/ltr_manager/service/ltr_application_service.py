@@ -199,7 +199,7 @@ class LTRApplicationService:
         from src.core.config_manager import config_manager
         application_data = LTRApplicationData()
         # 设置默认的project_leader
-        default_project_leader = config_manager.get("defaults.project_leader", "")
+        default_project_leader = config_manager.get_default("project_leader", "")
         if default_project_leader:
             application_data.project_leader = default_project_leader
         return application_data

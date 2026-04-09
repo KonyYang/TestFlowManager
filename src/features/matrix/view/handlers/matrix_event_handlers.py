@@ -2,6 +2,7 @@
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QInputDialog
 import os
 from src.core.logger import logger
+from src.core.project_document_context import ProjectDocumentContext
 from src.features.matrix.view.matrix_filter_dialog import MatrixFilterDialog
 from src.features.test_record_generator.controller.test_record_controller import TestRecordController
 
@@ -270,7 +271,10 @@ class MatrixEventHandlers:
             self.view.sync_to_model()
             
             # 创建Test Record控制器实例
-            controller = TestRecordController(matrix_service=self.view.matrix_controller.service)
+            controller = TestRecordController(
+                matrix_controller=self.view.matrix_controller,
+                project_context=self.view.get_project_context(),
+            )
             
             # 调用控制器生成Test Record（直接使用固定路径）
             success = controller.generate_test_record(parent=self.view)
@@ -296,30 +300,14 @@ class MatrixEventHandlers:
             from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
             matrix_data_structure = MatrixDataStructure()
             
-            # 从Matrix数据中提取必要的信息
-            # 首先尝试从当前项目获取DL编号和其他信息
-            dl_number = self.view.ltr_number or "DL-UNKNOWN"
-            project_data_file_path = self.view.resolve_project_data_file_path()
-            
-            # 尝试从项目数据文件中加载更多信息
-            requested_by = ""
-            location = ""
-            product_description = ""
-            tests_to_be_performed = ""
-            
-            if project_data_file_path and os.path.exists(project_data_file_path):
-                try:
-                    import json
-                    with open(project_data_file_path, 'r', encoding='utf-8') as f:
-                        project_data = json.load(f)
-                    
-                    # 从项目数据中提取所需字段
-                    requested_by = project_data.get('requested_by', '')
-                    location = project_data.get('location', '')
-                    product_description = project_data.get('product_description', '')
-                    tests_to_be_performed = project_data.get('tests_to_be_performed', '')
-                except Exception as e:
-                    logger.warning(f"读取项目数据文件失败: {e}")
+            document_context = ProjectDocumentContext.from_project_context(
+                self.view.get_project_context()
+            )
+            dl_number = self.view.ltr_number or document_context.dl_number
+            requested_by = document_context.get_field('requested_by', '')
+            location = document_context.get_field('location', '')
+            product_description = document_context.get_field('product_description', '')
+            tests_to_be_performed = document_context.get_field('tests_to_be_performed', '')
             
             # 解析Matrix数据结构
             matrix_data_structure.parse_matrix_to_structure(self.view.get_data_model().rows)

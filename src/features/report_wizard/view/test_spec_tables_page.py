@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal, QThread, pyqtSlot
 from src.core.logger import logger
+from src.core.project_context import ProjectContext, get_current_project_context
+from src.core.project_document_context import ProjectDocumentContext
 from src.features.report_wizard.service.test_spec_tables_service import TestSpecTablesService
 
 class TestSpecTablesWorker(QThread):
@@ -18,22 +20,45 @@ class TestSpecTablesWorker(QThread):
     status_updated = pyqtSignal(str)
     finished = pyqtSignal(bool)
     
-    def __init__(self, document_path, matrix_service=None):
+    def __init__(self, document_path, matrix_controller=None, matrix_service=None, project_context: ProjectContext = None):
         super().__init__()
         self.document_path = document_path
+        self.matrix_controller = matrix_controller
         self.matrix_service = matrix_service
+        self.project_context = project_context
         self.matrix_data_structure = None
         
-        # 从Matrix服务获取或创建数据结构
-        if self.matrix_service:
+        # 从Matrix控制器或服务获取或创建数据结构
+        if self.matrix_controller:
+            self.matrix_data_structure = self._create_matrix_data_structure_from_controller(self.matrix_controller)
+            logger.info(f"TestSpecTablesWorker初始化: document_path={document_path}, matrix_controller is not None: {matrix_controller is not None}, matrix_data_structure is not None: {self.matrix_data_structure is not None}")
+        elif self.matrix_service:
             self.matrix_data_structure = self._create_matrix_data_structure_from_service(self.matrix_service)
             logger.info(f"TestSpecTablesWorker初始化: document_path={document_path}, matrix_service is not None: {matrix_service is not None}, matrix_data_structure is not None: {self.matrix_data_structure is not None}")
         else:
-            logger.info(f"TestSpecTablesWorker初始化: document_path={document_path}, matrix_service is not None: {matrix_service is not None}, 无法获取matrix_data_structure")
+            logger.info("TestSpecTablesWorker初始化: 无法获取matrix_data_structure")
+
+    def _create_matrix_data_structure_from_controller(self, matrix_controller):
+        """从Matrix控制器创建数据结构"""
+        try:
+            matrix_structure, warnings = matrix_controller.create_matrix_data_structure(
+                self.project_context or get_current_project_context()
+            )
+            if warnings:
+                logger.warning(f"Worker: Matrix数据验证警告: {warnings}")
+            return matrix_structure
+        except Exception as e:
+            logger.error(f"Worker: 从Matrix控制器创建数据结构时出错: {e}")
+            import traceback
+            logger.error(f"Worker: 错误堆栈: {traceback.format_exc()}")
+            return None
     
     def _create_matrix_data_structure_from_service(self, matrix_service):
         """从Matrix服务创建数据结构"""
         try:
+            document_context = ProjectDocumentContext.from_project_context(
+                self.project_context or get_current_project_context()
+            )
             # 检查matrix_service是否是MatrixService实例或MatrixController实例
             if hasattr(matrix_service, 'data_model') and hasattr(matrix_service.data_model, 'rows'):
                 # MatrixService或MatrixController实例
@@ -43,32 +68,9 @@ class TestSpecTablesWorker(QThread):
                 # 创建MatrixDataStructure实例并解析数据
                 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
                 matrix_structure = MatrixDataStructure()
-                
-                # 尝试获取DL编号和项目数据文件路径
-                dl_number = "DL-UNKNOWN"
-                project_data_file_path = None
-                
-                # 优先从 ProjectContext 获取项目数据文件路径，旧属性仅保留 fallback
-                from src.core.project_context import get_current_project_data_file_path
-                project_data_file_path = get_current_project_data_file_path()
-                if project_data_file_path:
-                    logger.debug(f"Worker: 从ProjectContext解析到项目数据文件路径: {project_data_file_path}")
-                    
-                    # 从项目数据文件中提取DL编号
-                    if project_data_file_path and os.path.exists(project_data_file_path):
-                        try:
-                            import json
-                            with open(project_data_file_path, 'r', encoding='utf-8') as f:
-                                project_data = json.load(f)
-                                dl_number = project_data.get("DL", dl_number)
-                                logger.debug(f"Worker: 从项目数据文件中提取到DL编号: {dl_number}")
-                        except Exception as e:
-                            logger.error(f"Worker: 读取项目数据文件时出错: {e}")
-                
-                matrix_structure.dl_number = dl_number
-                matrix_structure.project_data_file_path = project_data_file_path
-                logger.debug(f"Worker: 设置DL编号: {dl_number}")
-                logger.debug(f"Worker: 设置项目数据文件路径: {project_data_file_path}")
+                document_context.apply_to_matrix_data_structure(matrix_structure)
+                logger.debug(f"Worker: 设置DL编号: {document_context.dl_number}")
+                logger.debug(f"Worker: 设置项目数据文件路径: {document_context.project_data_file_path}")
                 
                 # 解析Matrix数据为结构化数据
                 warnings = matrix_structure.parse_matrix_to_structure(matrix_data)
@@ -156,24 +158,29 @@ class TestSpecTablesPage(QFrame):
     finish_clicked = pyqtSignal()
     cancel_clicked = pyqtSignal()
     
-    def __init__(self, parent=None, document_path=None, matrix_service=None):
+    def __init__(self, parent=None, document_path=None, matrix_controller=None, matrix_service=None, project_context: ProjectContext = None):
         """初始化Test Spec Tables页面"""
         super().__init__(parent)
         self.document_path = document_path
+        self.matrix_controller = matrix_controller
         self.matrix_service = matrix_service  # 接收Matrix服务或Matrix控制器
+        self.project_context = project_context
         self.matrix_data_structure = None  # 从Matrix服务中获取数据结构
         
-        # 如果Matrix服务存在，立即解析数据并创建数据结构
-        if self.matrix_service:
+        # 如果Matrix控制器或服务存在，立即解析数据并创建数据结构
+        if self.matrix_controller:
+            logger.info("Matrix控制器已设置，准备解析数据结构")
+            self._create_matrix_data_structure()
+        elif self.matrix_service:
             logger.info("Matrix服务已设置，准备解析数据结构")
             self._create_matrix_data_structure()
         else:
-            logger.info("Matrix服务未设置，等待外部设置")
+            logger.info("Matrix控制器/服务未设置，等待外部设置")
             
         self.worker = None
         self.init_ui()
         
-        logger.info(f"TestSpecTablesPage初始化完成: document_path={self.document_path}, matrix_service is not None: {self.matrix_service is not None}, matrix_data_structure is not None: {self.matrix_data_structure is not None}")
+        logger.info(f"TestSpecTablesPage初始化完成: document_path={self.document_path}, matrix_controller is not None: {self.matrix_controller is not None}, matrix_data_structure is not None: {self.matrix_data_structure is not None}")
         
         # 检查必要参数是否已设置 - 只有当两个条件都满足时才开始处理
         if self.document_path and self.matrix_data_structure is not None:
@@ -192,80 +199,66 @@ class TestSpecTablesPage(QFrame):
     def _create_matrix_data_structure(self):
         """从Matrix服务创建数据结构"""
         try:
-            # 检查matrix_service是否是MatrixService实例或MatrixController实例
-            if hasattr(self.matrix_service, 'data_model') and hasattr(self.matrix_service.data_model, 'rows'):
-                # MatrixService或MatrixController实例
-                matrix_data = self.matrix_service.data_model.rows
-                logger.info(f"从Matrix服务获取到 {len(matrix_data)} 行数据")
-                
-                # 创建MatrixDataStructure实例并解析数据
-                from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
-                self.matrix_data_structure = MatrixDataStructure()
-                
-                # 尝试获取DL编号和项目数据文件路径
-                dl_number = "DL-UNKNOWN"
-                project_data_file_path = None
-                
-                # 优先从 ProjectContext 获取项目数据文件路径，旧属性仅保留 fallback
-                from src.core.project_context import get_current_project_data_file_path
-                project_data_file_path = get_current_project_data_file_path()
-                if project_data_file_path:
-                    logger.debug(f"从ProjectContext解析到项目数据文件路径: {project_data_file_path}")
-                    
-                    # 从项目数据文件中提取DL编号
-                    if project_data_file_path and os.path.exists(project_data_file_path):
-                        try:
-                            import json
-                            with open(project_data_file_path, 'r', encoding='utf-8') as f:
-                                project_data = json.load(f)
-                                dl_number = project_data.get("DL", dl_number)
-                                logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
-                        except Exception as e:
-                            logger.error(f"读取项目数据文件时出错: {e}")
-                
-                self.matrix_data_structure.dl_number = dl_number
-                self.matrix_data_structure.project_data_file_path = project_data_file_path
-                logger.debug(f"设置DL编号: {dl_number}")
-                logger.debug(f"设置项目数据文件路径: {project_data_file_path}")
-                
-                # 解析Matrix数据为结构化数据
-                warnings = self.matrix_data_structure.parse_matrix_to_structure(matrix_data)
-                
-                # 记录解析结果
-                group_count = len(self.matrix_data_structure.group_steps)
-                logger.info(f"Matrix数据解析完成，共找到 {group_count} 个组别")
-                
-                # 添加数据结构内容的详细日志
-                logger.debug(f"Matrix数据结构详情 - DL编号: {self.matrix_data_structure.dl_number}")
-                logger.debug(f"Matrix数据结构详情 - 项目数据文件路径: {self.matrix_data_structure.project_data_file_path}")
-                logger.debug(f"Matrix数据结构详情 - 组别列表: {list(self.matrix_data_structure.group_steps.keys())}")
-                
-                # 显示每个组别的步骤数量
-                for group_name, steps in self.matrix_data_structure.group_steps.items():
-                    logger.debug(f"组别 '{group_name}' 包含 {len(steps)} 个步骤")
-                    # 如果步骤数量不多，显示前几个步骤的详细信息
-                    if len(steps) > 0:
-                        for i, step in enumerate(steps[:3]):  # 只显示前3个步骤作为示例
-                            logger.debug(f"  步骤 {i+1}: {step}")
-                        if len(steps) > 3:
-                            logger.debug(f"  ... 还有 {len(steps) - 3} 个步骤")
-                
-                # 显示LLCR和CR需求
-                if self.matrix_data_structure.llcr_requirements:
-                    logger.debug(f"LLCR需求: {self.matrix_data_structure.llcr_requirements}")
-                if self.matrix_data_structure.cr_requirements:
-                    logger.debug(f"CR需求: {self.matrix_data_structure.cr_requirements}")
-                
+            if self.matrix_controller:
+                self.matrix_data_structure, warnings = self.matrix_controller.create_matrix_data_structure(
+                    self.project_context or get_current_project_context()
+                )
                 if warnings:
                     logger.warning(f"Matrix数据验证警告: {warnings}")
-                
-            elif hasattr(self.matrix_service, 'data_structure'):
-                # 如果matrix_service直接有data_structure属性，直接使用
-                self.matrix_data_structure = self.matrix_service.data_structure
-                logger.info("直接从Matrix服务的data_structure属性获取数据结构")
+                logger.info("通过Matrix控制器创建数据结构完成")
             else:
-                logger.error("Matrix服务没有可用的数据模型或数据结构")
-                self.matrix_data_structure = None
+                document_context = ProjectDocumentContext.from_project_context(
+                    self.project_context or get_current_project_context()
+                )
+                # 检查matrix_service是否是MatrixService实例或MatrixController实例
+                if hasattr(self.matrix_service, 'data_model') and hasattr(self.matrix_service.data_model, 'rows'):
+                # MatrixService或MatrixController实例
+                    matrix_data = self.matrix_service.data_model.rows
+                    logger.info(f"从Matrix服务获取到 {len(matrix_data)} 行数据")
+                
+                    # 创建MatrixDataStructure实例并解析数据
+                    from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
+                    self.matrix_data_structure = MatrixDataStructure()
+                    document_context.apply_to_matrix_data_structure(self.matrix_data_structure)
+                    logger.debug(f"设置DL编号: {document_context.dl_number}")
+                    logger.debug(f"设置项目数据文件路径: {document_context.project_data_file_path}")
+                
+                    # 解析Matrix数据为结构化数据
+                    warnings = self.matrix_data_structure.parse_matrix_to_structure(matrix_data)
+                
+                    # 记录解析结果
+                    group_count = len(self.matrix_data_structure.group_steps)
+                    logger.info(f"Matrix数据解析完成，共找到 {group_count} 个组别")
+                
+                    # 添加数据结构内容的详细日志
+                    logger.debug(f"Matrix数据结构详情 - DL编号: {self.matrix_data_structure.dl_number}")
+                    logger.debug(f"Matrix数据结构详情 - 项目数据文件路径: {self.matrix_data_structure.project_data_file_path}")
+                    logger.debug(f"Matrix数据结构详情 - 组别列表: {list(self.matrix_data_structure.group_steps.keys())}")
+                
+                    # 显示每个组别的步骤数量
+                    for group_name, steps in self.matrix_data_structure.group_steps.items():
+                        logger.debug(f"组别 '{group_name}' 包含 {len(steps)} 个步骤")
+                        if len(steps) > 0:
+                            for i, step in enumerate(steps[:3]):
+                                logger.debug(f"  步骤 {i+1}: {step}")
+                            if len(steps) > 3:
+                                logger.debug(f"  ... 还有 {len(steps) - 3} 个步骤")
+                
+                    # 显示LLCR和CR需求
+                    if self.matrix_data_structure.llcr_requirements:
+                        logger.debug(f"LLCR需求: {self.matrix_data_structure.llcr_requirements}")
+                    if self.matrix_data_structure.cr_requirements:
+                        logger.debug(f"CR需求: {self.matrix_data_structure.cr_requirements}")
+                
+                    if warnings:
+                        logger.warning(f"Matrix数据验证警告: {warnings}")
+                
+                elif hasattr(self.matrix_service, 'data_structure'):
+                    self.matrix_data_structure = self.matrix_service.data_structure
+                    logger.info("直接从Matrix服务的data_structure属性获取数据结构")
+                else:
+                    logger.error("Matrix服务没有可用的数据模型或数据结构")
+                    self.matrix_data_structure = None
                 
         except Exception as e:
             logger.error(f"创建Matrix数据结构时出错: {e}")
@@ -284,6 +277,27 @@ class TestSpecTablesPage(QFrame):
         else:
             logger.info(f"文档路径已设置，但等待Matrix数据结构或处理已开始 - 路径: {bool(self.document_path)}, Matrix: {self.matrix_data_structure is not None}, 进度: {self.progress_bar.value()}")
             if self.document_path and self.matrix_data_structure is None:
+                self.status_label.setText("等待Matrix数据结构...")
+
+    def set_matrix_controller(self, matrix_controller):
+        """设置Matrix控制器"""
+        logger.info(f"设置Matrix控制器: {matrix_controller is not None}")
+        self.matrix_controller = matrix_controller
+        if self.matrix_controller:
+            self._create_matrix_data_structure()
+            logger.info("Matrix数据结构已通过控制器更新")
+        elif not self.matrix_service:
+            self.matrix_data_structure = None
+            logger.info("Matrix控制器已清除")
+        
+        if self.document_path and self.matrix_data_structure is not None and self.progress_bar.value() == 0:
+            logger.info("文档路径和Matrix数据结构均已设置，开始处理")
+            self.start_processing()
+        else:
+            logger.info(f"Matrix控制器已设置，但等待文档路径或处理已开始 - 路径: {bool(self.document_path)}, Matrix: {self.matrix_data_structure is not None}, 进度: {self.progress_bar.value()}")
+            if self.matrix_data_structure is not None and not self.document_path:
+                self.status_label.setText("等待文档路径设置...")
+            elif self.matrix_data_structure is None:
                 self.status_label.setText("等待Matrix数据结构...")
 
     def set_matrix_service(self, matrix_service):
@@ -311,6 +325,11 @@ class TestSpecTablesPage(QFrame):
                 self.status_label.setText("等待文档路径设置...")
             elif self.matrix_data_structure is None:
                 self.status_label.setText("等待Matrix数据结构...")
+
+    def set_project_context(self, project_context: ProjectContext):
+        self.project_context = project_context
+        if self.matrix_controller or self.matrix_service:
+            self._create_matrix_data_structure()
     
     def start_processing(self):
         """开始处理"""
@@ -325,8 +344,13 @@ class TestSpecTablesPage(QFrame):
         self.status_label.setText("正在开始处理...")
         logger.info(f"开始处理文档: {self.document_path}")
         
-        # 创建并启动工作线程，传递Matrix服务以便worker可以创建数据结构
-        self.worker = TestSpecTablesWorker(self.document_path, self.matrix_service)
+        # 创建并启动工作线程，优先传递Matrix控制器
+        self.worker = TestSpecTablesWorker(
+            self.document_path,
+            matrix_controller=self.matrix_controller,
+            matrix_service=self.matrix_service,
+            project_context=self.project_context,
+        )
         self.worker.progress_updated.connect(self.update_progress)
         self.worker.status_updated.connect(self.update_status)
         self.worker.finished.connect(self.processing_finished)

@@ -4,8 +4,11 @@
 """
 
 from typing import Dict, Any, List, Optional
+from src.core.config_manager import config_manager
 from src.core.logger import logger
+from src.core.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext, get_current_project_context
+from src.core.project_document_context import ProjectDocumentContext
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 import os
 import pythoncom
@@ -22,8 +25,8 @@ class FeeSheetExportService:
 
     def __init__(self, project_context: Optional[ProjectContext] = None):
         """初始化费用表导出服务"""
-        self.template_dir = r"D:\TestFlowManager\Template"
-        self.output_dir = r"D:\OutFile"
+        self.template_dir = config_manager.get_template_dir()
+        self.output_dir = OutputPathResolver.get_default_output_dir()
         self.excel_app = None
         self.project_context = project_context
 
@@ -214,21 +217,17 @@ class FeeSheetExportService:
         :return: 是否成功填充
         """
         try:
-            # 现在我们知道第5行是'Sample preparation (if needed)'，第6行是空白行模板
-            base_row = 5  # 'Sample preparation (if needed)' 行
-            template_row = 6  # 空白行模板
-            
-            # 检查基础行是否存在
-            base_cell_value = worksheet.Cells(base_row, 3).Value  # C列第5行
-            if not base_cell_value or 'Sample preparation' not in str(base_cell_value):
+            anchor = self._find_sample_preparation_anchor(worksheet)
+            if not anchor:
                 logger.warning("未找到'Sample preparation (if needed)'行，无法按要求填充组别数据")
                 return False
-            
-            template_cell_value = worksheet.Cells(template_row, 3).Value  # C列第6行
-            if template_cell_value is not None:
-                logger.warning("第6行不是空白行模板，无法按要求复制行")
+
+            base_row, template_row, template_col = anchor
+            template_cell_value = worksheet.Cells(template_row, template_col).Value
+            if template_cell_value not in (None, ""):
+                logger.warning(f"第{template_row}行第{template_col}列不是空白模板单元格，无法按要求复制行")
                 return False
-            
+
             logger.debug(f"找到基础行 (第{base_row}行) 和模板行 (第{template_row}行)")
             
             # 记录插入前的行高，以防止插入操作影响原有行的行高
@@ -391,6 +390,120 @@ class FeeSheetExportService:
             logger.error(f"填充测试组别数据时出错: {e}", exc_info=True)
             return False
 
+    def _find_sample_preparation_anchor(self, worksheet) -> Optional[tuple]:
+        """在模板中搜索“Sample preparation”锚点，避免固定依赖 C5。"""
+        try:
+            used_range = worksheet.UsedRange
+            max_rows = min(max(used_range.Rows.Count, 12), 40)
+            max_cols = min(max(used_range.Columns.Count, 8), 12)
+
+            for row in range(1, max_rows + 1):
+                for col in range(1, max_cols + 1):
+                    cell = worksheet.Cells(row, col)
+                    candidates = self._get_fee_sheet_cell_candidates(cell)
+
+                    for candidate in candidates:
+                        normalized = self._normalize_fee_sheet_anchor_text(candidate)
+                        if self._is_sample_preparation_anchor_text(normalized):
+                            logger.debug(f"找到Sample preparation锚点: row={row}, col={col}, value={candidate}")
+                            return row, row + 1, col
+
+            self._log_fee_sheet_anchor_debug_cells(worksheet)
+        except Exception as exc:
+            logger.error(f"搜索Sample preparation锚点时出错: {exc}", exc_info=True)
+
+        return None
+
+    def _get_fee_sheet_cell_candidates(self, cell) -> List[Any]:
+        candidates: List[Any] = []
+        try:
+            candidates.append(cell.Value)
+        except Exception:
+            pass
+        try:
+            candidates.append(cell.Text)
+        except Exception:
+            pass
+        return candidates
+
+    def _normalize_fee_sheet_anchor_text(self, value: Any) -> str:
+        if value in (None, ""):
+            return ""
+        text = str(value).replace("\r", " ").replace("\n", " ")
+        return " ".join(text.lower().split())
+
+    def _is_sample_preparation_anchor_text(self, normalized_text: str) -> bool:
+        if not normalized_text:
+            return False
+
+        compact_text = normalized_text.replace(" ", "")
+        if "samplepreparation(ifneeded)" in compact_text:
+            return True
+        if "sample preparation" in normalized_text:
+            return True
+        if "preparation (if needed)" in normalized_text and "sample" in normalized_text:
+            return True
+        return "sample" in normalized_text and "preparation" in normalized_text
+
+    def _log_fee_sheet_anchor_debug_cells(self, worksheet) -> None:
+        """在锚点定位失败时打印关键区域内容，便于适配模板。"""
+        try:
+            debug_rows = range(4, 9)
+            debug_cols = range(1, 7)
+            cell_snapshots = []
+            for row in debug_rows:
+                row_values = []
+                for col in debug_cols:
+                    cell = worksheet.Cells(row, col)
+                    value = None
+                    text = None
+                    try:
+                        value = cell.Value
+                    except Exception:
+                        pass
+                    try:
+                        text = cell.Text
+                    except Exception:
+                        pass
+                    if value not in (None, "") or text not in (None, ""):
+                        normalized_value = self._normalize_fee_sheet_anchor_text(value)
+                        normalized_text = self._normalize_fee_sheet_anchor_text(text)
+                        row_values.append(
+                            f"R{row}C{col}=Value[{value}] Text[{text}] "
+                            f"NormValue[{normalized_value}] NormText[{normalized_text}]"
+                        )
+                if row_values:
+                    cell_snapshots.append(" | ".join(row_values))
+
+            if cell_snapshots:
+                logger.debug("费用表锚点调试区域内容:\n" + "\n".join(cell_snapshots))
+        except Exception as exc:
+            logger.error(f"输出费用表锚点调试信息时出错: {exc}", exc_info=True)
+
+    def _rebuild_existing_fee_sheet_from_template(self, output_path: str) -> bool:
+        """当现有费用表缺失模板主体结构时，用标准模板重建该文件。"""
+        try:
+            templates = self._find_fee_sheet_templates()
+            if not templates:
+                logger.error("未找到费用表模板文件，无法重建现有费用表")
+                return False
+
+            template_path = templates[0]
+            backup_path = f"{output_path}.bak"
+            if os.path.exists(output_path):
+                try:
+                    shutil.copy2(output_path, backup_path)
+                    logger.info(f"已备份原费用表文件到: {backup_path}")
+                except Exception as exc:
+                    logger.warning(f"备份原费用表文件失败，将继续尝试直接重建: {exc}")
+
+            shutil.copy2(template_path, output_path)
+            logger.info(f"现有费用表缺失模板主体结构，已使用标准模板重建: {output_path}")
+            return True
+        except Exception as exc:
+            logger.error(f"重建费用表文件时出错: {exc}", exc_info=True)
+            return False
+
     def export_fee_sheet(self, matrix_data_structure: MatrixDataStructure,
                          dl_number: str = "DL-UNKNOWN", 
                          requested_by: str = "", 
@@ -409,18 +522,23 @@ class FeeSheetExportService:
         """
         try:
             logger.info("开始导出费用表")
-            
-            # 获取当前项目路径
-            project_context = self.get_project_context()
+            document_context = ProjectDocumentContext.from_project_context(self.get_project_context())
+            project_context = document_context.project_context
             current_project = project_context.project_path if project_context else None
+
+            if dl_number == "DL-UNKNOWN" and document_context.dl_number:
+                dl_number = document_context.dl_number
+            if not requested_by:
+                requested_by = document_context.get_field("requested_by", "")
+            if not location:
+                location = document_context.get_field("location", "")
+            if not product_description:
+                product_description = document_context.get_field("product_description", "")
+            if not tests_to_be_performed:
+                tests_to_be_performed = document_context.get_field("tests_to_be_performed", "")
             
             # 确定输出目录和文件名
             if current_project and os.path.exists(current_project):
-                # 项目已打开，使用项目名称作为DL编号
-                project_name = os.path.basename(current_project)
-                if project_name.startswith("DL-"):
-                    dl_number = project_name
-                
                 logger.info(f"检测到已打开项目: {current_project}")
                 logger.info(f"使用项目名称作为DL编号: {dl_number}")
                 
@@ -503,7 +621,7 @@ class FeeSheetExportService:
                 templates = self._find_fee_sheet_templates()
                 if not templates:
                     logger.error("未找到费用表模板文件")
-                    return False
+                    return (False, None)
                 
                 template_path = templates[0]  # 使用第一个模板
                 file_name = os.path.basename(template_path)
@@ -535,7 +653,7 @@ class FeeSheetExportService:
                 templates = self._find_fee_sheet_templates()
                 if not templates:
                     logger.error("未找到费用表模板文件")
-                    return False
+                    return (False, None)
                 
                 template_path = templates[0]
                 
@@ -562,13 +680,45 @@ class FeeSheetExportService:
                 # 打开文件
                 wb = excel_app.Workbooks.Open(output_path)
                 ws = wb.Sheets(1)
+
+                if use_existing_file:
+                    existing_anchor = self._find_sample_preparation_anchor(ws)
+                    if not existing_anchor:
+                        logger.warning("现有费用表不包含标准模板主体结构，将使用标准模板重建后再填充")
+                        try:
+                            wb.Close(SaveChanges=False)
+                        except Exception:
+                            pass
+                        wb = None
+                        try:
+                            excel_app.Quit()
+                        except Exception:
+                            pass
+                        excel_app = None
+
+                        rebuilt = self._rebuild_existing_fee_sheet_from_template(output_path)
+                        if not rebuilt:
+                            return (False, None)
+
+                        use_existing_file = False
+                        excel_app = win32.Dispatch("Excel.Application")
+                        try:
+                            excel_app.Visible = False
+                        except Exception:
+                            pass
+                        try:
+                            excel_app.DisplayAlerts = False
+                        except Exception:
+                            pass
+                        wb = excel_app.Workbooks.Open(output_path)
+                        ws = wb.Sheets(1)
                 
                 # 填充测试组别数据（这是主要功能，无论是否使用现有文件都要执行）
                 success = self._fill_group_tests_data(ws, group_tests_info)
                 
                 if not success:
                     logger.warning(f"填充测试组别数据失败: {output_path}")
-                    return False
+                    return (False, None)
                 
                 # 只有在不是使用现有文件时才填充基本信息
                 if not use_existing_file:
@@ -596,7 +746,7 @@ class FeeSheetExportService:
                 
             except Exception as e:
                 logger.error(f"处理文件时出错: {e}", exc_info=True)
-                return False
+                return (False, None)
             finally:
                 # 正确关闭工作簿和Excel应用
                 if wb:

@@ -16,11 +16,16 @@ _matrix_service_instance = None
 class MatrixService:
     """Matrix服务层 - Service层"""
 
-    def __new__(cls):
+    def __new__(cls, *args, **kwargs):
         global _matrix_service_instance
         if _matrix_service_instance is None:
             _matrix_service_instance = super(MatrixService, cls).__new__(cls)
         return _matrix_service_instance
+
+    @classmethod
+    def shared(cls) -> "MatrixService":
+        """显式获取当前共享 MatrixService 实例。"""
+        return cls()
 
     def __init__(self):
         # 防止重复初始化

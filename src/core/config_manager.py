@@ -15,11 +15,14 @@ class ConfigManager:
     管理应用程序的配置信息，支持从文件加载和保存配置
     """
 
-    def __init__(self, config_file: str = "config/settings.json"):
+    DEFAULT_MAIN_CONFIG = "config/settings.json"
+    DEFAULT_PATHS_CONFIG = "config/paths.ini"
+
+    def __init__(self, config_file: str = DEFAULT_MAIN_CONFIG):
         self.config_file = config_file
         self._config: Dict[str, Any] = {}
         self.load_main_config()
-        self.load_paths_config("config/paths.ini")
+        self.load_paths_config(self.DEFAULT_PATHS_CONFIG)
 
     def load_main_config(self) -> None:
         """从主配置文件加载配置"""
@@ -168,6 +171,23 @@ class ConfigManager:
         # print(f"[DEBUG] Final resource path: {result_path}")
         return result_path
 
+    def get_main_config_path(self) -> str:
+        """获取主配置文件实际路径。"""
+        return self._get_resource_path(self.config_file)
+
+    def get_paths_config_path(self) -> str:
+        """获取路径配置文件实际路径。"""
+        return self._get_resource_path(self.DEFAULT_PATHS_CONFIG)
+
+    def get_config_root_dir(self) -> str:
+        """获取实际配置根目录。"""
+        return os.path.dirname(self.get_main_config_path())
+
+    def describe_config_source(self) -> str:
+        """返回当前运行模式下的配置来源描述。"""
+        mode = "生产环境配置" if getattr(sys, "frozen", False) else "开发环境配置"
+        return f"{mode}({self.get_paths_config_path()})"
+
     def save_config(self) -> None:
         """保存配置到文件"""
         config_path = self._get_resource_path(self.config_file)
@@ -232,6 +252,36 @@ class ConfigManager:
                         abs_path = os.path.join(base_path, default)
                         return abs_path
             return default
+
+    def get_path(self, key: str, default: str = "") -> str:
+        return self.get(f"paths.{key}", default)
+
+    def get_template_dir(self, default: str = r"D:\TestFlowManager\Template") -> str:
+        return self.get_path("template_dir", default)
+
+    def get_default_project_dir(self, default: str = r"D:\TestFlowManager\Projects") -> str:
+        return self.get_path("default_project_path", default)
+
+    def get_backup_dir(self, default: str = r"D:\TestFlowManager\Backup") -> str:
+        return self.get_path("backup_path", default)
+
+    def get_temp_dir(self, default: str = r"D:\TestFlowManager\Temp") -> str:
+        return self.get_path("temp_dir", default)
+
+    def get_default(self, key: str, default: Any = "") -> Any:
+        return self.get(f"defaults.{key}", default)
+
+    def get_password(self, key: str, default: str = "") -> str:
+        return self.get(f"passwords.{key}", default)
+
+    def get_logging(self, key: str, default: Any = None) -> Any:
+        return self.get(f"logging.{key}", default)
+
+    def get_standard_file(self, key: str, default: Any = "") -> Any:
+        return self.get(f"standard_files.{key}", default)
+
+    def get_equipment_data_source(self, key: str, default: Any = "") -> Any:
+        return self.get(f"equipment_data_sources.{key}", default)
 
     def set(self, key: str, value: Any) -> None:
         """

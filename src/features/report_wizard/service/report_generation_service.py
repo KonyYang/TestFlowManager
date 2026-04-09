@@ -9,7 +9,11 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Optional
 import pythoncom
+from src.core.config_manager import config_manager
 from src.core.logger import logger
+from src.core.output_paths import OutputPathResolver
+from src.core.project_context import ProjectContext
+from src.core.project_document_context import ProjectDocumentContext
 from src.features.report_wizard.service.header_modifier import HeaderModifier
 from src.utils.word_utils import open_docx_document, save_docx_document, get_shared_word_app
 from src.features.report_wizard.model.header_data import HeaderData
@@ -24,9 +28,8 @@ class ReportGenerationService:
 
     def __init__(self):
         """初始化报告生成服务"""
-        # 移除硬编码的模板路径
-        self.template_dir = r"D:\TestFlowManager\Template"
-        self.default_output_dir = r"D:\outfile"
+        self.template_dir = config_manager.get_template_dir()
+        self.default_output_dir = OutputPathResolver.get_default_output_dir()
     
     def _sanitize_filename(self, filename: str) -> str:
         """
@@ -88,7 +91,52 @@ class ReportGenerationService:
         self.template_path = template_path  # 设置找到的模板路径
         return True
 
-    def create_report_from_template(self, header_data: HeaderData, output_dir: Optional[str] = None, project_path: Optional[str] = None) -> str:
+    def _resolve_output_dir(
+        self,
+        output_dir: Optional[str] = None,
+        project_path: Optional[str] = None,
+        project_context: Optional[ProjectContext] = None,
+    ) -> str:
+        if output_dir:
+            return output_dir
+
+        if project_context is None and project_path:
+            project_context = ProjectContext.from_project_path(project_path)
+
+        if project_context and os.path.exists(project_context.project_path):
+            resolved_dir = OutputPathResolver.resolve_submitted_material_dir(
+                project_context,
+                create=True,
+            )
+            if resolved_dir != OutputPathResolver.get_default_output_dir():
+                logger.info(f"使用项目输出目录: {resolved_dir}")
+            else:
+                logger.info("没有解析到项目提交材料目录，回退全局默认输出目录")
+            return resolved_dir
+
+        logger.info("没有项目上下文，使用默认输出目录")
+        return self.default_output_dir
+
+    def _load_project_json_data(
+        self,
+        project_path: Optional[str] = None,
+        project_context: Optional[ProjectContext] = None,
+    ) -> Optional[Dict[str, Any]]:
+        if project_context is None and project_path:
+            project_context = ProjectContext.from_project_path(project_path)
+
+        document_context = ProjectDocumentContext.from_project_context(project_context)
+        if document_context.project_data:
+            return document_context.project_data
+        return None
+
+    def create_report_from_template(
+        self,
+        header_data: HeaderData,
+        output_dir: Optional[str] = None,
+        project_path: Optional[str] = None,
+        project_context: Optional[ProjectContext] = None,
+    ) -> str:
         """
         基于模板创建报告文件
         
@@ -107,54 +155,11 @@ class ReportGenerationService:
             if not self.validate_template_exists():
                 raise FileNotFoundError(f"未找到以'E-3707'开头的模板文件")
 
-            # 确定输出目录
-            logger.info(f"项目路径(project_path): {project_path}")
-            logger.info(f"项目路径是否存在: {project_path and os.path.exists(project_path) if project_path else False}")
-            logger.info(f"传入的输出目录(output_dir): {output_dir}")
-            
-            if project_path and os.path.exists(project_path):
-                # 从项目路径中提取DL编号作为子文件夹名称
-                import json
-                from pathlib import Path
-                
-                # 查找项目中的JSON文件以获取DL编号
-                json_files = list(Path(project_path).glob("*.json"))
-                logger.info(f"在项目路径中找到的JSON文件: {json_files}")
-                
-                if json_files:
-                    json_file_path = json_files[0]
-                    with open(json_file_path, 'r', encoding='utf-8') as f:
-                        project_data = json.load(f)
-                        dl_number = project_data.get("DL", "")
-                        logger.info(f"从JSON文件中获取的DL编号: {dl_number}")
-                        
-                        if dl_number:
-                            # 在项目路径下查找以DL编号开头的子文件夹
-                            matching_folders = [f for f in os.listdir(project_path) 
-                                              if os.path.isdir(os.path.join(project_path, f)) 
-                                              and f.startswith(dl_number)]
-                            
-                            if matching_folders:
-                                # 如果找到匹配的文件夹，使用第一个
-                                output_dir = os.path.join(project_path, matching_folders[0])
-                                logger.info(f"找到以DL编号开头的文件夹: {output_dir}")
-                            else:
-                                # 如果没找到匹配的文件夹，使用项目文件夹本身
-                                logger.info(f"未找到以DL编号开头的文件夹，使用项目路径本身: {project_path}")
-                                output_dir = project_path
-                        else:
-                            # 如果JSON中没有DL字段，使用项目路径本身
-                            logger.info(f"JSON中未找到DL字段，使用项目路径本身: {project_path}")
-                            output_dir = project_path
-                else:
-                    # 如果找不到JSON文件，使用项目路径本身
-                    logger.info(f"项目路径中未找到JSON文件，使用项目路径本身")
-                    output_dir = project_path
-            else:
-                # 如果没有项目路径，使用默认输出目录
-                logger.info(f"没有项目路径，使用默认输出目录")
-                output_dir = self.default_output_dir if output_dir is None else output_dir
-            
+            output_dir = self._resolve_output_dir(
+                output_dir=output_dir,
+                project_path=project_path,
+                project_context=project_context,
+            )
             logger.info(f"最终确定的输出目录: {output_dir}")
             
             # 确保输出目录存在
@@ -268,25 +273,10 @@ class ReportGenerationService:
                     logger.error("修订记录表格日期修改失败")
 
                 # 修改正文 (使用win32com修改)，根据是否有项目数据决定调用哪个方法
-                if project_path and os.path.exists(project_path):
+                project_data = self._load_project_json_data(project_path, project_context)
+                if project_data:
                     logger.info(f"项目已打开: {project_path}，检查JSON文件...")
-                    # 有项目数据时，使用占位符替换方式
-                    import json
-                    from pathlib import Path
-                    # 尝试从项目路径加载完整的项目数据用于占位符替换
-                    json_files = list(Path(project_path).glob("*.json"))
-                    if json_files:
-                        logger.info(f"找到JSON文件: {json_files[0]}，使用占位符替换方式")
-                        json_file_path = json_files[0]
-                        with open(json_file_path, 'r', encoding='utf-8') as f:
-                            project_data = json.load(f)
-                            # 使用update_document_content方法，传入完整的项目数据
-                            success4 = header_modifier.update_document_content(project_data)
-                        # 文档在replace_document_placeholders内部已被保存，但文档仍然打开供后续操作使用
-                    else:
-                        logger.info("未找到JSON文件，使用传统方式调用modify_sample_received_date")
-                        # 如果没有找到JSON文件，使用传统方式
-                        success4 = header_modifier._modify_sample_received_date_fallback(output_path)
+                    success4 = header_modifier.update_document_content(project_data)
                 else:
                     logger.info("项目未打开，使用传统方式调用modify_sample_received_date")
                     # 没有项目数据时，使用传统方式
@@ -303,14 +293,7 @@ class ReportGenerationService:
                     test_spec_service = TestSpecTablesService()
 
                     # 从项目数据中提取测试样品信息
-                    project_data = None
-                    if project_path and os.path.exists(project_path):
-                        import json
-                        from pathlib import Path
-                        json_files = list(Path(project_path).glob("*.json"))
-                        if json_files:
-                            with open(json_files[0], 'r', encoding='utf-8') as f:
-                                project_data = json.load(f)
+                    project_data = self._load_project_json_data(project_path, project_context)
 
                     if project_data:
                         logger.info("开始填充测试样品信息表格...")
@@ -407,30 +390,26 @@ class ReportGenerationService:
             HeaderData: 从项目中加载的页眉数据，如果失败则返回None
         """
         try:
-            # 查找项目中的JSON文件
-            project_dir = Path(project_path)
-            json_files = list(project_dir.glob("*.json"))
-            
-            if not json_files:
-                logger.warning(f"在项目路径中未找到JSON文件: {project_path}")
+            project_data = self._load_project_json_data(project_path=project_path)
+            if not project_data:
+                logger.warning(f"在项目路径中未找到JSON数据: {project_path}")
                 return None
-            
-            # 使用第一个找到的JSON文件
-            json_file = json_files[0]
-            with open(json_file, 'r', encoding='utf-8') as f:
-                import json
-                json_data = json.load(f)
-                
-                # 从JSON数据创建HeaderData对象
-                header_data = HeaderData.from_json(json_data)
-                logger.info(f"成功从 {json_file} 加载项目数据")
-                return header_data
+
+            header_data = HeaderData.from_json(project_data)
+            logger.info(f"成功从项目上下文加载项目数据: {project_path}")
+            return header_data
                 
         except Exception as e:
             logger.error(f"加载项目数据失败: {e}")
             return None
 
-    def get_generated_report_path(self, header_data: HeaderData, output_dir: Optional[str] = None, project_path: Optional[str] = None) -> str:
+    def get_generated_report_path(
+        self,
+        header_data: HeaderData,
+        output_dir: Optional[str] = None,
+        project_path: Optional[str] = None,
+        project_context: Optional[ProjectContext] = None,
+    ) -> str:
         """
         获取将要生成的报告文件路径（不实际生成文件）
         
@@ -443,54 +422,11 @@ class ReportGenerationService:
             str: 将要生成的报告文件路径
         """
         try:
-            # 确定输出目录
-            logger.info(f"项目路径(project_path): {project_path}")
-            logger.info(f"项目路径是否存在: {project_path and os.path.exists(project_path) if project_path else False}")
-            logger.info(f"传入的输出目录(output_dir): {output_dir}")
-            
-            if project_path and os.path.exists(project_path):
-                # 从项目路径中提取DL编号作为子文件夹名称
-                import json
-                from pathlib import Path
-                
-                # 查找项目中的JSON文件以获取DL编号
-                json_files = list(Path(project_path).glob("*.json"))
-                logger.info(f"在项目路径中找到的JSON文件: {json_files}")
-                
-                if json_files:
-                    json_file_path = json_files[0]
-                    with open(json_file_path, 'r', encoding='utf-8') as f:
-                        project_data = json.load(f)
-                        dl_number = project_data.get("DL", "")
-                        logger.info(f"从JSON文件中获取的DL编号: {dl_number}")
-                        
-                        if dl_number:
-                            # 在项目路径下查找以DL编号开头的子文件夹
-                            matching_folders = [f for f in os.listdir(project_path) 
-                                              if os.path.isdir(os.path.join(project_path, f)) 
-                                              and f.startswith(dl_number)]
-                            
-                            if matching_folders:
-                                # 如果找到匹配的文件夹，使用第一个
-                                output_dir = os.path.join(project_path, matching_folders[0])
-                                logger.info(f"找到以DL编号开头的文件夹: {output_dir}")
-                            else:
-                                # 如果没找到匹配的文件夹，使用项目文件夹本身
-                                logger.info(f"未找到以DL编号开头的文件夹，使用项目路径本身: {project_path}")
-                                output_dir = project_path
-                        else:
-                            # 如果JSON中没有DL字段，使用项目路径本身
-                            logger.info(f"JSON中未找到DL字段，使用项目路径本身: {project_path}")
-                            output_dir = project_path
-                else:
-                    # 如果找不到JSON文件，使用项目路径本身
-                    logger.info(f"项目路径中未找到JSON文件，使用项目路径本身")
-                    output_dir = project_path
-            else:
-                # 如果没有项目路径，使用默认输出目录
-                logger.info(f"没有项目路径，使用默认输出目录")
-                output_dir = self.default_output_dir if output_dir is None else output_dir
-            
+            output_dir = self._resolve_output_dir(
+                output_dir=output_dir,
+                project_path=project_path,
+                project_context=project_context,
+            )
             logger.info(f"最终确定的输出目录: {output_dir}")
             
             # 确保输出目录存在

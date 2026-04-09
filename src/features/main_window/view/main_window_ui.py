@@ -4,6 +4,8 @@
 定义主窗口的用户界面（Lims 式：顶栏 + 左侧导航 + 主内容区）
 """
 import os
+import ctypes
+import ctypes.wintypes
 from typing import Optional, List, Tuple
 
 from PyQt5.QtWidgets import (
@@ -287,6 +289,7 @@ class MainWindow(QMainWindow):
         # 设置无边框窗口模式
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, False)
+        self._resize_border_width = 8
         
         self.setWindowTitle("TestFlow Manager")
         self._set_window_icon()
@@ -294,6 +297,7 @@ class MainWindow(QMainWindow):
         screen_geometry = QApplication.primaryScreen().availableGeometry()
         self.setGeometry(screen_geometry)
         self.fullscreen_geometry = screen_geometry
+        self.setMinimumSize(1024, 640)
 
         global_font = FontUtils.get_scaled_font(9)
         self.setFont(global_font)
@@ -535,6 +539,7 @@ class MainWindow(QMainWindow):
         self._nav_list.setFrameShape(QFrame.NoFrame)
         self._nav_list.setSpacing(4)
         self._nav_list.currentRowChanged.connect(self._on_nav_row_changed)
+        self._nav_list.itemClicked.connect(self._on_nav_item_clicked)
         
         # 导航分组容器
         nav_container = QWidget()
@@ -826,18 +831,18 @@ class MainWindow(QMainWindow):
             subtitle="将Matrix导出为Excel文件"
         )
         self._register_nav_page(
-            "📊 LLCR报告", 
-            "测试表格 / LLCR报告", 
-            self._create_placeholder_page("LLCR报告", "导出LLCR格式报告"),
+            "📊 LLCR记录表", 
+            "测试表格 / LLCR记录表", 
+            self._create_placeholder_page("LLCR记录表", "导出LLCR格式记录表"),
             action=self._on_export_llcr,
-            subtitle="导出LLCR格式报告"
+            subtitle="导出LLCR格式记录表"
         )
         self._register_nav_page(
-            "📄 CR报告", 
-            "测试表格 / CR报告", 
-            self._create_placeholder_page("CR报告", "导出CR格式报告"),
+            "📄 CR记录表", 
+            "测试表格 / CR记录表", 
+            self._create_placeholder_page("CR记录表", "导出CR格式记录表"),
             action=self._on_export_cr,
-            subtitle="导出CR格式报告"
+            subtitle="导出CR格式记录表"
         )
         
         # === 工具箱组 ===
@@ -902,19 +907,29 @@ class MainWindow(QMainWindow):
         """侧栏选中行变化。"""
         if row < 0:
             return
-        
-        # 初始化期间不执行动作函数
-        if not self._initializing_nav:
-            # 如果有注册的动作，先执行动作
-            if row in self._nav_actions:
-                action_func = self._nav_actions[row]
-                try:
-                    action_func()
-                except Exception as e:
-                    logger.error(f"执行侧栏动作失败: {e}", exc_info=True)
-        
-        # 然后切换页面
+
+        # 行变化只负责页面同步，动作统一交给点击事件触发。
         self._apply_nav_index(row)
+
+    def _on_nav_item_clicked(self, item: QListWidgetItem) -> None:
+        """侧栏点击事件：每次点击都执行动作（含重复点击同一项）。"""
+        if self._initializing_nav:
+            return
+        if self._nav_list is None:
+            return
+
+        row = self._nav_list.row(item)
+        if row < 0:
+            return
+
+        action_func = self._nav_actions.get(row)
+        if not action_func:
+            return
+
+        try:
+            action_func()
+        except Exception as e:
+            logger.error(f"执行侧栏动作失败: {e}", exc_info=True)
 
     def _apply_nav_index(self, index: int) -> None:
         """同步堆叠页、页标题与面包屑。"""
@@ -1088,6 +1103,60 @@ class MainWindow(QMainWindow):
         self.is_custom_sized = False
         super().showMaximized()
 
+    def nativeEvent(self, event_type, message):
+        """在 Windows 无边框模式下启用系统边缘缩放。"""
+        if (
+            os.name != "nt"
+            or self.isMaximized()
+            or self.isFullScreen()
+            or event_type != "windows_generic_MSG"
+        ):
+            return super().nativeEvent(event_type, message)
+
+        msg = ctypes.wintypes.MSG.from_address(int(message))
+        WM_NCHITTEST = 0x0084
+        if msg.message != WM_NCHITTEST:
+            return super().nativeEvent(event_type, message)
+
+        HTLEFT = 10
+        HTRIGHT = 11
+        HTTOP = 12
+        HTTOPLEFT = 13
+        HTTOPRIGHT = 14
+        HTBOTTOM = 15
+        HTBOTTOMLEFT = 16
+        HTBOTTOMRIGHT = 17
+
+        x = ctypes.c_short(msg.lParam & 0xFFFF).value
+        y = ctypes.c_short((msg.lParam >> 16) & 0xFFFF).value
+        pos = self.mapFromGlobal(QPoint(x, y))
+        rect = self.rect()
+        border = self._resize_border_width
+
+        on_left = pos.x() <= border
+        on_right = pos.x() >= rect.width() - border
+        on_top = pos.y() <= border
+        on_bottom = pos.y() >= rect.height() - border
+
+        if on_top and on_left:
+            return True, HTTOPLEFT
+        if on_top and on_right:
+            return True, HTTOPRIGHT
+        if on_bottom and on_left:
+            return True, HTBOTTOMLEFT
+        if on_bottom and on_right:
+            return True, HTBOTTOMRIGHT
+        if on_left:
+            return True, HTLEFT
+        if on_right:
+            return True, HTRIGHT
+        if on_top:
+            return True, HTTOP
+        if on_bottom:
+            return True, HTBOTTOM
+
+        return super().nativeEvent(event_type, message)
+
     def showMinimized(self):
         self.is_custom_sized = False
         super().showMinimized()
@@ -1136,7 +1205,7 @@ class MainWindow(QMainWindow):
     def _on_create_report(self) -> None:
         logger.debug("Create report action triggered")
         self.report_wizard_controller.set_project_context(self.controller.project_context)
-        self.report_wizard_controller.set_matrix_service(self.matrix_controller.service)
+        self.report_wizard_controller.set_matrix_controller(self.matrix_controller)
         self.report_wizard_controller.show_wizard()
         self._update_status()
 

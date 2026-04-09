@@ -23,7 +23,7 @@ class TestRecordService:
 
     def __init__(self):
         self.template_prefix = "FDQF-E-036"
-        self.template_dir = config_manager.get("paths.template_dir")
+        self.template_dir = config_manager.get_path("template_dir")
         self.word_app = None
         # 定义需要排除的Requirement值
         self.exclude_requirement_values = ["No detrimental condition", "No damage"]

@@ -201,7 +201,7 @@ def _load_excel_standards(file_path: str) -> dict:
             return standards
             
         # 从配置中获取工作表名称
-        sheet_name = config_manager.get("standard_files.standard_version_sheet_name", "认可标准")
+            sheet_name = config_manager.get_standard_file("standard_version_sheet_name", "认可标准")
         
         # 检查文件是否存在
         if not os.path.exists(file_path):
@@ -247,7 +247,7 @@ def _load_excel_with_xlrd(file_path: str) -> dict:
     try:
         import xlrd
         # 从配置中获取工作表名称
-        sheet_name = config_manager.get("standard_files.standard_version_sheet_name", "认可标准")
+        sheet_name = config_manager.get_standard_file("standard_version_sheet_name", "认可标准")
         
         # 打开工作簿
         workbook = xlrd.open_workbook(file_path)
@@ -350,7 +350,7 @@ def update_test_method_versions(matrix_data: list) -> dict:
     
     try:
         # 获取测试标准文件路径
-        standard_file_path = config_manager.get("standard_files.standard_version_info_file")
+        standard_file_path = config_manager.get_standard_file("standard_version_info_file")
         
         # 检查是否在可执行文件环境中，如果是，则尝试使用相对路径
         if getattr(sys, 'frozen', False):
@@ -366,7 +366,7 @@ def update_test_method_versions(matrix_data: list) -> dict:
         
         if not standard_file_path:
             # 再次尝试获取，确保没有遗漏
-            standard_file_path = config_manager.get("standard_files.standard_version_info_file")
+            standard_file_path = config_manager.get_standard_file("standard_version_info_file")
             if not standard_file_path:
                 return {"updated_count": 0, "details": [], "file_exists": False, "file_path": standard_file_path}
             

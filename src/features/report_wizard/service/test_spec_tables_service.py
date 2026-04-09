@@ -259,7 +259,7 @@ class TestSpecTablesService:
         
         # 从MatrixService获取表头信息
         from src.features.matrix.service.matrix_service import MatrixService
-        matrix_service = MatrixService()
+        matrix_service = MatrixService.shared()
         
         # 获取表头行
         header_row = matrix_service.data_model.headers if hasattr(matrix_service.data_model, 'headers') else []
@@ -543,7 +543,7 @@ class TestSpecTablesService:
         
         # 从MatrixService获取当前数据
         from src.features.matrix.service.matrix_service import MatrixService
-        matrix_service = MatrixService()
+        matrix_service = MatrixService.shared()
         
         # 获取表头行
         header_row = matrix_service.data_model.headers if hasattr(matrix_service.data_model, 'headers') else []

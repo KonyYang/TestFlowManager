@@ -27,7 +27,7 @@ class LTRBaseService:
     def __init__(self, data_model: LTRViewerData = None):
         """初始化LTR基础服务"""
         self.data_model = data_model
-        self.ltr_file_path = config_manager.get("paths.ltr_file")
+        self.ltr_file_path = config_manager.get_path("ltr_file")
 
     def open_ltr_file(self, with_password: bool = False):
         """
@@ -40,7 +40,7 @@ class LTRBaseService:
             工作簿对象，如果打开失败则返回None
         """
         try:
-            ltr_file_path = config_manager.get("paths.ltr_file")
+            ltr_file_path = config_manager.get_path("ltr_file")
 
             if not ltr_file_path:
                 logger.error("LTR文件路径未配置")
@@ -66,7 +66,7 @@ class LTRBaseService:
             logger.debug(f"准备打开 LTR 文件：{ltr_file_path}")
             
             if with_password:
-                ltr_password = config_manager.get("passwords.ltr_password")
+                ltr_password = config_manager.get_password("ltr_password")
                 print(f"[DEBUG] Password from config: {ltr_password}")
                 workbook = open_excel_file(ltr_file_path, read_only=False, password=ltr_password)
                 mode = "读写模式"
@@ -439,7 +439,7 @@ class LTRBaseService:
 
             # 如果project_leader为空，使用配置中的默认值
             if not modified_data['project_leader']:
-                modified_data['project_leader'] = config_manager.get("defaults.project_leader", "")
+                modified_data['project_leader'] = config_manager.get_default("project_leader", "")
                 
             # 字段名称映射
             field_names = [

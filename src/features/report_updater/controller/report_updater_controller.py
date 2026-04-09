@@ -6,6 +6,7 @@ import os
 from typing import Optional, List, Dict
 from PyQt5.QtWidgets import QWidget, QMessageBox, QFileDialog, QDialog
 from src.core.logger import logger
+from src.core.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext, get_current_project_context
 from src.features.report_updater.model.report_updater_data import ReportUpdaterData
 from src.features.report_updater.view.report_updater_dialog import ReportUpdaterDialog
@@ -25,9 +26,10 @@ class ReportUpdaterController:
         self.parent = parent
         self.data_model = ReportUpdaterData()
         self.project_context = get_current_project_context()
-        current_project = self.project_context.project_path if self.project_context else None
-        self.service = ReportUpdaterService(project_context=self.project_context, project_path=current_project)
-        self.current_project_path = current_project
+        self.service = ReportUpdaterService(project_context=self.project_context)
+        self.current_project_path = None
+        self.data_model.set_project_context(self.project_context)
+        self.current_project_path = self.project_context.project_path if self.project_context else None
         self.view: Optional[ReportUpdaterDialog] = None
         logger.info("ReportUpdaterController initialized")
     
@@ -43,18 +45,17 @@ class ReportUpdaterController:
 
     def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
         self.project_context = project_context
+        self.service.set_project_context(project_context)
+        self.data_model.set_project_context(project_context)
 
         if project_context and os.path.exists(project_context.project_path):
             self.current_project_path = project_context.project_path
-            self.data_model.set_project_path(project_context.project_path)
-            self.service = ReportUpdaterService(project_context=project_context)
             logger.info(f"Project context set to: {project_context.project_path}")
         else:
             self.current_project_path = None
-            self.data_model.is_project_loaded = False
-            self.data_model.config.base_directory = "D:\\OutFile"
-            self.service = ReportUpdaterService()
-            logger.info("No project context loaded, using default path: D:\\OutFile")
+            fallback_dir = self.data_model.config.base_directory
+            self.data_model.config.base_directory = fallback_dir
+            logger.info(f"No project context loaded, using default path: {fallback_dir}")
     
     def show_report_updater_dialog(self) -> bool:
         """
@@ -148,7 +149,7 @@ class ReportUpdaterController:
             start_directory = self.data_model.get_current_directory()
             
             if not os.path.exists(start_directory):
-                start_directory = "D:\\OutFile"
+                start_directory = self.data_model.config.base_directory
                 if not os.path.exists(start_directory):
                     start_directory = os.path.expanduser("~")
             

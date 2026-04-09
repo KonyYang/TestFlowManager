@@ -16,51 +16,59 @@ import win32com.client as win32
 import win32com.client.gencache as gencache
 from src.core.logger import logger
 from src.core.config_manager import config_manager
+from src.core.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext, get_current_project_context
+from src.core.project_document_context import ProjectDocumentContext
 
 
 class EquipmentConfigManager:
     """设备更新配置管理器"""
     
-    def __init__(self):
+    def __init__(self, project_context: Optional[ProjectContext] = None):
+        self.project_context = project_context
         self.config = self._load_config()
+
+    def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
+        self.project_context = project_context
+        self.config = self._load_config()
+
+    def get_project_path(self) -> Optional[str]:
+        return self.project_context.project_path if self.project_context else None
+
+    def resolve_source_doc_path(self) -> str:
+        project_path = self.get_project_path()
+        if project_path and os.path.exists(project_path):
+            return os.path.join(project_path, "EquipmentID.docx")
+        return self.config["equipment_data_sources"]["source_doc_fallback_path"]
+
+    def resolve_default_output_dir(self) -> str:
+        project_path = self.get_project_path()
+        if project_path and os.path.exists(project_path):
+            document_context = ProjectDocumentContext.from_project_context(self.project_context)
+            return (
+                document_context.get_project_workspace_dir(create=False)
+                or project_path
+            )
+        return self.config["equipment_data_sources"]["default_output_fallback_dir"]
     
     def _load_config(self):
-        """加载设备更新配置"""
-        # 从INI配置文件中读取设备数据源配置
-        excel_file_path = config_manager.get("equipment_data_sources.excel_file_path", 
+        """加载设备更新配置。source/output 路径只表示无项目态兜底。"""
+        excel_file_path = config_manager.get_equipment_data_source("excel_file_path", 
             "D:\\Source\\FCI Dongguan product test laboratory equipment list for report- Huan Revised.xls")
-        default_source_doc_path = config_manager.get("equipment_data_sources.source_doc_path", 
-            "D:\\OutFile\\EquipmentID.docx")
-        default_output_path = config_manager.get("equipment_data_sources.default_output_path", 
-            "D:\\OutFile\\")
-        
-        # 检查当前是否有项目打开，如果有则在项目目录下查找EquipmentID.docx
-        # 优先使用实例变量中存储的项目路径
-        if hasattr(self, 'project_path') and self.project_path and os.path.exists(self.project_path):
-            # 在项目目录下查找EquipmentID.docx
-            project_equipment_doc_path = os.path.join(self.project_path, "EquipmentID.docx")
-            if os.path.exists(project_equipment_doc_path):
-                source_doc_path = project_equipment_doc_path
-            else:
-                # 如果项目目录下没有EquipmentID.docx，弹出提醒信息并退出
-                from PyQt5.QtWidgets import QMessageBox
-                msg_box = QMessageBox()
-                msg_box.setIcon(QMessageBox.Warning)
-                msg_box.setWindowTitle("文件未找到")
-                msg_box.setText("当前项目路径下没有EquipmentID.docx")
-                msg_box.exec_()
-                # 抛出异常以中断配置加载
-                raise FileNotFoundError(f"项目目录下未找到EquipmentID.docx: {project_equipment_doc_path}")
-        else:
-            # 没有项目打开时，使用默认路径
-            source_doc_path = default_source_doc_path
+        default_source_doc_fallback_path = config_manager.get_equipment_data_source(
+            "source_doc_path",
+            OutputPathResolver.build_default_output_path("EquipmentID.docx"),
+        )
+        default_output_fallback_dir = config_manager.get_equipment_data_source(
+            "default_output_path",
+            OutputPathResolver.get_default_output_dir(),
+        )
         
         return {
             "equipment_data_sources": {
                 "excel_file_path": excel_file_path,
-                "source_doc_path": source_doc_path,
-                "default_output_path": default_output_path
+                "source_doc_fallback_path": default_source_doc_fallback_path,
+                "default_output_fallback_dir": default_output_fallback_dir,
             },
             "equipment_table_settings": {
                 "section_keyword": "EQUIPMENTS",
@@ -93,14 +101,18 @@ class ReportUpdaterService:
         self.project_context = project_context or get_current_project_context()
         if self.project_context is None and project_path:
             self.project_context = ProjectContext.from_project_path(project_path)
-        self.config_manager = EquipmentConfigManager()
-        # 优先使用上下文中的项目路径，兼容旧 project_path 入口
-        if self.project_context:
-            self.config_manager.project_path = self.project_context.project_path
-        elif project_path:
-            self.config_manager.project_path = project_path
+        self.config_manager = EquipmentConfigManager(self.project_context)
         self.config = self.config_manager.get_config()
         logger.info("ReportUpdaterService initialized")
+
+    def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
+        self.project_context = project_context
+        self.config_manager.set_project_context(project_context)
+        self.config = self.config_manager.get_config()
+
+    def _get_project_base_directory(self) -> Optional[str]:
+        document_context = ProjectDocumentContext.from_project_context(self.project_context)
+        return document_context.get_project_workspace_dir(create=False)
     
     def update_equipment_list(self, report_path: str, equipment_data: List[Dict[str, Any]] = None) -> bool:
         """
@@ -283,12 +295,7 @@ class ReportUpdaterService:
             excel_file_path = self.config["equipment_data_sources"]["excel_file_path"]
             
             # 根据项目状态动态确定源文档路径
-            if hasattr(self.config_manager, 'project_path') and self.config_manager.project_path:
-                # 如果有项目打开，使用项目目录下的EquipmentID.docx
-                source_doc_path = os.path.join(self.config_manager.project_path, "EquipmentID.docx")
-            else:
-                # 如果没有项目打开，使用默认路径
-                source_doc_path = self.config["equipment_data_sources"]["source_doc_path"]
+            source_doc_path = self.config_manager.resolve_source_doc_path()
             # section_keyword 不再使用，直接使用 "EQUIPMENTS" 进行匹配
 
             # 确保路径使用正确的反斜杠格式
@@ -304,7 +311,7 @@ class ReportUpdaterService:
                 logger.error(f"Excel file does not exist: {excel_file_path}")
                 # 提供详细的错误信息，包括配置来源
                 import sys
-                config_source = "生产环境配置(D:\\TestFlowManager\\config\\paths.ini)" if getattr(sys, 'frozen', False) else "开发环境配置(src/app/config/paths.ini)"
+                config_source = config_manager.describe_config_source()
                 error_details = [
                     f"配置来源: {config_source}",
                     f"Excel文件路径: {excel_file_path}",
@@ -331,7 +338,8 @@ class ReportUpdaterService:
                 logger.error(f"Source document does not exist: {source_doc_path}")
                 # 检查是否在项目目录下查找，以确定错误信息的类型
                 project_dir = os.path.dirname(source_doc_path)
-                if hasattr(self.config_manager, 'project_path') and self.config_manager.project_path and project_dir == self.config_manager.project_path:
+                project_path = self.config_manager.get_project_path()
+                if project_path and project_dir == project_path:
                     # 在项目目录下查找但未找到，显示项目相关错误信息
                     error_message = "项目文件夹下没有找到EquipmentID.docx"
                 else:
@@ -340,12 +348,12 @@ class ReportUpdaterService:
                 
                 # 提供详细的错误信息
                 import sys
-                config_source = "生产环境配置(D:\\TestFlowManager\\config\\paths.ini)" if getattr(sys, 'frozen', False) else "开发环境配置(src/app/config/paths.ini)"
+                config_source = config_manager.describe_config_source()
                 error_details = [
                     f"错误类型: {error_message}",
                     f"配置来源: {config_source}",
                     f"查找路径: {source_doc_path}",
-                    f"项目路径: {getattr(self.config_manager, 'project_path', '无')}",
+                    f"项目路径: {project_path or '无'}",
                     f"当前工作目录: {os.getcwd()}"
                 ]
                 
@@ -361,7 +369,7 @@ class ReportUpdaterService:
                     f"- 配置文件实际路径: {self._get_actual_config_path()}\n"
                     f"- 源文档路径: {source_doc_path}\n"
                     f"- 文件是否存在: {os.path.exists(source_doc_path)}\n"
-                    f"- 项目路径设置: {getattr(self.config_manager, 'project_path', '未设置')}\n"
+                    f"- 项目路径设置: {project_path or '未设置'}\n"
                     f"- 运行模式: {'可执行文件模式' if getattr(sys, 'frozen', False) else '开发模式'}"
                 )
                 msg_box.exec_()
@@ -880,20 +888,7 @@ class ReportUpdaterService:
     def _get_actual_config_path(self) -> str:
         """获取实际使用的配置文件路径"""
         try:
-            from src.core.config_manager import config_manager
-            # 通过反射获取实际的配置文件路径
-            import sys
-            if getattr(sys, 'frozen', False):
-                # 可执行文件模式
-                production_path = os.path.join("D:", "TestFlowManager", "config", "paths.ini")
-                if os.path.exists(production_path):
-                    return production_path
-                else:
-                    executable_dir = os.path.dirname(sys.executable)
-                    return os.path.join(executable_dir, "config", "paths.ini")
-            else:
-                # 开发模式
-                return os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "app", "config", "paths.ini")
+            return config_manager.get_paths_config_path()
         except Exception as e:
             return f"无法确定配置路径: {e}"
     

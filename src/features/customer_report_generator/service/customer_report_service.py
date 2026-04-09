@@ -4,9 +4,10 @@
 """
 
 import os
-from datetime import datetime
-from pathlib import Path
+from typing import Optional
+
 from src.core.logger import logger
+from src.core.project_context import ProjectContext
 from src.utils.word_utils import get_shared_word_app
 from .utils import HeaderProcessor, ContentCopier, FormatProcessor, DocumentUtils
 
@@ -151,7 +152,12 @@ class CustomerReportService:
         self.source_doc = None
         self.temp_template_path = None
 
-    def generate_customer_report(self, parent_window=None, project_path=None):
+    def generate_customer_report(
+        self,
+        parent_window=None,
+        project_path=None,
+        project_context: Optional[ProjectContext] = None,
+    ):
         """
         生成客户报告主函数
         
@@ -164,6 +170,8 @@ class CustomerReportService:
         """
         try:
             logger.info("开始生成客户报告")
+            if project_context and not project_path:
+                project_path = project_context.project_path
             
             # 初始化Word应用程序
             self._initialize_word_app()

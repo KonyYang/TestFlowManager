@@ -48,7 +48,8 @@ class CustomerReportController:
             # 调用服务生成客户报告
             success, result = self.service.generate_customer_report(
                 parent_window=self.parent_window,
-                project_path=project_path
+                project_path=project_path,
+                project_context=project_context,
             )
             
             if success:

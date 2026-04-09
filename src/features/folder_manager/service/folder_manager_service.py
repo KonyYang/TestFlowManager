@@ -227,9 +227,9 @@ class FolderManagerService:
             return None
 
         # 获取路径配置，使用项目中定义的配置键
-        template_dir = config_manager.get("paths.template_dir", r"D:\TestFlowManager\Template")
-        project_base_dir = config_manager.get("paths.default_project_path", r"D:\TestFlowManager\Projects")
-        backup_path = config_manager.get("paths.backup_path", r"D:\TestFlowManager\Backup")
+        template_dir = config_manager.get_template_dir()
+        project_base_dir = config_manager.get_default_project_dir()
+        backup_path = config_manager.get_backup_dir()
 
         target_folder = os.path.join(project_base_dir, dl_number)
         source_folder = os.path.join(template_dir, "DL-XXXX-YY-ZZZ")
@@ -298,7 +298,7 @@ class FolderManagerService:
 
         # Step 5: 初始化 Excel 表格
         # 获取默认的project_leader
-        default_project_leader = config_manager.get("defaults.project_leader", "")
+        default_project_leader = config_manager.get_default("project_leader", "")
         # 构建带project_leader的文件名（仅用于客户反馈表）
         fee_filename = f"{os.path.basename(new_subfolder_name)} Form for Testing Fee Evaluation.xls"
         if default_project_leader:

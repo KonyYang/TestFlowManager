@@ -83,7 +83,7 @@ class LTRNumberGenerator:
     def _open_ltr_file(self):
         """打开LTR文件"""
         try:
-            ltr_file_path = config_manager.get("paths.ltr_file")
+            ltr_file_path = config_manager.get_path("ltr_file")
             print(f"[DEBUG] 获取LTR文件路径: {ltr_file_path}")
             if not ltr_file_path or not os.path.exists(ltr_file_path):
                 # 检查路径是否为相对路径

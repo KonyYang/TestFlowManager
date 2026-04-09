@@ -207,7 +207,7 @@ class EmailExtractorService:
         """
         try:
             # 获取配置的临时目录路径
-            temp_base_dir = config_manager.get("paths.temp_dir", r"D:\TestFlowManager\Temp")
+            temp_base_dir = config_manager.get_temp_dir()
             
             # 确保临时目录存在
             if not os.path.exists(temp_base_dir):
@@ -300,7 +300,7 @@ class EmailExtractorService:
         """
         try:
             # 获取配置的临时目录路径
-            temp_base_dir = config_manager.get("paths.temp_dir", r"D:\TestFlowManager\Temp")
+            temp_base_dir = config_manager.get_temp_dir()
             logger.info(f"[EmailExtractorService] 配置的临时目录路径: {temp_base_dir}")
             logger.info(f"[EmailExtractorService] 系统临时目录: {tempfile.gettempdir()}")
             

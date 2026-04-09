@@ -6,17 +6,18 @@ import os
 import json
 from typing import List, Optional
 from PyQt5.QtWidgets import QWidget, QMessageBox, QDialog, QFileDialog
-from PyQt5.QtCore import QTimer
 from src.core.logger import logger
 from src.core.event_dispatcher import event_dispatcher
+from src.core.project_session_coordinator import ProjectSessionCoordinator
+from src.core.project_session_service import project_session_service
 from src.features.ltr_manager.controller.ltr_editor_controller import LTREditorController
 from src.features.main_window.model.main_window_data import MainWindowData
+from src.features.main_window.service.project_open_service import ProjectOpenService
 from src.features.main_window.service.main_window_service import MainWindowService
 from src.features.ltr_manager.controller.ltr_viewer_controller import LTRViewerController
 from src.features.main_window.view.dialogs.dl_input_dialog import DLInputDialog
-from src.features.project_creator.controller import ProjectCreatorController
-# 添加状态管理器
-from src.core.state_manager import state_manager
+from src.features.project_creator.controller.project_creator_controller import ProjectCreatorController
+# 添加项目上下文
 from src.core.project_context import ProjectContext
 # 添加Matrix相关导入
 from src.features.matrix.controller.matrix_project_controller import MatrixProjectController
@@ -38,6 +39,7 @@ class MainWindowController:
         self.view = view
         self.data_model = MainWindowData()
         self.service = MainWindowService(self.data_model)
+        self.project_open_service = ProjectOpenService()
 
         # 初始化状态
         self.service.update_status("就绪")
@@ -53,6 +55,11 @@ class MainWindowController:
         
         # 初始化当前项目路径
         self._project_context: Optional[ProjectContext] = None
+        self.project_session_coordinator = ProjectSessionCoordinator(
+            view,
+            matrix_project_controller=self.matrix_project_controller,
+            status_updater=self.service.update_status,
+        )
 
         # 订阅事件
         event_dispatcher.subscribe("ltr.processing.started", self._on_ltr_processing_started)
@@ -117,7 +124,7 @@ class MainWindowController:
             if self._matches_project_context(project_path, dl_number):
                 return
             self._apply_project_context(
-                project_context or self._build_project_context(project_path, dl_number),
+                project_context,
                 trigger_matrix_auto_import=True,
                 status_message=f"当前项目: {dl_number or os.path.basename(project_path)}",
                 log_message=f"Project opened successfully: {project_path} with DL number: {dl_number}",
@@ -125,33 +132,20 @@ class MainWindowController:
             return
 
     def _on_state_changed(self, data):
-        """处理状态变更事件"""
+        """处理状态变更事件。
+
+        项目打开主流程统一由 `project.opened` 事件驱动。
+        这里只保留通用状态更新和清理动作，避免重复编排项目打开副作用。
+        """
         key = data.get("key")
         new_value = data.get("new_value")
 
-        # 根据不同的状态键进行相应处理
-        if key == "current_project":
-            if new_value:
-                existing_dl_number = self.project_context.dl_number if self.project_context else None
-                if self._matches_project_context(new_value, existing_dl_number):
-                    return
-                self._apply_project_context(
-                    self._build_project_context(new_value, existing_dl_number),
-                    trigger_matrix_auto_import=True,
-                    status_message=f"当前项目: {existing_dl_number or new_value}",
-                )
-            else:
+        if key == "current_project_context":
+            if not isinstance(new_value, ProjectContext):
                 self._project_context = None
             return
-            self.service.update_status(f"当前项目: {new_value}")
-            # 更新窗口标题显示项目信息
-            if new_value:
-                project_name = os.path.basename(new_value) if new_value else '无'
-                self.view.setWindowTitle(f"TestFlow Manager - 项目: {project_name}")
-                
-            # 触发Matrix自动导入功能
-            QTimer.singleShot(0, self._trigger_matrix_auto_import)
-        elif key == "application_status":
+
+        if key == "application_status":
             self.service.update_status(new_value)
 
     @property
@@ -196,67 +190,12 @@ class MainWindowController:
         log_message: Optional[str] = None,
     ) -> None:
         self._project_context = project_context
-
-        project_label = project_context.dl_number or os.path.basename(project_context.project_path)
-
-        if status_message:
-            self.service.update_status(status_message)
-
-        self.view.setWindowTitle(f"TestFlow Manager - 项目: {project_label}")
-
-        if hasattr(self.view, "update_dl_number_display"):
-            self.view.update_dl_number_display(project_context.dl_number)
-
-        if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
-            self.matrix_project_controller.matrix_controller.set_project_context(project_context)
-            if project_context.dl_number:
-                self.matrix_project_controller.matrix_controller.set_ltr_number(project_context.dl_number)
-                logger.debug(f"Set LTR number {project_context.dl_number} to Matrix controller")
-
-        if hasattr(self.view, "set_matrix_project_context"):
-            self.view.set_matrix_project_context(project_context)
-
-        if hasattr(self.view, "report_updater_controller"):
-            self.view.report_updater_controller.set_project_context(project_context)
-
-        if trigger_matrix_auto_import:
-            QTimer.singleShot(0, self._trigger_matrix_auto_import)
-
-        if log_message:
-            logger.info(log_message)
-
-    def _trigger_matrix_auto_import(self):
-        """触发Matrix编辑器自动导入项目中的matrix.xlsx文件并更新显示"""
-        try:
-            if hasattr(self.view, "auto_import_from_project") and self.view.has_matrix_workspace():
-                self.view.auto_import_from_project()
-                logger.debug("Triggered auto import of matrix.xlsx in MainWindow")
-                
-                # 延迟更新表格显示，确保数据已加载
-                from PyQt5.QtCore import QTimer
-                QTimer.singleShot(50, self._update_matrix_display)
-                
-                # 切换回 Matrix 页面（索引为 0）
-                QTimer.singleShot(100, self._switch_to_matrix_page)
-        except Exception as e:
-            logger.error(f"Failed to trigger matrix auto import: {e}")
-    
-    def _update_matrix_display(self):
-        """更新 Matrix 表格显示"""
-        try:
-            if hasattr(self.view, "refresh_table") and self.view.has_matrix_workspace():
-                self.view.refresh_table()
-                logger.debug("Successfully updated Matrix table display")
-        except Exception as e:
-            logger.error(f"Failed to update Matrix display: {e}")
-    
-    def _switch_to_matrix_page(self):
-        """切换到 Matrix 编辑器页面"""
-        try:
-            if hasattr(self.view, "activate_matrix_workspace") and self.view.activate_matrix_workspace():
-                logger.debug("Switched to Matrix editor workspace")
-        except Exception as e:
-            logger.error(f"Failed to switch to Matrix page: {e}")
+        self.project_session_coordinator.apply_project_context(
+            project_context,
+            status_message=status_message,
+            log_message=log_message,
+            trigger_matrix_auto_import=trigger_matrix_auto_import,
+        )
 
     def initialize(self) -> bool:
         """
@@ -420,13 +359,7 @@ class MainWindowController:
         try:
             logger.debug("Handling open project request")
 
-            # 获取默认项目路径
-            from src.core.config_manager import config_manager
-            default_project_path = config_manager.get("paths.default_project_path", "")
-            
-            # 确保路径存在，如果不存在则使用空字符串（系统默认路径）
-            if not os.path.exists(default_project_path):
-                default_project_path = ""
+            default_project_path = self.project_open_service.resolve_default_project_path()
 
             # 显示文件夹选择对话框
             project_path = QFileDialog.getExistingDirectory(
@@ -439,173 +372,13 @@ class MainWindowController:
             if not project_path:  # 用户取消了选择
                 return False
 
-            # 检查项目文件夹是否包含必要的文件
-            json_files = [f for f in os.listdir(project_path) if f.endswith('.json')]
-            
-            # 如果没有找到JSON文件，则创建一个新的空白JSON文件
-            if not json_files:
-                logger.info(f"在项目路径 {project_path} 中未找到JSON文件，开始创建新的application_data.json文件")
-                # 查找项目文件夹名称作为DL编号
-                dl_number = os.path.basename(project_path)
-                logger.info(f"使用文件夹名称作为DL编号: {dl_number}")
-                
-                # 创建空白的application_data.json文件
-                json_file_path = os.path.join(project_path, "application_data.json")
-                
-                # 尝试从"Submitted Material"文件夹中查找包含"test request"关键字的.docx文件
-                # 首先查找以DL编号开头的子文件夹
-                dl_subfolder_path = None
-                # 对目录列表进行排序，确保每次遍历顺序一致
-                items = sorted(os.listdir(project_path))
-                for item in items:
-                    item_path = os.path.join(project_path, item)
-                    if os.path.isdir(item_path) and item.startswith(dl_number):
-                        dl_subfolder_path = item_path
-                        break
-                
-                # 如果找到了以DL编号开头的子文件夹，则在其中查找Submitted Material文件夹
-                submitted_material_path = None
-                if dl_subfolder_path:
-                    submitted_material_path = os.path.join(dl_subfolder_path, "Submitted Material")
-                    # 标准化路径分隔符
-                    submitted_material_path = os.path.normpath(submitted_material_path)
-                
-                # 注意：即使没有找到submitted_material_path，我们也继续执行后续逻辑
-                # 不再回退到项目根目录查找
-                
-                test_request_data = {}
-                
-                if submitted_material_path:
-                    logger.info(f"检查Submitted Material文件夹: {submitted_material_path}")
-                    if os.path.exists(submitted_material_path):
-                        logger.info(f"Submitted Material文件夹存在，开始搜索包含'test request'关键字的.docx文件")
-                        # 查找包含"test request"关键字的.docx文件
-                        # 改进搜索逻辑以匹配更多格式，如"E-3718_H_Laboratory_Test_Request_CPHD 10MM(.docx"
-                        docx_files = []
-                        for f in os.listdir(submitted_material_path):
-                            if f.lower().endswith('.docx'):
-                                # 检查文件名是否包含测试请求相关关键词
-                                fname_lower = f.lower()
-                                if 'test' in fname_lower and ('request' in fname_lower or 'test' in fname_lower):
-                                    docx_files.append(f)
-                                elif 'e-3718' in fname_lower and 'request' in fname_lower:
-                                    docx_files.append(f)
-                
-                        if docx_files:
-                            logger.info(f"找到 {len(docx_files)} 个匹配的.docx文件: {docx_files}")
-                            # 从第一个匹配的文件中提取信息
-                            # 使用 os.path.join 确保路径格式正确
-                            docx_file_path = os.path.join(submitted_material_path, docx_files[0])
-                            # 标准化路径分隔符
-                            docx_file_path = os.path.normpath(docx_file_path)
-                            logger.info(f"从文件中提取信息: {docx_file_path}")
-                            test_request_data = self._extract_info_from_test_request(docx_file_path)
-                            logger.info(f"提取到的数据: {test_request_data}")
-                        else:
-                            logger.info("在Submitted Material文件夹中未找到包含'test request'关键字的.docx文件")
-                    else:
-                        logger.info(f"Submitted Material文件夹不存在: {submitted_material_path}")
-                else:
-                    logger.info(f"未找到以DL编号'{dl_number}'开头的子文件夹，跳过查找Submitted Material文件夹并继续后续逻辑")
-                
-                # 加载完整的字段配置
-                from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
-                config_loader = LTRFieldConfigLoader()
-                field_mapping = config_loader.load_application_field_mapping()
-                
-                # 创建完整字段的数据结构
-                application_data = {}
-                
-                # 为每个字段设置默认值或从提取的数据中获取值
-                for field in field_mapping:
-                    key = field['key']
-                    # 特殊处理DL字段
-                    if key == "DL":
-                        application_data[key] = dl_number
-                    # 从提取的数据中获取值，如果没有则设为空字符串
-                    elif key in test_request_data:
-                        application_data[key] = test_request_data[key]
-                    else:
-                        # 默认值处理
-                        if key == "project_leader":
-                            # 从配置中获取默认的project_leader
-                            from src.core.config_manager import config_manager
-                            application_data[key] = config_manager.get("defaults.project_leader", "")
-                        elif key == "sub_contract":
-                            application_data[key] = "Yes"
-                        elif key == "test_result":
-                            application_data[key] = "In progress"
-                        elif key == "test_type":
-                            application_data[key] = "Partial Qualification"
-                        elif key == "lab_performing_the_tests":
-                            application_data[key] = "Dongguan"
-                        elif key == "condition_of_samples_when_received":
-                            application_data[key] = "Acceptable"
-                        elif key == "project_type":
-                            application_data[key] = "NPD"
-                        else:
-                            # 其他字段默认为空字符串
-                            application_data[key] = ""
-                
-                # 设置状态为new
-                application_data["status"] = "new"
-                application_data["error"] = ""
-                
-                # 如果有选中的文件路径，也加入进去
-                if 'selected_filename' in test_request_data:
-                    application_data['selected_filename'] = test_request_data['selected_filename']
-                else:
-                    application_data['selected_filename'] = ""
-                
-                # 确保file_path字段存在
-                application_data['file_path'] = test_request_data.get('file_path', '')
-                
-                # 保存空白JSON文件
-                try:
-                    with open(json_file_path, 'w', encoding='utf-8') as f:
-                        json.dump(application_data, f, ensure_ascii=False, indent=4)
-                    logger.info(f"Created new application_data.json file: {json_file_path}")
-                except Exception as e:
-                    logger.error(f"Failed to create application_data.json: {e}")
-                    QMessageBox.warning(
-                        self.view,
-                        "创建文件失败",
-                        f"无法创建项目数据文件: {str(e)}"
-                    )
-                    return False
-                
-                # 弹出更新基本信息对话框（使用专门的对话框）
+            project_result = self.project_open_service.prepare_project(project_path)
+            if project_result.created_application_data:
                 logger.info("显示基本信息对话框供用户确认和编辑")
-                self._show_basic_info_dialog(application_data, json_file_path)
-                
-                # 重新加载JSON文件列表
-                json_files = ["application_data.json"]
+                self._show_basic_info_dialog(project_result.project_data, project_result.json_file_path)
+                project_result = self.project_open_service.prepare_project(project_path)
 
-            # 读取JSON文件以获取项目信息（特别是DL编号）
-            dl_number = None
-            try:
-                json_file_path = os.path.join(project_path, json_files[0])
-                with open(json_file_path, 'r', encoding='utf-8') as f:
-                    project_data = json.load(f)
-                    # 尝试从项目数据中获取DL编号
-                    dl_number = project_data.get('DL', None)
-                    if not dl_number:
-                        # 如果DL字段不存在，尝试从文件名中提取
-                        dl_number = os.path.basename(project_path)
-            except Exception as e:
-                logger.warning(f"读取项目JSON文件时出错: {e}")
-                # 如果无法读取JSON文件，使用文件夹名称作为DL编号
-                dl_number = os.path.basename(project_path)
-
-            # 保存当前项目路径到状态
-            state_manager.set_state("current_project", project_path)
-            
-            project_context = self._build_project_context(project_path, dl_number)
-            state_manager.set_state("current_project_context", project_context)
-            self._apply_project_context(project_context, status_message=f"已打开项目: {os.path.basename(project_path)}")
-            
-            # 通知其他组件项目已打开
-            event_dispatcher.dispatch("project.opened", project_context.to_event_data())
+            project_session_service.apply_project_context(project_result.project_context)
             logger.info(f"Project opened successfully: {project_path}")
 
             return True
@@ -614,39 +387,6 @@ class MainWindowController:
             self.service.update_status("打开项目失败")
             QMessageBox.critical(self.view, "错误", f"打开项目失败: {str(e)}")
             return False
-
-    def _extract_info_from_test_request(self, docx_file_path: str) -> dict:
-        """
-        从测试申请文档中提取信息
-        
-        Args:
-            docx_file_path: .docx文件路径
-            
-        Returns:
-            提取的信息字典
-        """
-        try:
-            logger.info(f"开始从测试申请文档中提取信息: {docx_file_path}")
-            # 使用现有的LTRApplicationDataExtractor来提取信息
-            # 这样可以复用现有功能并保持代码一致性
-            from src.features.ltr_manager.service.application_processing.data_extractor import LTRApplicationDataExtractor
-            extractor = LTRApplicationDataExtractor()
-            extracted_data = extractor.extract_application_data(docx_file_path)
-            
-            # 检查是否有错误
-            if "error" in extracted_data:
-                logger.error(f"Failed to extract info from test request document: {extracted_data['error']}")
-                return {}
-            
-            # 移除不需要的字段
-            extracted_data.pop('file_path', None)
-            
-            logger.info(f"成功从测试申请文档中提取数据: {extracted_data}")
-            return extracted_data
-            
-        except Exception as e:
-            logger.error(f"Failed to extract info from test request document: {e}")
-            return {}
 
     def _show_basic_info_dialog(self, project_data: dict, json_file_path: str):
         """

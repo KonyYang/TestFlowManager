@@ -7,12 +7,20 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from src.core.config_manager import config_manager
+from src.core.output_paths import OutputPathResolver
+from src.core.project_context import ProjectContext
+from src.core.project_document_context import ProjectDocumentContext
+
 
 @dataclass
 class ReportUpdateConfig:
     """报告更新配置数据类"""
     # 基本配置
-    base_directory: str = "D:\\OutFile"  # 默认基础目录
+    base_directory: str = config_manager.get_equipment_data_source(
+        "default_output_path",
+        OutputPathResolver.get_default_output_dir(),
+    )  # 默认基础目录（无项目态兜底）
     project_directory: Optional[str] = None  # 当前项目目录
     selected_report_path: Optional[str] = None  # 选定的报告路径
     
@@ -39,21 +47,24 @@ class ReportUpdaterData:
         
     def set_project_path(self, project_path: str) -> None:
         """设置当前项目路径"""
-        self.current_project_path = project_path
-        self.config.project_directory = project_path
-        self.is_project_loaded = True
-        
-        # 尝试构建项目相关的报告目录
-        if project_path:
-            # 获取项目文件夹名称作为DL编号
-            dl_number = os.path.basename(project_path)
-            # 查找项目下的子文件夹，以DL编号开头的
-            project_subfolder = os.path.join(project_path, dl_number)
-            if os.path.exists(project_subfolder):
-                self.config.base_directory = project_subfolder
-            else:
-                # 如果没有找到以DL编号命名的子文件夹，使用项目根目录
-                self.config.base_directory = project_path
+        project_context = ProjectContext.from_project_path(project_path) if project_path else None
+        self.set_project_context(project_context)
+
+    def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
+        if project_context and os.path.exists(project_context.project_path):
+            self.current_project_path = project_context.project_path
+            self.config.project_directory = project_context.project_path
+            self.is_project_loaded = True
+
+            document_context = ProjectDocumentContext.from_project_context(project_context)
+            self.config.base_directory = (
+                document_context.get_project_workspace_dir(create=False)
+                or project_context.project_path
+            )
+        else:
+            self.current_project_path = None
+            self.config.project_directory = None
+            self.is_project_loaded = False
     
     def load_available_reports(self) -> List[str]:
         """加载可用的报告文件列表"""

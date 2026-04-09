@@ -21,10 +21,6 @@
         "template_dir": "D:\\TestFlowManager\\Template",
         "default_project_path": "D:\\TestFlowManager\\Projects",
         "backup_path": "D:\\TestFlowManager\\Backup",
-        "ltr_file": "D:\\Source\\Office Auto\\TestDocument\\LTR_number.xls",
         "temp_dir": "D:\\TestFlowManager\\Temp"
-    },
-    "passwords": {
-        "ltr_password": "DGLAB"
     }
 }

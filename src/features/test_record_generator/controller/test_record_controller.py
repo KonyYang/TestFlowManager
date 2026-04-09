@@ -6,10 +6,12 @@ Test Record生成控制器
 
 from src.features.test_record_generator.service.test_record_service import TestRecordService
 from src.core.logger import logger
+from src.core.output_paths import OutputPathResolver
+from src.core.project_context import ProjectContext, get_current_project_context
+from src.core.project_document_context import ProjectDocumentContext
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
 import os
-import re
 
 
 class TestRecordController:
@@ -17,69 +19,56 @@ class TestRecordController:
     Test Record生成控制器
     """
 
-    def __init__(self, matrix_service=None):
+    def __init__(self, matrix_service=None, matrix_controller=None, project_context: ProjectContext = None):
         self.service = TestRecordService()
         self.matrix_service = matrix_service  # 关联的Matrix服务
+        self.matrix_controller = matrix_controller
+        self.project_context = project_context
 
-    def _get_default_output_path(self, dl_number, project_data_file_path):
+    def set_project_context(self, project_context: ProjectContext) -> None:
+        self.project_context = project_context
+
+    def _get_project_context(self) -> ProjectContext:
+        if self.project_context:
+            return self.project_context
+
+        if self.matrix_controller:
+            matrix_project_context = self.matrix_controller.get_project_context()
+            if matrix_project_context:
+                return matrix_project_context
+
+        if self.matrix_service and hasattr(self.matrix_service, "project_context"):
+            matrix_project_context = getattr(self.matrix_service, "project_context", None)
+            if matrix_project_context:
+                return matrix_project_context
+
+        return get_current_project_context()
+
+    def _get_default_output_path(self, document_context: ProjectDocumentContext):
         """
-        根据项目路径和DL编号生成默认输出路径
+        根据项目上下文生成默认输出路径
         
         Args:
-            dl_number: DL编号
-            project_data_file_path: 项目数据文件路径
+            document_context: 文档生成上下文
             
         Returns:
             默认输出路径
         """
         try:
-            # 如果有项目数据文件路径，则基于该项目路径构建输出路径
-            if project_data_file_path and os.path.exists(project_data_file_path):
-                # 获取项目根目录（DL编号所在的文件夹）
-                project_root_dir = os.path.dirname(project_data_file_path)
-                
-                # 查找项目根目录下以DL编号开头的子文件夹
-                dl_subfolder_path = None
-                if os.path.exists(project_root_dir):
-                    # 列出项目根目录中的所有文件夹，并按名称排序确保一致性
-                    items = sorted(os.listdir(project_root_dir))
-                    for item in items:
-                        item_path = os.path.join(project_root_dir, item)
-                        # 检查是否为目录且以DL编号开头
-                        if os.path.isdir(item_path) and item.startswith(dl_number):
-                            dl_subfolder_path = item_path
-                            break
-                
-                # 如果没找到匹配的文件夹，则使用项目根目录
-                if not dl_subfolder_path:
-                    dl_subfolder_path = project_root_dir
-                
-                # 在DL编号文件夹下查找Submitted Material子文件夹
-                submitted_material_path = os.path.join(dl_subfolder_path, "Submitted Material")
-                # 标准化路径分隔符
-                submitted_material_path = os.path.normpath(submitted_material_path)
-                
-                # 检查Submitted Material文件夹是否存在，如果不存在则创建
-                if not os.path.exists(submitted_material_path):
-                    try:
-                        os.makedirs(submitted_material_path)
-                        logger.info(f"创建Submitted Material文件夹: {submitted_material_path}")
-                    except Exception as e:
-                        logger.error(f"创建Submitted Material文件夹失败: {e}")
-                        # 如果创建失败，使用DL编号文件夹作为替代
-                        submitted_material_path = dl_subfolder_path
-                
-                # 在Submitted Material文件夹中生成文件
-                output_filename = f"{dl_number} Test Record.docx"
-                output_path = os.path.join(submitted_material_path, output_filename)
+            output_filename = f"{document_context.dl_number} Test Record.docx"
+            output_path = OutputPathResolver.build_submitted_material_output_path(
+                self._get_project_context(),
+                output_filename,
+                create_dir=True,
+            )
+            if output_path:
                 logger.debug(f"构造的默认输出路径: {output_path}")
-                return os.path.normpath(output_path)  # 标准化路径分隔符
-            
-            # 如果没有项目数据文件路径，则使用默认路径
-            return r"D:\outfile\testrecord.docx"
+                return os.path.normpath(output_path)
+
+            return OutputPathResolver.build_default_output_path("testrecord.docx")
         except Exception as e:
             logger.error(f"生成默认输出路径时出错: {e}")
-            return r"D:\outfile\testrecord.docx"
+            return OutputPathResolver.build_default_output_path("testrecord.docx")
 
     def generate_test_record(self, parent=None):
         """
@@ -92,180 +81,103 @@ class TestRecordController:
             是否成功生成
         """
         try:
+            document_context = ProjectDocumentContext.from_project_context(
+                self._get_project_context()
+            )
+            output_path = self._get_default_output_path(document_context)
+
+            logger.debug(f"默认输出路径: {output_path}")
+
+            default_dir = os.path.dirname(output_path)
+            if not os.path.exists(default_dir):
+                msg_box = QMessageBox(parent)
+                msg_box.setIcon(QMessageBox.Warning)
+                msg_box.setWindowTitle("路径问题")
+                msg_box.setText(
+                    f"无法找到正确的项目文件夹，无法自动保存Test Record文档。\n\n"
+                    f"默认路径: {output_path}\n\n请手动选择保存位置。"
+                )
+                msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+                result = msg_box.exec_()
+
+                if result == QMessageBox.Cancel:
+                    logger.info("用户取消了Test Record生成操作")
+                    return False
+
+                output_path, _ = QFileDialog.getSaveFileName(
+                    parent,
+                    "保存Test Record文档",
+                    f"{document_context.dl_number} Test Record.docx",
+                    "Word文档 (*.docx)"
+                )
+
+                if not output_path:
+                    logger.info("用户未选择保存路径，取消Test Record生成操作")
+                    return False
+
+            output_path = os.path.normpath(output_path)
+            output_dir = os.path.dirname(output_path)
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+
             # 获取Matrix数据
-            if self.matrix_service:
+            if self.matrix_controller:
+                matrix_data = self.matrix_controller.get_matrix_rows()
+                logger.debug(f"获取到Matrix数据，共 {len(matrix_data)} 行")
+                matrix_structure, warnings = self.matrix_controller.create_matrix_data_structure(
+                    self._get_project_context()
+                )
+            elif self.matrix_service:
                 matrix_data = self.matrix_service.data_model.rows
                 logger.debug(f"获取到Matrix数据，共 {len(matrix_data)} 行")
                 
                 # 创建MatrixDataStructure实例来解析数据
                 matrix_structure = MatrixDataStructure()
-                
-                # 尝试获取DL编号和项目数据文件路径
-                dl_number = "DL-UNKNOWN"
-                project_data_file_path = None
-                
-                # 优先从 ProjectContext 获取项目数据文件路径，旧属性仅保留 fallback
-                from src.core.project_context import (
-                    get_current_project_context,
-                    get_current_project_data_file_path,
-                    get_current_project_path,
+
+                document_context = ProjectDocumentContext.from_project_context(
+                    self._get_project_context()
                 )
-                project_data_file_path = get_current_project_data_file_path()
-                if project_data_file_path:
-                    logger.debug(f"从ProjectContext解析到项目数据文件路径: {project_data_file_path}")
-                
-                    # 从项目数据文件中提取DL编号
-                    if os.path.exists(project_data_file_path):
-                        try:
-                            import json
-                            with open(project_data_file_path, 'r', encoding='utf-8') as f:
-                                project_data = json.load(f)
-                                dl_number = project_data.get("DL", dl_number)
-                                logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
-                        except Exception as e:
-                            logger.error(f"读取项目数据文件时出错: {e}")
-                if not project_data_file_path:
-                    # 如果Matrix服务中没有项目数据文件路径，尝试从状态管理器获取
-                    project_context = get_current_project_context()
-                    current_project = project_context.project_path if project_context else get_current_project_path()
-                    logger.debug(f"从状态管理器获取到当前项目路径: {current_project}")
-                    
-                    if current_project and os.path.exists(current_project):
-                        # 在当前项目路径中查找JSON文件
-                        try:
-                            if project_context and project_context.application_data_path and os.path.exists(project_context.application_data_path):
-                                project_data_file_path = project_context.application_data_path
-                            else:
-                                json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
-                                project_data_file_path = os.path.join(current_project, json_files[0]) if json_files else None
-                            if project_data_file_path:
-                                logger.debug(f"在当前项目路径中找到JSON文件: {project_data_file_path}")
-                                
-                                # 从项目数据文件中提取DL编号
-                                if os.path.exists(project_data_file_path):
-                                    try:
-                                        import json
-                                        with open(project_data_file_path, 'r', encoding='utf-8') as f:
-                                            project_data = json.load(f)
-                                            dl_number = project_data.get("DL", dl_number)
-                                            logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
-                                    except Exception as e:
-                                        logger.error(f"读取项目数据文件时出错: {e}")
-                            else:
-                                # 如果当前目录没有找到JSON文件，则在父目录查找
-                                parent_path = os.path.dirname(current_project)
-                                logger.debug(f"在父目录中查找JSON文件: {parent_path}")
-                                
-                                if os.path.exists(parent_path):
-                                    json_files = [f for f in os.listdir(parent_path) if f.endswith('.json')]
-                                    logger.debug(f"在父目录 {parent_path} 中找到的JSON文件: {json_files}")
-                                    
-                                    if json_files:
-                                        # 使用父目录中的JSON文件
-                                        project_data_file_path = os.path.join(parent_path, json_files[0])
-                                        logger.debug(f"构造的项目数据文件路径: {project_data_file_path}")
-                                        
-                                        # 从项目数据文件中提取DL编号
-                                        if os.path.exists(project_data_file_path):
-                                            try:
-                                                import json
-                                                with open(project_data_file_path, 'r', encoding='utf-8') as f:
-                                                    project_data = json.load(f)
-                                                    dl_number = project_data.get("DL", dl_number)
-                                                    logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
-                                            except Exception as e:
-                                                logger.error(f"读取项目数据文件时出错: {e}")
-                        except Exception as e:
-                            logger.error(f"查找项目中的JSON文件时出错: {e}")
-                
-                matrix_structure.dl_number = dl_number
-                matrix_structure.project_data_file_path = project_data_file_path
-                logger.debug(f"设置DL编号: {dl_number}")
-                logger.debug(f"设置项目数据文件路径: {project_data_file_path}")
-                
-                # 根据项目路径和DL编号生成默认输出路径
-                default_output_path = self._get_default_output_path(dl_number, project_data_file_path)
-                logger.debug(f"默认输出路径: {default_output_path}")
-                
-                # 检查默认路径是否有效
-                default_dir = os.path.dirname(default_output_path)
-                if not os.path.exists(default_dir):
-                    # 如果默认路径无效，显示警告并让用户选择路径
-                    msg_box = QMessageBox(parent)
-                    msg_box.setIcon(QMessageBox.Warning)
-                    msg_box.setWindowTitle("路径问题")
-                    msg_box.setText(f"无法找到正确的项目文件夹，无法自动保存Test Record文档。\n\n默认路径: {default_output_path}\n\n请手动选择保存位置。")
-                    msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-                    result = msg_box.exec_()
-                    
-                    if result == QMessageBox.Cancel:
-                        logger.info("用户取消了Test Record生成操作")
-                        return False
-                    
-                    # 让用户选择保存路径
-                    output_path, _ = QFileDialog.getSaveFileName(
-                        parent, 
-                        "保存Test Record文档", 
-                        f"{dl_number} Test Record.docx", 
-                        "Word文档 (*.docx)"
-                    )
-                    
-                    if not output_path:
-                        logger.info("用户未选择保存路径，取消Test Record生成操作")
-                        return False
-                else:
-                    # 使用默认路径
-                    output_path = default_output_path
-                
-                # 标准化路径分隔符
-                output_path = os.path.normpath(output_path)
-                
-                # 确保输出目录存在
-                output_dir = os.path.dirname(output_path)
-                if not os.path.exists(output_dir):
-                    os.makedirs(output_dir)
-                
+                matrix_structure.dl_number = document_context.dl_number
+                matrix_structure.project_data_file_path = document_context.project_data_file_path
+                logger.debug(f"设置DL编号: {document_context.dl_number}")
+                logger.debug(f"设置项目数据文件路径: {document_context.project_data_file_path}")
                 warnings = matrix_structure.parse_matrix_to_structure(matrix_data)
                 
-                # 记录解析结果
-                group_count = len(matrix_structure.group_steps)
-                logger.debug(f"解析完成，共找到 {group_count} 个组别")
-                
-                # 如果有警告信息，显示给用户并阻止继续
-                if warnings:
-                    warning_text = "\n".join(warnings)
-                    logger.warning(f"Matrix数据验证警告:\n{warning_text}")
-                    
-                    # 显示警告对话框，只用一个确认按钮
-                    if parent:
-                        msg_box = QMessageBox(parent)
-                        msg_box.setIcon(QMessageBox.Warning)
-                        msg_box.setWindowTitle("数据验证警告")
-                        msg_box.setText(f"发现以下数据问题：\n\n{warning_text}")
-                        msg_box.setStandardButtons(QMessageBox.Ok)
-                        msg_box.exec_()
-                        
-                        logger.debug("用户已确认警告信息，返回Matrix编辑界面")
-                        return False  # 阻止继续生成Test Record
-                
-                logger.debug("Matrix数据结构已更新")
-                
-                # 调用服务生成文档，传入已解析的数据结构
-                logger.debug("开始调用Test Record服务生成文档")
-                success = self.service.generate_test_record_with_structure(matrix_structure, output_path)
-                
-                if success:
-                    logger.info("Test Record文档生成成功")
-                    # 显示成功消息
-                    if parent:
-                        QMessageBox.information(parent, "成功", f"Test Record文档已成功生成并保存到:\n{output_path}")
-                else:
-                    logger.error("Test Record文档生成失败")
-                    
-                return success
             else:
-                logger.error("Matrix service not available")
+                logger.error("Matrix controller/service not available")
                 return False
+
+            group_count = len(matrix_structure.group_steps)
+            logger.debug(f"解析完成，共找到 {group_count} 个组别")
+
+            if warnings:
+                warning_text = "\n".join(warnings)
+                logger.warning(f"Matrix数据验证警告:\n{warning_text}")
+
+                if parent:
+                    msg_box = QMessageBox(parent)
+                    msg_box.setIcon(QMessageBox.Warning)
+                    msg_box.setWindowTitle("数据验证警告")
+                    msg_box.setText(f"发现以下数据问题：\n\n{warning_text}")
+                    msg_box.setStandardButtons(QMessageBox.Ok)
+                    msg_box.exec_()
+
+                    logger.debug("用户已确认警告信息，返回Matrix编辑界面")
+                    return False
+
+            logger.debug("Matrix数据结构已更新")
+
+            logger.debug("开始调用Test Record服务生成文档")
+            success = self.service.generate_test_record_with_structure(matrix_structure, output_path)
+
+            if success:
+                logger.info("Test Record文档生成成功")
+                if parent:
+                    QMessageBox.information(parent, "成功", f"Test Record文档已成功生成并保存到:\n{output_path}")
+            else:
+                logger.error("Test Record文档生成失败")
+
+            return success
                 
         except Exception as e:
             logger.error(f"Error in test record generation controller: {e}")

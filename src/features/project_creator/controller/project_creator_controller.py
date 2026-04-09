@@ -4,6 +4,9 @@ import os
 from PyQt5.QtWidgets import QDialog, QMessageBox
 from src.core.logger import logger
 from src.features.project_creator.service.project_creator_service import ProjectCreatorService
+from src.features.project_creator.service.project_creation_application_service import (
+    ProjectCreationApplicationService,
+)
 from src.features.project_creator.model.project_creator_data import EmailData, EmailAttachment, ProjectCreationContext
 from src.features.email_extractor.view.email_selector_dialog import EmailSelectorDialog
 from src.features.email_extractor.controller.email_extractor_controller import EmailExtractorController
@@ -13,9 +16,9 @@ from src.features.project_creator.service.ltr_project_integration_service import
 from src.features.matrix.controller.matrix_project_controller import MatrixProjectController
 # 添加事件调度器
 from src.core.event_dispatcher import event_dispatcher
-# 添加状态管理器
-from src.core.state_manager import state_manager
 from src.core.project_context import ProjectContext
+from src.core.project_session_coordinator import ProjectSessionCoordinator
+from src.core.project_session_service import project_session_service
 
 
 class ProjectCreatorController:
@@ -39,6 +42,14 @@ class ProjectCreatorController:
         self.ltr_integration_service = LTRProjectIntegrationService()
         # 添加Matrix项目控制器
         self.matrix_project_controller = MatrixProjectController(parent_view)
+        self.project_creation_service = ProjectCreationApplicationService(
+            self.ltr_integration_service,
+            self.matrix_project_controller,
+        )
+        self.project_session_coordinator = ProjectSessionCoordinator(
+            parent_view,
+            matrix_project_controller=self.matrix_project_controller,
+        )
         # 添加标志以避免重复订阅事件
         self._event_subscribed = False
         # 订阅LTR申请处理完成事件
@@ -442,6 +453,14 @@ class ProjectCreatorController:
 
         if self.parent_view and hasattr(self.parent_view, "set_matrix_project_context"):
             self.parent_view.set_matrix_project_context(project_context)
+
+    def _should_apply_session_side_effects_locally(self) -> bool:
+        """若主窗口主控制器不存在，则由当前控制器兜底编排会话副作用。"""
+        return not (
+            self.parent_view
+            and hasattr(self.parent_view, "controller")
+            and self.parent_view.controller is not None
+        )
         
     def _on_ltr_application_processed(self, data):
         """
@@ -486,99 +505,23 @@ class ProjectCreatorController:
         try:
             logger.info(f"Updating Matrix editor with LTR number: {dl_number}")
             logger.debug(f"Received dl_number: {dl_number}, project_path: {project_path}")
-            
-            # 如果dl_number为空，尝试从application_data.json文件中读取
-            if not dl_number and project_path:
-                logger.debug("dl_number is empty, trying to read from application_data.json")
-                try:
-                    # 构造application_data.json文件路径
-                    json_file_path = os.path.join(project_path, "application_data.json")
-                    if os.path.exists(json_file_path):
-                        import json
-                        with open(json_file_path, 'r', encoding='utf-8') as f:
-                            project_data = json.load(f)
-                            dl_number = project_data.get("DL", "")
-                            logger.debug(f"Read dl_number from application_data.json: {dl_number}")
-                    else:
-                        logger.warning(f"application_data.json not found at: {json_file_path}")
-                except Exception as e:
-                    logger.error(f"Error reading dl_number from application_data.json: {e}")
-            
-            # 设置LTR编号到Matrix控制器
-            if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
-                self.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
-                logger.debug(f"Set LTR number {dl_number} to Matrix controller")
-                
-            # 如果提供了项目路径，则设置项目路径
-            if project_path and dl_number:
-                logger.debug(f"Project path provided: {project_path}")
-                # 设置项目路径到状态管理器
-                state_manager.set_state("current_project", project_path)
-                project_context = ProjectContext.from_project_path(project_path, dl_number)
-                state_manager.set_state("current_project_context", project_context)
-                
-                # 通知其他组件项目已打开
-                event_dispatcher.dispatch("project.opened", project_context.to_event_data())
-                
-                # 触发Matrix自动导入功能（延迟执行，确保UI已就绪）
-                from PyQt5.QtCore import QTimer
-                if self.parent_view and hasattr(self.parent_view, 'auto_import_from_project'):
-                    QTimer.singleShot(100, lambda: self._trigger_matrix_update_after_project_creation(project_path))
-                
-                # 更新主窗口标题显示项目信息
-                if self.parent_view:
-                    logger.debug(f"Setting main window title in _open_matrix_editor_with_ltr_number to: TestFlow Manager - 项目: {dl_number}")
-                    self.parent_view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
-                    logger.debug(f"Main window title after setting in _open_matrix_editor_with_ltr_number: {self.parent_view.windowTitle()}")
-                    
-                    # 更新顶栏DL编号显示
-                    if hasattr(self.parent_view, 'update_dl_number_display'):
-                        self.parent_view.update_dl_number_display(dl_number)
-                
-                # 根据DL编号构造项目根目录路径
-                from src.core.config_manager import config_manager
-                default_project_path = config_manager.get("paths.default_project_path", "D:\\TestFlowManager\\Projects")
-                project_root_path = os.path.join(default_project_path, dl_number)
-                logger.info(f"Constructed project root path: {project_root_path}")
-                
-                # 检查构造的路径是否存在JSON文件
-                json_files = []
-                try:
-                    json_files = [f for f in os.listdir(project_root_path) if f.endswith('.json')]
-                    logger.info(f"Found JSON files in constructed path: {json_files}")
-                except Exception as e:
-                    logger.error(f"Error listing directory {project_root_path}: {e}")
-                
-                if json_files:
-                    # 通过LTR集成服务加载项目数据
-                    loaded_data = self.ltr_integration_service.load_ltr_project(project_root_path)
-                    logger.info(f"Loaded LTR project data result: {loaded_data is not None}")
-                    logger.info(f"Project data file path from LTR service: {self.ltr_integration_service.project_data_file_path}")
-                else:
-                    # 直接使用传入的project_path加载项目数据
-                    logger.info(f"No JSON files found in constructed path, using provided project_path: {project_path}")
-                    loaded_data = self.ltr_integration_service.load_ltr_project(project_path)
-                    logger.info(f"Loaded LTR project data result: {loaded_data is not None}")
-                    logger.info(f"Project data file path from LTR service: {self.ltr_integration_service.project_data_file_path}")
-                
-                # 只在LTR集成服务未设置或需要更新时才设置
-                if self.matrix_project_controller.ltr_integration_service != self.ltr_integration_service:
-                    self.matrix_project_controller.set_ltr_integration_service(self.ltr_integration_service)
-                
-                self._apply_matrix_project_context(project_context)
-                
-                logger.debug(f"Set project path {project_path} to Matrix controller via LTR integration service")
-                
-                # 初始化Matrix数据
-                if self.matrix_project_controller.ltr_integration_service and self.matrix_project_controller.ltr_integration_service.is_project_loaded():
-                    logger.debug("Initializing Matrix with LTR data")
-                    self.matrix_project_controller.matrix_controller.initialize_with_ltr_data()
-                    
-                    # 更新Matrix视图以反映新数据
-                    if self.parent_view and hasattr(self.parent_view, 'refresh_table'):
-                        self.parent_view.refresh_table()
-            else:
+
+            session_result = self.project_creation_service.open_created_project(project_path, dl_number)
+            if not session_result:
                 logger.warning("No project path or DL number provided")
+                return
+
+            if self._should_apply_session_side_effects_locally():
+                self.project_session_coordinator.apply_project_context(
+                    session_result.project_context,
+                    status_message=f"当前项目: {session_result.dl_number}",
+                    trigger_matrix_auto_import=True,
+                )
+
+            self._apply_matrix_project_context(session_result.project_context)
+
+            if self.parent_view and hasattr(self.parent_view, 'refresh_table') and session_result.ltr_project_loaded:
+                self.parent_view.refresh_table()
                 
         except Exception as e:
             logger.error(f"Error updating Matrix editor with LTR number: {e}", exc_info=True)
@@ -619,25 +562,13 @@ class ProjectCreatorController:
         """
         try:
             logger.info(f"Triggering Matrix update after project creation: {project_path}")
-            
-            # 设置当前项目到状态管理器
-            from src.core.state_manager import state_manager
-            state_manager.set_state("current_project", project_path)
-            state_manager.set_state("current_project_context", ProjectContext.from_project_path(project_path))
-            
-            # 调用主窗口的 Matrix 自动导入方法
-            if hasattr(self.parent_view, 'auto_import_from_project'):
-                self.parent_view.auto_import_from_project()
-                logger.debug("Successfully triggered Matrix auto-import in main window")
-            
-            if hasattr(self.parent_view, 'refresh_table'):
-                self.parent_view.refresh_table()
-                logger.debug("Successfully updated Matrix table display")
-            
-            # 切换回 Matrix 页面（索引为 0）
-            from PyQt5.QtCore import QTimer
-            if hasattr(self.parent_view, '_nav_list'):
-                QTimer.singleShot(100, lambda: self._switch_to_matrix_page())
+            project_context = project_session_service.open_project(project_path)
+
+            if self._should_apply_session_side_effects_locally():
+                self.project_session_coordinator.apply_project_context(
+                    project_context,
+                    trigger_matrix_auto_import=True,
+                )
                 
         except Exception as e:
             logger.error(f"Failed to trigger Matrix update after project creation: {e}", exc_info=True)

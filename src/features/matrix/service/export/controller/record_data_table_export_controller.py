@@ -1,10 +1,11 @@
 from src.features.matrix.service.export.service.llcr_cr_export_service import LLCRCRExportService
 from src.features.matrix.service.export.view.llcr_cr_record_parameters_dialog import LLCR_CR_RecordParametersDialog
 from src.core.logger import logger
-from src.core.project_context import ProjectContext, get_current_project_context, resolve_project_data_file_path
+from src.core.output_paths import OutputPathResolver
+from src.core.project_context import ProjectContext, get_current_project_context
+from src.core.project_document_context import ProjectDocumentContext
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialog
 import os
-import json
 
 
 class RecordDataTableExportController:
@@ -72,7 +73,7 @@ class RecordDataTableExportController:
             cr_current_value = params.get("cr_current_value", "")
             
             # 设置默认文件路径和文件名
-            default_dir = "D:\\outfile"
+            default_dir = self._resolve_default_export_dir()
             default_filename = f"test {test_type.lower()}.xlsx"
             
             # 如果有DL编号，使用DL编号作为文件名的一部分
@@ -174,6 +175,7 @@ class RecordDataTableExportController:
         """设置Matrix数据结构到导出服务中"""
         # 参考test_record_controller.py中的方式获取Matrix数据
         matrix_data_structure = None
+        document_context = ProjectDocumentContext.from_project_context(self.get_project_context())
         
         # 优先使用已有的MatrixDataStructure实例
         if hasattr(self.data_model, 'data_structure'):
@@ -193,30 +195,9 @@ class RecordDataTableExportController:
                 # 创建MatrixDataStructure实例来解析数据
                 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
                 matrix_data_structure = MatrixDataStructure()
-                
-                # 尝试获取DL编号和项目数据文件路径
-                dl_number = "DL-UNKNOWN"
-                project_data_file_path = None
-                
-                # 优先从 ProjectContext 获取项目数据文件路径
-                project_data_file_path = resolve_project_data_file_path(self.get_project_context())
-                if project_data_file_path:
-                    logger.debug(f"从ProjectContext解析到项目数据文件路径: {project_data_file_path}")
-                    
-                    # 从项目数据文件中提取DL编号
-                    if os.path.exists(project_data_file_path):
-                        try:
-                            with open(project_data_file_path, 'r', encoding='utf-8') as f:
-                                project_data = json.load(f)
-                                dl_number = project_data.get("DL", dl_number)
-                                logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
-                        except Exception as e:
-                            logger.error(f"读取项目数据文件时出错: {e}")
-                
-                matrix_data_structure.dl_number = dl_number
-                matrix_data_structure.project_data_file_path = project_data_file_path
-                logger.debug(f"设置DL编号: {dl_number}")
-                logger.debug(f"设置项目数据文件路径: {project_data_file_path}")
+                document_context.apply_to_matrix_data_structure(matrix_data_structure)
+                logger.debug(f"设置DL编号: {document_context.dl_number}")
+                logger.debug(f"设置项目数据文件路径: {document_context.project_data_file_path}")
                 
                 # 检查MatrixDataStructure是否已经解析过数据，避免重复解析
                 if not getattr(matrix_data_structure, '_is_parsed', False):
@@ -275,31 +256,30 @@ class RecordDataTableExportController:
             str: DL编号，如果无法获取则返回None
         """
         try:
-            project_context = self.get_project_context()
-            current_project = project_context.project_path if project_context else None
-            
-            if current_project and os.path.exists(current_project):
-                # 在当前项目路径中查找JSON文件
-                try:
-                    if project_context and project_context.application_data_path and os.path.exists(project_context.application_data_path):
-                        project_data_file_path = project_context.application_data_path
-                    else:
-                        json_files = [f for f in os.listdir(current_project) if f.endswith('.json')]
-                        project_data_file_path = os.path.join(current_project, json_files[0]) if json_files else None
-                        
-                        # 从项目数据文件中提取DL编号
-                        if project_data_file_path and os.path.exists(project_data_file_path):
-                            with open(project_data_file_path, 'r', encoding='utf-8') as f:
-                                project_data = json.load(f)
-                                dl_number = project_data.get("DL")
-                                logger.debug(f"从项目数据文件中提取到DL编号: {dl_number}")
-                                return dl_number
-                except Exception as e:
-                    logger.warning(f"查找或读取项目JSON文件时出错: {e}")
+            document_context = ProjectDocumentContext.from_project_context(self.get_project_context())
+            if document_context.dl_number and document_context.dl_number != "DL-UNKNOWN":
+                logger.debug(f"从ProjectDocumentContext提取到DL编号: {document_context.dl_number}")
+                return document_context.dl_number
         except Exception as e:
             logger.warning(f"获取DL编号时出错: {e}")
         
         return None
+
+    def _resolve_default_export_dir(self) -> str:
+        """解析LLCR/CR导出的默认目录。"""
+        try:
+            export_dir = OutputPathResolver.resolve_test_results_dir(
+                self.get_project_context(),
+                create=True,
+            )
+            if export_dir != OutputPathResolver.get_default_output_dir():
+                logger.debug(f"LLCR/CR默认导出目录使用项目 Test results: {export_dir}")
+            else:
+                logger.debug(f"LLCR/CR默认导出目录回退到: {export_dir}")
+            return export_dir
+        except Exception as e:
+            logger.warning(f"解析LLCR/CR默认导出目录时出错: {e}")
+        return OutputPathResolver.get_default_output_dir()
 
     def _extract_test_categories_from_matrix(self):
         """

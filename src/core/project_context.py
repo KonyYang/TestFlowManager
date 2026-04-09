@@ -52,12 +52,7 @@ def get_current_project_context() -> Optional[ProjectContext]:
     project_context = state_manager.get_state("current_project_context")
     if isinstance(project_context, ProjectContext):
         return project_context
-
-    current_project = state_manager.get_state("current_project")
-    if not current_project:
-        return None
-
-    return ProjectContext.from_project_path(current_project)
+    return None
 
 
 def get_current_project_path() -> Optional[str]:

@@ -24,6 +24,7 @@ class ReportWizardController:
         self.service = ReportGenerationService()
         self.current_project_path = None
         self.project_context = None
+        self.matrix_controller = None
         self.matrix_service = None
 
     def set_project_path(self, project_path: str):
@@ -40,6 +41,9 @@ class ReportWizardController:
         self.project_context = project_context
         self.current_project_path = project_context.project_path if project_context else None
 
+    def set_matrix_controller(self, matrix_controller) -> None:
+        self.matrix_controller = matrix_controller
+
     def set_matrix_service(self, matrix_service):
         """
         设置Matrix服务
@@ -51,10 +55,17 @@ class ReportWizardController:
 
     def show_wizard(self):
         """显示报告向导对话框"""
-        self.view = ReportWizardDialog(self.parent_window, project_path=self.current_project_path)
+        self.view = ReportWizardDialog(
+            self.parent_window,
+            project_path=self.current_project_path,
+            project_context=self.project_context,
+        )
+
+        if self.matrix_controller:
+            self.view.set_matrix_controller(self.matrix_controller)
         
         # 设置Matrix服务（如果存在）
-        if self.matrix_service:
+        if self.matrix_service and not self.matrix_controller:
             self.view.set_matrix_service(self.matrix_service)
         
         # 如果有项目路径，尝试加载项目数据
@@ -96,7 +107,11 @@ class ReportWizardController:
                         output_path = document_path
                     else:
                         # 如果用户没有选择文档，则生成新报告
-                        output_path = self.service.create_report_from_template(header_data, project_path=self.current_project_path)
+                        output_path = self.service.create_report_from_template(
+                            header_data,
+                            project_path=self.current_project_path,
+                            project_context=self.project_context,
+                        )
 
                     # 显示成功消息
                     from PyQt5.QtWidgets import QMessageBox

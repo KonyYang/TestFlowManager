@@ -15,8 +15,8 @@ class MatrixController:
 
     def __init__(self, parent=None):
         self.parent = parent
-        # 使用单例模式获取MatrixService实例
-        self.service = MatrixService()
+        # 当前仍使用共享 MatrixService，后续可切换为显式注入。
+        self.service = MatrixService.shared()
         # 初始化导出控制器
         self.export_controller = ExportController(self.service.data_model, parent)
         # 初始化LTR集成服务
@@ -48,6 +48,71 @@ class MatrixController:
     def get_matrix_data(self):
         """获取Matrix数据 - Controller层数据提供"""
         return self.service.data_model
+
+    def get_matrix_service(self):
+        """兼容下游仍需显式 service 对象的场景。"""
+        return self.service
+
+    def sync_table_to_model(self):
+        """同步表格数据到模型。"""
+        self.service._sync_table_to_model()
+
+    def initialize_matrix(self):
+        """初始化 Matrix 数据结构。"""
+        return self.service.initialize_matrix()
+
+    def extract_test_methods_from_spec(self):
+        """从规格书中提取测试方法。"""
+        return self.service.extract_test_methods_from_spec()
+
+    def update_standard_versions(self):
+        """更新标准版本号。"""
+        return self.service.update_standard_versions()
+
+    def get_undo_cell_operation_text(self):
+        return self.service.get_undo_cell_operation_text()
+
+    def get_redo_cell_operation_text(self):
+        return self.service.get_redo_cell_operation_text()
+
+    def add_row(self):
+        self.service.add_row()
+
+    def insert_row(self, row):
+        self.service.insert_row(row)
+
+    def remove_row(self, row):
+        self.service.remove_row(row)
+
+    def move_row(self, row, new_position):
+        return self.service.move_row(row, new_position)
+
+    def copy_row(self, row):
+        return self.service.copy_row(row)
+
+    def paste_row(self, row, copied_row_data):
+        return self.service.paste_row(row, copied_row_data)
+
+    def add_column(self):
+        self.service.add_column()
+
+    def insert_column(self, col):
+        self.service.insert_column(col)
+
+    def remove_column(self, col):
+        self.service.remove_column(col)
+
+    def move_column(self, col, new_position):
+        return self.service.move_column(col, new_position)
+
+    def copy_column(self, col):
+        return self.service.copy_column(col)
+
+    def paste_column(self, col, copied_col_data):
+        return self.service.paste_column(col, copied_col_data)
+
+    def set_cell_value(self, row, col, value):
+        return self.service.set_cell_value(row, col, value)
 
     def export_to_excel(self, file_path, export_type="matrix_excel"):
         """导出Matrix数据到Excel文件
@@ -120,6 +185,10 @@ class MatrixController:
             self.ltr_integration_service = ltr_integration_service
         else:
             logger.debug("MatrixController: LTR integration service unchanged, skipping update")
+
+    def set_ltr_data(self, ltr_data):
+        """设置 LTR 数据到 Matrix 服务。"""
+        self.service.set_ltr_data(ltr_data)
 
     def set_project_context(self, project_context: ProjectContext):
         self.project_context = project_context

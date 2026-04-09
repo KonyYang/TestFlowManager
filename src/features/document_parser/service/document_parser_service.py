@@ -119,7 +119,7 @@ class DocumentParserService:
         try:
             # 获取模板目录
             from src.core.config_manager import config_manager
-            template_dir = config_manager.get("paths.template_dir", r"D:\TestFlowManager\Template")
+            template_dir = config_manager.get_template_dir()
             ltr_template_dir = os.path.join(template_dir, "LTR")
             
             if not os.path.exists(ltr_template_dir):

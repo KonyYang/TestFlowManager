@@ -25,7 +25,7 @@ class Logger:
         self.logger = logging.getLogger(name)
         
         # 从配置中获取日志级别，默认为INFO
-        log_level_str = config_manager.get("logging.level", "INFO")
+        log_level_str = config_manager.get_logging("level", "INFO")
         log_level = getattr(logging, log_level_str.upper(), logging.INFO)
         self.logger.setLevel(log_level)
 
@@ -92,7 +92,7 @@ class Logger:
 
 # 创建全局日志实例
 # 从配置中获取日志文件路径
-log_file_path = config_manager.get("logging.file", "testflow.log")
+log_file_path = config_manager.get_logging("file", "testflow.log")
 
 # 如果是相对路径，将其转换为绝对路径
 if not os.path.isabs(log_file_path):
