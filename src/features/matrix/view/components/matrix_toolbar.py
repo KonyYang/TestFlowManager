@@ -91,9 +91,9 @@ class MatrixToolbar(QWidget):
         self.generate_test_status_btn = QPushButton("📊 生成Test Status")
         self.generate_test_status_btn.setStyleSheet(button_style)
         
-        # 生成Test Record
-        self.generate_test_record_btn = QPushButton("📝 生成Test Record")
-        self.generate_test_record_btn.setStyleSheet(button_style)
+        # 生成Step Record
+        self.generate_step_record_btn = QPushButton("📝 生成Step Record")
+        self.generate_step_record_btn.setStyleSheet(button_style)
         
         # 生成费用表
         self.generate_cost_sheet_btn = QPushButton("💰 费用表")
@@ -105,7 +105,7 @@ class MatrixToolbar(QWidget):
         main_layout.addWidget(self.update_standard_versions_btn)
         main_layout.addWidget(self.basic_info_btn)
         main_layout.addWidget(self.generate_test_status_btn)
-        main_layout.addWidget(self.generate_test_record_btn)
+        main_layout.addWidget(self.generate_step_record_btn)
         main_layout.addWidget(self.generate_cost_sheet_btn)
         main_layout.addStretch()
         
@@ -128,5 +128,5 @@ class MatrixToolbar(QWidget):
         self.basic_info_btn.clicked.connect(handlers.on_show_basic_info_dialog)
         self.generate_test_status_btn.clicked.connect(handlers.on_export_clicked)
         self.update_standard_versions_btn.clicked.connect(handlers.on_update_standards_clicked)
-        self.generate_test_record_btn.clicked.connect(handlers.on_generate_test_record_clicked)
+        self.generate_step_record_btn.clicked.connect(handlers.on_generate_step_record_clicked)
         self.generate_cost_sheet_btn.clicked.connect(handlers.on_generate_cost_sheet_clicked)

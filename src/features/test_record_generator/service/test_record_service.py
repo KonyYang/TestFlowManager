@@ -1,7 +1,7 @@
-# src/features/test_record_generator/service/test_record_service.py
+# src/features/step_record_generator/service/step_record_service.py
 """
-Test Record生成服务
-根据Matrix中的数据自动生成Test Record Word文档
+Step Record生成服务
+根据Matrix中的数据自动生成Step Record Word文档
 """
 
 import os
@@ -11,14 +11,14 @@ from src.core.logger import logger
 from src.core.config_manager import config_manager
 from src.utils.word_utils import get_shared_word_app, release_word_app, open_word_file
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
-from src.features.test_record_generator.service.table_structure_service import TestRecordTableStructureService
+from src.features.step_record_generator.service.table_structure_service import StepRecordTableStructureService
 import json
 import shutil
 
 
-class TestRecordService:
+class StepRecordService:
     """
-    Test Record文档生成服务
+    Step Record文档生成服务
     """
 
     def __init__(self):
@@ -384,9 +384,9 @@ class TestRecordService:
             logger.error(f"填充页眉信息时发生错误: {e}")
             return False
 
-    def generate_test_record_with_structure(self, matrix_structure: MatrixDataStructure, output_path: str) -> bool:
+    def generate_step_record_with_structure(self, matrix_structure: MatrixDataStructure, output_path: str) -> bool:
         """
-        根据已解析的Matrix数据结构生成Test Record文档
+        根据已解析的Matrix数据结构生成Step Record文档
         
         Args:
             matrix_structure: 已解析的Matrix数据结构
@@ -517,11 +517,11 @@ class TestRecordService:
             new_doc.Close(SaveChanges=False)
             logger.info("文档已保存并关闭")
 
-            logger.info(f"Test Record document generated successfully: {output_path}")
+            logger.info(f"Step Record document generated successfully: {output_path}")
             return True
             
         except Exception as e:
-            logger.error(f"Error generating Test Record document: {e}")
+            logger.error(f"Error generating Step Record document: {e}")
             return False
         finally:
             # 清理资源

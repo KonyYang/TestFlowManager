@@ -17,7 +17,7 @@ import win32com.client.gencache as gencache
 from src.core.logger import logger
 from src.core.config_manager import config_manager
 from src.core.output_paths import OutputPathResolver
-from src.core.project_context import ProjectContext, get_current_project_context
+from src.core.project_context import ProjectContext
 from src.core.project_document_context import ProjectDocumentContext
 
 
@@ -98,7 +98,7 @@ class ReportUpdaterService:
     
     def __init__(self, project_path: str = None, project_context: Optional[ProjectContext] = None):
         """初始化报告更新服务"""
-        self.project_context = project_context or get_current_project_context()
+        self.project_context = project_context
         if self.project_context is None and project_path:
             self.project_context = ProjectContext.from_project_path(project_path)
         self.config_manager = EquipmentConfigManager(self.project_context)

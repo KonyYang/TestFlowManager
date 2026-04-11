@@ -40,6 +40,12 @@ from src.features.report_wizard.controller.report_wizard_controller import Repor
 from src.features.document_parser.controller.document_parser_controller import DocumentParserController
 from src.features.report_updater.controller.report_updater_controller import ReportUpdaterController
 from src.features.matrix.view.matrix_page import MatrixPage
+from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
+from src.features.matrix.service.matrix_session_entry_policy import MatrixSessionEntryPolicyTable
+from src.features.matrix.service.matrix_session_manager import MatrixSessionManager
+from src.features.matrix.service.matrix_session_orchestrator import MatrixSessionOrchestrator
+from src.features.matrix.service.matrix_session_debug_facade import MatrixSessionDebugFacade
+from src.features.matrix.service.matrix_session_entry_facade import MatrixSessionEntryFacade
 
 
 # 主窗口 Lims 风格全局样式（高分辨率屏幕优化版）
@@ -205,6 +211,22 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.splash_screen = splash_screen
         self.controller = None
+        self.matrix_session_registry = MatrixSessionRegistry()
+        self.matrix_session_entry_policies = MatrixSessionEntryPolicyTable()
+        self.matrix_session_manager = MatrixSessionManager(
+            parent_view=self,
+            registry=self.matrix_session_registry,
+        )
+        self.matrix_session_orchestrator = MatrixSessionOrchestrator(
+            self.matrix_session_manager
+        )
+        self.matrix_session_debug_facade = MatrixSessionDebugFacade(
+            orchestrator=self.matrix_session_orchestrator,
+            entry_policies=self.matrix_session_entry_policies,
+        )
+        self.matrix_session_entry_facade = MatrixSessionEntryFacade(
+            entry_policies=self.matrix_session_entry_policies,
+        )
         
         # 延迟加载的控制器使用私有属性
         self._customer_report_controller = None
@@ -648,7 +670,6 @@ class MainWindow(QMainWindow):
         about_action = QAction("关于", self)
         about_action.triggered.connect(self._on_about)
         about_action.setFont(menu_font)
-
         # 注册快捷键（无菜单栏时仍需注册）
         self._register_action_shortcuts(
             new_action,
@@ -669,7 +690,15 @@ class MainWindow(QMainWindow):
     def _initialize_controllers(self):
         """初始化控制器 - 采用延迟加载策略"""
         # 只初始化核心控制器
-        self.controller = MainWindowController(self)
+        self.controller = MainWindowController(
+            self,
+            matrix_session_registry=self.matrix_session_registry,
+            matrix_session_entry_policies=self.matrix_session_entry_policies,
+            matrix_session_manager=self.matrix_session_manager,
+            matrix_session_orchestrator=self.matrix_session_orchestrator,
+            matrix_session_debug_facade=self.matrix_session_debug_facade,
+            matrix_session_entry_facade=self.matrix_session_entry_facade,
+        )
         
         # 其他控制器改为懒加载,在实际使用时才创建
         self._matrix_project_controller = None
@@ -1016,6 +1045,12 @@ class MainWindow(QMainWindow):
         """Matrix 主内容页 - 通过 MatrixPage 接入主窗口。"""
         if self.matrix_page is None:
             self.matrix_page = MatrixPage(self.matrix_controller, self)
+            if self.controller and hasattr(self.controller, "get_matrix_workspace_session_binding"):
+                binding = self.controller.get_matrix_workspace_session_binding()
+                self.matrix_page.bind_session(
+                    binding.get("session_id"),
+                    entry_name=binding.get("entry_name"),
+                )
 
         self.matrix_tab = self.matrix_page
 
@@ -1189,8 +1224,11 @@ class MainWindow(QMainWindow):
 
     def _on_export_matrix(self) -> None:
         logger.debug("Export matrix action triggered")
-        if self.matrix_controller.handle_export_matrix_to_excel():
+        result = self.matrix_controller.handle_export_matrix_to_excel()
+        if result.get("success"):
             self._update_status()
+        elif result.get("message"):
+            QMessageBox.warning(self, "错误", result["message"])
 
     def _on_export_llcr(self) -> None:
         logger.debug("Export LLCR action triggered")
@@ -1263,11 +1301,24 @@ class MainWindow(QMainWindow):
     def _on_page_changed_for_matrix(self, index: int) -> None:
         """页面切换时延迟加载Matrix表格数据"""
         if index == 0 and self.matrix_page:
+            if self.controller and hasattr(self.controller, "ensure_matrix_workspace_session_consistency"):
+                consistency = self.controller.ensure_matrix_workspace_session_consistency()
+                binding = self.controller.get_matrix_workspace_session_binding()
+                self.matrix_page.bind_session(
+                    binding.get("session_id"),
+                    entry_name=binding.get("entry_name"),
+                )
+                if not consistency.get("success", False):
+                    logger.warning(
+                        f"Matrix workspace session consistency failed: {consistency}"
+                    )
             if not self.matrix_page._matrix_table_initialized:
                 try:
                     self.matrix_page.handle_page_activated()
                 except Exception as e:
                     logger.error(f"延迟加载Matrix表格失败: {e}")
+        elif self.controller and hasattr(self.controller, "handle_matrix_workspace_hidden"):
+            self.controller.handle_matrix_workspace_hidden()
     
     def _initialize_matrix_table(self):
         """初始化Matrix表格数据 - 启动时调用"""

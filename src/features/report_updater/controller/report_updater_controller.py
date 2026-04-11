@@ -7,7 +7,7 @@ from typing import Optional, List, Dict
 from PyQt5.QtWidgets import QWidget, QMessageBox, QFileDialog, QDialog
 from src.core.logger import logger
 from src.core.output_paths import OutputPathResolver
-from src.core.project_context import ProjectContext, get_current_project_context
+from src.core.project_context import ProjectContext
 from src.features.report_updater.model.report_updater_data import ReportUpdaterData
 from src.features.report_updater.view.report_updater_dialog import ReportUpdaterDialog
 from src.features.report_updater.service.report_updater_service import ReportUpdaterService
@@ -25,7 +25,7 @@ class ReportUpdaterController:
         """
         self.parent = parent
         self.data_model = ReportUpdaterData()
-        self.project_context = get_current_project_context()
+        self.project_context = None
         self.service = ReportUpdaterService(project_context=self.project_context)
         self.current_project_path = None
         self.data_model.set_project_context(self.project_context)

@@ -7,24 +7,25 @@ from src.features.matrix.service.export.controller.export_controller import Expo
 from src.features.matrix.service.export.model.export_data_model import ExportDataModel
 from src.features.matrix.service.spec.matrix_spec_processing_service import MatrixSpecProcessingService
 from src.features.matrix.service.processing.matrix_data_structure_service import MatrixDataStructureService
+from src.features.matrix.service.matrix_import_service import MatrixImportService
 from src.core.logger import logger
-
-# 全局单例实例
-_matrix_service_instance = None
 
 
 class MatrixService:
     """Matrix服务层 - Service层"""
 
-    def __new__(cls, *args, **kwargs):
-        global _matrix_service_instance
-        if _matrix_service_instance is None:
-            _matrix_service_instance = super(MatrixService, cls).__new__(cls)
-        return _matrix_service_instance
+    _shared_instance = None
 
     @classmethod
     def shared(cls) -> "MatrixService":
         """显式获取当前共享 MatrixService 实例。"""
+        if cls._shared_instance is None:
+            cls._shared_instance = cls()
+        return cls._shared_instance
+
+    @classmethod
+    def create_isolated(cls) -> "MatrixService":
+        """创建独立的 MatrixService 实例，不复用共享单例。"""
         return cls()
 
     def __init__(self):
@@ -59,6 +60,10 @@ class MatrixService:
         
         # 创建规格书处理服务
         self.spec_processing_service = MatrixSpecProcessingService(self.data_model, self.template_filler)
+        self.import_service = MatrixImportService(
+            data_model=self.data_model,
+            spec_processing_service=self.spec_processing_service,
+        )
         
         # 临时存储合并单元格信息
         self.merged_cells_info = []
@@ -185,13 +190,15 @@ class MatrixService:
         # 使用导出控制器执行导出
         return self.export_controller.export_by_type(file_path, export_type)
 
+    def import_from_excel(self, file_path):
+        """从 Excel 导入 Matrix 数据。"""
+        return self.import_service.import_from_excel(file_path)
+
     def import_from_spec(self, file_path, page_number=None, keyword=None):
         """从Spec导入数据 - Service层持久化功能"""
-        logger.debug(f"MatrixService.import_from_spec 被调用，参数: file_path={file_path}, page_number={page_number}, keyword={keyword}")
-        result = self.spec_processing_service.import_from_spec(file_path, page_number, keyword)
+        result = self.import_service.import_from_spec(file_path, page_number, keyword)
         # 更新last_imported_spec_path引用
         self.last_imported_spec_path = self.spec_processing_service.last_imported_spec_path
-        logger.debug(f"MatrixService.import_from_spec 完成，返回结果: {result}")
         return result
             
     def update_standard_versions(self):

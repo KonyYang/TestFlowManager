@@ -21,7 +21,7 @@ class BasicInfoDialog(BaseInfoDialog):
     用于显示和编辑项目基本信息
     """
 
-    def __init__(self, project_data, parent=None):
+    def __init__(self, project_data, parent=None, project_data_file_path=None):
         """
         初始化项目基本信息对话框
 
@@ -33,12 +33,9 @@ class BasicInfoDialog(BaseInfoDialog):
         super().__init__("项目基本信息", project_data, parent)
         
         # 保存原始项目数据文件路径
-        self.project_data_file_path = None
-        if parent:
-            if hasattr(parent, "resolve_project_data_file_path"):
-                self.project_data_file_path = parent.resolve_project_data_file_path()
-            else:
-                self.project_data_file_path = getattr(parent, 'project_data_file_path', None)
+        self.project_data_file_path = project_data_file_path
+        if not self.project_data_file_path and parent and hasattr(parent, "resolve_project_data_file_path"):
+            self.project_data_file_path = parent.resolve_project_data_file_path()
 
     def accept(self):
         """重写accept方法，保存修改后的数据到JSON文件"""

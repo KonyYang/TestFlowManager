@@ -3,7 +3,7 @@ Test Spec Tables服务模块
 提供填充Test Description、Test Method和Test Result表格的业务逻辑服务
 """
 
-from typing import Dict, Any, Callable, Optional
+from typing import Dict, Any, Callable, Optional, List
 from src.core.logger import logger
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 from src.features.report_wizard.service.test_result_service import TestResultService
@@ -21,7 +21,16 @@ class TestSpecTablesService:
         """初始化Test Spec Tables服务"""
         self.test_result_service = TestResultService()
         self.test_sample_info_service = TestSampleInfoService()
-        pass
+        self._matrix_headers: List[str] = []
+        self._matrix_rows: List[List[str]] = []
+
+    def set_matrix_table_data(self, headers=None, rows=None) -> None:
+        """设置当前处理所使用的 Matrix 表头和行数据快照。"""
+        self._matrix_headers = list(headers or [])
+        self._matrix_rows = list(rows or [])
+
+    def _get_matrix_table_data(self):
+        return self._matrix_headers, self._matrix_rows
     
     def _safe_callback_call(self, callback, *args):
         """
@@ -54,6 +63,8 @@ class TestSpecTablesService:
         self, 
         document_path: str, 
         matrix_data_structure: MatrixDataStructure,
+        matrix_headers=None,
+        matrix_rows=None,
         progress_callback: Optional[Callable[[int], None]] = None,
         status_callback: Optional[Callable[[str], None]] = None
     ) -> bool:
@@ -70,6 +81,7 @@ class TestSpecTablesService:
             bool: 是否成功
         """
         logger.info(f"开始填充Test Description、Test Method和Test Result表格，文档路径: {document_path}")
+        self.set_matrix_table_data(matrix_headers, matrix_rows)
         word_app = None
         word_doc = None
         try:
@@ -257,13 +269,8 @@ class TestSpecTablesService:
         """
         logger.info("开始填充Test Description表格")
         
-        # 从MatrixService获取表头信息
-        from src.features.matrix.service.matrix_service import MatrixService
-        matrix_service = MatrixService.shared()
-        
-        # 获取表头行
-        header_row = matrix_service.data_model.headers if hasattr(matrix_service.data_model, 'headers') else []
-        
+        header_row, data_rows = self._get_matrix_table_data()
+
         logger.info(f"Matrix表头: {header_row}")
         
         # 确定列范围：从第6列（索引5）开始，到"Notes"列的前一列结束（不包含Notes列）
@@ -292,8 +299,6 @@ class TestSpecTablesService:
         # 总列数 = 首列(Test Item) + 组别列数量
         target_cols = 1 + group_columns_count  # 1为Test Item列，其余为组别列
         
-        # 从MatrixService获取数据行，直到"Time"行的上一行
-        data_rows = matrix_service.data_model.rows if hasattr(matrix_service.data_model, 'rows') else []
         rows_to_process = []
         
         time_row_found = False
@@ -541,12 +546,7 @@ class TestSpecTablesService:
         """
         logger.info("开始使用win32com填充Test Method表格")
         
-        # 从MatrixService获取当前数据
-        from src.features.matrix.service.matrix_service import MatrixService
-        matrix_service = MatrixService.shared()
-        
-        # 获取表头行
-        header_row = matrix_service.data_model.headers if hasattr(matrix_service.data_model, 'headers') else []
+        header_row, data_rows = self._get_matrix_table_data()
         
         logger.info(f"Matrix表头: {header_row}")
         
@@ -558,8 +558,6 @@ class TestSpecTablesService:
         # 固定目标列数为3（Test Item, Test Method, Condition）
         target_cols = 3
         
-        # 获取数据行，直到"Sample size"行的上一行
-        data_rows = matrix_service.data_model.rows if hasattr(matrix_service.data_model, 'rows') else []
         rows_to_process = []
         
         sample_row_found = False

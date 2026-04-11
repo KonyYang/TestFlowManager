@@ -12,8 +12,9 @@ from src.features.email_extractor.view.email_selector_dialog import EmailSelecto
 from src.features.email_extractor.controller.email_extractor_controller import EmailExtractorController
 # 添加LTR项目集成服务
 from src.features.project_creator.service.ltr_project_integration_service import LTRProjectIntegrationService
-# 添加Matrix项目控制器
-from src.features.matrix.controller.matrix_project_controller import MatrixProjectController
+# 添加Matrix会话工厂
+from src.features.matrix.service.matrix_session_factory import MatrixSessionFactory
+from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
 # 添加事件调度器
 from src.core.event_dispatcher import event_dispatcher
 from src.core.project_context import ProjectContext
@@ -27,7 +28,13 @@ class ProjectCreatorController:
     处理项目创建流程，包括邮件提取、文档解析等
     """
 
-    def __init__(self, parent_view=None):
+    def __init__(
+        self,
+        parent_view=None,
+        matrix_session_registry: MatrixSessionRegistry = None,
+        matrix_session_mode: str = "shared",
+        matrix_session_id: str = None,
+    ):
         """
         初始化项目创建控制器
 
@@ -35,13 +42,43 @@ class ProjectCreatorController:
             parent_view: 父窗口视图实例
         """
         self.parent_view = parent_view
+        self.matrix_session_registry = matrix_session_registry
+        self.matrix_session_mode = matrix_session_mode
+        self.matrix_session_id = matrix_session_id
+        self._matrix_session_scope = None
+        if self.matrix_session_mode not in ("shared", "isolated"):
+            raise ValueError(f"Unsupported matrix session mode: {self.matrix_session_mode}")
         self.context = ProjectCreationContext()
         self.email_extractor_controller = None  # 添加这一行来保存controller引用
         self.selected_attachment = None  # 用于存储选中的附件
         # 添加LTR项目集成服务
         self.ltr_integration_service = LTRProjectIntegrationService()
+        if (
+            self.matrix_session_mode == "isolated"
+            and self.matrix_session_registry is not None
+            and self.matrix_session_id
+            and hasattr(self.matrix_session_registry, "open_scope")
+        ):
+            self._matrix_session_scope = self.matrix_session_registry.open_scope(
+                self.matrix_session_id,
+                mode=self.matrix_session_mode,
+            )
         # 添加Matrix项目控制器
-        self.matrix_project_controller = MatrixProjectController(parent_view)
+        if self.matrix_session_mode == "isolated":
+            matrix_session = MatrixSessionFactory.create(
+                parent_view,
+                mode="isolated",
+                registry=self.matrix_session_registry,
+                session_id=self.matrix_session_id,
+            )
+        else:
+            matrix_session = MatrixSessionFactory.create(
+                parent_view,
+                mode="shared",
+                registry=self.matrix_session_registry,
+                session_id=self.matrix_session_id,
+            )
+        self.matrix_project_controller = matrix_session.matrix_project_controller
         self.project_creation_service = ProjectCreationApplicationService(
             self.ltr_integration_service,
             self.matrix_project_controller,
@@ -70,6 +107,18 @@ class ProjectCreatorController:
             event_dispatcher.unsubscribe("ltr.application.processed", self._on_ltr_application_processed)
             self._event_subscribed = False
             logger.info("Unsubscribed from ltr.application.processed event")
+        scope = getattr(self, "_matrix_session_scope", None)
+        if scope is not None and hasattr(scope, "close"):
+            scope.close()
+            self._matrix_session_scope = None
+            return
+        if (
+            self.matrix_session_mode == "isolated"
+            and self.matrix_session_registry is not None
+            and self.matrix_session_id
+            and hasattr(self.matrix_session_registry, "release_session")
+        ):
+            self.matrix_session_registry.release_session(self.matrix_session_id)
 
     def handle_create_new_project(self) -> bool:
         """

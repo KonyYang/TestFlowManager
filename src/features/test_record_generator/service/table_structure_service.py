@@ -3,8 +3,8 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, Font, PatternFill
 
 
-class TestRecordTableStructureService:
-    """Test Record表格结构服务 - 专门处理Test Record的各种表格结构创建"""
+class StepRecordTableStructureService:
+    """Step Record表格结构服务 - 专门处理Step Record的各种表格结构创建"""
 
     def __init__(self, formatting_service, formula_service, styling_service):
         self.formatting_service = formatting_service

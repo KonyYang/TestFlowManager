@@ -4,7 +4,7 @@ import os
 from src.core.logger import logger
 from src.core.project_document_context import ProjectDocumentContext
 from src.features.matrix.view.matrix_filter_dialog import MatrixFilterDialog
-from src.features.test_record_generator.controller.test_record_controller import TestRecordController
+from src.features.step_record_generator.controller.step_record_controller import StepRecordController
 
 
 class MatrixEventHandlers:
@@ -39,8 +39,8 @@ class MatrixEventHandlers:
                 # 触发Controller层处理
                 result = self.view.import_from_spec(file_path, page_number, keyword)
                 if result and result.get("success", False):
-                    # 更新表格显示
-                    self.view.refresh_table()
+                    if result.get("should_refresh", False):
+                        self.view.refresh_table()
                     QMessageBox.information(self.view, "成功", "数据已成功导入")
                 else:
                     error_msg = result.get("error", "导入失败") if result else "导入失败"
@@ -54,23 +54,16 @@ class MatrixEventHandlers:
             # 同步表格数据到模型
             self.view.sync_to_model()
             
-            # 先执行标准化操作
-            init_result = self.view.initialize_matrix()
-            if not init_result:
+            result = self.view.standardize_and_fill_matrix()
+            if not result.get("initialized", False):
                 QMessageBox.warning(self.view, "失败", "Matrix标准化失败")
                 return
-            
-            # 再尝试从已导入的规格书中提取测试方法
-            extract_result = self.view.extract_test_methods_from_spec()
-            
-            # 更新标准版本号
-            update_result = self.view.update_standard_versions()
-            
+
             # 更新表格显示
             self.view.refresh_table()
             
             # 只要有执行操作就弹出信息
-            if extract_result or update_result["success"]:
+            if result.get("success", False):
                 QMessageBox.information(self.view, "成功", "标准化填充Matrix已完成")
             # 如果没有任何操作被执行，则不显示任何信息
 
@@ -99,9 +92,11 @@ class MatrixEventHandlers:
                     logger.debug(f"成功读取项目数据: {project_data}")
                     # 显示基本信息对话框，同时传入项目数据文件路径
                     from src.features.main_window.view.basic_info_dialog import BasicInfoDialog
-                    dialog = BasicInfoDialog(project_data, self.view)
-                    # 将项目数据文件路径设置到dialog对象上
-                    dialog.project_data_file_path = project_data_file_path
+                    dialog = BasicInfoDialog(
+                        project_data,
+                        self.view,
+                        project_data_file_path=project_data_file_path,
+                    )
                     dialog.exec_()
                 except Exception as e:
                     logger.error(f"读取或显示项目基本信息时出错: {e}")
@@ -262,31 +257,31 @@ class MatrixEventHandlers:
             logger.error(f"更新标准版本号时出错: {e}", exc_info=True)
             QMessageBox.warning(self.view, "错误", f"更新标准版本号时出错: {str(e)}")
             
-    def on_generate_test_record_clicked(self):
-        """处理生成Test Record按钮点击事件"""
+    def on_generate_step_record_clicked(self):
+        """处理生成Step Record按钮点击事件"""
         try:
-            logger.info("开始生成Test Record文档")
+            logger.info("开始生成Step Record文档")
             
             # 同步表格数据到模型
             self.view.sync_to_model()
             
-            # 创建Test Record控制器实例
-            controller = TestRecordController(
+            # 创建Step Record控制器实例
+            controller = StepRecordController(
                 matrix_controller=self.view.matrix_controller,
                 project_context=self.view.get_project_context(),
             )
             
-            # 调用控制器生成Test Record（直接使用固定路径）
-            success = controller.generate_test_record(parent=self.view)
+            # 调用控制器生成Step Record（直接使用固定路径）
+            success = controller.generate_step_record(parent=self.view)
             
             if success:
-                logger.info("Test Record文档生成成功")
+                logger.info("Step Record文档生成成功")
             else:
                 # 错误信息已经在controller中处理过了，这里不需要额外提示
-                logger.warning("Test Record文档生成失败或被取消")
+                logger.warning("Step Record文档生成失败或被取消")
         except Exception as e:
-            logger.error(f"生成Test Record时出错: {e}", exc_info=True)
-            QMessageBox.warning(self.view, "错误", f"生成Test Record时出错: {str(e)}")
+            logger.error(f"生成Step Record时出错: {e}", exc_info=True)
+            QMessageBox.warning(self.view, "错误", f"生成Step Record时出错: {str(e)}")
 
     def on_generate_cost_sheet_clicked(self):
         """处理生成费用表按钮点击事件"""

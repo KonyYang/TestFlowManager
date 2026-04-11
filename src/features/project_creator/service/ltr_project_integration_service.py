@@ -16,7 +16,7 @@ class LTRProjectIntegrationService:
     def __init__(self):
         self.current_ltr_data = None
         self.current_ltr_path = None
-        self.project_data_file_path = None
+        self.project_json_path = None
     
     def load_ltr_project(self, project_path):
         """
@@ -49,10 +49,10 @@ class LTRProjectIntegrationService:
                 
             self.current_ltr_data = ltr_data
             self.current_ltr_path = project_path
-            self.project_data_file_path = json_path
+            self.project_json_path = json_path
             
             logger.info(f"Successfully loaded LTR project data from: {json_path}")
-            logger.info(f"Project data file path set to: {self.project_data_file_path}")
+            logger.info(f"Project JSON path set to: {self.project_json_path}")
             return ltr_data
             
         except Exception as e:
@@ -76,6 +76,10 @@ class LTRProjectIntegrationService:
             str: 当前项目路径
         """
         return self.current_ltr_path
+
+    def get_project_json_path(self):
+        """获取项目 application_data.json 路径。"""
+        return self.project_json_path
     
     def is_project_loaded(self):
         """

@@ -15,7 +15,7 @@ class MatrixProjectController:
     负责协调LTR项目数据与Matrix功能的集成，提供项目级别的Matrix功能接口。
     该控制器内部使用MatrixController来执行具体的功能操作。"""
 
-    def __init__(self, parent_view=None):
+    def __init__(self, parent_view=None, matrix_controller=None):
         """
         初始化Matrix项目控制器
         
@@ -23,7 +23,12 @@ class MatrixProjectController:
             parent_view: 父视图组件
         """
         self.parent_view = parent_view
-        self.matrix_controller = MatrixController(parent_view)
+        if matrix_controller is None:
+            raise ValueError(
+                "matrix_controller is required. Construct MatrixProjectController via "
+                "MatrixSessionFactory or pass an explicit matrix_controller instance."
+            )
+        self.matrix_controller = matrix_controller
         self.ltr_integration_service = None
 
     def set_ltr_integration_service(self, ltr_integration_service):
@@ -37,7 +42,12 @@ class MatrixProjectController:
         if self.ltr_integration_service != ltr_integration_service:
             logger.info(f"Setting LTR integration service: {ltr_integration_service is not None}")
             if ltr_integration_service:
-                logger.info(f"LTR integration service project data file path: {getattr(ltr_integration_service, 'project_data_file_path', 'Not available')}")
+                project_json_path = (
+                    ltr_integration_service.get_project_json_path()
+                    if hasattr(ltr_integration_service, "get_project_json_path")
+                    else getattr(ltr_integration_service, "project_json_path", "Not available")
+                )
+                logger.info(f"LTR integration service project JSON path: {project_json_path}")
             self.ltr_integration_service = ltr_integration_service
             # 同时设置到Matrix控制器中
             self.matrix_controller.set_ltr_integration_service(ltr_integration_service)
