@@ -46,6 +46,9 @@ from src.features.matrix.service.matrix_session_manager import MatrixSessionMana
 from src.features.matrix.service.matrix_session_orchestrator import MatrixSessionOrchestrator
 from src.features.matrix.service.matrix_session_debug_facade import MatrixSessionDebugFacade
 from src.features.matrix.service.matrix_session_entry_facade import MatrixSessionEntryFacade
+from src.features.matrix.workspace.matrix_workspace_coordinator import (
+    MatrixWorkspaceCoordinator,
+)
 
 
 # 主窗口 Lims 风格全局样式（高分辨率屏幕优化版）
@@ -207,25 +210,49 @@ class MainWindow(QMainWindow):
 
     startup_progress = pyqtSignal(int, str)
 
-    def __init__(self, splash_screen=None):
+    def __init__(
+        self,
+        splash_screen=None,
+        *,
+        matrix_session_registry: Optional[MatrixSessionRegistry] = None,
+        matrix_session_entry_policies: Optional[MatrixSessionEntryPolicyTable] = None,
+        matrix_session_manager: Optional[MatrixSessionManager] = None,
+        matrix_session_orchestrator: Optional[MatrixSessionOrchestrator] = None,
+        matrix_session_debug_facade: Optional[MatrixSessionDebugFacade] = None,
+        matrix_session_entry_facade: Optional[MatrixSessionEntryFacade] = None,
+        matrix_workspace_coordinator: Optional[MatrixWorkspaceCoordinator] = None,
+    ):
         super().__init__()
         self.splash_screen = splash_screen
         self.controller = None
-        self.matrix_session_registry = MatrixSessionRegistry()
-        self.matrix_session_entry_policies = MatrixSessionEntryPolicyTable()
-        self.matrix_session_manager = MatrixSessionManager(
-            parent_view=self,
-            registry=self.matrix_session_registry,
+        self.matrix_workspace_coordinator = (
+            matrix_workspace_coordinator
+            or MatrixWorkspaceCoordinator(
+                parent_view=None,
+                matrix_session_registry=matrix_session_registry,
+                matrix_session_entry_policies=matrix_session_entry_policies,
+                matrix_session_manager=matrix_session_manager,
+                matrix_session_orchestrator=matrix_session_orchestrator,
+                matrix_session_debug_facade=matrix_session_debug_facade,
+                matrix_session_entry_facade=matrix_session_entry_facade,
+            )
         )
-        self.matrix_session_orchestrator = MatrixSessionOrchestrator(
-            self.matrix_session_manager
+        self.matrix_workspace_coordinator.bind_parent_view(self)
+        self.matrix_session_registry = self.matrix_workspace_coordinator.matrix_session_registry
+        self.matrix_session_entry_policies = (
+            self.matrix_workspace_coordinator.entry_policies
         )
-        self.matrix_session_debug_facade = MatrixSessionDebugFacade(
-            orchestrator=self.matrix_session_orchestrator,
-            entry_policies=self.matrix_session_entry_policies,
+        self.matrix_session_manager = (
+            self.matrix_workspace_coordinator.matrix_session_manager
         )
-        self.matrix_session_entry_facade = MatrixSessionEntryFacade(
-            entry_policies=self.matrix_session_entry_policies,
+        self.matrix_session_orchestrator = (
+            self.matrix_workspace_coordinator.matrix_session_orchestrator
+        )
+        self.matrix_session_debug_facade = (
+            self.matrix_workspace_coordinator.matrix_session_debug_facade
+        )
+        self.matrix_session_entry_facade = (
+            self.matrix_workspace_coordinator.matrix_session_entry_facade
         )
         
         # 延迟加载的控制器使用私有属性
@@ -670,6 +697,16 @@ class MainWindow(QMainWindow):
         about_action = QAction("关于", self)
         about_action.triggered.connect(self._on_about)
         about_action.setFont(menu_font)
+
+        # Pilot: isolated matrix preview entry (non-default, env-gated)
+        preview_pilot_action = QAction("[PILOT] 打开隔离 Matrix 预览", self)
+        preview_pilot_action.setShortcut("Ctrl+Alt+Shift+P")
+        preview_pilot_action.triggered.connect(self._on_open_isolated_matrix_preview_pilot)
+        preview_pilot_action.setFont(menu_font)
+        close_preview_pilot_action = QAction("[PILOT] 关闭隔离 Matrix 预览", self)
+        close_preview_pilot_action.setShortcut("Ctrl+Alt+Shift+L")
+        close_preview_pilot_action.triggered.connect(self._on_close_isolated_matrix_preview_pilot)
+        close_preview_pilot_action.setFont(menu_font)
         # 注册快捷键（无菜单栏时仍需注册）
         self._register_action_shortcuts(
             new_action,
@@ -686,6 +723,8 @@ class MainWindow(QMainWindow):
             encrypt_files_action,
             about_action,
         )
+        if MatrixSessionEntryFacade.is_preview_pilot_enabled(os.environ):
+            self._register_action_shortcuts(preview_pilot_action, close_preview_pilot_action)
 
     def _initialize_controllers(self):
         """初始化控制器 - 采用延迟加载策略"""
@@ -698,6 +737,7 @@ class MainWindow(QMainWindow):
             matrix_session_orchestrator=self.matrix_session_orchestrator,
             matrix_session_debug_facade=self.matrix_session_debug_facade,
             matrix_session_entry_facade=self.matrix_session_entry_facade,
+            matrix_workspace_coordinator=self.matrix_workspace_coordinator,
         )
         
         # 其他控制器改为懒加载,在实际使用时才创建
@@ -1292,6 +1332,19 @@ class MainWindow(QMainWindow):
     def _on_about(self) -> None:
         logger.debug("About action triggered")
         self.controller.handle_about()
+
+    def _on_open_isolated_matrix_preview_pilot(self) -> None:
+        logger.debug("Open isolated matrix preview pilot action triggered")
+        if self.controller and hasattr(self.controller, "handle_open_isolated_matrix_preview_pilot"):
+            session_id = self.controller.handle_open_isolated_matrix_preview_pilot()
+            if session_id:
+                self._update_status()
+
+    def _on_close_isolated_matrix_preview_pilot(self) -> None:
+        logger.debug("Close isolated matrix preview pilot action triggered")
+        if self.controller and hasattr(self.controller, "handle_close_isolated_matrix_preview_pilot"):
+            if self.controller.handle_close_isolated_matrix_preview_pilot():
+                self._update_status()
 
     def _update_status(self) -> None:
         """更新状态栏"""

@@ -19,8 +19,6 @@ from src.features.main_window.view.dialogs.dl_input_dialog import DLInputDialog
 from src.features.project_creator.controller.project_creator_controller import ProjectCreatorController
 # 添加项目上下文
 from src.core.project_context import ProjectContext
-# 添加Matrix相关导入
-from src.features.matrix.service.matrix_session_factory import MatrixSessionFactory
 from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
 from src.features.matrix.service.matrix_session_entry_policy import MatrixSessionEntryPolicyTable
 from src.features.matrix.service.matrix_session_manager import MatrixSessionManager
@@ -28,6 +26,9 @@ from src.features.matrix.service.matrix_session_orchestrator import MatrixSessio
 from src.features.matrix.service.matrix_session_debug_commands import MatrixSessionDebugCommands
 from src.features.matrix.service.matrix_session_debug_facade import MatrixSessionDebugFacade
 from src.features.matrix.service.matrix_session_entry_facade import MatrixSessionEntryFacade
+from src.features.matrix.workspace.matrix_workspace_coordinator import (
+    MatrixWorkspaceCoordinator,
+)
 
 
 class MainWindowController:
@@ -55,6 +56,7 @@ class MainWindowController:
         matrix_session_orchestrator: Optional[MatrixSessionOrchestrator] = None,
         matrix_session_debug_facade: Optional[MatrixSessionDebugFacade] = None,
         matrix_session_entry_facade: Optional[MatrixSessionEntryFacade] = None,
+        matrix_workspace_coordinator: Optional[MatrixWorkspaceCoordinator] = None,
     ):
         """
         初始化主窗口控制器
@@ -77,26 +79,17 @@ class MainWindowController:
             self.ltr_controller.service
         )
         
-        # 初始化Matrix项目控制器
-        matrix_session = MatrixSessionFactory.create(
-            view,
-            registry=self.matrix_session_registry,
-        )
-        self.matrix_project_controller = matrix_session.matrix_project_controller
-        
         # 初始化当前项目路径
         self._project_context: Optional[ProjectContext] = None
-        self.project_session_coordinator = ProjectSessionCoordinator(
-            view,
-            matrix_project_controller=self.matrix_project_controller,
-            status_updater=self.service.update_status,
-        )
         self._matrix_session_entry_policies = (
             matrix_session_entry_policies or MatrixSessionEntryPolicyTable()
         )
-        self._matrix_preview_session_manager = matrix_session_manager or MatrixSessionManager(
-            parent_view=self.view,
-            registry=self.matrix_session_registry,
+        self._matrix_preview_session_manager = (
+            matrix_session_manager
+            or MatrixSessionManager(
+                parent_view=self.view,
+                registry=self.matrix_session_registry,
+            )
         )
         self._matrix_session_orchestrator = (
             matrix_session_orchestrator
@@ -115,6 +108,43 @@ class MainWindowController:
                 entry_policies=self._matrix_session_entry_policies,
             )
         )
+        self.matrix_workspace_coordinator = (
+            matrix_workspace_coordinator
+            or MatrixWorkspaceCoordinator(
+                parent_view=self.view,
+                matrix_session_registry=self.matrix_session_registry,
+                matrix_session_manager=self._matrix_preview_session_manager,
+                matrix_session_orchestrator=self._matrix_session_orchestrator,
+                matrix_session_debug_facade=self._matrix_session_debug_facade,
+                matrix_session_entry_facade=self._matrix_session_entry_facade,
+                matrix_session_entry_policies=self._matrix_session_entry_policies,
+            )
+        )
+        matrix_session = self.matrix_workspace_coordinator.assemble_shared_session(
+            parent_view=self.view,
+            session_id=self.DEFAULT_MATRIX_WORKSPACE_SESSION_ID,
+            entry_name=self.DEFAULT_MATRIX_WORKSPACE_ENTRY,
+        )
+        self.matrix_workspace_coordinator.bind_parent_view(self.view)
+        self.matrix_project_controller = matrix_session.matrix_project_controller
+        self._matrix_preview_session_manager = (
+            self.matrix_workspace_coordinator.matrix_session_manager
+        )
+        self._matrix_session_orchestrator = (
+            self.matrix_workspace_coordinator.matrix_session_orchestrator
+        )
+        self._matrix_session_debug_facade = (
+            self.matrix_workspace_coordinator.matrix_session_debug_facade
+        )
+        self._matrix_session_entry_facade = (
+            self.matrix_workspace_coordinator.matrix_session_entry_facade
+        )
+
+        self.project_session_coordinator = ProjectSessionCoordinator(
+            view,
+            matrix_project_controller=self.matrix_project_controller,
+            status_updater=self.service.update_status,
+        )
 
         # 订阅事件
         event_dispatcher.subscribe("ltr.processing.started", self._on_ltr_processing_started)
@@ -132,6 +162,14 @@ class MainWindowController:
         Default is disabled, which keeps shared behavior unchanged.
         """
         return MatrixSessionEntryFacade.is_new_file_pilot_enabled(os.environ)
+
+    @staticmethod
+    def _is_isolated_matrix_preview_pilot_enabled() -> bool:
+        """
+        Experimental switch for opening a non-default isolated preview session.
+        Default is disabled, which keeps shared behavior unchanged.
+        """
+        return MatrixSessionEntryFacade.is_preview_pilot_enabled(os.environ)
 
     @staticmethod
     def _is_debug_matrix_command_enabled() -> bool:
@@ -196,9 +234,59 @@ class MainWindowController:
             entry_name=entry_name,
         )
 
-    def close_isolated_matrix_preview_session(self, session_id: str) -> None:
+    def handle_open_isolated_matrix_preview_pilot(self) -> str | None:
+        """
+        Controlled non-default entry (pilot) for isolated preview session.
+        Default is disabled; when enabled it opens a fixed isolated preview session id.
+        """
+        entry_facade = self._ensure_matrix_session_entry_facade()
+        pilot_enabled = self._is_isolated_matrix_preview_pilot_enabled()
+        session_id = entry_facade.resolve_preview_pilot_session_id(pilot_enabled=pilot_enabled)
+        if not session_id:
+            return None
+        session = self.open_isolated_matrix_preview_session(
+            session_id,
+            entry_name=MatrixSessionEntryPolicyTable.PREVIEW,
+        )
+        matrix_project_controller = getattr(session, "matrix_project_controller", None)
+        if matrix_project_controller and hasattr(matrix_project_controller, "open_matrix_workspace"):
+            matrix_project_controller.open_matrix_workspace()
+        return session_id
+
+    def close_isolated_matrix_preview_session(self, session_id: str) -> bool:
         facade = self._ensure_matrix_session_debug_facade()
-        facade.close_preview_session(session_id)
+        return bool(facade.close_preview_session(session_id))
+
+    def handle_close_isolated_matrix_preview_pilot(self) -> bool:
+        """
+        Controlled non-default close entry (pilot) for isolated preview session.
+        Default is disabled; when enabled it closes the fixed isolated preview session id.
+
+        Close semantics:
+        - closes the managed session and clears any page binding via manager lifecycle.
+        - best-effort restores active session to the default workspace session id if present.
+        - triggers workspace consistency check after close.
+        """
+        entry_facade = self._ensure_matrix_session_entry_facade()
+        pilot_enabled = self._is_isolated_matrix_preview_pilot_enabled()
+        session_id = entry_facade.resolve_preview_pilot_session_id(pilot_enabled=pilot_enabled)
+        if not session_id:
+            return False
+
+        manager = self._ensure_preview_session_manager()
+        active_session_id = None
+        if hasattr(manager, "get_active_session_id"):
+            active_session_id = manager.get_active_session_id()
+
+        closed = self.close_isolated_matrix_preview_session(session_id)
+        if not closed:
+            return False
+
+        if active_session_id == session_id and hasattr(manager, "activate"):
+            manager.activate(self.DEFAULT_MATRIX_WORKSPACE_SESSION_ID)
+
+        self.ensure_matrix_workspace_session_consistency()
+        return True
 
     def debug_open_isolated_matrix_preview_session(self, session_id: Optional[str] = None) -> Optional[str]:
         if not self._is_debug_matrix_command_enabled():
@@ -419,14 +507,8 @@ class MainWindowController:
 
         if status == "success":
             self.service.update_status(f"LTR申请单处理完成: {dl_number}")
-            # 更新窗口标题显示项目信息
-            logger.debug(f"Setting main window title in MainWindowController to: TestFlow Manager - 项目: {dl_number}")
-            self.view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
-            logger.debug(f"Main window title after setting in MainWindowController: {self.view.windowTitle()}")
-            # 设置LTR编号到Matrix控制器
-            if self.matrix_project_controller and self.matrix_project_controller.matrix_controller:
-                self.matrix_project_controller.matrix_controller.set_ltr_number(dl_number)
-                logger.debug(f"Set LTR number {dl_number} to Matrix controller")
+            # Project-open side effects (title/dl/matrix binding/auto import) must be orchestrated by
+            # `project.opened` consumption -> ProjectSessionCoordinator.apply_project_context(...).
         else:
             self.service.update_status(f"LTR申请单处理失败: {dl_number}")
 

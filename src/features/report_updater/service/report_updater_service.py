@@ -96,11 +96,9 @@ class EquipmentConfigManager:
 class ReportUpdaterService:
     """报告更新服务类"""
     
-    def __init__(self, project_path: str = None, project_context: Optional[ProjectContext] = None):
+    def __init__(self, project_context: Optional[ProjectContext] = None):
         """初始化报告更新服务"""
         self.project_context = project_context
-        if self.project_context is None and project_path:
-            self.project_context = ProjectContext.from_project_path(project_path)
         self.config_manager = EquipmentConfigManager(self.project_context)
         self.config = self.config_manager.get_config()
         logger.info("ReportUpdaterService initialized")

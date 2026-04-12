@@ -1,11 +1,17 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from src.features.matrix.model.matrix_data import MatrixData
-from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
 from src.core.logger import logger
 from src.features.matrix.service.export.service.base_export_service import BaseExportService
 from src.features.matrix.service.export.service.excel_formatting_service import ExcelFormattingService
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Side, PatternFill, Font
 from openpyxl.utils import get_column_letter
+
+if TYPE_CHECKING:
+    from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
 
 
 class TestStatusTableExportService(BaseExportService):

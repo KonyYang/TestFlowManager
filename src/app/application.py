@@ -14,7 +14,7 @@ sys.path.insert(0, project_root)
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
-from src.features.main_window.view.main_window_ui import MainWindow
+from src.app.composition.main_window_assembler import assemble_main_window
 from src.core.logger import logger
 from src.core.config_manager import config_manager
 from src.utils import word_utils
@@ -51,7 +51,7 @@ def create_main_window(splash_screen=None):
     """
     try:
         logger.info("开始创建主窗口...")
-        main_window = MainWindow(splash_screen)
+        main_window = assemble_main_window(splash_screen)
         
         # 设置应用程序图标
         icon_path = os.path.join(os.path.dirname(__file__), "resources", "icons", "app_icon.ico")

@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 from src.features.matrix.service.matrix_service import MatrixService
-from src.features.matrix.service.matrix_service_provider import MatrixServiceProvider
 
 
 @dataclass
@@ -46,7 +45,7 @@ class MatrixSessionScope:
 
 class MatrixSessionRegistry:
     """
-    Tracks the current Matrix service mode (shared/isolated) and wires it into MatrixServiceProvider.
+    Tracks the current Matrix service mode (shared/isolated) and provides session-scoped routing.
 
     Scope: a single "current" choice, not a multi-session container.
     """
@@ -64,12 +63,6 @@ class MatrixSessionRegistry:
             mode=self._resolve_mode(session_id),
             session_id=session_id,
         )
-
-    def install(self) -> None:
-        MatrixServiceProvider.set_provider(self)
-
-    def uninstall(self) -> None:
-        MatrixServiceProvider.reset_provider()
 
     def set_mode(self, mode: str, *, session_id: Optional[str] = None) -> None:
         if mode not in ("shared", "isolated"):
@@ -93,7 +86,6 @@ class MatrixSessionRegistry:
         self._session_modes.clear()
         self._session_isolated_instances.clear()
 
-    # Provider protocol expected by MatrixServiceProvider
     def get_service(self, *, session_id: Optional[str] = None) -> MatrixService:
         mode = self._resolve_mode(session_id)
         if mode == "shared":

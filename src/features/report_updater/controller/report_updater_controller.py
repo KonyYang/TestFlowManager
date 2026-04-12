@@ -6,11 +6,12 @@ import os
 from typing import Optional, List, Dict
 from PyQt5.QtWidgets import QWidget, QMessageBox, QFileDialog, QDialog
 from src.core.logger import logger
-from src.core.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext
 from src.features.report_updater.model.report_updater_data import ReportUpdaterData
 from src.features.report_updater.view.report_updater_dialog import ReportUpdaterDialog
-from src.features.report_updater.service.report_updater_service import ReportUpdaterService
+from src.features.report_wizard.coordinator.report_export_coordinator import (
+    ReportExportCoordinator,
+)
 
 
 class ReportUpdaterController:
@@ -25,27 +26,17 @@ class ReportUpdaterController:
         """
         self.parent = parent
         self.data_model = ReportUpdaterData()
-        self.project_context = None
-        self.service = ReportUpdaterService(project_context=self.project_context)
+        self.project_context: Optional[ProjectContext] = None
+        self.export_coordinator = ReportExportCoordinator()
+        self.export_coordinator.set_project_context(self.project_context)
         self.current_project_path = None
         self.data_model.set_project_context(self.project_context)
-        self.current_project_path = self.project_context.project_path if self.project_context else None
         self.view: Optional[ReportUpdaterDialog] = None
         logger.info("ReportUpdaterController initialized")
     
-    def set_project_path(self, project_path: Optional[str]) -> None:
-        """
-        设置当前项目路径
-
-        Args:
-            project_path: 项目路径，如果为None则表示没有打开项目
-        """
-        project_context = ProjectContext.from_project_path(project_path) if project_path else None
-        self.set_project_context(project_context)
-
     def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
         self.project_context = project_context
-        self.service.set_project_context(project_context)
+        self.export_coordinator.set_project_context(project_context)
         self.data_model.set_project_context(project_context)
 
         if project_context and os.path.exists(project_context.project_path):
@@ -119,7 +110,7 @@ class ReportUpdaterController:
             
             # 直接使用服务层执行实际的更新操作，不需要传入设备数据
             # 因为新的实现会从外部源（Excel文件）获取设备数据
-            success = self.service.update_equipment_list(selected_report)
+            success = self.export_coordinator.update_equipment_list(selected_report)
             
             if success:
                 # 更新数据模型

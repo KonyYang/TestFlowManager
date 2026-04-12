@@ -7,7 +7,9 @@ from src.features.matrix.service.matrix_session_factory import MatrixSessionFact
 from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
 
 if TYPE_CHECKING:
-    from src.features.matrix.service.matrix_session_factory import MatrixSessionComponents
+    from src.features.matrix.service.matrix_session_components import (
+        MatrixSessionComponents,
+    )
 
 
 @dataclass(frozen=True)
@@ -47,6 +49,19 @@ class MatrixSessionManager:
         self._sessions: dict[str, ManagedMatrixSession] = {}
         self._active_session_id: str | None = None
         self._page_session_bindings: dict[str, str] = {}
+
+    def bind_parent_view(self, parent_view) -> None:
+        """
+        Late-bind the Qt view (MainWindow / page host) used for assembling sessions.
+
+        This enables moving composition ownership to the app layer without changing the
+        MainWindow initialization order.
+        """
+        self._parent_view = parent_view
+
+    def bind_registry(self, registry: Optional[MatrixSessionRegistry]) -> None:
+        """Late-bind registry for mode routing (shared/isolated)."""
+        self._registry = registry
 
     def create_or_get(
         self,
@@ -90,6 +105,42 @@ class MatrixSessionManager:
         if self._active_session_id is None:
             self._active_session_id = session_id
         return components
+
+    def register_existing(
+        self,
+        session_id: str,
+        *,
+        mode: str,
+        entry_name: str | None,
+        components: "MatrixSessionComponents",
+        scope: object | None = None,
+        set_active_if_none: bool = True,
+    ) -> bool:
+        """
+        Registers externally-assembled session components into the manager without re-assembling.
+
+        This is used to keep a single shared workspace session instance while letting the manager
+        own page bindings, active-session selection, and close semantics.
+        """
+        if not session_id:
+            raise ValueError("session_id is required")
+        if mode not in ("shared", "isolated"):
+            raise ValueError(f"Unsupported matrix session mode: {mode}")
+        if components is None:
+            raise ValueError("components is required")
+        if session_id in self._sessions:
+            return False
+
+        self._sessions[session_id] = ManagedMatrixSession(
+            session_id=session_id,
+            mode=mode,
+            entry_name=entry_name,
+            components=components,
+            scope=scope,
+        )
+        if set_active_if_none and self._active_session_id is None:
+            self._active_session_id = session_id
+        return True
 
     def get(self, session_id: str) -> Optional["MatrixSessionComponents"]:
         managed = self._sessions.get(session_id)

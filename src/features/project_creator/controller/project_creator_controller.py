@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 # src/features/project_creator/controller/project_creator_controller.py
 import os
+
+from typing import TYPE_CHECKING
 
 from PyQt5.QtWidgets import QDialog, QMessageBox
 from src.core.logger import logger
@@ -14,12 +18,14 @@ from src.features.email_extractor.controller.email_extractor_controller import E
 from src.features.project_creator.service.ltr_project_integration_service import LTRProjectIntegrationService
 # 添加Matrix会话工厂
 from src.features.matrix.service.matrix_session_factory import MatrixSessionFactory
-from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
 # 添加事件调度器
 from src.core.event_dispatcher import event_dispatcher
 from src.core.project_context import ProjectContext
 from src.core.project_session_coordinator import ProjectSessionCoordinator
 from src.core.project_session_service import project_session_service
+
+if TYPE_CHECKING:
+    from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
 
 
 class ProjectCreatorController:
@@ -31,7 +37,7 @@ class ProjectCreatorController:
     def __init__(
         self,
         parent_view=None,
-        matrix_session_registry: MatrixSessionRegistry = None,
+        matrix_session_registry: "MatrixSessionRegistry" = None,
         matrix_session_mode: str = "shared",
         matrix_session_id: str = None,
     ):
@@ -530,15 +536,9 @@ class ProjectCreatorController:
             return
 
         logger.info(f"LTR application processed successfully: {dl_number}")
-        # 更新主窗口标题显示项目信息
-        if self.parent_view:
-            logger.debug(f"Setting main window title to: TestFlow Manager - 项目: {dl_number}")
-            self.parent_view.setWindowTitle(f"TestFlow Manager - 项目: {dl_number}")
-            logger.debug(f"Main window title after setting: {self.parent_view.windowTitle()}")
-            
-            # 更新顶栏DL编号显示
-            if hasattr(self.parent_view, 'update_dl_number_display'):
-                self.parent_view.update_dl_number_display(dl_number)
+        # Session side effects (title, dl display, auto import) are orchestrated by:
+        # - MainWindowController (when available, via project.opened)
+        # - ProjectSessionCoordinator (local fallback when main window controller does not exist)
         # 使用QTimer延迟执行UI操作，避免在事件处理中直接操作UI
         from PyQt5.QtCore import QTimer
         QTimer.singleShot(0, lambda: self._open_matrix_editor_with_ltr_number(dl_number, project_path))
@@ -560,17 +560,28 @@ class ProjectCreatorController:
                 logger.warning("No project path or DL number provided")
                 return
 
-            if self._should_apply_session_side_effects_locally():
+            apply_side_effects_locally = self._should_apply_session_side_effects_locally()
+            matrix_session_mode = getattr(self, "matrix_session_mode", "shared")
+
+            if apply_side_effects_locally:
                 self.project_session_coordinator.apply_project_context(
                     session_result.project_context,
                     status_message=f"当前项目: {session_result.dl_number}",
                     trigger_matrix_auto_import=True,
                 )
 
-            self._apply_matrix_project_context(session_result.project_context)
-
-            if self.parent_view and hasattr(self.parent_view, 'refresh_table') and session_result.ltr_project_loaded:
-                self.parent_view.refresh_table()
+            # When the main window controller exists, project-open side effects must be centralized
+            # in `project.opened` consumption -> ProjectSessionCoordinator. For the isolated matrix
+            # pilot entry, the created Matrix session is not the shared mainline workspace, so we
+            # still apply the Matrix-side project context locally.
+            if apply_side_effects_locally or matrix_session_mode == "isolated":
+                self._apply_matrix_project_context(session_result.project_context)
+                if (
+                    self.parent_view
+                    and hasattr(self.parent_view, "refresh_table")
+                    and session_result.ltr_project_loaded
+                ):
+                    self.parent_view.refresh_table()
                 
         except Exception as e:
             logger.error(f"Error updating Matrix editor with LTR number: {e}", exc_info=True)
@@ -611,7 +622,8 @@ class ProjectCreatorController:
         """
         try:
             logger.info(f"Triggering Matrix update after project creation: {project_path}")
-            project_context = project_session_service.open_project(project_path)
+            project_context = ProjectContext.from_project_path(project_path)
+            project_session_service.apply_project_context(project_context)
 
             if self._should_apply_session_side_effects_locally():
                 self.project_session_coordinator.apply_project_context(

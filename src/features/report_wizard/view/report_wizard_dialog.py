@@ -13,7 +13,6 @@ from PyQt5.QtWidgets import (
 )
 
 from src.core.logger import logger
-from src.features.report_wizard.service.report_generation_service import ReportGenerationService
 from src.features.report_wizard.view.body_content_page import BodyContentPage
 from src.features.report_wizard.view.header_info_page import HeaderInfoPage
 from src.features.report_wizard.view.test_spec_tables_page import TestSpecTablesPage
@@ -22,16 +21,22 @@ from src.features.report_wizard.view.test_spec_tables_page import TestSpecTables
 class ReportWizardDialog(QDialog):
     wizard_finished = pyqtSignal(str)
 
-    def __init__(self, parent=None, project_path=None, project_context=None):
+    def __init__(
+        self,
+        parent=None,
+        project_context=None,
+        matrix_controller=None,
+        create_report_callback=None,
+    ):
         super().__init__(parent)
         self.setWindowTitle("报告生成向导")
         self.setGeometry(200, 200, 800, 600)
 
         self.current_page_index = 0
         self.pages = []
-        self.matrix_controller = None
-        self.project_path = project_path
+        self.matrix_controller = matrix_controller
         self.project_context = project_context
+        self._create_report_callback = create_report_callback
 
         self.init_ui()
         self.add_header_info_page()
@@ -102,13 +107,13 @@ class ReportWizardDialog(QDialog):
         if self.current_page_index == 0:
             header_page = self.pages[0]
             header_data = header_page.get_header_data()
-            service = ReportGenerationService()
+            if self._create_report_callback is None:
+                from PyQt5.QtWidgets import QMessageBox
+
+                QMessageBox.critical(self, "错误", "未配置报告生成回调")
+                return
             try:
-                document_path = service.create_report_from_template(
-                    header_data,
-                    project_path=self.project_path,
-                    project_context=self.project_context,
-                )
+                document_path = self._create_report_callback(header_data)
                 body_page = self.pages[1]
                 body_page.set_document_path(document_path)
             except Exception as exc:

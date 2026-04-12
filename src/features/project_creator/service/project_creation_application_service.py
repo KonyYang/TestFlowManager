@@ -41,12 +41,10 @@ class ProjectCreationApplicationService:
             logger.warning("Project creation session skipped: no dl_number resolved")
             return None
 
-        project_context = project_session_service.open_project(project_path, dl_number)
-
-        matrix_controller = getattr(self.matrix_project_controller, "matrix_controller", None)
-        if matrix_controller:
-            matrix_controller.set_ltr_number(dl_number)
-            logger.debug(f"Set LTR number {dl_number} to Matrix controller")
+        # Trigger-side unification: build context + apply via ProjectSessionService.
+        # All UI/Matrix side effects must run via `project.opened` consumption (MainWindow) or a controlled local fallback.
+        project_context = ProjectContext.from_project_path(project_path, dl_number)
+        project_session_service.apply_project_context(project_context)
 
         ltr_project_loaded = False
         loaded_data = self.ltr_integration_service.load_ltr_project(project_path)
@@ -61,13 +59,8 @@ class ProjectCreationApplicationService:
 
         if self.matrix_project_controller.ltr_integration_service != self.ltr_integration_service:
             self.matrix_project_controller.set_ltr_integration_service(self.ltr_integration_service)
-
-        if matrix_controller:
-            matrix_controller.set_project_context(project_context)
-
-        if self.matrix_project_controller.ltr_integration_service and self.matrix_project_controller.ltr_integration_service.is_project_loaded():
-            logger.debug("Initializing Matrix with LTR data")
-            matrix_controller.initialize_with_ltr_data()
+        # ProjectContext application and Matrix initialization are orchestrated by the caller
+        # (MainWindow via ProjectSessionCoordinator, or local controller for isolated pilot sessions).
 
         return ProjectCreationSessionResult(
             project_context=project_context,

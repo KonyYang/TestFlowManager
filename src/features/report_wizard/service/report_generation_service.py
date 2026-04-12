@@ -94,14 +94,10 @@ class ReportGenerationService:
     def _resolve_output_dir(
         self,
         output_dir: Optional[str] = None,
-        project_path: Optional[str] = None,
         project_context: Optional[ProjectContext] = None,
     ) -> str:
         if output_dir:
             return output_dir
-
-        if project_context is None and project_path:
-            project_context = ProjectContext.from_project_path(project_path)
 
         if project_context and os.path.exists(project_context.project_path):
             resolved_dir = OutputPathResolver.resolve_submitted_material_dir(
@@ -119,11 +115,10 @@ class ReportGenerationService:
 
     def _load_project_json_data(
         self,
-        project_path: Optional[str] = None,
         project_context: Optional[ProjectContext] = None,
     ) -> Optional[Dict[str, Any]]:
-        if project_context is None and project_path:
-            project_context = ProjectContext.from_project_path(project_path)
+        if project_context is None:
+            return None
 
         document_context = ProjectDocumentContext.from_project_context(project_context)
         if document_context.project_data:
@@ -134,7 +129,6 @@ class ReportGenerationService:
         self,
         header_data: HeaderData,
         output_dir: Optional[str] = None,
-        project_path: Optional[str] = None,
         project_context: Optional[ProjectContext] = None,
     ) -> str:
         """
@@ -143,7 +137,7 @@ class ReportGenerationService:
         Args:
             header_data: 页眉数据
             output_dir: 输出目录，如果为None则使用默认目录
-            project_path: 项目路径，用于确定保存位置
+            project_context: 项目上下文，用于确定保存位置
             
         Returns:
             str: 生成的报告文件路径
@@ -157,7 +151,6 @@ class ReportGenerationService:
 
             output_dir = self._resolve_output_dir(
                 output_dir=output_dir,
-                project_path=project_path,
                 project_context=project_context,
             )
             logger.info(f"最终确定的输出目录: {output_dir}")
@@ -273,9 +266,10 @@ class ReportGenerationService:
                     logger.error("修订记录表格日期修改失败")
 
                 # 修改正文 (使用win32com修改)，根据是否有项目数据决定调用哪个方法
-                project_data = self._load_project_json_data(project_path, project_context)
+                project_data = self._load_project_json_data(project_context)
                 if project_data:
-                    logger.info(f"项目已打开: {project_path}，检查JSON文件...")
+                    project_path_display = project_context.project_path if project_context else "unknown"
+                    logger.info(f"项目已打开: {project_path_display}，检查JSON文件...")
                     success4 = header_modifier.update_document_content(project_data)
                 else:
                     logger.info("项目未打开，使用传统方式调用modify_sample_received_date")
@@ -293,7 +287,7 @@ class ReportGenerationService:
                     test_spec_service = TestSpecTablesService()
 
                     # 从项目数据中提取测试样品信息
-                    project_data = self._load_project_json_data(project_path, project_context)
+                    project_data = self._load_project_json_data(project_context)
 
                     if project_data:
                         logger.info("开始填充测试样品信息表格...")
@@ -379,24 +373,25 @@ class ReportGenerationService:
         except Exception as e:
             logger.error(f"在析构函数中清理资源时出错: {e}")
 
-    def load_project_data(self, project_path: str) -> Optional[HeaderData]:
+    def load_project_data(self, project_context: ProjectContext) -> Optional[HeaderData]:
         """
-        从项目路径加载项目数据
+        从项目上下文加载项目数据
         
         Args:
-            project_path: 项目路径
+            project_context: 项目上下文，用于获取 JSON
             
         Returns:
             HeaderData: 从项目中加载的页眉数据，如果失败则返回None
         """
         try:
-            project_data = self._load_project_json_data(project_path=project_path)
+            project_data = self._load_project_json_data(project_context=project_context)
             if not project_data:
-                logger.warning(f"在项目路径中未找到JSON数据: {project_path}")
+                context_path = project_context.project_path if project_context else "unknown"
+                logger.warning(f"在项目路径中未找到JSON数据: {context_path}")
                 return None
 
             header_data = HeaderData.from_json(project_data)
-            logger.info(f"成功从项目上下文加载项目数据: {project_path}")
+            logger.info(f"成功从项目上下文加载项目数据: {project_context.project_path}")
             return header_data
                 
         except Exception as e:
@@ -407,7 +402,6 @@ class ReportGenerationService:
         self,
         header_data: HeaderData,
         output_dir: Optional[str] = None,
-        project_path: Optional[str] = None,
         project_context: Optional[ProjectContext] = None,
     ) -> str:
         """
@@ -416,7 +410,7 @@ class ReportGenerationService:
         Args:
             header_data: 页眉数据
             output_dir: 输出目录，如果为None则使用默认目录
-            project_path: 项目路径，用于确定保存位置
+            project_context: 项目上下文，用于确定保存位置
             
         Returns:
             str: 将要生成的报告文件路径
@@ -424,7 +418,6 @@ class ReportGenerationService:
         try:
             output_dir = self._resolve_output_dir(
                 output_dir=output_dir,
-                project_path=project_path,
                 project_context=project_context,
             )
             logger.info(f"最终确定的输出目录: {output_dir}")

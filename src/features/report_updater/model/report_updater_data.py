@@ -45,11 +45,6 @@ class ReportUpdaterData:
         self.selected_report_type: Optional[str] = None
         self.is_project_loaded: bool = False
         
-    def set_project_path(self, project_path: str) -> None:
-        """设置当前项目路径"""
-        project_context = ProjectContext.from_project_path(project_path) if project_path else None
-        self.set_project_context(project_context)
-
     def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
         if project_context and os.path.exists(project_context.project_path):
             self.current_project_path = project_context.project_path

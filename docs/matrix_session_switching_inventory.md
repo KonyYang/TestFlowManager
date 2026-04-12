@@ -9,9 +9,8 @@
 
 当前代码已经具备以下能力：
 
-- `MatrixServiceProvider` 支持可切换工厂接口
-- `MatrixServiceProvider` 内部已切到可替换 provider 对象
-- `MatrixSessionRegistry` 已引入，用于管理“当前 shared/isolated provider 选择”
+- `matrix_service_provider.py` 已删除（Phase-11）：不再作为共享实例入口
+- `MatrixSessionRegistry` 已引入，用于管理“当前 shared/isolated service 路由选择”
 - `MatrixSessionFactory` 支持 `shared / isolated` 两种装配模式
 - `MainWindowController` 与 `ProjectCreatorController` 已改为通过 `MatrixSessionFactory` 装配 Matrix 会话
 - `MatrixController / MatrixProjectController` 支持显式注入
@@ -57,26 +56,20 @@
 
 ### 4.1 仍保留隐式项目态假设或旧兼容入口的消费方
 
-- `report_updater_data.py`
-- `report_wizard/view/test_spec_tables_page.py`
-- `report_wizard/controller/report_wizard_controller.py`
-- `test_record_controller.py`
+- `report_updater`（仍存在较多历史“project_path 字符串通道”，需要继续收口到 `ProjectContext`）
+- 其他历史页面/对话框中仍可能存在“从 UI 侧临时拼路径/兜底默认目录”的通道（需按模块逐步清理）
 
 说明：
 
-- 主线模块中对全局 `get_current_project_context()` 的直接回退已大幅收口
-- 当前更主要的残留点是旧 `matrix_service` 兼容入口、目录假设，以及未彻底 session 化的页面层
+- `get_current_project_context()` 的主线回退已清零（主线不再依赖全局回退来推断项目路径）。
+- `report_wizard`/`test_record` 的 legacy `matrix_service` 兼容入口已清理完成（详见文档后续更新段落）。
+- 当前更主要的残留点转为：部分模块仍以“共享 Matrix 会话”为默认数据源假设，以及少量目录/输出路径的历史兜底惯性。
 
 ### 4.2 报告向导仍保留的旧 MatrixService 兼容入口
 
-- `report_wizard/view/test_spec_tables_page.py`
-- `report_wizard/controller/report_wizard_controller.py`
+（已清理 2026-04-10~2026-04-11）
 
-说明：
-
-- `test_spec_tables_service.py` 已不再直接通过 provider 取 `MatrixService`
-- 当前已改为优先消费显式传入的 `matrix_headers / matrix_rows` 快照
-- 但 `report_wizard` 页面层仍保留 `matrix_service` 兼容入口，尚未彻底收敛到 `matrix_controller + project_context`
+- `report_wizard` 页面层对 legacy `matrix_service` 的兼容入口已移除，主线改为消费显式注入的 `matrix_controller + project_context`。
 
 ### 4.3 MatrixService 本体仍保留单例语义
 
@@ -86,17 +79,16 @@
 
 - 当前 `isolated` 模式已改为通过 `MatrixService.create_isolated()` 创建独立实例
 - `MatrixService()` 已回归普通实例语义
-- 当前共享语义只保留在 `MatrixService.shared()` 与 `MatrixServiceProvider`
+- 当前共享语义只保留在 `MatrixService.shared()`
 - 这仍属于过渡实现，后续应继续评估如何弱化或替换
 
 ---
 
 ## 5. 推荐切换顺序
 
-1. 先继续减少直接 `get_current_project_context()` fallback
-2. 再收 `report_wizard` 页面层遗留的 `matrix_service` 兼容入口
-3. 然后让 `MatrixSessionFactory` 在测试或新窗口入口上试点 `isolated`
-4. 最后才评估主窗口默认 Matrix 会话是否切换为 `isolated`
+1. 继续保持默认 `shared`，只在受控入口（pilot）扩展 `isolated` 能力与回归覆盖面。
+2. 选择一个“非 debug 的正式业务入口”作为下一批 `isolated` 试点（保持默认不变）。
+3. 在完成跨入口/跨页面的隔离与回滚契约覆盖后，再评估是否推进更广范围的会话化（包括主窗口默认是否切换）。
 
 ---
 
@@ -117,7 +109,20 @@
   - switch absent or falsy => shared mode with injected `MatrixSessionRegistry`
 - Pilot behavior when enabled:
   - project-creation entry uses `mode="isolated"`
-  - no shared registry is passed to that entry, to avoid mutating the main shared session
+  - the shared `MatrixSessionRegistry` may still be passed into that entry
+    (safe because `session_id`-scoped mode routing does not mutate the default shared mode)
+
+### 7.1 Preview Pilot Entry (2026-04-11)
+
+- Added a second isolated-session pilot switch for a non-default preview entry:
+  - entry API: `MainWindowController.handle_open_isolated_matrix_preview_pilot()`
+  - switch: environment variable `TFM_MATRIX_SESSION_ISOLATED_PREVIEW_PILOT`
+  - fixed session id: `pilot:preview`
+- UI trigger (only when the switch is enabled):
+  - shortcut: `Ctrl+Alt+Shift+P` (MainWindow action)
+  - close shortcut: `Ctrl+Alt+Shift+L` (MainWindow action)
+- Default remains unchanged:
+  - switch absent or falsy => no preview session is opened
 
 ## 8. Report Wizard Boundary Update (2026-04-10)
 
@@ -203,9 +208,9 @@
 ## 16. Service Access Consolidation (2026-04-10)
 
 - `MatrixSessionFactory` no longer directly imports or instantiates `MatrixService`.
-- Default shared mode still resolves through `MatrixServiceProvider.get_service()`.
+- Default shared mode resolves through `MatrixSessionRegistry` -> `MatrixService.shared()`.
 - Default isolated mode is now delegated to a local `MatrixSessionRegistry(initial_mode="isolated")`,
-  keeping factory behavior stable while centralizing service-mode routing semantics in registry/provider.
+  keeping factory behavior stable while centralizing service-mode routing semantics in the registry.
 - Added unit guard `test_matrix_service_access_guard.py` to prevent new direct `MatrixService`
   imports in mainline modules outside scoped service-routing points.
 
@@ -650,3 +655,9 @@ Phase 9 transition focus:
   - formal non-debug sessionized entry expansion (controlled + rollback-safe)
   - compatibility fallback surface reduction under existing guard tests
   - preventing direct switch logic bypass outside orchestrator/facade boundary.
+
+## 49. 文档校准结论（2026-04-11）
+
+- 本文档与 `project_session_state_flow.md`、`refactor_compatibility_backlog.md` 共完成 Session/Project 文档盘点，确保“残留兼容点”只在文档说明里出现，代码层面没有新的 `MatrixServiceProvider` / `current_project_context` fallback。
+- 已在 `docs/matrix_session_switching_inventory.md` 说明 `src/app/composition/main_window_assembler.py` 通过 `MatrixWorkspaceCoordinator` 统一装配 `MatrixSessionRegistry/Manager/Orchestrator/Facades`，避免每个 view/controller 重复构建。
+- 这次盘点锁定的剩余兼容点（文档、 guard、测试）均已指向具体 TODO，方便之后直接删除。

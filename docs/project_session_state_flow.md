@@ -213,3 +213,10 @@
 
 - 阶段 6 的第一轮自动化安全网已建立
 - `project.opened + current_project_context` 主线已具备稳定的非 GUI 回归验证口径
+
+## 11. 文档校准结论（2026-04-11）
+
+- Session/Project 文档盘点已完成：`project_session_state_flow.md`、`matrix_session_switching_inventory.md` 与 `refactor_compatibility_backlog.md` 现在都清晰描述了当前唯一的 `ProjectContext` + `project.opened` 主线，同时把剩余的状态/事件通道仅作为兼容记录列出。
+- 新 guard tests `tests/unit/test_project_session_state_guard.py` 和 `tests/unit/test_matrix_service_provider_guard.py` 也上线，确保 `current_project_context` 只能由 `ProjectSessionService` 写入，`MatrixServiceProvider` 不出现在 `src/`，让旧状态/Provider 通道彻底消失。
+- 文档中已补充 `MatrixWorkspaceCoordinator` 作为 `src/app/composition/main_window_assembler.py` 的组装器，明确 `MainWindow`/`MainWindowController` 内部不再直接创建 `MatrixSessionManager`，而是通过 coordinator 注入。
+- 这次盘点确认三份文档中的“残留点清单”与代码搜索结果一致——`matrix_service` 兼容入口、`get_current_project_context` fallback、`MatrixServiceProvider.*` 残留已被清除，文档层面仅留说明。

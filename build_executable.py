@@ -190,16 +190,22 @@ def build_executable():
         return False
 
 
-# 从version.txt文件读取版本号
+# 从src/__init__.py读取版本号
 def get_version():
     """
-    从version.txt文件读取版本号
+    从src/__init__.py读取版本号
     """
-    version_file = Path.cwd() / "version.txt"
-    if version_file.exists():
-        with open(version_file, 'r', encoding='utf-8') as f:
-            return f.read().strip()
-    return "1.0.0"  # 默认版本号
+    try:
+        import sys
+        project_root = Path.cwd()
+        if str(project_root) not in sys.path:
+            sys.path.insert(0, str(project_root))
+        
+        import src
+        return src.__version__
+    except Exception as e:
+        print(f"警告: 无法从src/__init__.py读取版本号: {e}")
+        return "1.0.0"  # 默认版本号
 
 
 def main():
@@ -212,7 +218,7 @@ def main():
     print(f"项目根目录: {project_root}")
     
     # 检查必要的文件是否存在
-    required_files = ["TestFlowManager.spec", "src/app/application.py", "version.txt"]
+    required_files = ["TestFlowManager.spec", "src/app/application.py", "src/__init__.py"]
     missing_files = [f for f in required_files if not (project_root / f).exists()]
     
     if missing_files:
