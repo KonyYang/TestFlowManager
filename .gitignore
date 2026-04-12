@@ -1,53 +1,15 @@
-# Build outputs
-/build/
-/dist/*.exe
-/dist/*.pkg
-/dist/Backup/
-/dist/Projects/
-/dist/Temp/
-/dist/Template/
-/dist/config/
-/dist/logs/
-/dist/resources/
-/dist/start.bat
-/dist/README.txt
-
-# IDE files
-/.idea/
-/.vscode/
-*.iml
-.ipynb_checkpoints/
-
-# Python cache
-**/__pycache__/
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-tests/testflow.log
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
 logs/
-
-# Node modules
-/node_modules/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.bak
-*.swp
-*~
-
-# Documentation build
-docs/_build/
-
-# Local configuration
-*.local
-.env
+tmp_git_analysis.py
+tmp_pytest/
+.pytest_cache/

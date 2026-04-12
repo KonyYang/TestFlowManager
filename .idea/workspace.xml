@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="eb45768c-6138-4b42-ba4c-85a3bc2bc60f" name="Changes" comment="feat(matrix): 添加费用表导出和项目集成服务&#10;&#10;- 实现了 BasicInfoDialog 类用于显示和编辑项目基本信息&#10;- 创建了 FeeSheetExportService 服务用于生成费用表&#10;- 添加了 ImportExportManager 管理器处理Matrix视图的导入导出&#10;- 实现了 LTRProjectIntegrationService 服务用于LTR项目与Matrix模块集成&#10;- 添加了 MatrixSessionFactory、MatrixSessionRegistry 等矩阵会话管理组件&#10;- 创建了 MatrixSessionOrchestrator 协调矩阵会话操作流程&#10;- 实现了 MatrixSessionEntryPolicyTable 管理会话入口策略&#10;- 添加了 MatrixSessionDebugCommands 和 MatrixSessionDebugFacade 调试工具&#10;- 创建了 MatrixSessionEntryFacade 作为矩阵会话入口门面接口">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    </list>
+    <list id="cd1585ca-d35f-42c3-ad4f-96afbeac4d79" name="DelFiles" comment="DelFiles" />
+    <list id="52ad285d-ee64-421c-978e-a10523f905df" name="Other changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="382" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Unit Test" />
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="feature/ltr-manager" />
+    <option name="OPTIONS">
+      <set>
+        <option value="NO_FF" />
+      </set>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <branch-grouping />
+    <option name="PUSH_AUTO_UPDATE" value="true" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="feature/integrate-matrix-into-main-window1207" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;KonyYang&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:KonyYang/TestFlowManager&quot;,
+    &quot;accountId&quot;: &quot;637d2806-f925-4c53-b3d1-94b81fff69ed&quot;
+  },
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
+    },
+    &quot;owner&quot;: &quot;KonyYang&quot;,
+    &quot;repository&quot;: &quot;TestFlowManager&quot;
+  },
+  &quot;editorReviewEnabled&quot;: false
+}</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/PyCharmCE2025.2/python_stubs/-1126411478/PyQt5/QtWidgets/QDialog.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/../../ProgramData/anaconda3/envs/TestFlowManager/Lib/site-packages/_pytest/runner.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/../../ProgramData/anaconda3/envs/TestFlowManager/Lib/site-packages/jupyter_server/services/contents/fileio.py" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="32C849g8FmwHmAIRBIAmGEpR6O8" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python tests.Python tests for tests.test_matrix_module.TestMatrixModule.executor": "Run",
+    "Python tests.Python tests for tests.test_matrix_module.TestMatrixModule.test_export_import_excel.executor": "Run",
+    "Python tests.Python tests for tests.test_matrix_module.TestMatrixModule.test_matrix_data_initialization.executor": "Run",
+    "Python tests.Python tests for tests.test_msg_attachment_extraction.test_extract_msg_attachments.executor": "Run",
+    "Python tests.Python tests in simple_test.py.executor": "Run",
+    "Python tests.Python tests in tempfile_1757027871196.py.executor": "Run",
+    "Python tests.Python tests in test_event_handlers.py.executor": "Run",
+    "Python tests.Python tests in test_excel_formatting.py.executor": "Run",
+    "Python tests.Python tests in test_fee_table_generator.py.executor": "Run",
+    "Python tests.Python tests in test_initialize_matrix.py.executor": "Run",
+    "Python tests.Python tests in test_ltr_data_manager_filename.py.executor": "Run",
+    "Python tests.Python tests in test_matrix_module.py.executor": "Run",
+    "Python tests.Python tests in test_msg_attachment_extraction.py.executor": "Run",
+    "Python tests.Python tests in test_performance_bottleneck.py.executor": "Run",
+    "Python tests.Python tests in test_record_data_table_export.py.executor": "Run",
+    "Python tests.Python tests in test_replace_placeholders_enhanced.py.executor": "Run",
+    "Python tests.Python tests in test_report_wizard.py.executor": "Run",
+    "Python tests.Python tests in test_splash_screen.py.executor": "Run",
+    "Python tests.Python tests in test_summary.py.executor": "Run",
+    "Python tests.Python tests in test_table_operation.py.executor": "Run",
+    "Python.QQtestable.executor": "Run",
+    "Python.application.executor": "Run",
+    "Python.build_executable.executor": "Run",
+    "Python.copy_and_fill_testing_fee_xls.executor": "Run",
+    "Python.copy_template.executor": "Run",
+    "Python.creatematrix.executor": "Run",
+    "Python.dl_input_dialog.executor": "Run",
+    "Python.excel_dual_password.executor": "Run",
+    "Python.excel_password_protector.executor": "Run",
+    "Python.excel_protect_cli.executor": "Run",
+    "Python.excel_protect_simple.executor": "Run",
+    "Python.excel_utils.executor": "Run",
+    "Python.exctractMSG.executor": "Run",
+    "Python.extractMSG.executor": "Run",
+    "Python.extract_project.executor": "Run",
+    "Python.fill_equipment.executor": "Run",
+    "Python.fill_equipment_optimized.executor": "Run",
+    "Python.find_group (1).executor": "Run",
+    "Python.find_private_methods.executor": "Run",
+    "Python.ltr_view.executor": "Run",
+    "Python.main_window_controller.executor": "Run",
+    "Python.main_window_service.executor": "Run",
+    "Python.manual_test_matrix_gui.executor": "Run",
+    "Python.preserve_format_fill_xls.executor": "Run",
+    "Python.standalone_docx_replacer.executor": "Run",
+    "Python.tempfile_1757027871196.executor": "Run",
+    "Python.test_integration_ltr_password (1).executor": "Run",
+    "Python.test_integration_ltr_password.executor": "Run",
+    "Python.test_integration_ltr_view.executor": "Run",
+    "Python.test_matrix_changes.executor": "Run",
+    "Python.test_matrix_filter.executor": "Run",
+    "Python.test_matrix_gui_simple.executor": "Run",
+    "Python.test_msg_attachment_extraction.executor": "Run",
+    "Python.testflow_project_generator.executor": "Run",
+    "Python.ui_modernization_demo.executor": "Run",
+    "Python.wordform.executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "feature/integrate-matrix-into-main-window1206",
+    "javascript.nodejs.core.library.configured.version": "24.14.1",
+    "javascript.nodejs.core.library.typings.version": "24.12.2",
+    "javascript.preferred.runtime.type.id": "node",
+    "last_opened_file_path": "D:/PythonProject/TestFlowManager",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "ml.llm.LLMThirdPartyAiProvidersConfigurable",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\PythonProject\TestFlowManager" />
+      <recent name="D:\PythonProject\TestFlowManager\tests\refer_source" />
+      <recent name="D:\PythonProject\TestFlowManager\tests" />
+      <recent name="D:\PythonProject\TestFlowManager\src\features\matrix" />
+      <recent name="D:\PythonProject\TestFlowManager\src\features\ltr_manager\service\application_processing" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\PythonProject\TestFlowManager" />
+      <recent name="D:\PythonProject\TestFlowManager\tools" />
+      <recent name="D:\PythonProject\TestFlowManager\src\features\report_wizard\service" />
+      <recent name="D:\PythonProject\TestFlowManager\src\features\report_wizard\service\utils" />
+      <recent name="D:\PythonProject\TestFlowManager\tests" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.application">
+    <configuration name="application" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="TestFlowManager" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/app" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/app/application.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="build_executable" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="TestFlowManager" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/build_executable.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in D:/PythonProject/TestFlowManager/tests/test_performance_bottleneck.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="TestFlowManager" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_performance_bottleneck.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in D:/PythonProject/TestFlowManager/tests/test_splash_screen.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="TestFlowManager" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_splash_screen.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test_event_handlers.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="TestFlowManager" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/unit/test_event_handlers.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.application" />
+        <item itemvalue="Python.build_executable" />
+        <item itemvalue="Python tests.Python tests in D:/PythonProject/TestFlowManager/tests/test_splash_screen.py" />
+        <item itemvalue="Python tests.Python tests in D:/PythonProject/TestFlowManager/tests/test_performance_bottleneck.py" />
+        <item itemvalue="Python tests.Python tests in test_event_handlers.py" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-b63d5a1f7c97-b61e75351b1f-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.22158.340" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="eb45768c-6138-4b42-ba4c-85a3bc2bc60f" name="Changes" comment="" />
+      <changelist id="cd1585ca-d35f-42c3-ad4f-96afbeac4d79" name="DelFiles" comment="" />
+      <changelist id="52ad285d-ee64-421c-978e-a10523f905df" name="Other changelist" comment="" />
+      <created>1756912999211</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1756912999211</updated>
+      <workItem from="1775872167365" duration="27199000" />
+      <workItem from="1775946269178" duration="6475000" />
+      <workItem from="1775953582147" duration="3700000" />
+    </task>
+    <task id="LOCAL-00107" summary="fix(word): 修复Word应用程序后台运行和资源释放问题&#10;&#10;- 在BodyContentService初始化时确保Word应用在后台运行&#10;- 修改update_paragraph_content方法使用局部变量避免属性冲突&#10;- 添加finally块确保Word应用程序在操作完成后正确关闭&#10;- 实现析构函数确保Word应用程序资源被正确释放&#10;- 在DocumentParserService中设置Word应用不可见和禁用警告&#10;- 更新HeaderModifier确保Word应用保持不可见状态&#10;- 在ReportGenerationService中添加Word应用关闭逻辑&#10;- 实现DocumentEditorMixin中保存按钮状态的动态更新&#10;- 添加_update_save_button_state方法控制保存按钮启用状态">
+      <option name="closed" value="true" />
+      <created>1767612238296</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1767612238296</updated>
+    </task>
+    <task id="LOCAL-00108" summary="refactor(document_parser): 移除正文内容编辑相关功能模块&#10;&#10;- 移除 body_content_service 模块及其配置文件&#10;- 移除 body_content_dialog 视图组件&#10;- 移除 document_editor_mixin 工具类&#10;- 更新 DocumentContentEditor 中的导入路径&#10;- 修改 update_content_between_sections 方法为 update_multiple_sections_content&#10;- 调整 report_wizard 模块中的导入路径以避免循环依赖">
+      <option name="closed" value="true" />
+      <created>1767615948560</created>
+      <option name="number" value="00108" />
+      <option name="presentableId" value="LOCAL-00108" />
+      <option name="project" value="LOCAL" />
+      <updated>1767615948560</updated>
+    </task>
+    <task id="LOCAL-00109" summary="feat(report): 添加样品接收日期字段和相关功能&#10;&#10;- 在HeaderData模型中添加date_lab_received_samples字段&#10;- 在报告向导头部信息页面添加样品接收日期输入控件&#10;- 实现样品接收日期的格式化和解析功能&#10;- 更新JSON序列化和反序列化以包含新日期字段&#10;- 添加日期解析的多种格式支持和错误处理&#10;- 移除内容编辑器相关的控制器和服务模块">
+      <option name="closed" value="true" />
+      <created>1767653406275</created>
+      <option name="number" value="00109" />
+      <option name="presentableId" value="LOCAL-00109" />
+      <option name="project" value="LOCAL" />
+      <updated>1767653406275</updated>
+    </task>
+    <task id="LOCAL-00110" summary="refactor(report_wizard): 优化向导页面状态管理和文档内容加载&#10;&#10;- 添加缓存机制保持用户编辑内容状态&#10;- 实现文档内容加载功能支持PURPOSE和CONCLUSIONS章节&#10;- 重构页眉信息页面数据缓存和状态保持逻辑&#10;- 拆分页眉修改器服务为独立工具模块提高代码可维护性&#10;- 优化日期处理和表格操作功能提升性能表现">
+      <option name="closed" value="true" />
+      <created>1767695462465</created>
+      <option name="number" value="00110" />
+      <option name="presentableId" value="LOCAL-00110" />
+      <option name="project" value="LOCAL" />
+      <updated>1767695462465</updated>
+    </task>
+    <task id="LOCAL-00111" summary="feat(report_wizard): 添加Test Spec Tables页面实现自动化填充&#10;&#10;- 添加TestSpecTablesPage页面视图组件，支持测试规格表格填写向导&#10;- 实现ReportWizardDialog中TestSpecTablesPage的集成和页面导航逻辑&#10;- 添加Matrix服务支持，实现文档路径和Matrix数据结构的传递机制&#10;- 实现TestSpecTablesWorker后台线程处理表格填充操作&#10;- 添加完整的日期处理、页眉管理、表格处理和单元格修改工具模块&#10;- 修复test_record_service中模板组别数量计算逻辑，从默认2组改为1组&#10;- 实现header_manager中页眉内容的精准填写功能&#10;- 添加table_handler中修订记录表格日期修改功能&#10;- 实现cell_modifier中单元格文本替换并保留格式的功能">
+      <option name="closed" value="true" />
+      <created>1767738878308</created>
+      <option name="number" value="00111" />
+      <option name="presentableId" value="LOCAL-00111" />
+      <option name="project" value="LOCAL" />
+      <updated>1767738878308</updated>
+    </task>
+    <task id="LOCAL-00112" summary="feat(report_wizard): 集成Matrix服务到报告向导功能&#10;&#10;- 在主窗口中将Matrix服务传递给报告向导控制器&#10;- 为报告向导控制器添加Matrix服务设置方法&#10;- 在测试规格表页面中传递Matrix服务给工作线程&#10;- 添加详细的数据结构日志记录功能&#10;- 实现安全的回调函数调用机制以处理Qt信号&#10;- 在服务层使用安全回调调用进度和状态更新">
+      <option name="closed" value="true" />
+      <created>1767744124714</created>
+      <option name="number" value="00112" />
+      <option name="presentableId" value="LOCAL-00112" />
+      <option name="project" value="LOCAL" />
+      <updated>1767744124714</updated>
+    </task>
+    <task id="LOCAL-00113" summary="refactor(matrix): 实现MatrixService单例模式并优化导出控制器&#10;&#10;- 将MatrixService改为单例模式，避免重复实例化&#10;- 为ExportController实现RecordDataTableExportController的懒加载&#10;- 禁用报告向导中的上一步功能以简化操作流程&#10;- 修改报告生成服务的默认输出目录路径&#10;- 移除header_modifier中重复的格式化方法&#10;- 重构TestSpecTablesService使用win32com处理Word文档&#10;- 添加矩阵数据结构解析状态检查避免重复解析&#10;- 创建MatrixService备份文件以保留原有实现">
+      <option name="closed" value="true" />
+      <created>1767830713548</created>
+      <option name="number" value="00113" />
+      <option name="presentableId" value="LOCAL-00113" />
+      <option name="project" value="LOCAL" />
+      <updated>1767830713548</updated>
+    </task>
+    <task id="LOCAL-00114" summary="refactor(matrix): 实现MatrixService单例模式并优化导出控制器&#10;&#10;- 将MatrixService改为单例模式，避免重复实例化&#10;- 为ExportController实现RecordDataTableExportController的懒加载&#10;- 禁用报告向导中的上一步功能以简化操作流程&#10;- 修改报告生成服务的默认输出目录路径&#10;- 移除header_modifier中重复的格式化方法&#10;- 重构TestSpecTablesService使用win32com处理Word文档&#10;- 添加矩阵数据结构解析状态检查避免重复解析&#10;- 创建MatrixService备份文件以保留原有实现">
+      <option name="closed" value="true" />
+      <created>1767873245887</created>
+      <option name="number" value="00114" />
+      <option name="presentableId" value="LOCAL-00114" />
+      <option name="project" value="LOCAL" />
+      <updated>1767873245888</updated>
+    </task>
+    <task id="LOCAL-00115" summary="feat(report_wizard): 优化表格宽度设置并添加Sample行背景色&#10;&#10;- 将表格宽度设置从90%调整为100%，确保充分利用页面宽度&#10;- 添加Sample size行背景色设置功能，自动识别并设置浅蓝色背景&#10;- 实现表格最后一行底纹设置功能，支持win32com和python-docx两种方式&#10;- 优化表格格式设置逻辑，增强背景色设置的稳定性和兼容性&#10;- 添加详细的日志记录和异常处理机制">
+      <option name="closed" value="true" />
+      <created>1767874293196</created>
+      <option name="number" value="00115" />
+      <option name="presentableId" value="LOCAL-00115" />
+      <option name="project" value="LOCAL" />
+      <updated>1767874293196</updated>
+    </task>
+    <task id="LOCAL-00116" summary="refactor(report_wizard): 重构Word文档表格填充功能&#10;&#10;- 将_fill_description_table方法重命名为_fill_description_table_win32com&#10;- 修改_fill_method_table_win32com方法参数，添加document_path和word_app_instance&#10;- 更新Matrix数据获取逻辑，从MatrixService动态获取表格数据&#10;- 调整表格行数和列数的处理逻辑，支持动态调整表格尺寸&#10;- 优化数据填充逻辑，按指定列索引(0,2,3,4)填充Test Item、Test Method、Condition和Requirements&#10;- 添加Word文档打开、保存和关闭的完整流程管理&#10;- 改进错误处理和日志记录机制&#10;- 保持表格格式和样式的正确应用">
+      <option name="closed" value="true" />
+      <created>1767885779145</created>
+      <option name="number" value="00116" />
+      <option name="presentableId" value="LOCAL-00116" />
+      <option name="project" value="LOCAL" />
+      <updated>1767885779145</updated>
+    </task>
+    <task id="LOCAL-00117" summary="refactor(report_wizard): 移除表格处理相关功能和调试日志&#10;&#10;- 移除了 _find_table_by_paragraph 方法及其相关辅助方法&#10;- 移除了 _is_bold_uppercase 和 _is_bold_uppercase_in_cell 辅助方法&#10;- 注释掉了调试日志输出代码&#10;- 移除了 cell 变量声明以简化代码逻辑&#10;- 移除了 Sample size 行背景色设置功能&#10;- 移除了 _fill_method_table 和 _set_last_row_shading 相关方法&#10;- 优化了表格列数调整逻辑的注释处理">
+      <option name="closed" value="true" />
+      <created>1767915415317</created>
+      <option name="number" value="00117" />
+      <option name="presentableId" value="LOCAL-00117" />
+      <option name="project" value="LOCAL" />
+      <updated>1767915415318</updated>
+    </task>
+    <task id="LOCAL-00118" summary="refactor(report_wizard): 将Word表格处理功能提取到独立工具类&#10;&#10;- 将表格格式化方法apply_table_formatting移动到TableHandler工具类&#10;- 将根据段落查找表格方法find_table_by_paragraph_win32com移动到TableHandler工具类&#10;- 在test_spec_tables_service中引入并使用TableHandler工具类方法&#10;- 删除test_spec_tables_service中的重复实现代码&#10;- 添加win32com.client导入到table_handler模块&#10;- 实现更稳定的表格格式设置策略，包括边框、宽度调整和垂直对齐">
+      <option name="closed" value="true" />
+      <created>1767916219010</created>
+      <option name="number" value="00118" />
+      <option name="presentableId" value="LOCAL-00118" />
+      <option name="project" value="LOCAL" />
+      <updated>1767916219010</updated>
+    </task>
+    <task id="LOCAL-00119" summary="feat(report_wizard): 添加Test Result表格生成功能&#10;&#10;- 集成TestResultService服务用于生成Test Result表格&#10;- 在TestSpecTablesService中添加TestResultService实例&#10;- 实现Test Result表格的复制和填充功能&#10;- 添加对Word文档中TEST RESULTS段落的查找和处理&#10;- 实现组别标题的动态更新功能&#10;- 添加对大于小于符号的特殊处理和文本清理功能&#10;- 优化Word文档操作流程，确保正确关闭应用实例&#10;- 重构表格填充方法，统一使用外部传入的Word应用实例&#10;- 添加进度和状态回调支持，提升用户体验">
+      <option name="closed" value="true" />
+      <created>1768004614241</created>
+      <option name="number" value="00119" />
+      <option name="presentableId" value="LOCAL-00119" />
+      <option name="project" value="LOCAL" />
+      <updated>1768004614241</updated>
+    </task>
+    <task id="LOCAL-00120" summary="feat(report_wizard): 添加Test Result表格填充功能并优化查找逻辑&#10;&#10;- 实现了Group # Test Results段落的查找和处理逻辑&#10;- 修改了表格复制机制以同时复制标题段落和表格内容&#10;- 更新了组别标题更新功能，支持动态替换占位符&#10;- 重命名fill_test_description_and_methods为fill_all_test_spec_tables&#10;- 保持原有标题行格式不变，仅填充数据行内容&#10;- 优化了日志输出和错误处理机制">
+      <option name="closed" value="true" />
+      <created>1768172943463</created>
+      <option name="number" value="00120" />
+      <option name="presentableId" value="LOCAL-00120" />
+      <option name="project" value="LOCAL" />
+      <updated>1768172943463</updated>
+    </task>
+    <task id="LOCAL-00121" summary="fix(report): 解决多列表格超出页面宽度问题&#10;&#10;- 为多列表格设置更小的列宽以避免超过页面宽度&#10;- 对于超过10列的表格进一步减小列宽至60磅&#10;- 添加异常处理当单列宽度设置失败时尝试设置整个表格宽度&#10;- 针对多列表格实现特殊的窄列模式处理&#10;- 限制测试规范表格的最大列数防止超出Word限制&#10;- 在添加新列前调整现有列宽度为新列预留空间&#10;- 添加列数限制警告和错误处理机制">
+      <option name="closed" value="true" />
+      <created>1768174256513</created>
+      <option name="number" value="00121" />
+      <option name="presentableId" value="LOCAL-00121" />
+      <option name="project" value="LOCAL" />
+      <updated>1768174256513</updated>
+    </task>
+    <task id="LOCAL-00122" summary="refactor(report_wizard): 重构报告向导流程并优化Word文档处理&#10;&#10;- 移除完成按钮和相关逻辑，处理成功后直接关闭向导&#10;- 注释掉next_clicked信号连接，简化页面导航流程&#10;- 修改TestResultService支持传入Word应用和文档实例&#10;- 添加参数控制是否自动保存文档，避免重复保存&#10;- 优化资源管理，只在必要时关闭Word应用程序&#10;- 统一文档保存逻辑，在所有处理完成后一次性保存&#10;- 确保传入的Word应用实例保持隐藏状态">
+      <option name="closed" value="true" />
+      <created>1768219329235</created>
+      <option name="number" value="00122" />
+      <option name="presentableId" value="LOCAL-00122" />
+      <option name="project" value="LOCAL" />
+      <updated>1768219329235</updated>
+    </task>
+    <task id="LOCAL-00123" summary="feat(report_wizard): 添加项目路径支持和文件名清理功能&#10;&#10;- 新增 _sanitize_filename 方法清理文件名中的非法字符&#10;- 修改 create_report_from_template 方法添加 project_path 参数&#10;- 实现根据项目路径中的 JSON 文件查找 DL 编号并确定输出目录&#10;- 更新报告文件名格式为 &quot;报告编号 报告标题 Report_Rev_版本号&quot;&#10;- 修改 get_generated_report_path 方法支持项目路径参数&#10;- 在控制器中传递当前项目路径到报告生成服务&#10;- 移动测试文件到 tests 目录并更新导入路径&#10;- 添加路径规范化处理避免斜杠问题&#10;- 增加详细的日志记录用于调试路径处理逻辑">
+      <option name="closed" value="true" />
+      <created>1768234436850</created>
+      <option name="number" value="00123" />
+      <option name="presentableId" value="LOCAL-00123" />
+      <option name="project" value="LOCAL" />
+      <updated>1768234436850</updated>
+    </task>
+    <task id="LOCAL-00124" summary="feat(report_updater): 添加报告更新功能模块&#10;&#10;- 新增report_updater模块的完整MVC架构&#10;- 实现报告文件选择和设备列表更新功能&#10;- 添加Word和Excel文档的设备表格更新支持&#10;- 集成报告更新功能到主窗口菜单系统&#10;- 优化features模块导入机制避免循环依赖&#10;- 添加项目根目录路径配置确保模块正确导入">
+      <option name="closed" value="true" />
+      <created>1768261735575</created>
+      <option name="number" value="00124" />
+      <option name="presentableId" value="LOCAL-00124" />
+      <option name="project" value="LOCAL" />
+      <updated>1768261735575</updated>
+    </task>
+    <task id="LOCAL-00125" summary="refactor(report): 优化报告生成器中的文本处理和日期替换逻辑&#10;&#10;- 更新format_processor.py中的文本移动逻辑，支持多种场景下的文本处理&#10;- 重构header_modifier.py中的日期替换功能，改进正则表达式匹配模式&#10;- 增强对文档中不同文本组合情况的处理能力&#10;- 优化代码结构以提高文本处理的准确性和稳定性">
+      <option name="closed" value="true" />
+      <created>1768348623464</created>
+      <option name="number" value="00125" />
+      <option name="presentableId" value="LOCAL-00125" />
+      <option name="project" value="LOCAL" />
+      <updated>1768348623464</updated>
+    </task>
+    <task id="LOCAL-00126" summary="feat(report_wizard): 添加Word文档页眉精确修改功能&#10;&#10;- 实现首页页眉表格内容的精确定位和填充功能&#10;- 新增第二节页眉中Report No.字段的精确替换功能&#10;- 添加文档占位符批量替换机制支持&#10;- 实现文档复用机制避免重复打开关闭操作&#10;- 增加文件复制时的权限错误重试机制&#10;- 优化文档处理流程提升稳定性和性能&#10;- 修复JSON加载时的语法错误问题">
+      <option name="closed" value="true" />
+      <created>1768405573319</created>
+      <option name="number" value="00126" />
+      <option name="presentableId" value="LOCAL-00126" />
+      <option name="project" value="LOCAL" />
+      <updated>1768405573320</updated>
+    </task>
+    <task id="LOCAL-00127" summary="feat(ltr_manager): 增强Word文档数据提取和报告生成功能&#10;&#10;- 扩展数据提取器支持多列样品信息提取（产品名称、料号、批次、基材、镀层、润滑油、塑材）&#10;- 修改数据提取方法返回字典格式包含详细的样品信息字段&#10;- 在LTR申请流程中集成Word文档重新提取功能以获取完整数据&#10;- 增加对提取数据的传递和合并机制到申请单对话框&#10;- 新增样品信息字段到LTR申请数据模型中&#10;- 实现测试样品信息表格的自动填充功能&#10;- 添加Word文档COM连接异常处理和资源管理&#10;- 创建样品数据提取工具和测试样品信息服务模块">
+      <option name="closed" value="true" />
+      <created>1768484528670</created>
+      <option name="number" value="00127" />
+      <option name="presentableId" value="LOCAL-00127" />
+      <option name="project" value="LOCAL" />
+      <updated>1768484528670</updated>
+    </task>
+    <task id="LOCAL-00128" summary="fix(report): 解决报告生成中的文件保存和依赖路径问题&#10;&#10;- 在修订记录表格修改后立即保存文档避免数据丢失&#10;- 修复test_result_service模块的导入路径问题&#10;- 移除不必要的requirement过滤逻辑并保留原始需求值&#10;- 修正Word应用程序和文档实例的关闭条件判断&#10;- 添加调试信息输出以便跟踪需求处理过程">
+      <option name="closed" value="true" />
+      <created>1768489384715</created>
+      <option name="number" value="00128" />
+      <option name="presentableId" value="LOCAL-00128" />
+      <option name="project" value="LOCAL" />
+      <updated>1768489384715</updated>
+    </task>
+    <task id="LOCAL-00129" summary="feat(report_updater): 实现从Excel源更新Word文档设备列表功能&#10;&#10;- 添加设备配置管理器，支持外部Excel数据源配置&#10;- 实现从Word文档中提取设备ID的功能&#10;- 集成win32com库实现在Word文档中定位目标表格&#10;- 添加Excel数据匹配和日期格式化处理功能&#10;- 实现设备信息从Excel到Word表格的自动化填充&#10;- 添加表格边框和格式保持功能&#10;- 修改基础信息对话框窗口尺寸和多行文本字段显示行数&#10;- 添加模块版本号和作者信息">
+      <option name="closed" value="true" />
+      <created>1768633665909</created>
+      <option name="number" value="00129" />
+      <option name="presentableId" value="LOCAL-00129" />
+      <option name="project" value="LOCAL" />
+      <updated>1768633665909</updated>
+    </task>
+    <task id="LOCAL-00130" summary="feat(report_updater): 实现从Excel源更新Word文档设备列表功能&#10;&#10;- 添加设备配置管理器，支持外部Excel数据源配置&#10;- 实现从Word文档中提取设备ID的功能&#10;- 集成win32com库实现在Word文档中定位目标表格&#10;- 添加Excel数据匹配和日期格式化处理功能&#10;- 实现设备信息从Excel到Word表格的自动化填充&#10;- 添加表格边框和格式保持功能&#10;- 修改基础信息对话框窗口尺寸和多行文本字段显示行数&#10;- 添加模块版本号和作者信息">
+      <option name="closed" value="true" />
+      <created>1768657950068</created>
+      <option name="number" value="00130" />
+      <option name="presentableId" value="LOCAL-00130" />
+      <option name="project" value="LOCAL" />
+      <updated>1768657950068</updated>
+    </task>
+    <task id="LOCAL-00131" summary="feat(report): 实现项目打开时自动更新报告功能&#10;&#10;- 添加project.opened事件订阅处理项目打开逻辑&#10;- 在项目打开时更新窗口标题和状态信息&#10;- 通过事件分发器通知其他组件项目已打开&#10;- 报告更新控制器从状态管理器获取当前项目路径&#10;- 使用openpyxl替换pandas读取Excel文件提高性能&#10;- 更新报告更新对话框界面布局和尺寸设置&#10;- 实现Matrix控制器LTR编号自动设置功能">
+      <option name="closed" value="true" />
+      <created>1768834348540</created>
+      <option name="number" value="00131" />
+      <option name="presentableId" value="LOCAL-00131" />
+      <option name="project" value="LOCAL" />
+      <updated>1768834348540</updated>
+    </task>
+    <task id="LOCAL-00132" summary="feat(config): 添加设备数据源配置并优化Excel文件读取功能&#10;&#10;- 在配置管理器中添加设备数据源配置加载功能&#10;- 修改路径配置文件中的设备数据源节名称&#10;- 添加win32com客户端缓存导入用于Excel操作&#10;- 重构Excel数据读取逻辑，使用win32com直接读取避免pandas初始化问题&#10;- 实现Excel文件读取的备选方案，当主方法失败时使用openpyxl回退&#10;- 更新数据访问方式，将pandas DataFrame操作改为直接列表索引访问&#10;- 修复日期格式化输出错误，确保校准到期日期正确显示">
+      <option name="closed" value="true" />
+      <created>1768953899918</created>
+      <option name="number" value="00132" />
+      <option name="presentableId" value="LOCAL-00132" />
+      <option name="project" value="LOCAL" />
+      <updated>1768953899919</updated>
+    </task>
+    <task id="LOCAL-00133" summary="refactor(report): 优化Word文档处理流程使用win32com替代python-docx&#10;&#10;- 修复文件夹管理服务中的返回路径变量错误&#10;- 添加win32com方式修改修订记录日期的新方法modify_revision_record_date_win32com&#10;- 移除HeaderModifier中跳过保存的参数，统一文档生命周期管理&#10;- 重构占位符替换逻辑，添加替换统计和调试日志&#10;- 优化文档打开逻辑，复用已存在的文档实例避免重复打开&#10;- 更新报告生成服务使用动态模板文件查找而非硬编码路径&#10;- 完全迁移到win32com进行文档操作，移除python-docx依赖的混合模式&#10;- 改进错误处理和COM对象资源管理，确保文档正确关闭和保存&#10;- 优化测试样品信息表格填充，传递文档实例避免重复打开文档">
+      <option name="closed" value="true" />
+      <created>1769425039036</created>
+      <option name="number" value="00133" />
+      <option name="presentableId" value="LOCAL-00133" />
+      <option name="project" value="LOCAL" />
+      <updated>1769425039036</updated>
+    </task>
+    <task id="LOCAL-00134" summary="feat(build): 更新构建脚本添加资源文件复制和时间戳版本&#10;&#10;- 添加配置文件目录不存在时的警告提示&#10;- 实现资源文件夹（图标等）的自动复制功能&#10;- 添加字体和样式文件的复制逻辑&#10;- 将README发布日期改为动态获取当前日期&#10;- 修改可执行文件重命名规则，包含版本号和时间戳&#10;- 在必要文件检查列表中添加version.txt&#10;- 降低报告向导服务中的替换统计日志级别&#10;- 移除未使用的文档另存代码&#10;- 更新设备数据源配置文件路径设置">
+      <option name="closed" value="true" />
+      <created>1769470453365</created>
+      <option name="number" value="00134" />
+      <option name="presentableId" value="LOCAL-00134" />
+      <option name="project" value="LOCAL" />
+      <updated>1769470453365</updated>
+    </task>
+    <task id="LOCAL-00135" summary="feat(ltr): 添加文件占用检测功能&#10;&#10;- 在 LTR 基础服务中添加 check_file_not_locked 方法用于检测文件是否被其他进程占用&#10;- 在 LTR 编辑服务中集成文件占用检测逻辑并优化错误提示信息&#10;- 在 LTR 号码生成器中添加文件占用检查防止并发访问冲突&#10;- 使用二进制读写模式检测文件锁定状态避免文本编码问题&#10;- 添加详细的占用文件错误提示和用户友好的警告消息框&#10;- 引入时间模块支持文件操作的时间相关功能">
+      <option name="closed" value="true" />
+      <created>1769556944774</created>
+      <option name="number" value="00135" />
+      <option name="presentableId" value="LOCAL-00135" />
+      <option name="project" value="LOCAL" />
+      <updated>1769556944774</updated>
+    </task>
+    <task id="LOCAL-00136" summary="feat(matrix): 添加费用表导出功能&#10;&#10;- 新增费用表导出服务模块，包括FeeSheetExportService等核心服务&#10;- 在矩阵工具栏添加生成费用表按钮并集成相关事件处理&#10;- 实现从Matrix数据结构提取测试项目信息的功能&#10;- 完成费用表模板查找、数据填充和Excel操作逻辑&#10;- 移除已废弃的_test_items方法，优化代码结构&#10;- 更新导出服务模块的初始化文件和导入配置">
+      <option name="closed" value="true" />
+      <created>1769988861239</created>
+      <option name="number" value="00136" />
+      <option name="presentableId" value="LOCAL-00136" />
+      <option name="project" value="LOCAL" />
+      <updated>1769988861239</updated>
+    </task>
+    <task id="LOCAL-00137" summary="fix(matrix): 解决费用表导出服务中的重复测试项问题&#10;&#10;- 添加去重逻辑确保每个组别中的同名测试只保留一次&#10;- 修改代码使用去重后的测试列表替代原始列表进行数据填充&#10;- 更新调试日志显示去重前后的测试数量对比&#10;- 修复因重复测试导致的数据插入错误问题">
+      <option name="closed" value="true" />
+      <created>1769989337006</created>
+      <option name="number" value="00137" />
+      <option name="presentableId" value="LOCAL-00137" />
+      <option name="project" value="LOCAL" />
+      <updated>1769989337006</updated>
+    </task>
+    <task id="LOCAL-00138" summary="fix(excel): 修正费用评估表数据写入位置并添加自适应行高功能&#10;&#10;- 修正Excel数据写入位置，将B/E列改为D/G列&#10;- 添加插入行的自适应高度设置功能&#10;- 实现第6行到当前行的自动行高调整&#10;- 增加行高设置异常处理和日志记录&#10;- 确保内容完整显示而不会被截断">
+      <option name="closed" value="true" />
+      <created>1770029198498</created>
+      <option name="number" value="00138" />
+      <option name="presentableId" value="LOCAL-00138" />
+      <option name="project" value="LOCAL" />
+      <updated>1770029198499</updated>
+    </task>
+    <task id="LOCAL-00139" summary="fix(excel): 修正费用评估表数据写入位置并添加自适应行高功能&#10;&#10;- 修正Excel数据写入位置，将B/E列改为D/G列&#10;- 添加插入行的自适应高度设置功能&#10;- 实现第6行到当前行的自动行高调整&#10;- 增加行高设置异常处理和日志记录&#10;- 确保内容完整显示而不会被截断">
+      <option name="closed" value="true" />
+      <created>1772063784925</created>
+      <option name="number" value="00139" />
+      <option name="presentableId" value="LOCAL-00139" />
+      <option name="project" value="LOCAL" />
+      <updated>1772063784925</updated>
+    </task>
+    <task id="LOCAL-00140" summary="fix(excel): 修正费用评估表数据写入位置并添加自适应行高功能&#10;&#10;- 修正Excel数据写入位置，将B/E列改为D/G列&#10;- 添加插入行的自适应高度设置功能&#10;- 实现第6行到当前行的自动行高调整&#10;- 增加行高设置异常处理和日志记录&#10;- 确保内容完整显示而不会被截断">
+      <option name="closed" value="true" />
+      <created>1772063936736</created>
+      <option name="number" value="00140" />
+      <option name="presentableId" value="LOCAL-00140" />
+      <option name="project" value="LOCAL" />
+      <updated>1772063936736</updated>
+    </task>
+    <task id="LOCAL-00141" summary="fix(matrix): 修复费用表导出服务中的文件覆盖逻辑&#10;&#10;- 在默认输出模式下始终生成新文件，避免覆盖现有文件&#10;- 移除冗余的条件判断逻辑，简化模板复制流程&#10;- 删除不再使用的配置文件 ltr_fields.json">
+      <option name="closed" value="true" />
+      <created>1772236383745</created>
+      <option name="number" value="00141" />
+      <option name="presentableId" value="LOCAL-00141" />
+      <option name="project" value="LOCAL" />
+      <updated>1772236383745</updated>
+    </task>
+    <task id="LOCAL-00142" summary="feat(ui): 添加启动进度窗口功能&#10;&#10;- 在 report_wizard 服务中优化 sample 行检测逻辑，统一判断规则&#10;- 新增 splash_screen.py 文件实现启动进度窗口组件&#10;- 添加带进度条和状态信息的应用程序启动界面&#10;- 实现分步骤初始化应用的进度展示机制&#10;- 集成日志记录功能跟踪启动进度状态">
+      <option name="closed" value="true" />
+      <created>1772755290940</created>
+      <option name="number" value="00142" />
+      <option name="presentableId" value="LOCAL-00142" />
+      <option name="project" value="LOCAL" />
+      <updated>1772755290940</updated>
+    </task>
+    <task id="LOCAL-00143" summary="feat(ui): 添加启动进度窗口功能&#10;&#10;- 在 report_wizard 服务中优化 sample 行检测逻辑，统一判断规则&#10;- 新增 splash_screen.py 文件实现启动进度窗口组件&#10;- 添加带进度条和状态信息的应用程序启动界面&#10;- 实现分步骤初始化应用的进度展示机制&#10;- 集成日志记录功能跟踪启动进度状态">
+      <option name="closed" value="true" />
+      <created>1773186353308</created>
+      <option name="number" value="00143" />
+      <option name="presentableId" value="LOCAL-00143" />
+      <option name="project" value="LOCAL" />
+      <updated>1773186353308</updated>
+    </task>
+    <task id="LOCAL-00144" summary="refactor(customer_report_generator): 优化章节标题格式清理逻辑&#10;&#10;- 使用 Find 方法快速定位章节标题，替代原有的遍历方式&#10;- 直接删除章节标题前的数字和点符号，提高处理效率&#10;- 定义标准章节标题列表，支持 PURPOSE、CONCLUSIONS 等固定格式&#10;- 移除粗体和下划线检测逻辑，简化代码流程&#10;- 添加性能调试日志，便于监控处理耗时情况&#10;- 优化搜索算法，按顺序查找并更新搜索起点位置">
+      <option name="closed" value="true" />
+      <created>1773187363819</created>
+      <option name="number" value="00144" />
+      <option name="presentableId" value="LOCAL-00144" />
+      <option name="project" value="LOCAL" />
+      <updated>1773187363820</updated>
+    </task>
+    <task id="LOCAL-00145" summary="fix(report_updater): 修复 Word 应用程序初始化问题&#10;&#10;- 将 gencache.EnsureDispatch 替换为 win32.Dispatch 以避免缓存文件损坏&#10;- 添加了关于手动清理 win32com 缓存目录的注释说明&#10;- 保持 Word 应用程序不可见和关闭警告提示的设置">
+      <option name="closed" value="true" />
+      <created>1773355296419</created>
+      <option name="number" value="00145" />
+      <option name="presentableId" value="LOCAL-00145" />
+      <option name="project" value="LOCAL" />
+      <updated>1773355296419</updated>
+    </task>
+    <task id="LOCAL-00146" summary="fix(report_updater): 修复 Word 应用程序初始化问题&#10;&#10;- 将 gencache.EnsureDispatch 替换为 win32.Dispatch 以避免缓存文件损坏&#10;- 添加了关于手动清理 win32com 缓存目录的注释说明&#10;- 保持 Word 应用程序不可见和关闭警告提示的设置">
+      <option name="closed" value="true" />
+      <created>1773937347552</created>
+      <option name="number" value="00146" />
+      <option name="presentableId" value="LOCAL-00146" />
+      <option name="project" value="LOCAL" />
+      <updated>1773937347552</updated>
+    </task>
+    <task id="LOCAL-00147" summary="feat(ui): 实现Lims风格主界面和正文内容编辑功能&#10;&#10;- 添加Lims式顶栏、左侧导航和主内容区域布局&#10;- 实现文件加密模块的初始化和核心服务&#10;- 添加正文内容填充服务，支持Word文档内容查找和填充&#10;- 实现批量更新文档章节内容功能&#10;- 添加预定义描述内容管理和配置功能&#10;- 实现关键词后段落内容更新功能&#10;- 重构主窗口UI结构，移除传统菜单栏改用侧栏导航&#10;- 添加全局样式表实现Lims界面风格&#10;- 实现面包屑导航和页面标题显示功能">
+      <option name="closed" value="true" />
+      <created>1775380311938</created>
+      <option name="number" value="00147" />
+      <option name="presentableId" value="LOCAL-00147" />
+      <option name="project" value="LOCAL" />
+      <updated>1775380311938</updated>
+    </task>
+    <task id="LOCAL-00148" summary="feat(ui): 实现Lims风格主界面和正文内容编辑功能&#10;&#10;- 添加Lims式顶栏、左侧导航和主内容区域布局&#10;- 实现文件加密模块的初始化和核心服务&#10;- 添加正文内容填充服务，支持Word文档内容查找和填充&#10;- 实现批量更新文档章节内容功能&#10;- 添加预定义描述内容管理和配置功能&#10;- 实现关键词后段落内容更新功能&#10;- 重构主窗口UI结构，移除传统菜单栏改用侧栏导航&#10;- 添加全局样式表实现Lims界面风格&#10;- 实现面包屑导航和页面标题显示功能">
+      <option name="closed" value="true" />
+      <created>1775479028038</created>
+      <option name="number" value="00148" />
+      <option name="presentableId" value="LOCAL-00148" />
+      <option name="project" value="LOCAL" />
+      <updated>1775479028038</updated>
+    </task>
+    <task id="LOCAL-00149" summary="feat(main_window): 优化Matrix表格初始化逻辑&#10;&#10;- 使用QTimer延迟执行确保UI完全初始化后再加载数据&#10;- 新增_initialize_matrix_table方法统一处理表格初始化流程&#10;- 避免auto_import方法重复调用导致的数据加载问题&#10;- 添加矩阵表格初始化状态标记&#10;- 改进错误处理和调试日志记录">
+      <option name="closed" value="true" />
+      <created>1775479824675</created>
+      <option name="number" value="00149" />
+      <option name="presentableId" value="LOCAL-00149" />
+      <option name="project" value="LOCAL" />
+      <updated>1775479824675</updated>
+    </task>
+    <task id="LOCAL-00150" summary="feat(ui): 在主窗口顶栏添加DL编号显示功能&#10;&#10;- 在MainWindow UI中添加DL编号标签控件&#10;- 实现update_dl_number_display方法用于更新DL编号显示&#10;- 在MainWindowController的项目加载和创建流程中调用DL编号更新&#10;- 在ProjectCreatorController中添加DL编号显示更新逻辑&#10;- 重构顶栏布局将应用图标与DL编号并排显示&#10;- 移除原有的用户信息显示组件">
+      <option name="closed" value="true" />
+      <created>1775604288987</created>
+      <option name="number" value="00150" />
+      <option name="presentableId" value="LOCAL-00150" />
+      <option name="project" value="LOCAL" />
+      <updated>1775604288987</updated>
+    </task>
+    <task id="LOCAL-00151" summary="fix(excel): 修复Excel文件密码保护参数配置&#10;&#10;- 更正WriteResPassword参数设置逻辑&#10;- 修正Password参数在读写模式下的应用条件&#10;- 添加详细的密码保护类型注释说明&#10;- 实现读写模式下正确的密码验证机制">
+      <option name="closed" value="true" />
+      <created>1775605183802</created>
+      <option name="number" value="00151" />
+      <option name="presentableId" value="LOCAL-00151" />
+      <option name="project" value="LOCAL" />
+      <updated>1775605183802</updated>
+    </task>
+    <task id="LOCAL-00152" summary="feat(app): 初始化应用程序核心组件并实现数据同步管理&#10;&#10;- 创建应用程序入口文件src/app/application.py，实现主窗口管理和资源清理&#10;- 添加项目版本信息和作者信息到__init__.py文件&#10;- 实现客户报告生成控制器处理业务逻辑&#10;- 创建数据同步管理器同步表格视图与数据模型&#10;- 实现导出控制器统一管理各类数据导出功能&#10;- 添加费用表导出服务处理测试费用评估表格生成&#10;- 优化基本信息服务数据文件路径解析逻辑">
+      <option name="closed" value="true" />
+      <created>1775663025422</created>
+      <option name="number" value="00152" />
+      <option name="presentableId" value="LOCAL-00152" />
+      <option name="project" value="LOCAL" />
+      <updated>1775663025423</updated>
+    </task>
+    <task id="LOCAL-00153" summary="feat(config): 添加配置管理器和客户报告生成功能&#10;&#10;- 实现了ConfigManager类，支持从JSON和INI文件加载配置&#10;- 添加了全局配置管理器实例，提供统一的配置访问接口&#10;- 实现了客户报告生成的控制器、服务和工具类&#10;- 添加了LTR数据提取器，从Word文档中提取申请单数据&#10;- 实现了文档解析服务，处理文件复制和Word文档更新功能&#10;- 集成了Word应用程序接口，支持自动化文档处理&#10;- 添加了多编码支持的配置文件读取功能&#10;- 实现了开发和生产环境的配置路径自动识别">
+      <option name="closed" value="true" />
+      <created>1775749369816</created>
+      <option name="number" value="00153" />
+      <option name="presentableId" value="LOCAL-00153" />
+      <option name="project" value="LOCAL" />
+      <updated>1775749369816</updated>
+    </task>
+    <task id="LOCAL-00154" summary="feat(matrix): 添加费用表导出和项目集成服务&#10;&#10;- 实现了 BasicInfoDialog 类用于显示和编辑项目基本信息&#10;- 创建了 FeeSheetExportService 服务用于生成费用表&#10;- 添加了 ImportExportManager 管理器处理Matrix视图的导入导出&#10;- 实现了 LTRProjectIntegrationService 服务用于LTR项目与Matrix模块集成&#10;- 添加了 MatrixSessionFactory、MatrixSessionRegistry 等矩阵会话管理组件&#10;- 创建了 MatrixSessionOrchestrator 协调矩阵会话操作流程&#10;- 实现了 MatrixSessionEntryPolicyTable 管理会话入口策略&#10;- 添加了 MatrixSessionDebugCommands 和 MatrixSessionDebugFacade 调试工具&#10;- 创建了 MatrixSessionEntryFacade 作为矩阵会话入口门面接口">
+      <option name="closed" value="true" />
+      <created>1775876953894</created>
+      <option name="number" value="00154" />
+      <option name="presentableId" value="LOCAL-00154" />
+      <option name="project" value="LOCAL" />
+      <updated>1775876953894</updated>
+    </task>
+    <task id="LOCAL-00155" summary="feat(matrix): 添加费用表导出和项目集成服务&#10;&#10;- 实现了 BasicInfoDialog 类用于显示和编辑项目基本信息&#10;- 创建了 FeeSheetExportService 服务用于生成费用表&#10;- 添加了 ImportExportManager 管理器处理Matrix视图的导入导出&#10;- 实现了 LTRProjectIntegrationService 服务用于LTR项目与Matrix模块集成&#10;- 添加了 MatrixSessionFactory、MatrixSessionRegistry 等矩阵会话管理组件&#10;- 创建了 MatrixSessionOrchestrator 协调矩阵会话操作流程&#10;- 实现了 MatrixSessionEntryPolicyTable 管理会话入口策略&#10;- 添加了 MatrixSessionDebugCommands 和 MatrixSessionDebugFacade 调试工具&#10;- 创建了 MatrixSessionEntryFacade 作为矩阵会话入口门面接口">
+      <option name="closed" value="true" />
+      <created>1775956132965</created>
+      <option name="number" value="00155" />
+      <option name="presentableId" value="LOCAL-00155" />
+      <option name="project" value="LOCAL" />
+      <updated>1775956132966</updated>
+    </task>
+    <option name="localTasksCounter" value="156" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.ini" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="feat/matrix-attachment-processing" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="feature/integrate-matrix-into-main-window1206" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="feat(report_wizard): 添加Word文档页眉精确修改功能&#10;&#10;- 实现首页页眉表格内容的精确定位和填充功能&#10;- 新增第二节页眉中Report No.字段的精确替换功能&#10;- 添加文档占位符批量替换机制支持&#10;- 实现文档复用机制避免重复打开关闭操作&#10;- 增加文件复制时的权限错误重试机制&#10;- 优化文档处理流程提升稳定性和性能&#10;- 修复JSON加载时的语法错误问题" />
+    <MESSAGE value="feat(ltr_manager): 增强Word文档数据提取和报告生成功能&#10;&#10;- 扩展数据提取器支持多列样品信息提取（产品名称、料号、批次、基材、镀层、润滑油、塑材）&#10;- 修改数据提取方法返回字典格式包含详细的样品信息字段&#10;- 在LTR申请流程中集成Word文档重新提取功能以获取完整数据&#10;- 增加对提取数据的传递和合并机制到申请单对话框&#10;- 新增样品信息字段到LTR申请数据模型中&#10;- 实现测试样品信息表格的自动填充功能&#10;- 添加Word文档COM连接异常处理和资源管理&#10;- 创建样品数据提取工具和测试样品信息服务模块" />
+    <MESSAGE value="fix(report): 解决报告生成中的文件保存和依赖路径问题&#10;&#10;- 在修订记录表格修改后立即保存文档避免数据丢失&#10;- 修复test_result_service模块的导入路径问题&#10;- 移除不必要的requirement过滤逻辑并保留原始需求值&#10;- 修正Word应用程序和文档实例的关闭条件判断&#10;- 添加调试信息输出以便跟踪需求处理过程" />
+    <MESSAGE value="feat(report_updater): 实现从Excel源更新Word文档设备列表功能&#10;&#10;- 添加设备配置管理器，支持外部Excel数据源配置&#10;- 实现从Word文档中提取设备ID的功能&#10;- 集成win32com库实现在Word文档中定位目标表格&#10;- 添加Excel数据匹配和日期格式化处理功能&#10;- 实现设备信息从Excel到Word表格的自动化填充&#10;- 添加表格边框和格式保持功能&#10;- 修改基础信息对话框窗口尺寸和多行文本字段显示行数&#10;- 添加模块版本号和作者信息" />
+    <MESSAGE value="feat(report): 实现项目打开时自动更新报告功能&#10;&#10;- 添加project.opened事件订阅处理项目打开逻辑&#10;- 在项目打开时更新窗口标题和状态信息&#10;- 通过事件分发器通知其他组件项目已打开&#10;- 报告更新控制器从状态管理器获取当前项目路径&#10;- 使用openpyxl替换pandas读取Excel文件提高性能&#10;- 更新报告更新对话框界面布局和尺寸设置&#10;- 实现Matrix控制器LTR编号自动设置功能" />
+    <MESSAGE value="feat(config): 添加设备数据源配置并优化Excel文件读取功能&#10;&#10;- 在配置管理器中添加设备数据源配置加载功能&#10;- 修改路径配置文件中的设备数据源节名称&#10;- 添加win32com客户端缓存导入用于Excel操作&#10;- 重构Excel数据读取逻辑，使用win32com直接读取避免pandas初始化问题&#10;- 实现Excel文件读取的备选方案，当主方法失败时使用openpyxl回退&#10;- 更新数据访问方式，将pandas DataFrame操作改为直接列表索引访问&#10;- 修复日期格式化输出错误，确保校准到期日期正确显示" />
+    <MESSAGE value="refactor(report): 优化Word文档处理流程使用win32com替代python-docx&#10;&#10;- 修复文件夹管理服务中的返回路径变量错误&#10;- 添加win32com方式修改修订记录日期的新方法modify_revision_record_date_win32com&#10;- 移除HeaderModifier中跳过保存的参数，统一文档生命周期管理&#10;- 重构占位符替换逻辑，添加替换统计和调试日志&#10;- 优化文档打开逻辑，复用已存在的文档实例避免重复打开&#10;- 更新报告生成服务使用动态模板文件查找而非硬编码路径&#10;- 完全迁移到win32com进行文档操作，移除python-docx依赖的混合模式&#10;- 改进错误处理和COM对象资源管理，确保文档正确关闭和保存&#10;- 优化测试样品信息表格填充，传递文档实例避免重复打开文档" />
+    <MESSAGE value="feat(build): 更新构建脚本添加资源文件复制和时间戳版本&#10;&#10;- 添加配置文件目录不存在时的警告提示&#10;- 实现资源文件夹（图标等）的自动复制功能&#10;- 添加字体和样式文件的复制逻辑&#10;- 将README发布日期改为动态获取当前日期&#10;- 修改可执行文件重命名规则，包含版本号和时间戳&#10;- 在必要文件检查列表中添加version.txt&#10;- 降低报告向导服务中的替换统计日志级别&#10;- 移除未使用的文档另存代码&#10;- 更新设备数据源配置文件路径设置" />
+    <MESSAGE value="feat(ltr): 添加文件占用检测功能&#10;&#10;- 在 LTR 基础服务中添加 check_file_not_locked 方法用于检测文件是否被其他进程占用&#10;- 在 LTR 编辑服务中集成文件占用检测逻辑并优化错误提示信息&#10;- 在 LTR 号码生成器中添加文件占用检查防止并发访问冲突&#10;- 使用二进制读写模式检测文件锁定状态避免文本编码问题&#10;- 添加详细的占用文件错误提示和用户友好的警告消息框&#10;- 引入时间模块支持文件操作的时间相关功能" />
+    <MESSAGE value="feat(matrix): 添加费用表导出功能&#10;&#10;- 新增费用表导出服务模块，包括FeeSheetExportService等核心服务&#10;- 在矩阵工具栏添加生成费用表按钮并集成相关事件处理&#10;- 实现从Matrix数据结构提取测试项目信息的功能&#10;- 完成费用表模板查找、数据填充和Excel操作逻辑&#10;- 移除已废弃的_test_items方法，优化代码结构&#10;- 更新导出服务模块的初始化文件和导入配置" />
+    <MESSAGE value="fix(matrix): 解决费用表导出服务中的重复测试项问题&#10;&#10;- 添加去重逻辑确保每个组别中的同名测试只保留一次&#10;- 修改代码使用去重后的测试列表替代原始列表进行数据填充&#10;- 更新调试日志显示去重前后的测试数量对比&#10;- 修复因重复测试导致的数据插入错误问题" />
+    <MESSAGE value="fix(excel): 修正费用评估表数据写入位置并添加自适应行高功能&#10;&#10;- 修正Excel数据写入位置，将B/E列改为D/G列&#10;- 添加插入行的自适应高度设置功能&#10;- 实现第6行到当前行的自动行高调整&#10;- 增加行高设置异常处理和日志记录&#10;- 确保内容完整显示而不会被截断" />
+    <MESSAGE value="fix(matrix): 修复费用表导出服务中的文件覆盖逻辑&#10;&#10;- 在默认输出模式下始终生成新文件，避免覆盖现有文件&#10;- 移除冗余的条件判断逻辑，简化模板复制流程&#10;- 删除不再使用的配置文件 ltr_fields.json" />
+    <MESSAGE value="feat(ui): 添加启动进度窗口功能&#10;&#10;- 在 report_wizard 服务中优化 sample 行检测逻辑，统一判断规则&#10;- 新增 splash_screen.py 文件实现启动进度窗口组件&#10;- 添加带进度条和状态信息的应用程序启动界面&#10;- 实现分步骤初始化应用的进度展示机制&#10;- 集成日志记录功能跟踪启动进度状态" />
+    <MESSAGE value="refactor(customer_report_generator): 优化章节标题格式清理逻辑&#10;&#10;- 使用 Find 方法快速定位章节标题，替代原有的遍历方式&#10;- 直接删除章节标题前的数字和点符号，提高处理效率&#10;- 定义标准章节标题列表，支持 PURPOSE、CONCLUSIONS 等固定格式&#10;- 移除粗体和下划线检测逻辑，简化代码流程&#10;- 添加性能调试日志，便于监控处理耗时情况&#10;- 优化搜索算法，按顺序查找并更新搜索起点位置" />
+    <MESSAGE value="fix(report_updater): 修复 Word 应用程序初始化问题&#10;&#10;- 将 gencache.EnsureDispatch 替换为 win32.Dispatch 以避免缓存文件损坏&#10;- 添加了关于手动清理 win32com 缓存目录的注释说明&#10;- 保持 Word 应用程序不可见和关闭警告提示的设置" />
+    <MESSAGE value="feat(ui): 实现Lims风格主界面和正文内容编辑功能&#10;&#10;- 添加Lims式顶栏、左侧导航和主内容区域布局&#10;- 实现文件加密模块的初始化和核心服务&#10;- 添加正文内容填充服务，支持Word文档内容查找和填充&#10;- 实现批量更新文档章节内容功能&#10;- 添加预定义描述内容管理和配置功能&#10;- 实现关键词后段落内容更新功能&#10;- 重构主窗口UI结构，移除传统菜单栏改用侧栏导航&#10;- 添加全局样式表实现Lims界面风格&#10;- 实现面包屑导航和页面标题显示功能" />
+    <MESSAGE value="feat(main_window): 优化Matrix表格初始化逻辑&#10;&#10;- 使用QTimer延迟执行确保UI完全初始化后再加载数据&#10;- 新增_initialize_matrix_table方法统一处理表格初始化流程&#10;- 避免auto_import方法重复调用导致的数据加载问题&#10;- 添加矩阵表格初始化状态标记&#10;- 改进错误处理和调试日志记录" />
+    <MESSAGE value="feat: 顶栏新增DL编号显示" />
+    <MESSAGE value="feat(ui): 在主窗口顶栏添加DL编号显示功能&#10;&#10;- 在MainWindow UI中添加DL编号标签控件&#10;- 实现update_dl_number_display方法用于更新DL编号显示&#10;- 在MainWindowController的项目加载和创建流程中调用DL编号更新&#10;- 在ProjectCreatorController中添加DL编号显示更新逻辑&#10;- 重构顶栏布局将应用图标与DL编号并排显示&#10;- 移除原有的用户信息显示组件" />
+    <MESSAGE value="fix(excel): 修复Excel文件密码保护参数配置&#10;&#10;- 更正WriteResPassword参数设置逻辑&#10;- 修正Password参数在读写模式下的应用条件&#10;- 添加详细的密码保护类型注释说明&#10;- 实现读写模式下正确的密码验证机制" />
+    <MESSAGE value="feat(app): 初始化应用程序核心组件并实现数据同步管理&#10;&#10;- 创建应用程序入口文件src/app/application.py，实现主窗口管理和资源清理&#10;- 添加项目版本信息和作者信息到__init__.py文件&#10;- 实现客户报告生成控制器处理业务逻辑&#10;- 创建数据同步管理器同步表格视图与数据模型&#10;- 实现导出控制器统一管理各类数据导出功能&#10;- 添加费用表导出服务处理测试费用评估表格生成&#10;- 优化基本信息服务数据文件路径解析逻辑" />
+    <MESSAGE value="chore(build): 更新构建配置以包含PyInstaller相关依赖&#10;&#10;- 集成PyInstaller构建工具支持&#10;- 添加PyQt5、win32com、extract_msg等第三方库依赖&#10;- 配置numpy、pandas、openpyxl等数据处理库&#10;- 包含lark、docx等解析库支持&#10;- 添加构建时配置文件(ltr_fields.json, paths.ini, settings.json)&#10;- 集成邮件模板文件(.msg格式)资源&#10;- 添加应用图标资源(app_icon.ico)&#10;- 配置构建时日志文件(testflow.log)&#10;- 添加body_content_config.json配置文件&#10;- 集成多个rthook运行时钩子文件&#10;- 配置Python运行时环境和多进程支持&#10;- 添加XML、JSON、CSV等数据格式处理支持&#10;- 集成网络请求和HTTP服务相关模块&#10;- 添加加密和安全相关的cryptography模块&#10;- 配置图形界面(tkinter)和数据库连接支持" />
+    <MESSAGE value="feat(config): 添加配置管理器和客户报告生成功能&#10;&#10;- 实现了ConfigManager类，支持从JSON和INI文件加载配置&#10;- 添加了全局配置管理器实例，提供统一的配置访问接口&#10;- 实现了客户报告生成的控制器、服务和工具类&#10;- 添加了LTR数据提取器，从Word文档中提取申请单数据&#10;- 实现了文档解析服务，处理文件复制和Word文档更新功能&#10;- 集成了Word应用程序接口，支持自动化文档处理&#10;- 添加了多编码支持的配置文件读取功能&#10;- 实现了开发和生产环境的配置路径自动识别" />
+    <MESSAGE value="feat(matrix): 添加费用表导出和项目集成服务&#10;&#10;- 实现了 BasicInfoDialog 类用于显示和编辑项目基本信息&#10;- 创建了 FeeSheetExportService 服务用于生成费用表&#10;- 添加了 ImportExportManager 管理器处理Matrix视图的导入导出&#10;- 实现了 LTRProjectIntegrationService 服务用于LTR项目与Matrix模块集成&#10;- 添加了 MatrixSessionFactory、MatrixSessionRegistry 等矩阵会话管理组件&#10;- 创建了 MatrixSessionOrchestrator 协调矩阵会话操作流程&#10;- 实现了 MatrixSessionEntryPolicyTable 管理会话入口策略&#10;- 添加了 MatrixSessionDebugCommands 和 MatrixSessionDebugFacade 调试工具&#10;- 创建了 MatrixSessionEntryFacade 作为矩阵会话入口门面接口" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(matrix): 添加费用表导出和项目集成服务&#10;&#10;- 实现了 BasicInfoDialog 类用于显示和编辑项目基本信息&#10;- 创建了 FeeSheetExportService 服务用于生成费用表&#10;- 添加了 ImportExportManager 管理器处理Matrix视图的导入导出&#10;- 实现了 LTRProjectIntegrationService 服务用于LTR项目与Matrix模块集成&#10;- 添加了 MatrixSessionFactory、MatrixSessionRegistry 等矩阵会话管理组件&#10;- 创建了 MatrixSessionOrchestrator 协调矩阵会话操作流程&#10;- 实现了 MatrixSessionEntryPolicyTable 管理会话入口策略&#10;- 添加了 MatrixSessionDebugCommands 和 MatrixSessionDebugFacade 调试工具&#10;- 创建了 MatrixSessionEntryFacade 作为矩阵会话入口门面接口" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/TestFlowManager$build_executable.coverage" NAME="build_executable Coverage Results" MODIFIED="1775879894365" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/TestFlowManager$application.coverage" NAME="application Coverage Results" MODIFIED="1775955541543" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/app" />
+  </component>
+</project>
