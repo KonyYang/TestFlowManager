@@ -5,7 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eb45768c-6138-4b42-ba4c-85a3bc2bc60f" name="Changes" comment="feat(matrix): 添加费用表导出和项目集成服务&#10;&#10;- 实现了 BasicInfoDialog 类用于显示和编辑项目基本信息&#10;- 创建了 FeeSheetExportService 服务用于生成费用表&#10;- 添加了 ImportExportManager 管理器处理Matrix视图的导入导出&#10;- 实现了 LTRProjectIntegrationService 服务用于LTR项目与Matrix模块集成&#10;- 添加了 MatrixSessionFactory、MatrixSessionRegistry 等矩阵会话管理组件&#10;- 创建了 MatrixSessionOrchestrator 协调矩阵会话操作流程&#10;- 实现了 MatrixSessionEntryPolicyTable 管理会话入口策略&#10;- 添加了 MatrixSessionDebugCommands 和 MatrixSessionDebugFacade 调试工具&#10;- 创建了 MatrixSessionEntryFacade 作为矩阵会话入口门面接口">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/refactor_task_board.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/refactor_task_board.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/test_report_export_coordinator.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_report_export_coordinator.py" afterDir="false" />
     </list>
     <list id="cd1585ca-d35f-42c3-ad4f-96afbeac4d79" name="DelFiles" comment="DelFiles" />
     <list id="52ad285d-ee64-421c-978e-a10523f905df" name="Other changelist" comment="" />
@@ -152,7 +154,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "feature/integrate-matrix-into-main-window1206",
+    "git-widget-placeholder": "feature/refactor",
     "javascript.nodejs.core.library.configured.version": "24.14.1",
     "javascript.nodejs.core.library.typings.version": "24.12.2",
     "javascript.preferred.runtime.type.id": "node",
@@ -727,6 +729,11 @@
             <list>
               <RecentGroup>
                 <option name="FILTER_VALUES">
+                  <option value="master" />
+                </option>
+              </RecentGroup>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
                   <option value="feat/matrix-attachment-processing" />
                 </option>
               </RecentGroup>
@@ -745,7 +752,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="feature/integrate-matrix-into-main-window1206" />
+                        <option value="feature/refactor" />
                       </list>
                     </value>
                   </entry>

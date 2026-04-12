@@ -1382,7 +1382,7 @@ Phase 9 entry gates:
 
 ---
 
-## 13. 阶段 10：多会话对象管理（进行中）
+## 13. 阶段 10：多会话对象管理（已完成）
 
 ### 13.1 阶段目标
 
@@ -1528,7 +1528,7 @@ Phase 9 entry gates:
 - 副作用继续收敛：窗口标题 `TestFlow Manager - 项目: ...` 只能由 `ProjectSessionCoordinator.apply_project_context(...)` 设置（guard 覆盖）：
   - `tests/unit/test_project_open_title_guard.py`
 
-### 13.8 Phase 13 兼容收口任务化（进行中）
+### 13.8 Phase 13 兼容收口任务化（已完成）
 
 阶段目标：
 
