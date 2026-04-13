@@ -1,5 +1,9 @@
 # MainWindow 重构追踪
 
+> 状态：历史追踪文档，非主执行指南
+> 主执行口径请以 [main_window_shell_refactor_guide.md](/D:/PythonProject/TestFlowManager/docs/main_window_shell_refactor_guide.md) 为准。
+> 说明：本文档保留早期 MainWindow 重构思路、候选方案和阶段性记录；其中部分“已接入/已拆出”的描述不再代表当前运行主线。
+
 ## 1. 重构目标
 
 - 把 `MainWindow` 削减成**纯 UI 容器**（只是 header/sidebar/page stack + QSS shell），不再直接持有 Matrix/报告/文档的复杂生命周期。
@@ -47,8 +51,6 @@
 
 ## 4. 验收标准
 
-## 4. 验收标准
-
 1. `main_window_ui.py` 行数显著下降（目标 < 12k），只包含 UI wiring + minimal signal handling。
 2. MatrixPage、报告/文档 controller 相关 import 只出现在 lazy loader 中，冷启动时不加载。
 3. 重写之后没有重复 `application_data.json` 写入 —— 通过 audit logger 或单元测试确保只写一次。
@@ -60,23 +62,23 @@
 | 日期 | 更改 | 负责人 | 备注 |
 | --- | --- | --- | --- |
 | 2026-04-12 | 建立本追踪文档 | Codex | 作为重构基线 |
-| 2026-04-12 | 接入 header/sidebar/event handler 模块 & 增加 MatrixWorkspaceFacade | Codex | 主窗口现在使用 components/handlers/const 定义的 shell，新增 facade 抽象 matrix lifecycle，UI 控件只做 wiring。 |
-| 2026-04-12 | 增加 ProjectLifecycleCoordinator & 投入 lazy matrix facade | Codex | controller 侧引入 facade + coordinator，项目打开逻辑剥离到 coordinator，减少 controller 责任。 |
+| 2026-04-12 | 引入 header/sidebar/event handler 模块与 MatrixWorkspaceFacade 候选实现 | Codex | 该阶段形成了 shell 化候选结构，但未完全成为当前运行主线。 |
+| 2026-04-12 | 引入 ProjectLifecycleCoordinator 与 lazy matrix facade 候选路径 | Codex | 该阶段建立了 coordinator/facade 方向，但未完成对旧 controller 主线的替换。 |
 | 2026-04-12 | 移动 `BasicInfoDialog` 到 `view/dialogs` 并更新引用路径 | Codex | 确保 ProjectLifecycleCoordinator 与 Matrix 事件处理器引入的模块存在，避免启动时 module-not-found。 |
-| 2026-04-12 | 抽离导航逻辑到 `navigation_controller.py` | Codex | 让主窗口只负责 action wiring+UI shell，侧栏/堆叠页的同步由 new NavigationController 管理，便于后续 lazy load。 |
+| 2026-04-12 | 抽离导航逻辑到独立导航组件候选实现 | Codex | 形成了导航抽离方向，但该组件并未自动等于当前主线导航机制。 |
 
 ## 7. 近期对话梳理与新增约束
 
-1. **BasicInfoDialog 已迁移**：`BasicInfoDialog` 现位于 `src/features/main_window/view/dialogs/basic_info_dialog.py`，所有依赖该模块的 coordinator/controller/handler 已同步更新 import；后续仍需保持路径一致以避免打包时报错。
+1. **BasicInfoDialog 已迁移**：`BasicInfoDialog` 的新实现位于 `src/features/main_window/view/dialogs/basic_info_dialog.py`；但仓库中仍可能残留旧路径引用，因此后续执行应先统一 import，再删除旧副本。
 2. **新模块尚未真正接入主流程**：`components/header_components.py`、`components/sidebar_components.py`、`view/handlers/event_handlers.py`、`constants/main_window_styles.py` 都已建成，但主窗口仍保留旧的 inline header/sidebar/QSS/事件逻辑，这导致 PyInstaller 打包和冷路径加载仍触发这些模块，无法达成预期的 lazy load。
 3. **计划步骤被要求同步记录**：当前对话强调每轮迭代要写入文档、明确任务与步骤、说明关键决策（例如组件 wiring、职责迁移、重写 lazy loader），并持续列出风险/约束。
 
 ## 8. 高优先级主任务与细化步骤
 
 ### 8.1 任务 A：恢复主窗口可启动状态
-- 甄别缺失 `BasicInfoDialog` 的原因（可能因命名为 `base_info_dialog`，亦或文件丢失），并修复引用。
-- 若短期内无法提供完整 UI，可临时建立 stub（只实现最低接口），让整个系统能加载壳层与 controller。
-- 验收：`python src/app/application.py` 不再因 `ModuleNotFoundError` 中断，能够进入壳层并显示启动提示。
+- 统一 `BasicInfoDialog` 到 `view/dialogs/basic_info_dialog.py` 的引用路径，移除旧路径歧义。
+- 若后续仍保留历史兼容入口，必须在文档中明确其非主线身份，避免再次形成双轨。
+- 验收：主线运行路径只依赖一个 `BasicInfoDialog` 实现位置。
 
 ### 8.2 任务 B：让组件/handler 实现真正接入
 - 清理 `main_window_ui.py` 中自有 header/sidebar/QSS/事件 wiring，只保留调用 `HeaderComponents`, `SidebarComponents`, `EventHandlers`, `constants/main_window_styles` 的部分。
@@ -95,22 +97,16 @@
 
 ## 9. 下一步动作（在当前交付中需说明）
 
-1. 修复 `ProjectLifecycleCoordinator` 依赖的 `BasicInfoDialog`，确保入口运行不再失败（可通过补文件或修正路径）。
-2. 在接下来的重构中，先将 `MainWindow` 的 UI wiring 完全托管给 `components`/`handlers`，再逐步瘦身 controller/facade。
-3. 继续保持对话与文档同步：每完成一步就追加表格行，并在回复中包含关键决策与后续计划。
-| 2026-04-12 | 接入 header/sidebar/event handler 模块 & 增加 MatrixWorkspaceFacade | Codex | 主窗口现在使用 components/handlers/const 定义的 shell，新增 facade 抽象 matrix lifecycle，UI 控件只做 wiring。 |
-| 2026-04-12 | 增加 ProjectLifecycleCoordinator & 投入 lazy matrix facade | Codex | controller 侧引入 facade + coordinator，项目打开逻辑剥离到 coordinator，减少 controller 责任。 |
+1. 以 [main_window_shell_refactor_guide.md](/D:/PythonProject/TestFlowManager/docs/main_window_shell_refactor_guide.md) 作为唯一主执行口径。
+2. 先收口 `MainWindow` 的 shell 边界，再决定 `ProjectLifecycleCoordinator` 与 `MatrixWorkspaceFacade` 是正式接管还是降级清理。
+3. 若某个候选实现未成为主线，应在本文档中持续以“候选/历史”标注，而不是写成“已接入主流程”。
 
 ## 6. 当前讨论补充总结
 
-1. **组件接入正在推进**：刚完成的工作将 `components/header_components`/`sidebar_components`、`handlers/event_handlers`、`constants/main_window_styles` 真正接回主流程，`main_window_ui.py` 只保留 UI wiring。
+1. **组件接入方向已建立，但未完全成为主线**：`components/header_components`/`sidebar_components`、`handlers/event_handlers`、`constants/main_window_styles` 已提供候选 shell 结构，但当前主窗口仍保留大量旧的 inline 逻辑。
 2. **MainWindow/Controller 过重，逻辑混乱**：main_window里 UI、Matrix生命周期、LTR、COM、report 逻辑都耦合，controller 中也把 Matrix session 在 constructor 里 fully instantiate， lazy load 只是逻辑上的延后，冷路径 import 仍把所有重模块加载。
 3. **重复写逻辑**：`ProjectOpenService` 和 controller/view 里多处写 `application_data.json`，同时还有 COM 释放/Word/Excel 控制，需要集中至单一 service 以免冲突。
 4. **接下来要做的每个步骤**：
    - 先把 header/sidebar/event handler wiring 重构到 shell/handler 模块，确保 MainWindow 只做 UI 容器。  
    - 再拆 facade/coordinator，让 controller 成为 orchestration layer，Matrix session/workspace 由 facade 管理。  
    - 最后完善 lazy loader 和 service，清理未用模块与 `__pycache__`，写入文档并记录每一步完成情况。
-
-| 日期 | 更改 | 负责人 | 备注 |
-| --- | --- | --- | --- |
-| 2026-04-12 | 建立本追踪文档 | Codex | 作为重构基线 |

@@ -64,13 +64,6 @@ class MatrixWorkspaceFacade:
         )
         return self._shared_session
 
-    def get_matrix_project_controller(self):
-        if self._shared_session is None:
-            return None
-        return getattr(self._shared_session, "matrix_project_controller", None)
-
     def ensure_preview_session_manager(self) -> MatrixSessionManager:
+        """提供预览会话管理器（延迟访问点）"""
         return self.matrix_session_manager
-
-    def ensure_matrix_workspace_coordinator(self) -> MatrixWorkspaceCoordinator:
-        return self.matrix_workspace_coordinator

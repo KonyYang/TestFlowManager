@@ -1,5 +1,10 @@
 # TestFlowManager 重构任务看板
 
+## MainWindow Shell Guide
+
+- 新增执行指南：[main_window_shell_refactor_guide.md](D:/PythonProject/TestFlowManager/docs/main_window_shell_refactor_guide.md)
+- 用于收敛 `main_window` 优先重构的起源、目标、双轨风险、`main_window -> matrix` 依赖边界、任务顺序与验收标准
+
 > 更新时间：2026-04-11  
 > 关联文档：[refactor_baseline.md](D:/PythonProject/TestFlowManager/docs/refactor_baseline.md)
 

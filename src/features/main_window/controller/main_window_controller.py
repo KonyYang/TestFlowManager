@@ -17,18 +17,13 @@ from src.features.main_window.service.main_window_service import MainWindowServi
 from src.features.ltr_manager.controller.ltr_viewer_controller import LTRViewerController
 from src.features.main_window.view.dialogs.dl_input_dialog import DLInputDialog
 from src.features.project_creator.controller.project_creator_controller import ProjectCreatorController
-# 添加项目上下文
 from src.core.project_context import ProjectContext
-from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
-from src.features.matrix.service.matrix_session_entry_policy import MatrixSessionEntryPolicyTable
+from src.features.main_window.facade.matrix_workspace_facade import MatrixWorkspaceFacade
 from src.features.matrix.service.matrix_session_manager import MatrixSessionManager
 from src.features.matrix.service.matrix_session_orchestrator import MatrixSessionOrchestrator
-from src.features.matrix.service.matrix_session_debug_commands import MatrixSessionDebugCommands
 from src.features.matrix.service.matrix_session_debug_facade import MatrixSessionDebugFacade
 from src.features.matrix.service.matrix_session_entry_facade import MatrixSessionEntryFacade
-from src.features.matrix.workspace.matrix_workspace_coordinator import (
-    MatrixWorkspaceCoordinator,
-)
+from src.features.matrix.service.matrix_session_entry_policy import MatrixSessionEntryPolicyTable
 
 
 class MainWindowController:
@@ -50,22 +45,16 @@ class MainWindowController:
     def __init__(
         self,
         view: QWidget,
-        matrix_session_registry: Optional[MatrixSessionRegistry] = None,
-        matrix_session_entry_policies=None,
-        matrix_session_manager: Optional[MatrixSessionManager] = None,
-        matrix_session_orchestrator: Optional[MatrixSessionOrchestrator] = None,
-        matrix_session_debug_facade: Optional[MatrixSessionDebugFacade] = None,
-        matrix_session_entry_facade: Optional[MatrixSessionEntryFacade] = None,
-        matrix_workspace_coordinator: Optional[MatrixWorkspaceCoordinator] = None,
+        matrix_workspace_facade: Optional[MatrixWorkspaceFacade] = None,
     ):
         """
         初始化主窗口控制器
 
         Args:
             view: 主窗口视图实例
+            matrix_workspace_facade: Matrix 工作区协同件
         """
         self.view = view
-        self.matrix_session_registry = matrix_session_registry or MatrixSessionRegistry()
         self.data_model = MainWindowData()
         self.service = MainWindowService(self.data_model)
         self.project_open_service = ProjectOpenService()
@@ -73,7 +62,6 @@ class MainWindowController:
         # 初始化状态
         self.service.update_status("就绪")
         self.ltr_controller = LTRViewerController()
-        # 使用LTR控制器的服务实例初始化LTR编辑器控制器
         self.ltr_editor_controller = LTREditorController(
             self.ltr_controller.data_model,
             self.ltr_controller.service
@@ -81,64 +69,17 @@ class MainWindowController:
         
         # 初始化当前项目路径
         self._project_context: Optional[ProjectContext] = None
-        self._matrix_session_entry_policies = (
-            matrix_session_entry_policies or MatrixSessionEntryPolicyTable()
-        )
-        self._matrix_preview_session_manager = (
-            matrix_session_manager
-            or MatrixSessionManager(
-                parent_view=self.view,
-                registry=self.matrix_session_registry,
-            )
-        )
-        self._matrix_session_orchestrator = (
-            matrix_session_orchestrator
-            or MatrixSessionOrchestrator(self._matrix_preview_session_manager)
-        )
-        self._matrix_session_debug_facade = (
-            matrix_session_debug_facade
-            or MatrixSessionDebugFacade(
-                orchestrator=self._matrix_session_orchestrator,
-                entry_policies=self._matrix_session_entry_policies,
-            )
-        )
-        self._matrix_session_entry_facade = (
-            matrix_session_entry_facade
-            or MatrixSessionEntryFacade(
-                entry_policies=self._matrix_session_entry_policies,
-            )
-        )
-        self.matrix_workspace_coordinator = (
-            matrix_workspace_coordinator
-            or MatrixWorkspaceCoordinator(
-                parent_view=self.view,
-                matrix_session_registry=self.matrix_session_registry,
-                matrix_session_manager=self._matrix_preview_session_manager,
-                matrix_session_orchestrator=self._matrix_session_orchestrator,
-                matrix_session_debug_facade=self._matrix_session_debug_facade,
-                matrix_session_entry_facade=self._matrix_session_entry_facade,
-                matrix_session_entry_policies=self._matrix_session_entry_policies,
-            )
-        )
-        matrix_session = self.matrix_workspace_coordinator.assemble_shared_session(
-            parent_view=self.view,
+
+        # 通过 facade 访问所有 Matrix session 对象（私有属性，不对外暴露）
+        self._facade = matrix_workspace_facade or MatrixWorkspaceFacade(parent_view=view)
+        self._facade.parent_view = view
+
+        # 组装共享 session
+        matrix_session = self._facade.assemble_shared_session(
             session_id=self.DEFAULT_MATRIX_WORKSPACE_SESSION_ID,
             entry_name=self.DEFAULT_MATRIX_WORKSPACE_ENTRY,
         )
-        self.matrix_workspace_coordinator.bind_parent_view(self.view)
-        self.matrix_project_controller = matrix_session.matrix_project_controller
-        self._matrix_preview_session_manager = (
-            self.matrix_workspace_coordinator.matrix_session_manager
-        )
-        self._matrix_session_orchestrator = (
-            self.matrix_workspace_coordinator.matrix_session_orchestrator
-        )
-        self._matrix_session_debug_facade = (
-            self.matrix_workspace_coordinator.matrix_session_debug_facade
-        )
-        self._matrix_session_entry_facade = (
-            self.matrix_workspace_coordinator.matrix_session_entry_facade
-        )
+        self.matrix_project_controller = matrix_session.matrix_project_controller if matrix_session else None
 
         self.project_session_coordinator = ProjectSessionCoordinator(
             view,
@@ -177,44 +118,20 @@ class MainWindowController:
         return value.strip().lower() in {"1", "true", "yes", "on"}
 
     def _ensure_preview_session_manager(self) -> MatrixSessionManager:
-        manager = getattr(self, "_matrix_preview_session_manager", None)
-        if manager is not None:
-            return manager
-        manager = MatrixSessionManager(
-            parent_view=getattr(self, "view", None),
-            registry=getattr(self, "matrix_session_registry", None),
-        )
-        self._matrix_preview_session_manager = manager
-        return manager
+        """通过 facade 获取预览会话管理器"""
+        return self._facade.ensure_preview_session_manager()
 
     def _ensure_matrix_session_orchestrator(self) -> MatrixSessionOrchestrator:
-        orchestrator = getattr(self, "_matrix_session_orchestrator", None)
-        if orchestrator is not None:
-            return orchestrator
-        orchestrator = MatrixSessionOrchestrator(self._ensure_preview_session_manager())
-        self._matrix_session_orchestrator = orchestrator
-        return orchestrator
+        """通过 facade 获取会话编排器"""
+        return self._facade.matrix_session_orchestrator
 
     def _ensure_matrix_session_debug_facade(self) -> MatrixSessionDebugFacade:
-        facade = getattr(self, "_matrix_session_debug_facade", None)
-        if facade is not None:
-            return facade
-        facade = MatrixSessionDebugFacade(
-            orchestrator=self._ensure_matrix_session_orchestrator(),
-            entry_policies=getattr(self, "_matrix_session_entry_policies", None),
-        )
-        self._matrix_session_debug_facade = facade
-        return facade
+        """通过 facade 获取调试协同件"""
+        return self._facade.matrix_session_debug_facade
 
     def _ensure_matrix_session_entry_facade(self) -> MatrixSessionEntryFacade:
-        facade = getattr(self, "_matrix_session_entry_facade", None)
-        if facade is not None:
-            return facade
-        facade = MatrixSessionEntryFacade(
-            entry_policies=getattr(self, "_matrix_session_entry_policies", None),
-        )
-        self._matrix_session_entry_facade = facade
-        return facade
+        """通过 facade 获取入口协同件"""
+        return self._facade.matrix_session_entry_facade
 
     def open_isolated_matrix_preview_session(
         self,
@@ -460,8 +377,8 @@ class MainWindowController:
 
     def _build_matrix_session_debug_state(self) -> dict:
         facade = self._ensure_matrix_session_debug_facade()
-        registry = getattr(self, "matrix_session_registry", None)
         registry_snapshot = None
+        registry = self._facade.matrix_session_registry
         if registry is not None and hasattr(registry, "snapshot"):
             registry_snapshot = registry.snapshot()
         return facade.get_debug_state(registry_snapshot=registry_snapshot)
@@ -743,7 +660,7 @@ class MainWindowController:
             )
             project_creator = ProjectCreatorController(
                 self.view,
-                matrix_session_registry=getattr(self, "matrix_session_registry", None),
+                matrix_session_registry=self._facade.matrix_session_registry,
                 matrix_session_mode=session_config.mode,
                 matrix_session_id=session_config.session_id,
             )

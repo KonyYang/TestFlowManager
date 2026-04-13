@@ -40,15 +40,8 @@ from src.features.report_wizard.controller.report_wizard_controller import Repor
 from src.features.document_parser.controller.document_parser_controller import DocumentParserController
 from src.features.report_updater.controller.report_updater_controller import ReportUpdaterController
 from src.features.matrix.view.matrix_page import MatrixPage
-from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
-from src.features.matrix.service.matrix_session_entry_policy import MatrixSessionEntryPolicyTable
-from src.features.matrix.service.matrix_session_manager import MatrixSessionManager
-from src.features.matrix.service.matrix_session_orchestrator import MatrixSessionOrchestrator
-from src.features.matrix.service.matrix_session_debug_facade import MatrixSessionDebugFacade
+from src.features.main_window.facade.matrix_workspace_facade import MatrixWorkspaceFacade
 from src.features.matrix.service.matrix_session_entry_facade import MatrixSessionEntryFacade
-from src.features.matrix.workspace.matrix_workspace_coordinator import (
-    MatrixWorkspaceCoordinator,
-)
 
 
 # 主窗口 Lims 风格全局样式（高分辨率屏幕优化版）
@@ -214,46 +207,14 @@ class MainWindow(QMainWindow):
         self,
         splash_screen=None,
         *,
-        matrix_session_registry: Optional[MatrixSessionRegistry] = None,
-        matrix_session_entry_policies: Optional[MatrixSessionEntryPolicyTable] = None,
-        matrix_session_manager: Optional[MatrixSessionManager] = None,
-        matrix_session_orchestrator: Optional[MatrixSessionOrchestrator] = None,
-        matrix_session_debug_facade: Optional[MatrixSessionDebugFacade] = None,
-        matrix_session_entry_facade: Optional[MatrixSessionEntryFacade] = None,
-        matrix_workspace_coordinator: Optional[MatrixWorkspaceCoordinator] = None,
+        matrix_workspace_facade: Optional[MatrixWorkspaceFacade] = None,
     ):
         super().__init__()
         self.splash_screen = splash_screen
         self.controller = None
-        self.matrix_workspace_coordinator = (
-            matrix_workspace_coordinator
-            or MatrixWorkspaceCoordinator(
-                parent_view=None,
-                matrix_session_registry=matrix_session_registry,
-                matrix_session_entry_policies=matrix_session_entry_policies,
-                matrix_session_manager=matrix_session_manager,
-                matrix_session_orchestrator=matrix_session_orchestrator,
-                matrix_session_debug_facade=matrix_session_debug_facade,
-                matrix_session_entry_facade=matrix_session_entry_facade,
-            )
-        )
-        self.matrix_workspace_coordinator.bind_parent_view(self)
-        self.matrix_session_registry = self.matrix_workspace_coordinator.matrix_session_registry
-        self.matrix_session_entry_policies = (
-            self.matrix_workspace_coordinator.entry_policies
-        )
-        self.matrix_session_manager = (
-            self.matrix_workspace_coordinator.matrix_session_manager
-        )
-        self.matrix_session_orchestrator = (
-            self.matrix_workspace_coordinator.matrix_session_orchestrator
-        )
-        self.matrix_session_debug_facade = (
-            self.matrix_workspace_coordinator.matrix_session_debug_facade
-        )
-        self.matrix_session_entry_facade = (
-            self.matrix_workspace_coordinator.matrix_session_entry_facade
-        )
+
+        # 通过 facade 统一访问所有 Matrix session 对象（私有属性，不对外暴露）
+        self._workspace_facade = matrix_workspace_facade or MatrixWorkspaceFacade(parent_view=self)
         
         # 延迟加载的控制器使用私有属性
         self._customer_report_controller = None
@@ -728,16 +689,9 @@ class MainWindow(QMainWindow):
 
     def _initialize_controllers(self):
         """初始化控制器 - 采用延迟加载策略"""
-        # 只初始化核心控制器
         self.controller = MainWindowController(
             self,
-            matrix_session_registry=self.matrix_session_registry,
-            matrix_session_entry_policies=self.matrix_session_entry_policies,
-            matrix_session_manager=self.matrix_session_manager,
-            matrix_session_orchestrator=self.matrix_session_orchestrator,
-            matrix_session_debug_facade=self.matrix_session_debug_facade,
-            matrix_session_entry_facade=self.matrix_session_entry_facade,
-            matrix_workspace_coordinator=self.matrix_workspace_coordinator,
+            matrix_workspace_facade=self._workspace_facade,
         )
         
         # 其他控制器改为懒加载,在实际使用时才创建
