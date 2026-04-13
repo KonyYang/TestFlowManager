@@ -91,7 +91,7 @@ class MatrixEventHandlers:
 
                     logger.debug(f"成功读取项目数据: {project_data}")
                     # 显示基本信息对话框，同时传入项目数据文件路径
-                    from src.features.main_window.view.basic_info_dialog import BasicInfoDialog
+                    from src.features.main_window.view.dialogs.basic_info_dialog import BasicInfoDialog
                     dialog = BasicInfoDialog(
                         project_data,
                         self.view,

@@ -1,4 +1,4 @@
-﻿"""
+"""
 主窗口控制器模块
 处理主窗口的业务逻辑和事件
 """
@@ -809,7 +809,7 @@ class MainWindowController:
         try:
             logger.info("开始显示项目基本信息对话框")
             # 使用项目基本信息对话框来更新项目信息
-            from src.features.main_window.view.basic_info_dialog import BasicInfoDialog
+            from src.features.main_window.view.dialogs.basic_info_dialog import BasicInfoDialog
             
             # 创建并显示对话框
             dialog = BasicInfoDialog(

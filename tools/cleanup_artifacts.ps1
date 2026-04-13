@@ -9,7 +9,7 @@ Write-Host ""
 
 # 1. 从 git 跟踪中移除目录
 Write-Host "[1/7] 从 Git 跟踪中移除构建产物..." -ForegroundColor Yellow
-$tracked_dirs = @('build', 'dist', 'logs', '.idea', '.ipynb_checkpoints')
+$tracked_dirs = @('build', 'dist', 'logs', '.idea', 'nb_checkpoints')
 foreach ($dir in $tracked_dirs) {
     if (Test-Path $dir) {
         Write-Host "  处理: $dir" 

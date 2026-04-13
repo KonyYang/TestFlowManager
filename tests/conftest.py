@@ -158,15 +158,6 @@ def main_window(mock_controller, mock_matrix_controller):
 
 
 @pytest.fixture
-def matrix_integration(main_window):
-    """Matrix集成固件"""
-    from src.features.main_window.view.integration.matrix_integration import MatrixIntegration
-    
-    integration = MatrixIntegration(main_window)
-    return integration
-
-
-@pytest.fixture
 def event_handlers(main_window):
     """事件处理器固件"""
     from src.features.main_window.view.handlers.event_handlers import EventHandlers
