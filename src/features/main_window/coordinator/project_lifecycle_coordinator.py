@@ -2,21 +2,26 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass
-from typing import Callable, Dict, Optional
+from typing import Callable, Optional
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 from src.core.logger import logger
 from src.core.project_context import ProjectContext
 from src.core.project_session_service import project_session_service
-from src.core.project_session_coordinator import ProjectSessionCoordinator
 from src.features.main_window.service.project_open_service import ProjectOpenService
 from src.features.main_window.view.dialogs.basic_info_dialog import BasicInfoDialog
 
 
 class ProjectLifecycleCoordinator:
-    """组织项目打开 / 创建的业务流"""
+    """
+    项目生命周期的编排器。
+    
+    职责：
+    - UI 交互编排（文件夹选择、对话框）
+    - 通过事件系统触发项目打开流程
+    - 不直接持有 Matrix 或 ProjectSessionCoordinator 的引用
+    """
 
     def __init__(
         self,
@@ -27,66 +32,57 @@ class ProjectLifecycleCoordinator:
         self.view = view
         self.status_updater = status_updater
         self.project_open_service = project_open_service or ProjectOpenService()
-        self._matrix_project_controller = None
-        self.project_session_coordinator: Optional[ProjectSessionCoordinator] = None
 
-    def set_matrix_project_controller(self, matrix_project_controller):
-        """在 Matrix 装配完成时注入 controller"""
-        if self._matrix_project_controller == matrix_project_controller:
-            return
-        self._matrix_project_controller = matrix_project_controller
-        self.project_session_coordinator = ProjectSessionCoordinator(
-            self.view,
-            matrix_project_controller=self._matrix_project_controller,
-            status_updater=self.status_updater,
-        )
+    def handle_open_project(self) -> bool:
+        """
+        处理打开项目事件 - 项目生命周期的统一入口。
 
-    def open_project_dialog(self) -> bool:
-        """显示文件夹选择并打开项目"""
-        default_project_path = self.project_open_service.resolve_default_project_path()
-        project_path = QFileDialog.getExistingDirectory(
-            self.view,
-            "选择项目文件夹",
-            default_project_path,
-            QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks,
-        )
-        if not project_path:
-            return False
+        流程：
+        1. 显示文件夹选择对话框
+        2. 调用 ProjectOpenService 准备项目
+        3. 如需补填信息，显示 BasicInfoDialog
+        4. 通过事件系统派发 project.opened 事件
 
-        result = self.project_open_service.prepare_project(project_path)
-        if result.created_application_data:
-            self._show_basic_info_dialog(result.project_data, result.json_file_path)
-            result = self.project_open_service.prepare_project(project_path)
+        Returns:
+            是否处理成功
+        """
+        try:
+            logger.debug("LifecycleCoordinator: Handling open project request")
 
-        self.project_session_coordinator_trigger(result.project_context)
-        logger.info(f"Project opened successfully: {project_path}")
-        return True
+            default_project_path = self.project_open_service.resolve_default_project_path()
 
-    def project_session_coordinator_trigger(self, project_context: ProjectContext, *, status_message: Optional[str] = None, log_message: Optional[str] = None, trigger_matrix_auto_import: bool = False):
-        """应用项目上下文并执行状态更新"""
-        if not self.project_session_coordinator or not project_context:
-            logger.warning("ProjectSessionCoordinator 未就绪或 project_context 无效")
-            return
-        self.project_session_coordinator.apply_project_context(
-            project_context,
-            status_message=status_message,
-            log_message=log_message,
-            trigger_matrix_auto_import=trigger_matrix_auto_import,
-        )
-
-    def handle_project_opened_event(self, data: Dict) -> None:
-        project_context = ProjectContext.from_event_data(data)
-        project_path = project_context.project_path if project_context else data.get("project_path")
-        dl_number = project_context.dl_number if project_context else data.get("dl_number")
-        if project_path:
-            self.project_session_coordinator_trigger(
-                project_context,
-                status_message=f"当前项目: {dl_number or os.path.basename(project_path)}",
-                log_message=f"Project opened successfully: {project_path} with DL number: {dl_number}",
-                trigger_matrix_auto_import=True,
+            # 显示文件夹选择对话框
+            project_path = QFileDialog.getExistingDirectory(
+                self.view,
+                "选择项目文件夹",
+                default_project_path,
+                QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks,
             )
 
-    def _show_basic_info_dialog(self, project_data: Dict, json_file_path: str) -> None:
+            if not project_path:
+                return False
+
+            project_result = self.project_open_service.prepare_project(project_path)
+            if project_result.created_application_data:
+                logger.info("LifecycleCoordinator: 显示基本信息对话框供用户确认和编辑")
+                self._show_basic_info_dialog(project_result.project_data, project_result.json_file_path)
+                project_result = self.project_open_service.prepare_project(project_path)
+
+            # 通过事件系统派发项目打开事件
+            # 项目打开的副作用由事件消费者（MainWindowController）统一处理
+            project_session_service.apply_project_context(project_result.project_context)
+
+            logger.info(f"LifecycleCoordinator: Project opened successfully: {project_path}")
+            return True
+
+        except Exception as e:
+            logger.error(f"LifecycleCoordinator: Failed to open project: {e}")
+            QMessageBox.critical(self.view, "错误", f"打开项目失败: {str(e)}")
+            if self.status_updater:
+                self.status_updater("打开项目失败")
+            return False
+
+    def _show_basic_info_dialog(self, project_data: dict, json_file_path: str) -> None:
         """在首次打开项目时提示用户补填基础信息"""
         try:
             dialog = BasicInfoDialog(

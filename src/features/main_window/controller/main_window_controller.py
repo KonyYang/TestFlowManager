@@ -9,10 +9,8 @@ from PyQt5.QtWidgets import QWidget, QMessageBox, QDialog, QFileDialog
 from src.core.logger import logger
 from src.core.event_dispatcher import event_dispatcher
 from src.core.project_session_coordinator import ProjectSessionCoordinator
-from src.core.project_session_service import project_session_service
 from src.features.ltr_manager.controller.ltr_editor_controller import LTREditorController
 from src.features.main_window.model.main_window_data import MainWindowData
-from src.features.main_window.service.project_open_service import ProjectOpenService
 from src.features.main_window.service.main_window_service import MainWindowService
 from src.features.ltr_manager.controller.ltr_viewer_controller import LTRViewerController
 from src.features.main_window.view.dialogs.dl_input_dialog import DLInputDialog
@@ -20,10 +18,11 @@ from src.features.project_creator.controller.project_creator_controller import P
 from src.core.project_context import ProjectContext
 from src.features.main_window.facade.matrix_workspace_facade import MatrixWorkspaceFacade
 from src.features.matrix.service.matrix_session_manager import MatrixSessionManager
-from src.features.matrix.service.matrix_session_orchestrator import MatrixSessionOrchestrator
 from src.features.matrix.service.matrix_session_debug_facade import MatrixSessionDebugFacade
 from src.features.matrix.service.matrix_session_entry_facade import MatrixSessionEntryFacade
 from src.features.matrix.service.matrix_session_entry_policy import MatrixSessionEntryPolicyTable
+from src.features.matrix.service.matrix_session_debug_commands import MatrixSessionDebugCommands
+from src.features.main_window.coordinator.project_lifecycle_coordinator import ProjectLifecycleCoordinator
 
 
 class MainWindowController:
@@ -34,13 +33,6 @@ class MainWindowController:
     DEFAULT_MATRIX_WORKSPACE_SESSION_ID = "main:shared"
     DEFAULT_MATRIX_WORKSPACE_ENTRY = "main"
     MATRIX_MAIN_PAGE_ID = "matrix.main"
-    MATRIX_WORKSPACE_SWITCH_REQUESTED_BY = "main_window.matrix_workspace.page_visible"
-    MATRIX_WORKSPACE_SWITCHABLE_ENTRIES = (
-        "main",
-        "new_file_pilot",
-        "preview",
-        "debug_preview",
-    )
 
     def __init__(
         self,
@@ -57,7 +49,6 @@ class MainWindowController:
         self.view = view
         self.data_model = MainWindowData()
         self.service = MainWindowService(self.data_model)
-        self.project_open_service = ProjectOpenService()
 
         # 初始化状态
         self.service.update_status("就绪")
@@ -66,7 +57,7 @@ class MainWindowController:
             self.ltr_controller.data_model,
             self.ltr_controller.service
         )
-        
+
         # 初始化当前项目路径
         self._project_context: Optional[ProjectContext] = None
 
@@ -81,6 +72,14 @@ class MainWindowController:
         )
         self.matrix_project_controller = matrix_session.matrix_project_controller if matrix_session else None
 
+        # 项目生命周期统一编排器（通过事件系统触发，不持有 Matrix 引用）
+        self.lifecycle_coordinator = ProjectLifecycleCoordinator(
+            view=view,
+            status_updater=self.service.update_status,
+        )
+
+        # 项目会话协调器（通过 facade 获取 matrix_project_controller）
+        # 作为 project.opened 事件的消费者，处理项目打开后的副作用
         self.project_session_coordinator = ProjectSessionCoordinator(
             view,
             matrix_project_controller=self.matrix_project_controller,
@@ -120,10 +119,6 @@ class MainWindowController:
     def _ensure_preview_session_manager(self) -> MatrixSessionManager:
         """通过 facade 获取预览会话管理器"""
         return self._facade.ensure_preview_session_manager()
-
-    def _ensure_matrix_session_orchestrator(self) -> MatrixSessionOrchestrator:
-        """通过 facade 获取会话编排器"""
-        return self._facade.matrix_session_orchestrator
 
     def _ensure_matrix_session_debug_facade(self) -> MatrixSessionDebugFacade:
         """通过 facade 获取调试协同件"""
@@ -262,40 +257,45 @@ class MainWindowController:
             return None
         return self._build_matrix_session_debug_state()
 
+    def on_page_visible(self, page_id: str) -> dict:
+        """
+        当页面变为可见时调用 - 委托给 MatrixWorkspaceFacade 处理。
+
+        Shell 只负责转发页面变更，Matrix 内部逻辑由 Facade 处理。
+
+        Args:
+            page_id: 页面标识符
+
+        Returns:
+            包含 session binding 信息的字典
+        """
+        return self._facade.on_page_visible(page_id)
+
+    def set_matrix_page(self, matrix_page) -> None:
+        """
+        设置 MatrixPage 引用，使 Facade 可以直接操作页面。
+        Shell 通过此方法注入 MatrixPage，打破直接依赖。
+
+        Args:
+            matrix_page: MatrixPage 实例
+        """
+        self._facade.set_matrix_page(matrix_page)
+
+    def on_page_hidden(self, page_id: str) -> bool:
+        """
+        当页面被隐藏时调用 - 委托给 MatrixWorkspaceFacade 处理。
+
+        Args:
+            page_id: 页面标识符
+
+        Returns:
+            是否成功处理
+        """
+        return self._facade.on_page_hidden(page_id)
+
     def get_matrix_workspace_session_binding(self, *, page_id: str = MATRIX_MAIN_PAGE_ID) -> dict:
         """Returns matrix workspace session metadata for page-level binding."""
-        manager = self._ensure_preview_session_manager()
-        active_session_id = None
-        active_entry_name = None
-        active_mode = "shared"
-        bound_session_id = None
-        if hasattr(manager, "snapshot"):
-            snapshot = manager.snapshot()
-            active_session_id = getattr(snapshot, "active_session_id", None)
-            session_modes = dict(getattr(snapshot, "session_modes", {}) or {})
-            session_entries = dict(getattr(snapshot, "session_entries", {}) or {})
-            page_bindings = dict(getattr(snapshot, "page_session_bindings", {}) or {})
-            bound_session_id = page_bindings.get(page_id)
-            if bound_session_id:
-                return {
-                    "session_id": bound_session_id,
-                    "entry_name": session_entries.get(bound_session_id) or self.DEFAULT_MATRIX_WORKSPACE_ENTRY,
-                    "mode": session_modes.get(bound_session_id, "shared"),
-                }
-            if active_session_id is not None:
-                active_mode = session_modes.get(active_session_id, active_mode)
-                active_entry_name = session_entries.get(active_session_id)
-        if not active_session_id:
-            return {
-                "session_id": self.DEFAULT_MATRIX_WORKSPACE_SESSION_ID,
-                "entry_name": self.DEFAULT_MATRIX_WORKSPACE_ENTRY,
-                "mode": "shared",
-            }
-        return {
-            "session_id": active_session_id,
-            "entry_name": active_entry_name or self.DEFAULT_MATRIX_WORKSPACE_ENTRY,
-            "mode": active_mode,
-        }
+        return self._facade.on_page_visible(page_id)
 
     def ensure_matrix_workspace_session_consistency(
         self,
@@ -304,76 +304,18 @@ class MainWindowController:
     ) -> dict:
         """
         Ensures matrix workspace visible page is aligned with active session routing.
-        Returns a structured result with rollback semantics from switch contract.
+        委托给 MatrixWorkspaceFacade 处理。
         """
-        manager = self._ensure_preview_session_manager()
-        active_session_id = None
-        bound_session_id = None
-        if hasattr(manager, "snapshot"):
-            snapshot = manager.snapshot()
-            active_session_id = getattr(snapshot, "active_session_id", None)
-            page_bindings = dict(getattr(snapshot, "page_session_bindings", {}) or {})
-            bound_session_id = page_bindings.get(page_id)
-        elif hasattr(manager, "get_active_session_id"):
-            active_session_id = manager.get_active_session_id()
-            if hasattr(manager, "get_page_session_id"):
-                bound_session_id = manager.get_page_session_id(page_id)
-
-        if not bound_session_id:
-            if active_session_id and hasattr(manager, "bind_page_session"):
-                manager.bind_page_session(page_id, active_session_id)
-                return {
-                    "success": True,
-                    "reason": None,
-                    "page_id": page_id,
-                    "active_session_id": active_session_id,
-                    "bound_session_id": active_session_id,
-                    "rollback_performed": False,
-                }
-            return {
-                "success": True,
-                "reason": "default_shared_binding",
-                "page_id": page_id,
-                "active_session_id": active_session_id,
-                "bound_session_id": None,
-                "rollback_performed": False,
-            }
-
-        if bound_session_id == active_session_id:
-            return {
-                "success": True,
-                "reason": None,
-                "page_id": page_id,
-                "active_session_id": active_session_id,
-                "bound_session_id": bound_session_id,
-                "rollback_performed": False,
-            }
-
-        orchestrator = self._ensure_matrix_session_orchestrator()
-        result = orchestrator.bind_page_session(
-            page_id,
-            bound_session_id,
-            expected_entry_names=self.MATRIX_WORKSPACE_SWITCHABLE_ENTRIES,
-            requested_by=self.MATRIX_WORKSPACE_SWITCH_REQUESTED_BY,
-        )
-        return {
-            "success": bool(getattr(result, "success", False)),
-            "reason": getattr(result, "reason", None),
-            "page_id": page_id,
-            "active_session_id": getattr(result, "active_session_id", active_session_id),
-            "bound_session_id": bound_session_id,
-            "rollback_performed": bool(getattr(result, "rollback_performed", False)),
-        }
+        result = self._facade.on_page_visible(page_id)
+        return result.get("consistency", {"success": True})
 
     def handle_matrix_workspace_hidden(self, *, page_id: str = MATRIX_MAIN_PAGE_ID) -> bool:
         """
         Clears page-level session binding when matrix workspace is no longer visible.
         This does not close sessions; it only releases page->session association.
+        委托给 MatrixWorkspaceFacade 处理。
         """
-        manager = self._ensure_preview_session_manager()
-        if hasattr(manager, "unbind_page_session"):
-            return bool(manager.unbind_page_session(page_id))
-        return False
+        return self._facade.on_page_hidden(page_id)
 
     def _build_matrix_session_debug_state(self) -> dict:
         facade = self._ensure_matrix_session_debug_facade()
@@ -678,81 +620,13 @@ class MainWindowController:
 
     def handle_open_project(self) -> bool:
         """
-        处理打开项目事件
+        处理打开项目事件 - 委托给 ProjectLifecycleCoordinator
 
         Returns:
             是否处理成功
         """
-        try:
-            logger.debug("Handling open project request")
+        return self.lifecycle_coordinator.handle_open_project()
 
-            default_project_path = self.project_open_service.resolve_default_project_path()
-
-            # 显示文件夹选择对话框
-            project_path = QFileDialog.getExistingDirectory(
-                self.view,
-                "选择项目文件夹",
-                default_project_path,  # 使用配置的默认路径作为初始目录
-                QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
-            )
-
-            if not project_path:  # 用户取消了选择
-                return False
-
-            project_result = self.project_open_service.prepare_project(project_path)
-            if project_result.created_application_data:
-                logger.info("显示基本信息对话框供用户确认和编辑")
-                self._show_basic_info_dialog(project_result.project_data, project_result.json_file_path)
-                project_result = self.project_open_service.prepare_project(project_path)
-
-            project_session_service.apply_project_context(project_result.project_context)
-            logger.info(f"Project opened successfully: {project_path}")
-
-            return True
-        except Exception as e:
-            logger.error(f"Failed to open project: {e}")
-            self.service.update_status("打开项目失败")
-            QMessageBox.critical(self.view, "错误", f"打开项目失败: {str(e)}")
-            return False
-
-    def _show_basic_info_dialog(self, project_data: dict, json_file_path: str):
-        """
-        显示项目基本信息对话框用于更新项目信息
-        
-        Args:
-            project_data: 项目数据
-            json_file_path: JSON文件路径
-        """
-        try:
-            logger.info("开始显示项目基本信息对话框")
-            # 使用项目基本信息对话框来更新项目信息
-            from src.features.main_window.view.dialogs.basic_info_dialog import BasicInfoDialog
-            
-            # 创建并显示对话框
-            dialog = BasicInfoDialog(
-                project_data,
-                self.view,
-                project_data_file_path=json_file_path,
-            )
-            result = dialog.exec_()
-            
-            # 如果用户确认了更改，保存到JSON文件
-            if result == BasicInfoDialog.Accepted:
-                modified_data = dialog.get_modified_data()
-                logger.info(f"用户确认了修改，准备保存数据到: {json_file_path}")
-                
-                # 保存到JSON文件
-                try:
-                    with open(json_file_path, 'w', encoding='utf-8') as f:
-                        json.dump(modified_data, f, ensure_ascii=False, indent=4)
-                    logger.info(f"Updated application_data.json: {json_file_path}")
-                except Exception as e:
-                    logger.error(f"Failed to update application_data.json: {e}")
-                    QMessageBox.warning(self.view, "保存失败", f"无法保存数据: {str(e)}")
-            
-        except Exception as e:
-            logger.error(f"Failed to show basic info dialog: {e}")
-            QMessageBox.warning(self.view, "错误", f"无法显示更新对话框: {str(e)}")
 
     def handle_about(self) -> None:
         """处理关于事件

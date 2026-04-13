@@ -231,7 +231,9 @@ class MainWindow(QMainWindow):
         self._page_subtitle_label: Optional[QLabel] = None
         self._nav_list: Optional[QListWidget] = None
         self._page_stack: Optional[QStackedWidget] = None
-        self._nav_entries: List[Tuple[str, str, str]] = []
+        # 元组格式: (nav_title, breadcrumb, subtitle, page_id)
+        self._nav_entries: List[Tuple[str, str, str, str]] = []
+        self._current_page_id: str = ""  # 当前页面 ID
         
         # DL编号显示标签
         self._dl_number_label: Optional[QLabel] = None
@@ -793,10 +795,11 @@ class MainWindow(QMainWindow):
         # === Matrix 编辑器（默认首页）===
         self._setup_matrix_tab()
         self._register_nav_page(
-            "📊 Matrix 编辑器", 
+            "📊 Matrix 编辑器",
             "项目管理 / Matrix 编辑器",
             self.matrix_tab,
-            subtitle="编辑和管理测试流程矩阵"
+            subtitle="编辑和管理测试流程矩阵",
+            page_id="matrix.main",
         )
         
         # === 项目管理组 ===
@@ -893,26 +896,35 @@ class MainWindow(QMainWindow):
             subtitle="了解TestFlow Manager的更多信息"
         )
 
-    def _register_nav_page(self, nav_title: str, breadcrumb_text: str, page: QWidget, 
-                           action=None, subtitle: str = "") -> None:
+    def _register_nav_page(
+        self,
+        nav_title: str,
+        breadcrumb_text: str,
+        page: QWidget,
+        *,
+        action=None,
+        subtitle: str = "",
+        page_id: str = "",
+    ) -> None:
         """
         添加侧栏一项并放入堆叠控件。
-        
+
         Args:
             nav_title: 侧栏显示标题
             breadcrumb_text: 面包屑文本
             page: 页面对象
             action: 可选的触发动作函数（点击时执行）
             subtitle: 页面副标题描述
+            page_id: 页面唯一标识符，用于页面可见性路由
         """
         if self._nav_list is None or self._page_stack is None:
             return
         index = len(self._nav_entries)
-        self._nav_entries.append((nav_title, breadcrumb_text, subtitle))
+        self._nav_entries.append((nav_title, breadcrumb_text, subtitle, page_id))
         item = QListWidgetItem(nav_title)
         self._nav_list.addItem(item)
         self._page_stack.addWidget(page)
-        
+
         # 注册动作映射
         if action:
             self._nav_actions[index] = action
@@ -955,7 +967,7 @@ class MainWindow(QMainWindow):
             logger.error(f"执行侧栏动作失败: {e}", exc_info=True)
 
     def _apply_nav_index(self, index: int) -> None:
-        """同步堆叠页、页标题与面包屑。"""
+        """同步堆叠页、页标题与面包屑，并触发页面可见性事件。"""
         if self._page_stack is None or not self._nav_entries or index >= len(self._nav_entries):
             return
         self._page_stack.setCurrentIndex(index)
@@ -963,13 +975,34 @@ class MainWindow(QMainWindow):
         nav_title = entry[0]
         breadcrumb = entry[1]
         subtitle = entry[2] if len(entry) > 2 else ""
-        
+        page_id = entry[3] if len(entry) > 3 else ""
+
+        # 保存当前页面 ID
+        old_page_id = self._current_page_id
+        self._current_page_id = page_id
+
         if self._page_title_label is not None:
             self._page_title_label.setText(nav_title)
         if self._breadcrumb_label is not None:
             self._breadcrumb_label.setText(f"📁 {breadcrumb}")
         if self._page_subtitle_label is not None:
             self._page_subtitle_label.setText(subtitle)
+
+        # 触发页面可见性事件（Shell 只转发，Matrix 逻辑在 Facade 中处理）
+        if old_page_id and old_page_id != page_id:
+            # 旧页面隐藏
+            if self.controller:
+                self.controller.on_page_hidden(old_page_id)
+        if page_id:
+            self._on_page_visible(page_id)
+
+    def _on_page_visible(self, page_id: str) -> None:
+        """
+        页面变为可见时调用 - Shell 只转发页面 ID，不含 Matrix 可见性策略。
+        """
+        if not self.controller:
+            return
+        self.controller.on_page_visible(page_id)
 
     def _create_placeholder_page(self, title: str, description: str = "") -> QWidget:
         """创建现代化的占位页面"""
@@ -1036,15 +1069,15 @@ class MainWindow(QMainWindow):
         return page
 
     def _setup_matrix_tab(self):
-        """Matrix 主内容页 - 通过 MatrixPage 接入主窗口。"""
+        """Matrix 主内容页 - 通过 MatrixPage 接入主窗口。
+
+        MatrixPage 由 Facade 注入，Shell 不直接操作 session 绑定。
+        """
         if self.matrix_page is None:
             self.matrix_page = MatrixPage(self.matrix_controller, self)
-            if self.controller and hasattr(self.controller, "get_matrix_workspace_session_binding"):
-                binding = self.controller.get_matrix_workspace_session_binding()
-                self.matrix_page.bind_session(
-                    binding.get("session_id"),
-                    entry_name=binding.get("entry_name"),
-                )
+            # 通过 controller 设置 MatrixPage 引用，打破直接依赖
+            if self.controller and hasattr(self.controller, "set_matrix_page"):
+                self.controller.set_matrix_page(self.matrix_page)
 
         self.matrix_tab = self.matrix_page
 
@@ -1075,15 +1108,31 @@ class MainWindow(QMainWindow):
         return self.matrix_page is not None
 
     def activate_matrix_workspace(self) -> bool:
+        """
+        激活 Matrix 工作区 - 通过 page_id 查找而非硬编码索引。
+        
+        Returns:
+            是否成功激活
+        """
         if self.matrix_page is None:
+            return False
+        
+        # 通过 page_id 查找 Matrix 页面索引
+        matrix_index = None
+        for i, entry in enumerate(self._nav_entries):
+            if len(entry) > 3 and entry[3] == "matrix.main":
+                matrix_index = i
+                break
+        
+        if matrix_index is None:
             return False
 
         if self._nav_list is not None:
-            self._nav_list.setCurrentRow(0)
+            self._nav_list.setCurrentRow(matrix_index)
             return True
 
         if self._page_stack is not None:
-            self._apply_nav_index(0)
+            self._apply_nav_index(matrix_index)
             return True
 
         return False
@@ -1306,26 +1355,23 @@ class MainWindow(QMainWindow):
         self.status_label.setText(status)
 
     def _on_page_changed_for_matrix(self, index: int) -> None:
-        """页面切换时延迟加载Matrix表格数据"""
-        if index == 0 and self.matrix_page:
-            if self.controller and hasattr(self.controller, "ensure_matrix_workspace_session_consistency"):
-                consistency = self.controller.ensure_matrix_workspace_session_consistency()
-                binding = self.controller.get_matrix_workspace_session_binding()
-                self.matrix_page.bind_session(
-                    binding.get("session_id"),
-                    entry_name=binding.get("entry_name"),
-                )
-                if not consistency.get("success", False):
-                    logger.warning(
-                        f"Matrix workspace session consistency failed: {consistency}"
-                    )
-            if not self.matrix_page._matrix_table_initialized:
-                try:
-                    self.matrix_page.handle_page_activated()
-                except Exception as e:
-                    logger.error(f"延迟加载Matrix表格失败: {e}")
-        elif self.controller and hasattr(self.controller, "handle_matrix_workspace_hidden"):
-            self.controller.handle_matrix_workspace_hidden()
+        """
+        页面切换信号处理 - Shell 只转发页面 ID，不含 Matrix 可见性策略。
+
+        页面可见性逻辑已移至 MatrixWorkspaceFacade.on_page_visible()。
+        """
+        # 获取当前页面 ID（通过索引查找）
+        page_id = ""
+        if 0 <= index < len(self._nav_entries):
+            entry = self._nav_entries[index]
+            page_id = entry[3] if len(entry) > 3 else ""
+
+        # Shell 只转发页面变更，不直接操作 Matrix
+        if page_id and self.controller:
+            self.controller.on_page_visible(page_id)
+        elif not page_id and self.controller:
+            # 非 Matrix 页面，通知隐藏
+            self.controller.on_page_hidden(self._current_page_id)
     
     def _initialize_matrix_table(self):
         """初始化Matrix表格数据 - 启动时调用"""
