@@ -4,7 +4,7 @@
 """
 import os
 import json
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 from PyQt5.QtWidgets import QWidget, QMessageBox, QDialog, QFileDialog
 from src.core.logger import logger
 from src.core.event_dispatcher import event_dispatcher
@@ -16,13 +16,12 @@ from src.features.ltr_manager.controller.ltr_viewer_controller import LTRViewerC
 from src.features.main_window.view.dialogs.dl_input_dialog import DLInputDialog
 from src.features.project_creator.controller.project_creator_controller import ProjectCreatorController
 from src.core.project_context import ProjectContext
-from src.features.main_window.facade.matrix_workspace_facade import MatrixWorkspaceFacade
-from src.features.matrix.service.matrix_session_manager import MatrixSessionManager
-from src.features.matrix.service.matrix_session_debug_facade import MatrixSessionDebugFacade
-from src.features.matrix.service.matrix_session_entry_facade import MatrixSessionEntryFacade
-from src.features.matrix.service.matrix_session_entry_policy import MatrixSessionEntryPolicyTable
-from src.features.matrix.service.matrix_session_debug_commands import MatrixSessionDebugCommands
+from src.features.matrix.workspace.matrix_workspace_facade import MatrixWorkspaceFacade
 from src.features.main_window.coordinator.project_lifecycle_coordinator import ProjectLifecycleCoordinator
+
+# 类型导入仅用于类型检查，运行时不依赖具体类
+if TYPE_CHECKING:
+    from src.features.matrix.service.matrix_session_manager import MatrixSessionManager
 
 
 class MainWindowController:
@@ -86,53 +85,47 @@ class MainWindowController:
             status_updater=self.service.update_status,
         )
 
-        # 订阅事件
-        event_dispatcher.subscribe("ltr.processing.started", self._on_ltr_processing_started)
-        event_dispatcher.subscribe("ltr.processing.completed", self._on_ltr_processing_completed)
-        event_dispatcher.subscribe("ltr.processing.failed", self._on_ltr_processing_failed)
-        event_dispatcher.subscribe("state.changed", self._on_state_changed)
-        event_dispatcher.subscribe("ltr.application.confirmed", self._on_ltr_application_confirmed)
-        event_dispatcher.subscribe("ltr.application.processed", self._on_ltr_application_processed)
-        event_dispatcher.subscribe("project.opened", self._on_project_opened)
+        # 初始化事件绑定管理器（只订阅 project.opened 和 state.changed）
+        from src.features.main_window.integration.event_bindings import EventBindingManager
+        self.event_binding_manager = EventBindingManager(
+            controller=self,
+            status_service=self.service,
+        )
+        self.event_binding_manager.bind_all()
+        
+        # 初始化 LTR 状态协调器（处理 LTR 领域事件）
+        from src.features.ltr_manager.integration.ltr_status_coordinator import LTRStatusCoordinator
+        self.ltr_status_coordinator = LTRStatusCoordinator(
+            status_updater=self.service.update_status,
+        )
 
-    @staticmethod
-    def _is_isolated_matrix_session_pilot_enabled() -> bool:
+    def _is_isolated_matrix_session_pilot_enabled(self) -> bool:
         """
         Experimental switch for project-creation entry only.
         Default is disabled, which keeps shared behavior unchanged.
         """
-        return MatrixSessionEntryFacade.is_new_file_pilot_enabled(os.environ)
+        return self._facade.is_new_file_pilot_enabled(os.environ)
 
-    @staticmethod
-    def _is_isolated_matrix_preview_pilot_enabled() -> bool:
+    def _is_isolated_matrix_preview_pilot_enabled(self) -> bool:
         """
         Experimental switch for opening a non-default isolated preview session.
         Default is disabled, which keeps shared behavior unchanged.
         """
-        return MatrixSessionEntryFacade.is_preview_pilot_enabled(os.environ)
+        return self._facade.is_preview_pilot_enabled(os.environ)
 
-    @staticmethod
-    def _is_debug_matrix_command_enabled() -> bool:
-        value = os.getenv("TFM_ENABLE_DEBUG_COMMANDS", "")
-        return value.strip().lower() in {"1", "true", "yes", "on"}
+    def _is_debug_matrix_command_enabled(self) -> bool:
+        """通过 facade 检查 debug 命令是否启用"""
+        return self._facade.is_debug_commands_enabled()
 
-    def _ensure_preview_session_manager(self) -> MatrixSessionManager:
+    def _ensure_preview_session_manager(self):
         """通过 facade 获取预览会话管理器"""
         return self._facade.ensure_preview_session_manager()
-
-    def _ensure_matrix_session_debug_facade(self) -> MatrixSessionDebugFacade:
-        """通过 facade 获取调试协同件"""
-        return self._facade.matrix_session_debug_facade
-
-    def _ensure_matrix_session_entry_facade(self) -> MatrixSessionEntryFacade:
-        """通过 facade 获取入口协同件"""
-        return self._facade.matrix_session_entry_facade
 
     def open_isolated_matrix_preview_session(
         self,
         session_id: str,
         *,
-        entry_name: str = MatrixSessionEntryPolicyTable.PREVIEW,
+        entry_name: str = "preview",
     ):
         """
         Non-default controlled entry for future standalone/preview matrix sessions.
@@ -140,25 +133,20 @@ class MainWindowController:
         """
         if not session_id:
             raise ValueError("session_id is required for isolated matrix preview session")
-        facade = self._ensure_matrix_session_debug_facade()
-        return facade.open_preview_session(
-            session_id,
-            entry_name=entry_name,
-        )
+        return self._facade.open_preview_session(session_id, entry_name=entry_name)
 
     def handle_open_isolated_matrix_preview_pilot(self) -> str | None:
         """
         Controlled non-default entry (pilot) for isolated preview session.
         Default is disabled; when enabled it opens a fixed isolated preview session id.
         """
-        entry_facade = self._ensure_matrix_session_entry_facade()
         pilot_enabled = self._is_isolated_matrix_preview_pilot_enabled()
-        session_id = entry_facade.resolve_preview_pilot_session_id(pilot_enabled=pilot_enabled)
+        session_id = self._facade.resolve_preview_pilot_session_id(pilot_enabled=pilot_enabled)
         if not session_id:
             return None
         session = self.open_isolated_matrix_preview_session(
             session_id,
-            entry_name=MatrixSessionEntryPolicyTable.PREVIEW,
+            entry_name="preview",
         )
         matrix_project_controller = getattr(session, "matrix_project_controller", None)
         if matrix_project_controller and hasattr(matrix_project_controller, "open_matrix_workspace"):
@@ -166,8 +154,7 @@ class MainWindowController:
         return session_id
 
     def close_isolated_matrix_preview_session(self, session_id: str) -> bool:
-        facade = self._ensure_matrix_session_debug_facade()
-        return bool(facade.close_preview_session(session_id))
+        return self._facade.close_preview_session(session_id)
 
     def handle_close_isolated_matrix_preview_pilot(self) -> bool:
         """
@@ -179,23 +166,19 @@ class MainWindowController:
         - best-effort restores active session to the default workspace session id if present.
         - triggers workspace consistency check after close.
         """
-        entry_facade = self._ensure_matrix_session_entry_facade()
         pilot_enabled = self._is_isolated_matrix_preview_pilot_enabled()
-        session_id = entry_facade.resolve_preview_pilot_session_id(pilot_enabled=pilot_enabled)
+        session_id = self._facade.resolve_preview_pilot_session_id(pilot_enabled=pilot_enabled)
         if not session_id:
             return False
 
-        manager = self._ensure_preview_session_manager()
-        active_session_id = None
-        if hasattr(manager, "get_active_session_id"):
-            active_session_id = manager.get_active_session_id()
+        active_session_id = self._facade.get_active_session_id()
 
         closed = self.close_isolated_matrix_preview_session(session_id)
         if not closed:
             return False
 
-        if active_session_id == session_id and hasattr(manager, "activate"):
-            manager.activate(self.DEFAULT_MATRIX_WORKSPACE_SESSION_ID)
+        if active_session_id == session_id:
+            self._facade.activate_session(self.DEFAULT_MATRIX_WORKSPACE_SESSION_ID)
 
         self.ensure_matrix_workspace_session_consistency()
         return True
@@ -204,8 +187,7 @@ class MainWindowController:
         if not self._is_debug_matrix_command_enabled():
             return None
 
-        facade = self._ensure_matrix_session_debug_facade()
-        resolved_session_id, session = facade.open_debug_preview_session(session_id=session_id)
+        resolved_session_id, session = self._facade.open_debug_preview_session(session_id=session_id)
 
         matrix_project_controller = getattr(session, "matrix_project_controller", None)
         if matrix_project_controller and hasattr(matrix_project_controller, "open_matrix_workspace"):
@@ -218,8 +200,7 @@ class MainWindowController:
         if not self._is_debug_matrix_command_enabled():
             return False
 
-        facade = self._ensure_matrix_session_debug_facade()
-        closed, target_id = facade.close_debug_preview_session(session_id=session_id)
+        closed, target_id = self._facade.close_debug_preview_session(session_id=session_id)
         if not closed or not target_id:
             return False
         self._debug_publish_matrix_session_state("close")
@@ -228,14 +209,13 @@ class MainWindowController:
     def debug_switch_isolated_matrix_preview_session(self, session_id: str) -> bool:
         if not self._is_debug_matrix_command_enabled():
             return False
-        facade = self._ensure_matrix_session_debug_facade()
-        result = facade.switch_preview_session(session_id)
+        result = self._facade.switch_preview_session(session_id)
         if not getattr(result, "success", False):
             reason = getattr(result, "reason", None) or "unknown"
             service = getattr(self, "service", None)
             if service is not None and hasattr(service, "update_status"):
                 service.update_status(
-                    MatrixSessionDebugCommands.format_switch_failed(reason, session_id)
+                    self._facade.format_switch_failed(reason, session_id)
                 )
             return False
         state = self._build_matrix_session_debug_state()
@@ -243,7 +223,7 @@ class MainWindowController:
         service = getattr(self, "service", None)
         if service is not None and hasattr(service, "update_status"):
             service.update_status(
-                MatrixSessionDebugCommands.format_switch_success(
+                self._facade.format_switch_success(
                     session_id,
                     entry_name,
                     state,
@@ -270,16 +250,6 @@ class MainWindowController:
             包含 session binding 信息的字典
         """
         return self._facade.on_page_visible(page_id)
-
-    def set_matrix_page(self, matrix_page) -> None:
-        """
-        设置 MatrixPage 引用，使 Facade 可以直接操作页面。
-        Shell 通过此方法注入 MatrixPage，打破直接依赖。
-
-        Args:
-            matrix_page: MatrixPage 实例
-        """
-        self._facade.set_matrix_page(matrix_page)
 
     def on_page_hidden(self, page_id: str) -> bool:
         """
@@ -318,59 +288,21 @@ class MainWindowController:
         return self._facade.on_page_hidden(page_id)
 
     def _build_matrix_session_debug_state(self) -> dict:
-        facade = self._ensure_matrix_session_debug_facade()
-        registry_snapshot = None
-        registry = self._facade.matrix_session_registry
-        if registry is not None and hasattr(registry, "snapshot"):
-            registry_snapshot = registry.snapshot()
-        return facade.get_debug_state(registry_snapshot=registry_snapshot)
+        registry_snapshot = self._facade.get_registry_snapshot()
+        return self._facade.get_debug_state(registry_snapshot=registry_snapshot)
 
     def _debug_publish_matrix_session_state(self, action: str) -> None:
         if not self._is_debug_matrix_command_enabled():
             return
         state = self._build_matrix_session_debug_state()
-        status_text = MatrixSessionDebugCommands.format_state_status(action, state)
+        status_text = self._facade.format_debug_state_status(action, state)
         logger.info(f"Matrix session debug state: {state}")
         service = getattr(self, "service", None)
         if service is not None and hasattr(service, "update_status"):
             service.update_status(status_text)
 
-    # 添加事件处理方法
-    def _on_ltr_processing_started(self, data):
-        """处理LTR处理开始事件"""
-        file_path = data.get("file_path", "未知文件")
-        self.service.update_status(f"正在处理LTR申请单: {os.path.basename(file_path)}")
-
-    def _on_ltr_processing_completed(self, data):
-        """处理LTR处理完成事件"""
-        file_path = data.get("file_path", "未知文件")
-        self.service.update_status(f"LTR申请单处理完成: {os.path.basename(file_path)}")
-
-    def _on_ltr_processing_failed(self, data):
-        """处理LTR处理失败事件"""
-        file_path = data.get("file_path", "未知文件")
-        error = data.get("error", "未知错误")
-        self.service.update_status(f"LTR申请单处理失败: {os.path.basename(file_path)}")
-
-    def _on_ltr_application_confirmed(self, data):
-        """处理LTR申请单确认事件"""
-        dl_number = data.get("dl_number")
-        self.service.update_status(f"确认LTR申请单: {dl_number}")
-
-    def _on_ltr_application_processed(self, data):
-        """处理LTR申请单处理完成事件"""
-        dl_number = data.get("dl_number")
-        status = data.get("status")
-
-        logger.debug(f"_on_ltr_application_processed in MainWindowController called with dl_number={dl_number}, status={status}")
-
-        if status == "success":
-            self.service.update_status(f"LTR申请单处理完成: {dl_number}")
-            # Project-open side effects (title/dl/matrix binding/auto import) must be orchestrated by
-            # `project.opened` consumption -> ProjectSessionCoordinator.apply_project_context(...).
-        else:
-            self.service.update_status(f"LTR申请单处理失败: {dl_number}")
-
+    # LTR 事件处理已移至 LTRStatusCoordinator
+    # project.opened 事件通过 EventBindingManager 转发
     def _on_project_opened(self, data):
         """处理项目打开事件"""
         project_context = ProjectContext.from_event_data(data)
@@ -391,21 +323,18 @@ class MainWindowController:
             return
 
     def _on_state_changed(self, data):
-        """处理状态变更事件。
+        """Handle state changed event - internal state management only.
 
-        项目打开主流程统一由 `project.opened` 事件驱动。
-        这里只保留通用状态更新和清理动作，避免重复编排项目打开副作用。
+        Note: application_status updates are handled by EventBindingManager directly.
+        Project open flow is driven by `project.opened` event.
         """
         key = data.get("key")
-        new_value = data.get("new_value")
 
         if key == "current_project_context":
+            new_value = data.get("new_value")
             if not isinstance(new_value, ProjectContext):
                 self._project_context = None
             return
-
-        if key == "application_status":
-            self.service.update_status(new_value)
 
     @property
     def project_context(self) -> Optional[ProjectContext]:
@@ -596,8 +525,7 @@ class MainWindowController:
 
             # 创建项目创建控制器并处理新建项目请求
             use_isolated_pilot = self._is_isolated_matrix_session_pilot_enabled()
-            entry_facade = self._ensure_matrix_session_entry_facade()
-            session_config = entry_facade.resolve_new_file_session_config(
+            session_config = self._facade.resolve_new_file_session_config(
                 pilot_enabled=use_isolated_pilot
             )
             project_creator = ProjectCreatorController(
@@ -672,6 +600,62 @@ class MainWindowController:
         """
         return self.service.get_status()
 
+    # ==================== Matrix 操作代理方法 ====================
+    # 所有 UI 对 Matrix 的操作都通过 controller 代理，避免直接耦合
+
+    def get_matrix_controller(self):
+        """
+        获取 MatrixController 实例。
+
+        Returns:
+            MatrixController 或 None（如果未初始化）
+        """
+        if not self.matrix_project_controller:
+            return None
+        return self.matrix_project_controller.matrix_controller
+
+    def handle_export_matrix_to_excel(self) -> dict:
+        """
+        代理 Matrix 导出操作。
+
+        Returns:
+            包含 success 和 message 键的字典
+        """
+        matrix_ctrl = self.get_matrix_controller()
+        if not matrix_ctrl:
+            return {"success": False, "message": "Matrix未初始化"}
+        return matrix_ctrl.handle_export_matrix_to_excel()
+
+    def handle_export_llcr(self) -> bool:
+        """
+        代理 LLCR 导出操作。
+
+        Returns:
+            是否成功
+        """
+        matrix_ctrl = self.get_matrix_controller()
+        if not matrix_ctrl:
+            return False
+        return matrix_ctrl.handle_export_llcr()
+
+    def handle_export_cr(self) -> bool:
+        """
+        代理 CR 导出操作。
+
+        Returns:
+            是否成功
+        """
+        matrix_ctrl = self.get_matrix_controller()
+        if not matrix_ctrl:
+            return False
+        return matrix_ctrl.handle_export_cr()
+
+    def auto_export_matrix_data_on_shutdown(self) -> None:
+        """代理关闭时自动导出 Matrix 数据"""
+        matrix_ctrl = self.get_matrix_controller()
+        if matrix_ctrl:
+            matrix_ctrl.auto_export_matrix_data_on_shutdown()
+
     def _cleanup_non_default_matrix_sessions(self) -> tuple[str, ...]:
         manager = getattr(self, "_matrix_preview_session_manager", None)
         if manager is None:
@@ -686,6 +670,23 @@ class MainWindowController:
         """关闭控制器"""
         try:
             logger.info("Shutting down MainWindowController")
+            
+            # 解绑事件订阅
+            if hasattr(self, 'event_binding_manager'):
+                try:
+                    self.event_binding_manager.unbind_all()
+                    logger.info("Event subscriptions unbound successfully")
+                except Exception as e:
+                    logger.error(f"Failed to unbind events: {e}")
+            
+            # 清理 LTR 状态协调器
+            if hasattr(self, 'ltr_status_coordinator'):
+                try:
+                    self.ltr_status_coordinator.cleanup()
+                    logger.info("LTR status coordinator cleaned up")
+                except Exception as e:
+                    logger.error(f"Failed to cleanup LTR status coordinator: {e}")
+            
             try:
                 manager = getattr(self, "_matrix_preview_session_manager", None)
                 if manager is not None and hasattr(manager, "clear_page_session_bindings"):
@@ -704,9 +705,8 @@ class MainWindowController:
                     f"Failed to cleanup non-default matrix sessions: {session_cleanup_error}"
                 )
 
-            # 在关闭前自动导出Matrix数据
-            if self.view and hasattr(self.view, 'matrix_controller'):
-                self.view.matrix_controller.auto_export_matrix_data_on_shutdown()
+            # 在关闭前自动导出Matrix数据（通过代理方法）
+            self.auto_export_matrix_data_on_shutdown()
             
             # 保存应用程序状态
             self.service.save_application_state()

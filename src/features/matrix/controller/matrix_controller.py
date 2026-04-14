@@ -6,7 +6,19 @@ from src.features.matrix.service.matrix_application_service import MatrixApplica
 
 
 class MatrixController:
-    """Core matrix controller."""
+    """
+    Matrix页面运行时控制器
+
+    职责边界：
+    - 页面运行时行为
+    - 表格操作（行/列/单元格）
+    - 运行时编辑/更新/刷新命令
+    - 导入/导出运行时入口方法
+    - 页面级上下文访问器
+
+    注意：此控制器不处理项目/工作区级别的入口编排，
+    该类职责由MatrixProjectController负责。
+    """
 
     def __init__(self, parent=None, matrix_service=None, application_service=None):
         self.parent = parent
@@ -24,7 +36,19 @@ class MatrixController:
         self.project_context = None
         self.ltr_number = None
 
-    def activate_matrix_workspace(self):
+    def _activate_matrix_workspace_runtime(self):
+        """
+        运行时层工作区激活 - 内部委托方法
+
+        警告：此方法不是项目/工作区入口！
+        外部调用者应使用 MatrixProjectController.open_matrix_workspace() 作为唯一入口。
+
+        此方法仅作为 page/runtime 层对 parent view 的激活委托存在，
+        由 MatrixProjectController 在编排完成后调用。
+
+        Returns:
+            bool: 是否成功激活
+        """
         try:
             if (
                 self.parent_view
@@ -42,20 +66,34 @@ class MatrixController:
             logger.error(f"Error showing matrix dialog: {e}", exc_info=True)
             raise
 
+    # 兼容性保留：旧方法名作为转发器
+    def activate_matrix_workspace(self):
+        """
+        [兼容性保留] 请使用 _activate_matrix_workspace_runtime()
+
+        此方法保留用于兼容性，内部调用 _activate_matrix_workspace_runtime()。
+        外部新代码不应直接调用此方法。
+        """
+        return self._activate_matrix_workspace_runtime()
+
     def get_matrix_data(self):
         return self.service.data_model
 
     def sync_table_to_model(self):
-        self.service._sync_table_to_model()
+        """同步表格数据到模型 - 委托给应用服务层"""
+        # 通过应用服务层进行同步，避免直接访问服务私有方法
+        self.application_service.export_service.sync_table_to_model()
 
     def initialize_matrix(self):
         return self.service.initialize_matrix()
 
     def extract_test_methods_from_spec(self):
-        return self.service.extract_test_methods_from_spec()
+        """从规格书提取测试方法 - 委托给应用服务层"""
+        return self.application_service.extract_test_methods_from_spec()
 
     def update_standard_versions(self):
-        return self.service.update_standard_versions()
+        """更新标准版本 - 委托给应用服务层"""
+        return self.application_service.update_standard_versions()
 
     def standardize_and_fill_matrix(self):
         return self.application_service.standardize_and_fill()
@@ -135,6 +173,13 @@ class MatrixController:
         return self.service.redo_cell_operation()
 
     def show_test_group_selector(self):
+        """
+        显示测试组选择器 - 占位符方法
+
+        TODO: 如果此功能不再需要，应在后续重构中移除
+        如果需要实现，应在页面层完成而非控制器层
+        """
+        logger.debug("show_test_group_selector called but not implemented")
         pass
 
     def set_ltr_integration_service(self, ltr_integration_service):

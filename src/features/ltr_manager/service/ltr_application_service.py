@@ -31,24 +31,7 @@ class LTRApplicationService:
         self.extractor = LTRApplicationDataExtractor()
 
         self.event_dispatcher = event_dispatcher
-        # 订阅LTR申请单确认事件
-        event_dispatcher.subscribe("ltr.application.confirmed", self._on_ltr_application_confirmed)
-
-    # 添加事件处理方法
-    def _on_ltr_application_confirmed(self, data):
-        """处理LTR申请单确认事件"""
-        try:
-            dl_number = data.get("dl_number")
-            form_data = data.get("data")
-
-            logger.info(f"LTR application confirmed for DL: {dl_number}")
-
-            # 注意：不再在这里发布处理完成事件，避免重复事件
-            # 事件应该在Controller层根据具体业务逻辑决定是否发布
-        except Exception as e:
-            logger.error(f"Error in _on_ltr_application_confirmed: {e}")
-            import traceback
-            traceback.print_exc()
+        # Note: ltr.application.confirmed 事件由 LTRStatusCoordinator 处理
 
     def apply_ltr(self, application_data: Dict[str, Any], parent=None) -> Dict[str, Any]:
         """

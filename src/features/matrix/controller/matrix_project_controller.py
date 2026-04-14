@@ -9,11 +9,17 @@ from src.core.logger import logger
 
 class MatrixProjectController:
     """
-    Matrix项目控制器
-    
-    在LTR项目环境中管理和控制Matrix功能，作为Matrix核心功能与LTR项目环境之间的桥梁。
-    负责协调LTR项目数据与Matrix功能的集成，提供项目级别的Matrix功能接口。
-    该控制器内部使用MatrixController来执行具体的功能操作。"""
+    Matrix项目控制器 - 项目/工作区入口控制器
+
+    职责边界：
+    - 项目/工作区入口方法
+    - 高级Matrix打开和激活编排
+    - 项目上下文和LTR集成传播（入口级别）
+    - 外部模块进入Matrix时应调用的公共入口
+
+    注意：该控制器内部使用MatrixController来执行具体的页面运行时操作，
+    本身不处理表格操作、运行时编辑等页面级行为。
+    """
 
     def __init__(self, parent_view=None, matrix_controller=None):
         """
@@ -61,24 +67,32 @@ class MatrixProjectController:
             
     def open_matrix_workspace(self):
         """
-        打开Matrix工作区入口
+        打开Matrix工作区 - 唯一外部入口
+
+        这是外部模块进入Matrix工作区的唯一公共入口点。
+        负责项目/工作区级别的进入编排：
+        1. 如有LTR项目数据，先初始化Matrix
+        2. 委托运行时控制器执行实际的页面激活
+
+        外部调用者应始终使用此方法，而非直接调用 MatrixController 的方法。
 
         Returns:
             bool: 是否成功打开
         """
         try:
             logger.info("Opening Matrix workspace entry")
-            
-            # 如果有LTR项目数据，先初始化Matrix
+
+            # Step 1: 如有LTR项目数据，先初始化Matrix（项目级编排决策）
             if self.ltr_integration_service and self.ltr_integration_service.is_project_loaded():
                 logger.debug("Initializing Matrix with LTR data")
                 self.matrix_controller.initialize_with_ltr_data()
-            
-            logger.debug("Showing Matrix workspace entry")
-            success = self.matrix_controller.activate_matrix_workspace()
+
+            # Step 2: 委托运行时层执行页面激活（非项目级决策，纯执行）
+            logger.debug("Delegating workspace activation to runtime controller")
+            success = self.matrix_controller._activate_matrix_workspace_runtime()
             logger.info("Matrix workspace entry opened successfully")
             return bool(success)
-            
+
         except Exception as e:
             logger.error(f"Failed to open matrix dialog: {e}", exc_info=True)
             return False

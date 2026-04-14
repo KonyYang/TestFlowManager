@@ -137,3 +137,90 @@ class MatrixWorkspaceCoordinator:
         if not self.matrix_project_controller:
             return None
         return self.matrix_project_controller.matrix_controller
+
+    def is_new_file_pilot_enabled(self, env=None) -> bool:
+        return self.matrix_session_entry_facade.is_new_file_pilot_enabled(env)
+
+    def is_preview_pilot_enabled(self, env=None) -> bool:
+        return self.matrix_session_entry_facade.is_preview_pilot_enabled(env)
+
+    def open_preview_session(self, session_id: str, *, entry_name: str = "preview"):
+        return self.matrix_session_debug_facade.open_preview_session(
+            session_id,
+            entry_name=entry_name,
+        )
+
+    def close_preview_session(self, session_id: str) -> bool:
+        return bool(self.matrix_session_debug_facade.close_preview_session(session_id))
+
+    def open_debug_preview_session(self, session_id: str | None = None):
+        return self.matrix_session_debug_facade.open_debug_preview_session(
+            session_id=session_id
+        )
+
+    def close_debug_preview_session(self, session_id: str | None = None):
+        return self.matrix_session_debug_facade.close_debug_preview_session(
+            session_id=session_id
+        )
+
+    def switch_preview_session(self, session_id: str):
+        return self.matrix_session_debug_facade.switch_preview_session(session_id)
+
+    def resolve_preview_pilot_session_id(self, *, pilot_enabled: bool) -> str | None:
+        return self.matrix_session_entry_facade.resolve_preview_pilot_session_id(
+            pilot_enabled=pilot_enabled
+        )
+
+    def resolve_new_file_session_config(self, *, pilot_enabled: bool):
+        return self.matrix_session_entry_facade.resolve_new_file_session_config(
+            pilot_enabled=pilot_enabled
+        )
+
+    def get_debug_state(self, registry_snapshot=None) -> dict:
+        return self.matrix_session_debug_facade.get_debug_state(
+            registry_snapshot=registry_snapshot
+        )
+
+    def format_debug_state_status(self, action: str, state: dict) -> str:
+        preview_count = len(state.get("preview_session_ids", []))
+        active_isolated_count = len(
+            state.get("registry_active_isolated_session_ids", [])
+        )
+        default_mode = state.get("registry_default_mode", "shared")
+        return (
+            f"[debug:{action}] preview={preview_count} "
+            f"active_isolated={active_isolated_count} default_mode={default_mode}"
+        )
+
+    def format_switch_success(self, session_id: str, entry_name: str, state: dict) -> str:
+        preview_count = len(state.get("preview_session_ids", []))
+        active_isolated_count = len(
+            state.get("registry_active_isolated_session_ids", [])
+        )
+        default_mode = state.get("registry_default_mode", "shared")
+        return (
+            f"[debug:switch] switched_to={session_id} entry={entry_name} "
+            f"preview={preview_count} active_isolated={active_isolated_count} "
+            f"default_mode={default_mode}"
+        )
+
+    def format_switch_failed(self, reason: str, session_id: str) -> str:
+        return f"[debug:switch:failed] reason={reason} session_id={session_id}"
+
+    def get_registry_snapshot(self):
+        if self.matrix_session_registry is not None and hasattr(
+            self.matrix_session_registry, "snapshot"
+        ):
+            return self.matrix_session_registry.snapshot()
+        return None
+
+    def activate_session(self, session_id: str) -> bool:
+        if hasattr(self.matrix_session_manager, "activate"):
+            self.matrix_session_manager.activate(session_id)
+            return True
+        return False
+
+    def get_active_session_id(self) -> str | None:
+        if hasattr(self.matrix_session_manager, "get_active_session_id"):
+            return self.matrix_session_manager.get_active_session_id()
+        return None

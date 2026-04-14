@@ -65,14 +65,26 @@ class MatrixService:
             spec_processing_service=self.spec_processing_service,
         )
         
-        # 临时存储合并单元格信息
-        self.merged_cells_info = []
-        # 存储最近导入的规格书文件路径
-        self.last_imported_spec_path = self.spec_processing_service.last_imported_spec_path
-        # 添加项目控制器引用
-        self.project_controller = None
         # 标记为已初始化
         self._initialized = True
+
+    @property
+    def last_imported_spec_path(self):
+        """
+        最近导入的规格书文件路径 - 兼容性属性
+
+        实际数据存储在 spec_processing_service 中，此属性仅为兼容性提供访问
+        """
+        return self.spec_processing_service.last_imported_spec_path
+
+    @last_imported_spec_path.setter
+    def last_imported_spec_path(self, value):
+        """
+        设置最近导入的规格书文件路径 - 兼容性属性
+
+        实际数据存储在 spec_processing_service 中
+        """
+        self.spec_processing_service.last_imported_spec_path = value
 
     def add_column(self, column_name="", position=None):
         """添加新列 - Service层业务逻辑"""
@@ -166,99 +178,65 @@ class MatrixService:
         """初始化Matrix - Service层业务逻辑"""
         return self.initializer.initialize_matrix()
 
-    def export_to_excel(self, file_path, export_type="matrix_excel"):
-        """导出到Excel - Service层持久化功能"""
-        # 在导出前强制同步数据模型，确保使用最新数据
-        self._sync_table_to_model()
-        
-        # 添加调试信息
-        try:
-            rows = self.data_model.rows
-            headers = self.data_model.headers
-            logger.debug(f"导出前数据概况 - 表头数量: {len(headers)}, 行数: {len(rows)}")
-            if headers:
-                logger.debug(f"表头内容: {headers}")
-            if rows:
-                logger.debug(f"导出前第一行数据: {rows[0][:5] if len(rows[0]) > 5 else rows[0]}")  # 只显示前5个元素
-                logger.debug(f"导出前前3行:")
-                for i, row in enumerate(rows[:3]):
-                    logger.debug(f"  第{i+1}行: {row}")
-                if len(rows) > 3:
-                    logger.debug(f"  ... (还有{len(rows)-3}行)")
-        except Exception as e:
-            logger.error(f"获取导出前数据信息时出错: {e}")
-        # 使用导出控制器执行导出
-        return self.export_controller.export_by_type(file_path, export_type)
-
     def import_from_excel(self, file_path):
         """从 Excel 导入 Matrix 数据。"""
         return self.import_service.import_from_excel(file_path)
 
     def import_from_spec(self, file_path, page_number=None, keyword=None):
-        """从Spec导入数据 - Service层持久化功能"""
-        result = self.import_service.import_from_spec(file_path, page_number, keyword)
-        # 更新last_imported_spec_path引用
-        self.last_imported_spec_path = self.spec_processing_service.last_imported_spec_path
-        return result
-            
+        """
+        从Spec导入数据 - 兼容性转发
+
+        注意：新代码应直接使用 MatrixApplicationService.import_from_spec()
+        """
+        return self.import_service.import_from_spec(file_path, page_number, keyword)
+
     def update_standard_versions(self):
         """
-        更新测试方法的标准版本号
-        
-        Returns:
-            dict: 更新结果，包含是否成功更新以及更新详情
+        更新测试方法的标准版本号 - 兼容性转发
+
+        注意：新代码应直接使用 MatrixApplicationService.update_standard_versions()
         """
-        result = self.spec_processing_service.update_standard_versions()
-        if result["success"]:
-            # 更新提取的数据
-            self._parse_and_structure_matrix_data()
-        return result
-            
+        return self.spec_processing_service.update_standard_versions()
+
     def extract_test_methods_from_spec(self):
         """
-        从已导入的规格书中提取测试方法标准并填充到Matrix中
-        
-        Returns:
-            bool: 是否成功提取并填充测试方法
+        从已导入的规格书中提取测试方法标准 - 兼容性转发
+
+        注意：新代码应直接使用 MatrixApplicationService.extract_test_methods_from_spec()
         """
-        # 更新last_imported_spec_path引用
-        self.spec_processing_service.last_imported_spec_path = self.last_imported_spec_path
         return self.spec_processing_service.extract_test_methods_from_spec()
 
-    def _process_rows(self):
-        """
-        处理行数据，类似于VBA中的ProcessRows函数
-        合并单元格内容并处理行数据
-        """
-        self.spec_processing_service._process_rows()
-            
-    def _check_duplicate_values(self):
-        """
-        检查重复值，从第1列到最后一列，从第1行到倒数第二行
-        类似于VBA中的CheckDuplicateValues函数
-        """
-        self.spec_processing_service._check_duplicate_values()
-            
     def _parse_and_structure_matrix_data(self):
         """
-        解析Matrix原始数据并构造成结构化数据
+        解析Matrix原始数据并构造成结构化数据 - 兼容性转发
+
+        注意：新代码应直接使用 MatrixApplicationService._parse_and_structure_matrix_data()
         """
-        # 解析Matrix原始数据并构造成结构化数据
         self.data_structure_service.parse_and_structure_matrix_data()
         
     def set_ltr_data(self, ltr_data):
         """
-        设置LTR数据
-        
+        设置LTR数据 - 兼容性转发，请使用 MatrixApplicationService.set_ltr_data()
+
         Args:
             ltr_data: LTR申请单数据
         """
-        # 将LTR数据设置到导出控制器中
+        # 兼容性转发到导出控制器
         self.export_controller.set_ltr_data(ltr_data)
-        
+
     def _sync_table_to_model(self):
         """
-        同步表格数据到模型 - Service层数据同步
+        同步表格数据到模型 - 兼容性转发，请使用 MatrixExportService._sync_table_to_model()
         """
-        # 更新导出控制器中的数据模型
+        # 兼容性转发：更新导出控制器中的数据模型
         self.export_controller.update_data_model(self.data_model)
+
+    def export_to_excel(self, file_path, export_type="matrix_excel"):
+        """
+        导出到Excel - 兼容性转发，请使用 MatrixExportService.export_matrix_excel()
+
+        注意：此方法保留用于兼容性，新代码应直接使用 MatrixExportService
+        """
+        # 兼容性转发：执行导出流程
+        self._sync_table_to_model()
+        return self.export_controller.export_by_type(file_path, export_type)

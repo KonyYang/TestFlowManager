@@ -34,14 +34,9 @@ from PyQt5.QtGui import QMouseEvent
 from src.core.logger import logger
 from src.core.font_utils import FontUtils
 from src.features.main_window.controller.main_window_controller import MainWindowController
-from src.features.matrix.controller.matrix_project_controller import MatrixProjectController
-from src.features.customer_report_generator.controller.customer_report_controller import CustomerReportController
-from src.features.report_wizard.controller.report_wizard_controller import ReportWizardController
-from src.features.document_parser.controller.document_parser_controller import DocumentParserController
-from src.features.report_updater.controller.report_updater_controller import ReportUpdaterController
-from src.features.matrix.view.matrix_page import MatrixPage
-from src.features.main_window.facade.matrix_workspace_facade import MatrixWorkspaceFacade
-from src.features.matrix.service.matrix_session_entry_facade import MatrixSessionEntryFacade
+from src.features.main_window.service.main_window_feature_registry import MainWindowFeatureRegistry
+
+from src.features.matrix.workspace.matrix_workspace_facade import MatrixWorkspaceFacade
 
 
 # 主窗口 Lims 风格全局样式（高分辨率屏幕优化版）
@@ -215,12 +210,9 @@ class MainWindow(QMainWindow):
 
         # 通过 facade 统一访问所有 Matrix session 对象（私有属性，不对外暴露）
         self._workspace_facade = matrix_workspace_facade or MatrixWorkspaceFacade(parent_view=self)
-        
-        # 延迟加载的控制器使用私有属性
-        self._customer_report_controller = None
-        self._report_wizard_controller = None
-        self._document_parser_controller = None
-        self._report_updater_controller = None
+
+        # Feature registry for shell-triggered feature controllers
+        self._feature_registry = None
 
         self.is_custom_sized = False
         self.custom_geometry = None
@@ -245,8 +237,9 @@ class MainWindow(QMainWindow):
         self._initializing_nav = False
         
         # Matrix 页面与兼容访问口
+        # Step 8: matrix_page 由 facade 创建，shell 只持有引用
         self.matrix_tab: Optional[QWidget] = None
-        self.matrix_page: Optional[MatrixPage] = None
+        self.matrix_page: Optional[QWidget] = None  # 实际是 MatrixPage，但避免直接导入
 
         self._initialize_step_by_step()
         self._update_status()
@@ -686,7 +679,8 @@ class MainWindow(QMainWindow):
             encrypt_files_action,
             about_action,
         )
-        if MatrixSessionEntryFacade.is_preview_pilot_enabled(os.environ):
+        # 通过 facade 检查 preview pilot 是否启用
+        if self._workspace_facade.is_preview_pilot_enabled(os.environ):
             self._register_action_shortcuts(preview_pilot_action, close_preview_pilot_action)
 
     def _initialize_controllers(self):
@@ -695,13 +689,12 @@ class MainWindow(QMainWindow):
             self,
             matrix_workspace_facade=self._workspace_facade,
         )
-        
-        # 其他控制器改为懒加载,在实际使用时才创建
+
+        # Feature registry: shell-triggered feature controller assembly
+        self._feature_registry = MainWindowFeatureRegistry(self)
+
+        # Matrix project controller remains lazy (accessed via controller)
         self._matrix_project_controller = None
-        self._customer_report_controller = None
-        self._report_wizard_controller = None
-        self._document_parser_controller = None
-        self._report_updater_controller = None
 
     @property
     def matrix_project_controller(self):
@@ -709,86 +702,6 @@ class MainWindow(QMainWindow):
         if self.controller and hasattr(self.controller, 'matrix_project_controller'):
             return self.controller.matrix_project_controller
         return None
-    
-    @property
-    def matrix_controller(self):
-        """获取Matrix控制器 - 从主窗口控制器中获取"""
-        if self.controller and hasattr(self.controller, 'matrix_project_controller'):
-            return self.controller.matrix_project_controller.matrix_controller
-        return None
-    
-    @property
-    def customer_report_controller(self):
-        """延迟加载客户报告控制器"""
-        if self._customer_report_controller is None:
-            logger.debug("Lazy loading CustomerReportController")
-            self._customer_report_controller = CustomerReportController(self)
-        return self._customer_report_controller
-    
-    @property
-    def report_wizard_controller(self):
-        """延迟加载报告向导控制器"""
-        if self._report_wizard_controller is None:
-            logger.debug("Lazy loading ReportWizardController")
-            self._report_wizard_controller = ReportWizardController(self)
-        return self._report_wizard_controller
-    
-    @property
-    def document_parser_controller(self):
-        """延迟加载文档解析控制器"""
-        if self._document_parser_controller is None:
-            logger.debug("Lazy loading DocumentParserController")
-            self._document_parser_controller = DocumentParserController(self)
-        return self._document_parser_controller
-    
-    @property
-    def report_updater_controller(self):
-        """延迟加载报告更新控制器"""
-        if self._report_updater_controller is None:
-            logger.debug("Lazy loading ReportUpdaterController")
-            self._report_updater_controller = ReportUpdaterController(self)
-        return self._report_updater_controller
-
-    def _get_matrix_page_attr(self, attr_name: str):
-        if self.matrix_page is None:
-            return None
-        return getattr(self.matrix_page, attr_name, None)
-
-    @property
-    def matrix_toolbar(self):
-        return self._get_matrix_page_attr("matrix_toolbar")
-
-    @property
-    def matrix_table_widget(self):
-        return self._get_matrix_page_attr("matrix_table_widget")
-
-    @property
-    def matrix_table_manager(self):
-        return self._get_matrix_page_attr("matrix_table_manager")
-
-    @property
-    def matrix_data_sync_manager(self):
-        return self._get_matrix_page_attr("matrix_data_sync_manager")
-
-    @property
-    def matrix_import_export_manager(self):
-        return self._get_matrix_page_attr("matrix_import_export_manager")
-
-    @property
-    def matrix_event_handlers(self):
-        return self._get_matrix_page_attr("matrix_event_handlers")
-
-    @property
-    def matrix_context_menus(self):
-        return self._get_matrix_page_attr("matrix_context_menus")
-
-    @property
-    def matrix_copied_row_data(self):
-        return self._get_matrix_page_attr("matrix_copied_row_data")
-
-    @property
-    def matrix_copied_col_data(self):
-        return self._get_matrix_page_attr("matrix_copied_col_data")
 
     def _setup_navigation_pages(self):
         """注册侧栏条目与堆叠页面（所有菜单项改为侧栏直达）。"""
@@ -1069,70 +982,54 @@ class MainWindow(QMainWindow):
         return page
 
     def _setup_matrix_tab(self):
-        """Matrix 主内容页 - 通过 MatrixPage 接入主窗口。
+        """Matrix 主内容页 - 通过 Facade 获取 MatrixPage。
 
-        MatrixPage 由 Facade 注入，Shell 不直接操作 session 绑定。
+        Step 8: Shell 不再直接构造 MatrixPage，而是通过 facade 获取。
+        Facade 成为 page 的拥有者，shell 只负责将 widget 放入 UI。
         """
         if self.matrix_page is None:
-            self.matrix_page = MatrixPage(self.matrix_controller, self)
-            # 通过 controller 设置 MatrixPage 引用，打破直接依赖
-            if self.controller and hasattr(self.controller, "set_matrix_page"):
-                self.controller.set_matrix_page(self.matrix_page)
+            # 通过 controller 获取 matrix_controller，避免直接依赖
+            matrix_controller = self.controller.get_matrix_controller() if self.controller else None
+            self.matrix_page = self._workspace_facade.get_or_create_matrix_page(
+                self,
+                matrix_controller,
+            )
 
         self.matrix_tab = self.matrix_page
 
-        if hasattr(self, '_page_stack') and self._page_stack:
-            self._page_stack.currentChanged.connect(self._on_page_changed_for_matrix)
-    
     def sync_to_model(self) -> None:
-        if self.matrix_page:
-            self.matrix_page.sync_to_model()
-    
+        """Step 8: 通过 facade 代理调用"""
+        self._workspace_facade.sync_matrix_to_model()
+
     def refresh_table(self) -> None:
-        if self.matrix_page:
-            self.matrix_page.refresh_table()
-    
+        """Step 8: 通过 facade 代理调用"""
+        self._workspace_facade.refresh_matrix_table()
+
     def save_merged_cells_info(self) -> None:
-        if self.matrix_page:
-            self.matrix_page.save_merged_cells_info()
-    
+        """Step 8: 通过 facade 代理调用"""
+        self._workspace_facade.save_matrix_merged_cells_info()
+
     def auto_import_from_project(self) -> None:
-        if self.matrix_page:
-            self.matrix_page.auto_import_from_project()
+        """Step 8: 通过 facade 代理调用"""
+        self._workspace_facade.auto_import_matrix_from_project()
 
     def set_matrix_project_context(self, project_context) -> None:
-        if self.matrix_page:
-            self.matrix_page.set_project_context(project_context)
+        """Step 8: 通过 facade 代理调用"""
+        self._workspace_facade.set_matrix_project_context(project_context)
 
     def has_matrix_workspace(self) -> bool:
         return self.matrix_page is not None
 
     def activate_matrix_workspace(self) -> bool:
-        """
-        激活 Matrix 工作区 - 通过 page_id 查找而非硬编码索引。
-        
-        Returns:
-            是否成功激活
-        """
         if self.matrix_page is None:
-            return False
-        
-        # 通过 page_id 查找 Matrix 页面索引
-        matrix_index = None
-        for i, entry in enumerate(self._nav_entries):
-            if len(entry) > 3 and entry[3] == "matrix.main":
-                matrix_index = i
-                break
-        
-        if matrix_index is None:
             return False
 
         if self._nav_list is not None:
-            self._nav_list.setCurrentRow(matrix_index)
+            self._nav_list.setCurrentRow(0)
             return True
 
         if self._page_stack is not None:
-            self._apply_nav_index(matrix_index)
+            self._apply_nav_index(0)
             return True
 
         return False
@@ -1267,7 +1164,7 @@ class MainWindow(QMainWindow):
 
     def _on_export_matrix(self) -> None:
         logger.debug("Export matrix action triggered")
-        result = self.matrix_controller.handle_export_matrix_to_excel()
+        result = self.controller.handle_export_matrix_to_excel()
         if result.get("success"):
             self._update_status()
         elif result.get("message"):
@@ -1275,30 +1172,30 @@ class MainWindow(QMainWindow):
 
     def _on_export_llcr(self) -> None:
         logger.debug("Export LLCR action triggered")
-        if self.matrix_controller.handle_export_llcr():
+        if self.controller.handle_export_llcr():
             self._update_status()
 
     def _on_export_cr(self) -> None:
         logger.debug("Export CR action triggered")
-        if self.matrix_controller.handle_export_cr():
+        if self.controller.handle_export_cr():
             self._update_status()
 
     def _on_create_report(self) -> None:
         logger.debug("Create report action triggered")
-        self.report_wizard_controller.set_project_context(self.controller.project_context)
-        self.report_wizard_controller.set_matrix_controller(self.matrix_controller)
-        self.report_wizard_controller.show_wizard()
+        self._feature_registry.run_create_report(
+            self.controller.project_context,
+            self.controller.get_matrix_controller(),
+        )
         self._update_status()
 
     def _on_update_report(self) -> None:
         logger.debug("Update report action triggered")
-        self.report_updater_controller.set_project_context(self.controller.project_context)
-        self.report_updater_controller.show_report_updater_dialog()
+        self._feature_registry.run_update_report(self.controller.project_context)
         self._update_status()
 
     def _on_convert_customer_version(self) -> None:
         logger.debug("Convert to customer version action triggered")
-        if self.customer_report_controller.handle_generate_customer_report_with_context(self.controller.project_context):
+        if self._feature_registry.run_convert_customer_report(self.controller.project_context):
             self._update_status()
         else:
             self._update_status()
@@ -1310,7 +1207,7 @@ class MainWindow(QMainWindow):
         )
         if file_path:
             logger.info(f"用户选择了文件：{file_path}")
-            self.document_parser_controller.show_body_content_editor(file_path)
+            self._feature_registry.run_edit_body_content(file_path)
         else:
             logger.info("用户取消了文件选择")
         self._update_status()
@@ -1318,12 +1215,7 @@ class MainWindow(QMainWindow):
     def _on_encrypt_test_files(self) -> None:
         logger.debug("Encrypt test files action triggered")
         try:
-            from src.features.file_encryption.controller.file_encryption_controller import FileEncryptionController
-
-            encryption_controller = FileEncryptionController(self)
-            folder_path = encryption_controller.show_folder_selection()
-            if folder_path:
-                encryption_controller.start_encryption_task(folder_path)
+            self._feature_registry.run_encrypt_test_files()
             self._update_status()
         except Exception as e:
             logger.error(f"加密功能执行失败：{e}", exc_info=True)
@@ -1354,30 +1246,13 @@ class MainWindow(QMainWindow):
         status = self.controller.get_status()
         self.status_label.setText(status)
 
-    def _on_page_changed_for_matrix(self, index: int) -> None:
-        """
-        页面切换信号处理 - Shell 只转发页面 ID，不含 Matrix 可见性策略。
-
-        页面可见性逻辑已移至 MatrixWorkspaceFacade.on_page_visible()。
-        """
-        # 获取当前页面 ID（通过索引查找）
-        page_id = ""
-        if 0 <= index < len(self._nav_entries):
-            entry = self._nav_entries[index]
-            page_id = entry[3] if len(entry) > 3 else ""
-
-        # Shell 只转发页面变更，不直接操作 Matrix
-        if page_id and self.controller:
-            self.controller.on_page_visible(page_id)
-        elif not page_id and self.controller:
-            # 非 Matrix 页面，通知隐藏
-            self.controller.on_page_hidden(self._current_page_id)
-    
     def _initialize_matrix_table(self):
-        """初始化Matrix表格数据 - 启动时调用"""
+        """初始化Matrix表格数据 - 启动时调用
+
+        Step 8: 通过 facade 代理调用
+        """
         try:
-            if self.matrix_page:
-                self.matrix_page.initialize_table()
+            self._workspace_facade.initialize_matrix_table()
         except Exception as e:
             logger.error(f"初始化Matrix表格失败: {e}", exc_info=True)
 

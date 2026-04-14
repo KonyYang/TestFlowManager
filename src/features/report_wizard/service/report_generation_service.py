@@ -100,14 +100,16 @@ class ReportGenerationService:
             return output_dir
 
         if project_context and os.path.exists(project_context.project_path):
-            resolved_dir = OutputPathResolver.resolve_submitted_material_dir(
+            # 报告应输出到项目工作空间目录(与费用表、客户反馈表同级)
+            # 而不是 Submitted Material 子目录
+            resolved_dir = OutputPathResolver.resolve_project_workspace_dir(
                 project_context,
                 create=True,
             )
             if resolved_dir != OutputPathResolver.get_default_output_dir():
                 logger.info(f"使用项目输出目录: {resolved_dir}")
             else:
-                logger.info("没有解析到项目提交材料目录，回退全局默认输出目录")
+                logger.info("没有解析到项目工作空间目录，回退全局默认输出目录")
             return resolved_dir
 
         logger.info("没有项目上下文，使用默认输出目录")

@@ -865,3 +865,122 @@ tests/
 - Phase 14 Guard Lockdown 之后，Phase 15 将 `ReportWizard`/`ReportUpdater` 的项目上下文与输出路径逻辑全部交给 `ReportExportCoordinator`，controller 只负责 UI 输入/反馈、显式注入 `ProjectContext`+`MatrixController`，彻底淘汰 `ProjectContext.from_project_path` 的隐式 fallback。
 - `ReportWizardDialog` 只通过 controller 注入的 coordinator 回调创建报告；`ReportUpdaterController`/`ReportUpdaterData` 只接受 `ProjectContext`，`ReportUpdaterService` 也只在明确的 context 下运行。此阶段还需要在 `docs/tasks/phase15_report_export.md` 中维护 QA 验证脚本，方便团队复核。
 - Phase 15 仍然依赖 `tools/run_phase14_guard_regression.ps1`（GitHub workflow `phase14-guard-lockdown.yml`）跑通 Phase 11/12 + Phase 14 guard tests，最近一次（2026-04-12）执行 143 条测试全部通过，说明新的 coordinator 和 guard 协作已经稳定。
+
+## 16. Phase 16 Step 7 Matrix Internal Consolidation（2026-04-14）
+
+### 16.1 概述
+
+在 MainWindow shell 收口（Step 5/6）完成后，重构重点转向 Matrix 内部。本阶段目标是：
+- 明确 `matrix_project_controller` 与 `matrix_controller` 的边界
+- 继续收缩 `matrix_service.py` 的职责表面
+- 将 workspace/session 语义保留在 Matrix 拥有的边界内
+- 保持高风险业务行为稳定
+
+### 16.2 已完成子步骤
+
+| 子步骤 | 名称 | 关键变更 |
+|--------|------|----------|
+| Step 7.1 | Matrix 控制链审计 | 建立职责表，识别 5 个移动候选 |
+| Step 7.2 | Matrix Service 整合 | 移动 3 个方法到 Export/Application Service |
+| Step 7.3 | Controller 边界整合 | 确立单一外部入口 `open_matrix_workspace()` |
+| Step 7.4 | 职责盘点 | 识别 spec/import 为剩余混合职责集群 |
+| Step 7.5 | Spec Import 整合 | AppService 直接调用 spec_processing_service |
+| Step 7.6 | Workspace/Session 隔离 | Facade 新增操作方法，移除 shell 直接依赖 |
+| Step 7.7 | Facade 所有权迁移 | Facade 从 `main_window` → `matrix/workspace` |
+| Step 8 | MatrixPage 解耦 | Shell 不再直接构造 MatrixPage |
+
+### 16.3 架构变化
+
+**Before**:
+```
+main_window
+  -> directly creates MatrixPage
+  -> directly calls matrix_page methods
+  -> MatrixWorkspaceFacade (owned by main_window)
+```
+
+**After**:
+```
+shell
+  -> MatrixWorkspaceFacade (owned by matrix/workspace)
+    -> get_or_create_matrix_page()
+    -> sync_matrix_to_model()
+    -> refresh_matrix_table()
+    -> matrix_project_controller (project/workspace entry)
+      -> matrix_controller (page/runtime)
+        -> MatrixApplicationService / MatrixExportService / MatrixService
+```
+
+### 16.4 MatrixService 职责收缩
+
+**当前职责**:
+- 数据模型持有者
+- 表格/运行时服务根
+- 服务组合根
+
+**已移除职责**:
+- export 执行逻辑 (→ MatrixExportService)
+- LTR 数据设置 (→ MatrixApplicationService)
+- spec import 工作流编排 (→ MatrixApplicationService)
+- UI 耦合的 sync 逻辑 (→ MatrixExportService)
+
+### 16.5 控制器边界
+
+| Controller | 职责 | 外部可见性 |
+|------------|------|------------|
+| `MatrixProjectController` | 项目/工作区入口编排 | ✅ 唯一公共入口 |
+| `MatrixController` | 页面运行时控制 | ❌ 内部使用 |
+
+### 16.6 关键文件变更
+
+**新增**:
+- `src/features/matrix/workspace/matrix_workspace_facade.py` (官方位置)
+- `tests/unit/test_matrix_workspace_facade_ownership_relocation.py`
+- `tests/unit/test_matrix_page_decoupling.py`
+
+**修改**:
+- `src/features/matrix/controller/matrix_controller.py`
+- `src/features/matrix/controller/matrix_project_controller.py`
+- `src/features/matrix/service/matrix_service.py`
+- `src/features/matrix/service/matrix_application_service.py`
+- `src/features/matrix/service/matrix_export_service.py`
+- `src/features/main_window/view/main_window_ui.py`
+- `src/features/main_window/controller/main_window_controller.py`
+
+**删除**:
+- `src/features/main_window/facade/matrix_workspace_facade.py` (兼容性 shim)
+
+### 16.7 验证状态
+
+- ✅ py_compile: 所有 Matrix 文件通过
+- ✅ 单元测试: 119+ 测试通过
+- ✅ 集成测试: 36+ 测试通过
+- ✅ 所有权守卫测试: 全部通过
+
+### 16.8 文档更新
+
+本阶段产生/更新的文档：
+- `docs/tasks/step7_matrix_internal_consolidation.md`
+- `docs/tasks/step7_1_audit_result.md`
+- `docs/tasks/step7_2_matrix_service_consolidation.md`
+- `docs/tasks/step7_3_matrix_controller_boundary_consolidation.md`
+- `docs/tasks/step7_4_matrix_service_inventory_result.md`
+- `docs/tasks/step7_5_matrix_spec_import_workflow_consolidation.md`
+- `docs/tasks/step7_7_matrix_workspace_facade_ownership_relocation.md`
+- `docs/tasks/step7_7_completion_report.md`
+- `docs/tasks/step8_matrix_page_decoupling.md`
+- `docs/tasks/step8_completion_report.md`
+
+### 16.9 结论
+
+Step 7 Matrix Internal Consolidation 已全部完成：
+- ✅ `matrix_project_controller` 与 `matrix_controller` 职责清晰区分
+- ✅ `matrix_service.py` 不再承载混合 controller/orchestration/workspace 职责
+- ✅ workspace/session 行为由 Matrix 内部边界拥有
+- ✅ 外部模块无需了解 Matrix 内部 session 组装细节
+- ✅ 高风险行为保持稳定（兼容性转发器确保行为一致）
+- ✅ 文档反映实际结构
+- ✅ 相关验证通过
+
+**当前架构原则达成**:
+> "keep Matrix important, but make Matrix internals coherent enough that the shell no longer has to compensate for them"

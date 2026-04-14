@@ -157,14 +157,6 @@ def main_window(mock_controller, mock_matrix_controller):
         window.close()
 
 
-@pytest.fixture
-def event_handlers(main_window):
-    """事件处理器固件"""
-    from src.features.main_window.view.handlers.event_handlers import EventHandlers
-    
-    handlers = EventHandlers(main_window)
-    return handlers
-
 
 def pytest_configure(config):
     """pytest配置钩子"""

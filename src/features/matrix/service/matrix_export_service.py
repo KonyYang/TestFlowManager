@@ -11,10 +11,49 @@ class MatrixExportService:
     def __init__(self, matrix_service):
         self.matrix_service = matrix_service
 
+    def sync_table_to_model(self):
+        self._sync_table_to_model()
+
+    def _sync_table_to_model(self):
+        """
+        同步表格数据到模型 - 导出前数据准备
+        """
+        # 更新导出控制器中的数据模型
+        self.matrix_service.export_controller.update_data_model(self.matrix_service.data_model)
+
     def export_matrix_excel(self, file_path, export_type="matrix_excel"):
-        self.matrix_service._sync_table_to_model()
+        """导出Matrix到Excel - 完整的导出流程控制"""
+        # 同步数据到模型
+        self._sync_table_to_model()
+        # 解析并结构化数据
         self.matrix_service._parse_and_structure_matrix_data()
-        return self.matrix_service.export_to_excel(file_path, export_type)
+        # 执行导出
+        return self._export_to_excel(file_path, export_type)
+
+    def _export_to_excel(self, file_path, export_type="matrix_excel"):
+        """
+        执行实际的Excel导出 - 导出执行核心
+        注意：调用此方法前应已执行 _sync_table_to_model()
+        """
+        # 添加调试信息
+        try:
+            rows = self.matrix_service.data_model.rows
+            headers = self.matrix_service.data_model.headers
+            logger.debug(f"导出前数据概况 - 表头数量: {len(headers)}, 行数: {len(rows)}")
+            if headers:
+                logger.debug(f"表头内容: {headers}")
+            if rows:
+                logger.debug(f"导出前第一行数据: {rows[0][:5] if len(rows[0]) > 5 else rows[0]}")
+                logger.debug(f"导出前前3行:")
+                for i, row in enumerate(rows[:3]):
+                    logger.debug(f"  第{i+1}行: {row}")
+                if len(rows) > 3:
+                    logger.debug(f"  ... (还有{len(rows)-3}行)")
+        except Exception as e:
+            logger.error(f"获取导出前数据信息时出错: {e}")
+
+        # 使用导出控制器执行导出
+        return self.matrix_service.export_controller.export_by_type(file_path, export_type)
 
     def export_matrix_excel_with_result(self, file_path, export_type="matrix_excel"):
         success = self.export_matrix_excel(file_path, export_type)

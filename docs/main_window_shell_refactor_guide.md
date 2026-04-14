@@ -379,29 +379,30 @@ Current repository status against that checklist:
 - completed:
   - `MainWindowController` already forwards visible/hidden handling to `MatrixWorkspaceFacade`
   - `MatrixWorkspaceFacade` already exposes `on_page_visible(...)` and `on_page_hidden(...)`
-  - page-level session consistency logic has started moving behind the Matrix boundary
-- not yet complete:
-  - `MainWindow` still hardcodes `index == 0` as Matrix page
-  - `MainWindow` still directly calls `self.matrix_page.bind_session(...)`
-  - `MainWindow` still directly calls `self.matrix_page.handle_page_activated()`
-  - `MainWindow` still contains Matrix-specific page-change semantics in `_on_page_changed_for_matrix(...)`
+  - page-level session consistency logic has moved behind the Matrix boundary
+  - `MainWindow` routes Matrix visibility by `page_id`
+  - `MainWindow` no longer directly calls `self.matrix_page.bind_session(...)`
+  - `MainWindow` no longer directly calls `self.matrix_page.handle_page_activated()`
+  - duplicate `_on_page_changed_for_matrix(...)` shell path has been removed
+- remaining note:
+  - Step 5 runtime cleanup is complete; any follow-up should now be treated as Step 6+ scope, not Step 5 blocker
 
 Current evidence in runtime code:
 
 - `src/features/main_window/view/main_window_ui.py`
-  - `_on_page_changed_for_matrix(...)` still checks `index == 0`
-  - `_on_page_changed_for_matrix(...)` still binds session metadata into `MatrixPage`
-  - `_on_page_changed_for_matrix(...)` still performs Matrix first-activation behavior
+  - `_apply_nav_index(...)` forwards page hidden/visible by `page_id`
+  - `_on_page_visible(...)` only forwards page identity to controller
+  - `activate_matrix_workspace()` resolves Matrix page by `page_id`, not shell-local fixed index
 - `src/features/main_window/controller/main_window_controller.py`
-  - visible/hidden hooks are already delegated to `MatrixWorkspaceFacade`
-  - this is necessary groundwork, but it is not by itself sufficient to mark Step 5 complete
+  - visible/hidden hooks are delegated to `MatrixWorkspaceFacade`
+- `src/features/main_window/facade/matrix_workspace_facade.py`
+  - Matrix-owned boundary now performs session binding and first-activation behavior
 
 Recommended remaining work to finish Step 5:
 
-1. Replace shell-local Matrix index assumptions with page-id-based routing.
-2. Move Matrix page activation behavior behind a Matrix-owned boundary.
-3. Move session metadata binding to a Matrix-owned boundary so the shell no longer calls `bind_session(...)` directly.
-4. Shrink `_on_page_changed_for_matrix(...)` into a generic shell page-change forwarder, or remove it entirely after equivalent forwarding exists elsewhere.
+1. Verify no downstream module reintroduces shell-side Matrix visible/hidden policy.
+2. Keep new tests aligned to the single forwarding path: `_apply_nav_index(...)` + `_on_page_visible(...)`.
+3. Treat any additional shell cleanup as Step 6 work, not as unfinished Step 5 work.
 
 Suggested minimum acceptance check after the cleanup:
 
@@ -409,6 +410,7 @@ Suggested minimum acceptance check after the cleanup:
   - `index == 0` for Matrix-specific page policy
   - direct calls to `self.matrix_page.bind_session(...)`
   - direct calls to `self.matrix_page.handle_page_activated()`
+  - `_on_page_changed_for_matrix(...)`
 - shell code should only express:
   - current page changed
   - page id
@@ -416,10 +418,15 @@ Suggested minimum acceptance check after the cleanup:
 
 Practical conclusion:
 
-- as of the current mainline, Step 5 is in late-stage transition but should not yet be declared complete
-- Step 6 may be prepared in analysis, but should not be treated as the formal next active implementation step until the above Step 5 exit criteria are satisfied
+- as of the current mainline, Step 5 can be considered complete
+- Step 6 is now the formal next active implementation step
 
-### Step 6. Remove shell-level feature-specific lazy wiring
+Focused validation used to close Step 5:
+
+- `python -m py_compile src/features/main_window/view/main_window_ui.py src/features/main_window/facade/matrix_workspace_facade.py`
+- `python -m pytest -q tests/unit/test_main_window_ui_session_policy_assembly.py`
+
+### Step 6. Remove shell-level feature-specific lazy wiring ✅ IMPLEMENTED
 
 Current problem:
 
@@ -430,9 +437,38 @@ Recommended change:
 - shell should use page factories, feature entry handlers, or feature page providers
 - feature-specific runtime construction should be outside shell UI code
 
+Implementation:
+
+- Created `MainWindowFeatureRegistry` in `src/features/main_window/service/main_window_feature_registry.py`
+- Registry owns lazy construction of 4 feature controllers:
+  - `CustomerReportController`
+  - `ReportWizardController`
+  - `DocumentParserController`
+  - `ReportUpdaterController`
+- Registry provides 5 shell-facing action methods:
+  - `run_create_report(project_context, matrix_controller)`
+  - `run_update_report(project_context)`
+  - `run_convert_customer_report(project_context)`
+  - `run_edit_body_content(file_path)`
+  - `run_encrypt_test_files()`
+- `MainWindow` action handlers now forward to registry instead of directly instantiating controllers
+- Removed 4 lazy properties from `MainWindow`
+- Removed direct feature controller imports from `main_window_ui.py`
+
 Expected result:
 
-- `MainWindow` no longer acts as a hidden service locator
+- `MainWindow` no longer acts as a hidden service locator ✅ ACHIEVED
+
+Validation:
+
+- `tests/unit/test_main_window_feature_registry_wiring.py` - 9 tests for shell wiring
+- `tests/unit/test_main_window_controller_facade_injection.py` - AST guards for facade boundary
+- Old `test_main_window_controller_session_manager_injection.py` removed (stale test)
+- Focused Step 6 acceptance set:
+  - `python -m pytest -q tests/unit/test_main_window_ui_session_policy_assembly.py`
+  - `python -m pytest -q tests/unit/test_main_window_feature_registry_wiring.py`
+  - `python -m pytest -q tests/unit/test_main_window_controller_facade_injection.py`
+- `python -m pytest -q tests/unit -k "main_window"` is not a Step 6 mandatory acceptance command because it currently includes unrelated `main_window` collection paths beyond Step 6 shell wiring scope
 
 ### Step 7. Only after shell consolidation, proceed into Matrix internals
 
@@ -445,6 +481,35 @@ Once the shell boundary is stable, start a separate Matrix-focused phase:
 Expected result:
 
 - Matrix refactor becomes module-internal optimization, not shell-boundary repair
+
+### Step 7 Architecture Decision Principle
+
+At the current repository stage, do **not** treat the next step as
+"fully remove every remaining MainWindow -> Matrix direct dependency first".
+
+That is not the preferred order anymore.
+
+Use this decision rule instead:
+
+- freeze `main_window` at the Step 6 shell boundary unless a Step 7 change strictly requires a shell adjustment
+- move into Matrix-internal consolidation first
+- let remaining shell-to-Matrix coupling shrink as a consequence of clearer Matrix-owned boundaries
+
+Why:
+
+- the most dangerous shell-side coupling has already been reduced in Step 5 and Step 6
+- several remaining couplings are symptoms of unfinished Matrix-internal ownership, not proof that shell must be refactored again first
+- forcing shell-side decoupling before Matrix internals are coherent would likely create new placeholder abstractions with unstable ownership
+
+Current practical interpretation:
+
+- `main_window` is no longer the primary refactor target
+- `matrix_project_controller`, `matrix_controller`, `matrix_service.py`, and Matrix workspace/session internals are now the primary target
+- only make new `main_window` changes when they are the minimum compatibility move needed to support Matrix-internal consolidation
+
+In short:
+
+> do not keep peeling `main_window` first; make Matrix worth depending on, then let shell thin further afterward
 
 ## 11. Detailed Operation Guide
 

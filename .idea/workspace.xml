@@ -4,12 +4,36 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eb45768c-6138-4b42-ba4c-85a3bc2bc60f" name="Changes" comment="refactor(main_window): 通过 facade 统一注入 Matrix 依赖，消除参数爆炸&#10;&#10;- 引入 MatrixWorkspaceFacade 统一管理所有 Matrix session 相关依赖&#10;- 消除 MainWindow 和 Controller 中的 7 个 Matrix 参数传递&#10;- 移除 MatrixWorkspaceCoordinator 的直接依赖，通过 facade 访问&#10;- 更新 assemble_main_window 函数使用 facade 替代协调器&#10;- 修改 MainWindowController 构造函数接受 facade 参数&#10;- 调整 MainWindowUI 使用私有 facade 属性管理 Matrix 对象&#10;- 简化 _ensure_* 方法通过 facade 获取相关服务&#10;- 添加 NavigationController 用于管理页面导航逻辑&#10;- 创建 matrix_workspace_facade.py 文件实现统一访问接口&#10;- 生成 main_window_refactor.md 文档追踪重构过程&#10;- 建立 refactor_task_board.md 任务看板管理重构进度">
+    <list default="true" id="eb45768c-6138-4b42-ba4c-85a3bc2bc60f" name="Changes" comment="feat(main_window): 添加主窗口控制器实现页面管理和事件处理&#10;&#10;- 实现了MainWindowController类，处理主窗口业务逻辑和事件&#10;- 添加了Matrix工作区门面集成，支持会话管理和页面可见性处理&#10;- 实现了项目生命周期协调器，统一编排项目打开和关闭逻辑&#10;- 添加了LTR查看和编辑功能，支持DL编号查询和数据更新&#10;- 实现了页面切换时的Matrix会话绑定和一致性检查&#10;- 添加了调试命令支持，便于隔离会话和预览功能测试&#10;- 集成了事件订阅机制，响应LTR处理和项目状态变更事件&#10;- 实现了应用程序状态保存和恢复功能&#10;- 添加了资源清理机制，确保Excel和Word应用正确释放">
+      <change afterPath="$PROJECT_DIR$/docs/tasks/step6_main_window_feature_wiring.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/main_window_shell_refactor_guide.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/main_window_shell_refactor_guide.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/refactor_baseline.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/refactor_baseline.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/refactor_task_board.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/refactor_task_board.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pytest.ini" beforeDir="false" afterPath="$PROJECT_DIR$/pytest.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/composition/main_window_assembler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/composition/main_window_assembler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/ltr_manager/service/ltr_application_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/ltr_manager/service/ltr_application_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/main_window/controller/main_window_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/main_window/controller/main_window_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/main_window/coordinator/project_lifecycle_coordinator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/main_window/coordinator/project_lifecycle_coordinator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/main_window/facade/matrix_workspace_facade.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/main_window/facade/matrix_workspace_facade.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/main_window/facade/matrix_workspace_facade.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/main_window/view/handlers/event_handlers.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/main_window/view/main_window_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/main_window/view/main_window_ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/matrix/controller/matrix_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/matrix/controller/matrix_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/matrix/controller/matrix_project_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/matrix/controller/matrix_project_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/matrix/service/matrix_application_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/matrix/service/matrix_application_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/matrix/service/matrix_export_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/matrix/service/matrix_export_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/matrix/service/matrix_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/matrix/service/matrix_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/matrix/workspace/matrix_workspace_coordinator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/matrix/workspace/matrix_workspace_coordinator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/report_wizard/service/report_generation_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_wizard/service/report_generation_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/test_main_window_controller_session_manager_injection.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/test_main_window_open_project_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_main_window_open_project_flow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/test_main_window_ui_session_policy_assembly.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_main_window_ui_session_policy_assembly.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/test_matrix_application_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_matrix_application_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/test_matrix_export_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_matrix_export_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/test_matrix_project_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_matrix_project_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/test_output_path_decisions.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_output_path_decisions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/test_project_creator_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_project_creator_flow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/test_report_export_coordinator.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/test_report_export_coordinator.py" afterDir="false" />
     </list>
     <list id="cd1585ca-d35f-42c3-ad4f-96afbeac4d79" name="DelFiles" comment="DelFiles" />
     <list id="52ad285d-ee64-421c-978e-a10523f905df" name="Other changelist" comment="" />
@@ -19,7 +43,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="397" />
+    <option name="cachedIndexableFilesCount" value="421" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -125,7 +149,10 @@
       <workItem from="1775996045752" duration="2542000" />
       <workItem from="1776036079537" duration="2974000" />
       <workItem from="1776074839299" duration="13593000" />
-      <workItem from="1776118378223" duration="3733000" />
+      <workItem from="1776118378223" duration="6621000" />
+      <workItem from="1776160842230" duration="15320000" />
+      <workItem from="1776204467066" duration="2482000" />
+      <workItem from="1776206958459" duration="3187000" />
     </task>
     <task id="LOCAL-00001" summary="docs(project): 更新重构任务看板并优化项目配置与路径策略&#10;&#10;- 完善 .gitignore 文件，添加构建输出、IDE文件、临时文件等忽略规则&#10;- 更新清理脚本，修正 .ipynb_checkpoints 为 nb_checkpoints 目录名&#10;- 删除 matrix_integration 测试固件，移除相关依赖注入配置&#10;- 优化日志配置，添加开发和打包模式下的路径策略说明&#10;- 调整模块导入路径，将 basic_info_dialog 移至 dialogs 子目录&#10;- 新增重构任务看板文档，记录完整的重构阶段规划和实施进展&#10;- 完成 Controller 瘦身阶段，统一项目上下文与工作区语义&#10;- 建立配置与环境治理，统一路径配置访问接口和输出目录策略&#10;- 构建测试基线，新增多个单元测试覆盖核心业务流程&#10;- 实施 Matrix 会话基础接入，建立 session factory/registry 装配链&#10;- 推进正式会话化过渡，完成多会话对象管理的试点入口开发">
       <option name="closed" value="true" />
@@ -143,7 +170,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776082844076</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="feat(main_window): 添加主窗口控制器实现页面管理和事件处理&#10;&#10;- 实现了MainWindowController类，处理主窗口业务逻辑和事件&#10;- 添加了Matrix工作区门面集成，支持会话管理和页面可见性处理&#10;- 实现了项目生命周期协调器，统一编排项目打开和关闭逻辑&#10;- 添加了LTR查看和编辑功能，支持DL编号查询和数据更新&#10;- 实现了页面切换时的Matrix会话绑定和一致性检查&#10;- 添加了调试命令支持，便于隔离会话和预览功能测试&#10;- 集成了事件订阅机制，响应LTR处理和项目状态变更事件&#10;- 实现了应用程序状态保存和恢复功能&#10;- 添加了资源清理机制，确保Excel和Word应用正确释放">
+      <option name="closed" value="true" />
+      <created>1776122352829</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1776122352829</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -163,11 +198,12 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="docs(project): 更新重构任务看板并优化项目配置与路径策略&#10;&#10;- 完善 .gitignore 文件，添加构建输出、IDE文件、临时文件等忽略规则&#10;- 更新清理脚本，修正 .ipynb_checkpoints 为 nb_checkpoints 目录名&#10;- 删除 matrix_integration 测试固件，移除相关依赖注入配置&#10;- 优化日志配置，添加开发和打包模式下的路径策略说明&#10;- 调整模块导入路径，将 basic_info_dialog 移至 dialogs 子目录&#10;- 新增重构任务看板文档，记录完整的重构阶段规划和实施进展&#10;- 完成 Controller 瘦身阶段，统一项目上下文与工作区语义&#10;- 建立配置与环境治理，统一路径配置访问接口和输出目录策略&#10;- 构建测试基线，新增多个单元测试覆盖核心业务流程&#10;- 实施 Matrix 会话基础接入，建立 session factory/registry 装配链&#10;- 推进正式会话化过渡，完成多会话对象管理的试点入口开发" />
     <MESSAGE value="refactor(main_window): 通过 facade 统一注入 Matrix 依赖，消除参数爆炸&#10;&#10;- 引入 MatrixWorkspaceFacade 统一管理所有 Matrix session 相关依赖&#10;- 消除 MainWindow 和 Controller 中的 7 个 Matrix 参数传递&#10;- 移除 MatrixWorkspaceCoordinator 的直接依赖，通过 facade 访问&#10;- 更新 assemble_main_window 函数使用 facade 替代协调器&#10;- 修改 MainWindowController 构造函数接受 facade 参数&#10;- 调整 MainWindowUI 使用私有 facade 属性管理 Matrix 对象&#10;- 简化 _ensure_* 方法通过 facade 获取相关服务&#10;- 添加 NavigationController 用于管理页面导航逻辑&#10;- 创建 matrix_workspace_facade.py 文件实现统一访问接口&#10;- 生成 main_window_refactor.md 文档追踪重构过程&#10;- 建立 refactor_task_board.md 任务看板管理重构进度" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor(main_window): 通过 facade 统一注入 Matrix 依赖，消除参数爆炸&#10;&#10;- 引入 MatrixWorkspaceFacade 统一管理所有 Matrix session 相关依赖&#10;- 消除 MainWindow 和 Controller 中的 7 个 Matrix 参数传递&#10;- 移除 MatrixWorkspaceCoordinator 的直接依赖，通过 facade 访问&#10;- 更新 assemble_main_window 函数使用 facade 替代协调器&#10;- 修改 MainWindowController 构造函数接受 facade 参数&#10;- 调整 MainWindowUI 使用私有 facade 属性管理 Matrix 对象&#10;- 简化 _ensure_* 方法通过 facade 获取相关服务&#10;- 添加 NavigationController 用于管理页面导航逻辑&#10;- 创建 matrix_workspace_facade.py 文件实现统一访问接口&#10;- 生成 main_window_refactor.md 文档追踪重构过程&#10;- 建立 refactor_task_board.md 任务看板管理重构进度" />
+    <MESSAGE value="feat(main_window): 添加主窗口控制器实现页面管理和事件处理&#10;&#10;- 实现了MainWindowController类，处理主窗口业务逻辑和事件&#10;- 添加了Matrix工作区门面集成，支持会话管理和页面可见性处理&#10;- 实现了项目生命周期协调器，统一编排项目打开和关闭逻辑&#10;- 添加了LTR查看和编辑功能，支持DL编号查询和数据更新&#10;- 实现了页面切换时的Matrix会话绑定和一致性检查&#10;- 添加了调试命令支持，便于隔离会话和预览功能测试&#10;- 集成了事件订阅机制，响应LTR处理和项目状态变更事件&#10;- 实现了应用程序状态保存和恢复功能&#10;- 添加了资源清理机制，确保Excel和Word应用正确释放" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(main_window): 添加主窗口控制器实现页面管理和事件处理&#10;&#10;- 实现了MainWindowController类，处理主窗口业务逻辑和事件&#10;- 添加了Matrix工作区门面集成，支持会话管理和页面可见性处理&#10;- 实现了项目生命周期协调器，统一编排项目打开和关闭逻辑&#10;- 添加了LTR查看和编辑功能，支持DL编号查询和数据更新&#10;- 实现了页面切换时的Matrix会话绑定和一致性检查&#10;- 添加了调试命令支持，便于隔离会话和预览功能测试&#10;- 集成了事件订阅机制，响应LTR处理和项目状态变更事件&#10;- 实现了应用程序状态保存和恢复功能&#10;- 添加了资源清理机制，确保Excel和Word应用正确释放" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/TestFlowManager$python__m_pytest_tests_unit_test_matrix_session_registry_py_tests_unit_test_matrix_session_factory_py__q.coverage" NAME="python -m pytest tests/unit/test_matrix_session_registry.py tests/unit/test_matrix_session_factory.py -q Coverage Results" MODIFIED="1775993549324" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/docs" />
     <SUITE FILE_PATH="coverage/TestFlowManager$build_executable.coverage" NAME="build_executable Coverage Results" MODIFIED="1775967755566" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/TestFlowManager$application.coverage" NAME="application Coverage Results" MODIFIED="1776120095339" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/app" />
+    <SUITE FILE_PATH="coverage/TestFlowManager$application.coverage" NAME="application Coverage Results" MODIFIED="1776208928425" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/app" />
   </component>
 </project>

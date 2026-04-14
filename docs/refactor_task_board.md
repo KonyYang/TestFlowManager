@@ -98,7 +98,7 @@
 
 ### 4.1 目标
 
-- 将主窗口从“超级集成器”收缩为“页面壳层 + 导航容器”
+- 将主窗口从"超级集成器"收缩为"页面壳层 + 导航容器"
 - 把 Matrix 页面内部装配从主窗口迁出
 
 ### 4.2 任务清单
@@ -107,7 +107,7 @@
 
 - 任务：
   - 标注 `main_window_ui.py` 中所有 Matrix 专属字段、初始化流程、事件处理方法
-  - 整理迁移边界，区分“主窗口公共能力”和“Matrix 页面能力”
+  - 整理迁移边界，区分"主窗口公共能力"和"Matrix 页面能力"
 
 - 涉及文件：
   - [main_window_ui.py](D:/PythonProject/TestFlowManager/src/features/main_window/view/main_window_ui.py)
@@ -364,7 +364,7 @@
 
 ### 7.1 目标
 
-- 让 controller 回到“协调输入输出”的角色
+- 让 controller 回到"协调输入输出"的角色
 - 把流程型逻辑迁移到 application service
 
 ### 7.2 任务清单
@@ -452,8 +452,8 @@
 - `ProjectSessionService` 已成为项目会话唯一写入口
 - `ProjectSessionCoordinator` 已统一项目会话建立后的 UI/Matrix/Report 副作用
 - `ProjectDocumentContext` 已成为文档生成/更新链路的统一输入准备层
-- `ProjectOpenService` 已承接“打开已有项目”流程中的 `application_data.json` 补建与上下文准备
-- `ProjectCreationApplicationService` 已承接“新建项目完成后进入项目会话”流程编排
+- `ProjectOpenService` 已承接"打开已有项目"流程中的 `application_data.json` 补建与上下文准备
+- `ProjectCreationApplicationService` 已承接"新建项目完成后进入项目会话"流程编排
 - `report_updater` 已切换到 `ProjectContext` 主线，不再依赖分散项目路径状态
 
 ### 7.5 阶段结论
@@ -607,15 +607,68 @@
 
 ---
 
-## 9. 阶段 6：测试基线重建
+## 9. 阶段 6：MainWindow Feature Wiring + 测试基线重建
 
 ### 9.1 目标
 
+- 将 `MainWindow` 从直接持有 Feature Controller 转变为通过 Registry 转发动作
 - 让测试真正成为重构安全网
 
 ### 9.2 任务清单
 
-#### T6-1 统一测试目录结构
+#### T6-1 MainWindow Feature Wiring 实现 ✅
+
+- 状态：已完成（2026-04-14）
+
+- 任务：
+  - 创建 `MainWindowFeatureRegistry` 统一管理 Feature Controller 延迟加载
+  - 从 `MainWindow` 移除4个 Feature Controller 的直接导入
+  - 从 `MainWindow` 移除4个 lazy property 方法
+  - 重写5个 action handler 调用 registry
+
+- 涉及文件：
+  - 新建：`src/features/main_window/service/main_window_feature_registry.py`
+  - 修改：`src/features/main_window/view/main_window_ui.py`
+
+- 验收标准：
+  - `main_window_ui.py` 不再直接导入 `CustomerReportController/ReportWizardController/DocumentParserController/ReportUpdaterController`
+  - `MainWindow` 不再定义 `customer_report_controller` 等 lazy property
+  - Action handlers 调用 `_feature_registry.run_*` 方法
+
+- 当前结果：
+  - `MainWindowFeatureRegistry` 已创建，包含4个 lazy getter 和5个 action 方法
+  - `main_window_ui.py` 已移除所有 Feature Controller 直接导入
+  - 4个 lazy property 已删除
+  - 5个 action handler 已重写为调用 registry
+
+#### T6-2 Step 6 回归测试与文档清理 ✅
+
+- 状态：已完成（2026-04-14）
+
+- 任务：
+  - 创建 Step 6 shell wiring 回归测试
+  - 重写/删除旧的 session manager injection 测试
+  - 更新 Step 6 相关文档
+
+- 涉及文件：
+  - 新建：`tests/unit/test_main_window_feature_registry_wiring.py`
+  - 新建：`tests/unit/test_main_window_controller_facade_injection.py`
+  - 删除：`tests/unit/test_main_window_controller_session_manager_injection.py`
+  - 修改：`docs/tasks/step6_main_window_feature_wiring.md`
+  - 修改：`docs/main_window_shell_refactor_guide.md`
+
+- 验收标准：
+  - 新测试文件包含9个测试覆盖 shell wiring
+  - 旧测试文件已删除
+  - 文档反映当前 runtime 状态
+
+- 当前结果：
+  - `test_main_window_feature_registry_wiring.py` 已创建（9个测试）
+  - `test_main_window_controller_facade_injection.py` 已创建（6个 AST guard 测试）
+  - 旧测试文件已删除
+  - 文档已更新
+
+#### T6-3 统一测试目录结构
 
 - 建议结构：
 
@@ -641,7 +694,7 @@ tests/
 - 验收标准：
   - 自动化测试目录边界清晰
 
-#### T6-2 建立核心冒烟测试
+#### T6-4 建立核心冒烟测试
 
 - 优先覆盖：
   - `ConfigManager` 加载配置
@@ -714,7 +767,7 @@ tests/
     - `python -m pytest tests/unit/test_project_creator_flow.py -q`
     - `python -m pytest tests/unit/test_project_contexts.py tests/unit/test_project_open_service.py tests/unit/test_config_manager.py tests/unit/test_project_session_flow.py tests/unit/test_project_creation_application_service.py tests/unit/test_main_window_open_project_flow.py tests/unit/test_output_path_decisions.py tests/unit/test_project_creator_flow.py -q`
 
-#### T6-3 将 COM 依赖流程分层测试
+#### T6-5 将 COM 依赖流程分层测试
 
 - 建议分类：
   - 纯单元测试：mock COM
@@ -733,10 +786,12 @@ tests/
 - 默认测试集可稳定执行
 - GUI 手工测试不再污染自动化测试目录
 - 关键流程有最小冒烟覆盖
+- Step 6 Feature Wiring 实现完成且测试覆盖
 
 ### 9.4 当前阶段进展
 
-- 已开始阶段 6
+- 阶段 6 实现已完成
+- Step 6 Feature Wiring 实现与回归测试已完成
 - 第一批非 GUI 自动化回归已落地并通过
 - 阶段 6 首轮目标已完成
 - 下一批优先建议：
@@ -814,7 +869,7 @@ tests/
 2. 建立主窗口页面注册机制，去掉主窗口对页面内部细节的感知。
 3. 梳理 `project.opened` 和 `current_project` 的双通道依赖，形成状态/事件表。
 4. 引入 `ProjectContext`，替代散落的 `project_path` 和 `dl_number`。
-5. 给“打开项目”和“Matrix 自动导入”补一组最小回归测试。
+5. 给"打开项目"和"Matrix 自动导入"补一组最小回归测试。
 
 ---
 
@@ -822,7 +877,7 @@ tests/
 
 这份看板的重点不是把重构任务拆得很细，而是先把顺序和边界做对。
 
-优先级最高的不是“全面重写”，而是：
+优先级最高的不是"全面重写"，而是：
 
 - 先把主窗口和 Matrix 分开
 - 先把状态流理顺
@@ -1220,7 +1275,7 @@ Phase 9 entry gates:
 ### 12.1 阶段目标
 
 - 保持默认 `shared` 主线行为不变
-- 将“可观测的 debug 会话能力”升级为“受控、可回滚的业务试点能力”
+- 将"可观测的 debug 会话能力"升级为"受控、可回滚的业务试点能力"
 - 在不引入 UI 大改的前提下，冻结会话切换契约并建立回归口径
 
 ### 12.2 可执行任务清单
@@ -1327,7 +1382,7 @@ Phase 9 entry gates:
 - 主要风险：
   - 旧通道未完全收口导致行为分叉
 - 验收标准：
-  - 兼容清单有“已删除/暂保留”状态
+  - 兼容清单有"已删除/暂保留"状态
   - guard 测试可阻止新直连访问回归
 
 - 当前结果：
@@ -1341,7 +1396,7 @@ Phase 9 entry gates:
 
 - 任务：
   - 定义 debug-only 快捷键保留周期
-  - 明确何时从“调试通道”迁移到“正式入口”
+  - 明确何时从"调试通道"迁移到"正式入口"
   - 保留必要诊断能力但不作为业务入口依赖
 - 涉及文件：
   - [matrix_session_switching_inventory.md](D:/PythonProject/TestFlowManager/docs/matrix_session_switching_inventory.md)
@@ -1391,7 +1446,7 @@ Phase 9 entry gates:
 
 ### 13.1 阶段目标
 
-- 将当前“非默认路径会话化”扩展到页面级可管理会话
+- 将当前"非默认路径会话化"扩展到页面级可管理会话
 - 建立可控的多会话生命周期（创建、激活、切换、关闭、回收）
 - 在业务入口稳定后逐步移除过渡兼容层
 
@@ -1419,7 +1474,7 @@ Phase 9 entry gates:
   - `clear_session_binding()`
   - `get_session_binding()`
 - `MainWindow` 在初始化 `MatrixPage` 时，已通过 controller 注入当前工作区绑定元数据。
-- 当前实现为“元数据绑定模型”，不改变默认 shared 业务行为。
+- 当前实现为"元数据绑定模型"，不改变默认 shared 业务行为。
 
 ### 13.2.2 T10-2 当前结果
 
@@ -1434,7 +1489,7 @@ Phase 9 entry gates:
   - 无 active 且无绑定时维持默认 shared 绑定语义
 - `MainWindow._on_page_changed_for_matrix(...)` 已在页面切换时触发该一致性检查，
   并同步更新 `MatrixPage` 的 session 绑定元数据。
-- 当前策略为“可见页面一致性收口”，未改变默认 shared 主线行为。
+- 当前策略为"可见页面一致性收口"，未改变默认 shared 主线行为。
 
 ### 13.2.3 T10-3 当前结果
 
@@ -1461,7 +1516,7 @@ Phase 9 entry gates:
 - 非 UI 诊断能力保留：
   - `MainWindowController` debug API 仍可用于测试与日志诊断；
   - `matrix_session_debug_commands.py` 仍作为 controller/status 文本常量表。
-- 结果：debug 通道从“UI 可触发”收敛为“代码/测试可触发”，满足 phase-10 兼容层退役目标。
+- 结果：debug 通道从"UI 可触发"收敛为"代码/测试可触发"，满足 phase-10 兼容层退役目标。
 
 ### 13.2.5 T10-5 当前结果
 
@@ -1470,7 +1525,7 @@ Phase 9 entry gates:
 - 覆盖场景：
   - 页面绑定与 active session 不一致时的切换一致性
   - 页面绑定 entry 不可切换时的回滚语义（`entry_not_allowed`）
-  - shutdown 下“先清页面绑定、再关 isolated、保留 shared”的混合集合清理
+  - shutdown 下"先清页面绑定、再关 isolated、保留 shared"的混合集合清理
 - 与既有 phase-9/10 套件组合执行通过（66 passed）。
 
 ### 13.3 启动前置条件
@@ -1500,7 +1555,7 @@ Phase 9 entry gates:
 ### 13.5 下一阶段入口（Phase 11 候选）
 
 - 将 `refactor_compatibility_backlog.md` 中剩余兼容收口项转为阶段化任务（优先清理/防止 `MatrixServiceProvider.*` 残留调用面回归）。
-- 评估并确定“正式非 debug 多会话业务入口”扩展点（在不改变默认 `shared` 的前提下）。
+- 评估并确定"正式非 debug 多会话业务入口"扩展点（在不改变默认 `shared` 的前提下）。
 - 对会话切换契约补充跨模块消费边界测试（避免新入口直接绕过 orchestrator/facade）。
 
 ### 13.6 Phase 11 主线完成验收清单（必须同时满足）
@@ -1537,7 +1592,7 @@ Phase 9 entry gates:
 
 阶段目标：
 
-- 将剩余兼容点从“文档描述/历史惯性”转成“可执行任务 + 验收标准 + 回归/guard”。
+- 将剩余兼容点从"文档描述/历史惯性"转成"可执行任务 + 验收标准 + 回归/guard"。
 - 优先消灭会导致主线回退的兼容面：
   - 入口绕过（绕过 factory/orchestrator/coordinator）
   - 触发侧编排副作用（绕过 `project.opened` 消费侧）
@@ -1552,15 +1607,15 @@ Phase 9 entry gates:
     - 不引入新的 `project_session_coordinator.apply_project_context(...)` 非受控调用点（既有 guard 通过）。
 
 - T13-2 Session/Project 文档盘点校准（已完成 2026-04-11）
-  - 内容：复核 session/context 相关文档（`project_session_state_flow.md`、`matrix_session_switching_inventory.md`、`refactor_compatibility_backlog.md`）中“已移除/已收口”的描述，避免文档滞后误导下一步拆分。
+  - 内容：复核 session/context 相关文档（`project_session_state_flow.md`、`matrix_session_switching_inventory.md`、`refactor_compatibility_backlog.md`）中"已移除/已收口"的描述，避免文档滞后误导下一步拆分。
   - 验收：
-    - 文档中的“残留点清单”与代码检索一致（至少覆盖：`matrix_service` 兼容入口、`get_current_project_context` fallback、provider 模块残留）。
+    - 文档中的"残留点清单"与代码检索一致（至少覆盖：`matrix_service` 兼容入口、`get_current_project_context` fallback、provider 模块残留）。
   - 当前进展（2026-04-11）：
     - `docs/project_session_state_flow.md` 明确记录当前只剩下 `ProjectContext` + `project.opened` 主线，剩余状态事件通道仅用于兼容记录。
     - `docs/matrix_session_switching_inventory.md` 与 `docs/refactor_compatibility_backlog.md` 都同步了新的 `MatrixWorkspaceCoordinator`/`src/app/composition/main_window_assembler.py` 装配路径，并把剩余兼容点收敛到文档层（code path 清单为零）。
 
 - T13-3 测试装配 stub 污染治理（已完成 2026-04-11）
-  - 内容：将单测中对 `sys.modules` 的导入期 stub 注入统一收口为“导入期生效、导入后还原”的模式，避免收集顺序导致的跨文件污染，保证回归口径稳定可重复。
+  - 内容：将单测中对 `sys.modules` 的导入期 stub 注入统一收口为"导入期生效、导入后还原"的模式，避免收集顺序导致的跨文件污染，保证回归口径稳定可重复。
   - 验收：
     - Phase 11/12 最小回归集可重复运行通过（不依赖测试收集顺序）。
     - 关键 stub 文件不再永久覆盖 `src.core.*` 模块（尤其 `src.core.logger`、`src.core.project_session_service`）。
@@ -1581,9 +1636,189 @@ Phase 9 entry gates:
 
 - 目标：把所有旧的事件、状态和 provider 通道彻底封死，只保留 `MatrixSessionFactory`/`ProjectSessionCoordinator`+`ProjectContext` 主线，避免未来代码重新绕过 Guard。
 - T14-1：新增 guard `tests/unit/test_project_session_state_guard.py`，限制 `state_manager.set_state("current_project_context", …)` 只能在 `src/core/project_session_service.py` 发生。
-- T14-2：新增 guard `tests/unit/test_matrix_service_provider_guard.py`，确保 `MatrixServiceProvider` 不出现在 `src/`，保持 Phase-11 guard 的 “provider 调用点为 0” 断言。
+- T14-2：新增 guard `tests/unit/test_matrix_service_provider_guard.py`，确保 `MatrixServiceProvider` 不出现在 `src/`，保持 Phase-11 guard 的 "provider 调用点为 0" 断言。
 - 验收：这两条 guard 与 Phase‑12/Phase‑13 回归集一起运行（Phase 11/12 最小集合 +  guard tests），任何旧 channel 重现都会在 CI 阶段被拒。
 - CI 增加了 `Phase 14 Guard Lockdown` workflow（`.github/workflows/phase14-guard-lockdown.yml`），在 `windows-latest` 上跑 `tools/run_phase14_guard_regression.ps1`，确保 guard tests 与 Phase 11/12 回归同步。
+
+---
+
+## 15. Phase 15 Report Export Boundary Cleanup（2026-04-12）
+
+- 目标：在 Phase 14 guard 奠定的 `ProjectContext + project.opened` 主线之上，把报告生成/更新的业务组合交给 `ReportExportCoordinator`，让 `ReportWizardController` 与 `ReportUpdaterController` 只负责 UI 输入/反馈、显式注入 `ProjectContext` + `MatrixController`，所有输出路径与 COM 操作都由 coordinator/service 组合处理，彻底淘汰 `ProjectContext.from_project_path` 的隐式补偿。
+- T15-1：让 `ReportWizardController` 不再直接实例化 `ReportGenerationService`，而是通过 coordinator 回调生成报告文档；`ReportWizardDialog` 只接收 controller 注入的回调，负责展示结果并把 `matrix_controller`/`project_context` 传给下游页。
+- T15-2：让 `ReportUpdaterController`/`ReportUpdaterData` 只接受 `ProjectContext` 并把上下文透传给 coordinator，`ReportUpdaterService` 也只在明确的 `ProjectContext` 下工作；最终的 guard+regression 套件继续跑通 Phase 11/12+Phase 14 guard（`tools/run_phase14_guard_regression.ps1` 最新一次 2026-04-12 运行成功 143 条测试），确保旧通道不会复活。
+- 验收标准：
+  1. `ReportWizardController`/`ReportUpdaterController` 代码中不再出现 `ProjectContext.from_project_path`，所有项目上下文在 controller 层由 `MainWindow` 注入。
+  2. `ReportGenerationService`/`ReportUpdaterService` 只依赖 `ProjectContext`，`ReportWizardDialog` 通过 coordinator 回调创建报告。
+  3. `tools/run_phase14_guard_regression.ps1` 最新一次运行（2026-04-12）包含 143 条测试并全部通过，说明 guard suite 与 Phase 15 协作已稳定。
+  4. QA 可通过 `docs/tasks/phase15_report_export.md` 中记录的步骤重现报告创建/更新流程。
+  5. 文档里明确 `ReportExportCoordinator` 是 `ReportWizard`/`ReportUpdater` 的统一入口，便于未来 isolated entry 拓展。
+
+---
+
+## 16. Phase 16 Step 7 Matrix Internal Consolidation（2026-04-14）
+
+### 16.1 阶段目标
+
+- 在 MainWindow shell 收口完成后，将重构重点转向 Matrix 内部
+- 明确 `matrix_project_controller` 与 `matrix_controller` 的边界
+- 继续收缩 `matrix_service.py` 的职责表面
+- 将 workspace/session 语义保留在 Matrix 拥有的边界内
+- 保持高风险业务行为稳定
+
+### 16.2 执行子步骤与完成状态
+
+| 子步骤 | 名称 | 状态 | 完成日期 |
+|--------|------|------|----------|
+| Step 7.1 | Matrix 控制链审计 | ✅ 已完成 | 2026-04-14 |
+| Step 7.2 | Matrix Service 方法移动 | ✅ 已完成 | 2026-04-14 |
+| Step 7.3 | Controller 边界整合 | ✅ 已完成 | 2026-04-14 |
+| Step 7.4 | Matrix Service 职责盘点 | ✅ 已完成 | 2026-04-14 |
+| Step 7.5 | Spec Import 工作流整合 | ✅ 已完成 | 2026-04-14 |
+| Step 7.6 | Workspace/Session 语义隔离 | ✅ 已完成 | 2026-04-14 |
+| Step 7.7 | Facade 所有权迁移 | ✅ 已完成 | 2026-04-14 |
+| Step 8 | MatrixPage 解耦 | ✅ 已完成 | 2026-04-14 |
+
+### 16.3 关键变更摘要
+
+#### Step 7.1 - 控制链审计
+- 审计了 Shell-to-Matrix 运行时链
+- 建立了类级和方法级职责表
+- 识别了 5 个优先移动候选
+
+#### Step 7.2 - Service 整合
+- `_sync_table_to_model()` → `MatrixExportService`
+- `export_to_excel()` → `MatrixExportService`
+- `set_ltr_data()` → `MatrixApplicationService`
+- 验证：16个测试通过
+
+#### Step 7.3 - Controller 边界
+- 确立 `MatrixProjectController.open_matrix_workspace()` 为唯一外部入口
+- `MatrixController._activate_matrix_workspace_runtime()` 为内部运行时方法
+- 验证：4个测试通过
+
+#### Step 7.4 - 职责盘点
+- 完成 `matrix_service.py` 方法级盘点
+- 识别 spec/import 工作流为剩余混合职责集群
+- 发现死代码（重复 `export_to_excel` 定义）
+
+#### Step 7.5 - Spec Import 整合
+- `MatrixApplicationService` 新增直接调用 `spec_processing_service` 的方法
+- `MatrixService` 简化为兼容性转发器
+- 移除 `_process_rows()` / `_check_duplicate_values()`
+- 删除重复 `export_to_excel()` 实现
+- 验证：10个测试通过
+
+#### Step 7.6 - Workspace/Session 隔离
+- Facade 新增 pilot checks、debug 操作方法
+- 移除 `MainWindowController` 直接 session helper 导入
+- 移除 `main_window_ui.py` 的 `MatrixSessionEntryFacade` 导入
+
+#### Step 7.7 - Facade 所有权迁移
+- `MatrixWorkspaceFacade` 从 `main_window/facade/` → `matrix/workspace/`
+- 删除兼容性 shim
+- 更新所有导入路径
+- 新增 5 个所有权保护测试
+- 验证：26个测试通过
+
+#### Step 8 - MatrixPage 解耦
+- Facade 新增 Page Provider API
+- `main_window_ui.py` 不再直接构造 `MatrixPage`
+- 新增 7 个解耦测试
+- 验证：36个回归测试通过
+
+### 16.4 架构现状
+
+```
+shell / external modules
+  -> MatrixWorkspaceFacade (Matrix-owned)
+    -> matrix_project_controller (项目/工作区入口)
+      -> matrix_controller (页面运行时)
+        -> matrix application / import / export / table services
+
+workspace/session semantics
+  -> stay behind Matrix-owned boundaries
+
+project/workspace entry concerns
+  -> matrix_project_controller
+
+page/table runtime concerns
+  -> matrix_controller
+```
+
+### 16.5 文档更新
+
+- `docs/tasks/step7_matrix_internal_consolidation.md` - 执行指南
+- `docs/tasks/step7_1_audit_result.md` - 审计结果
+- `docs/tasks/step7_2_matrix_service_consolidation.md` - Service 整合
+- `docs/tasks/step7_3_matrix_controller_boundary_consolidation.md` - Controller 边界
+- `docs/tasks/step7_4_matrix_service_inventory_result.md` - 职责盘点
+- `docs/tasks/step7_5_matrix_spec_import_workflow_consolidation.md` - Spec Import 整合
+- `docs/tasks/step7_7_matrix_workspace_facade_ownership_relocation.md` - Facade 迁移任务
+- `docs/tasks/step7_7_completion_report.md` - Facade 迁移完成报告
+- `docs/tasks/step8_matrix_page_decoupling.md` - MatrixPage 解耦任务
+- `docs/tasks/step8_completion_report.md` - MatrixPage 解耦完成报告
+
+### 16.6 验证结果
+
+```
+✅ py_compile: 所有 Matrix 文件通过
+✅ 单元测试: 119+ 测试通过
+✅ 集成测试: 36+ 测试通过
+✅ 所有权守卫测试: 全部通过
+```
+
+### 16.7 冒烟测试覆盖
+
+为验证高风险流程的稳定性，已建立冒烟测试套件：
+
+### 16.7.1 测试文件
+- **位置**: `tests/smoke/test_smoke_high_risk_flows.py`
+- **数量**: 14 个测试用例
+- **覆盖范围**:
+  - 项目创建流程 (2 个测试)
+  - Matrix 自动导入流程 (3 个测试)
+  - Matrix Excel 导入导出流程 (3 个测试)
+  - Matrix Spec 导入流程 (2 个测试)
+  - Matrix Application Service 集成 (2 个测试)
+  - 端到端流程 (2 个测试)
+
+### 16.7.2 运行方式
+```powershell
+# 使用 PowerShell 脚本
+.\tools\run_smoke_tests.ps1
+
+# 使用 pytest
+python -m pytest tests/smoke -v
+```
+
+### 16.7.3 验证结果
+```
+✅ 14/14 冒烟测试通过
+✅ 平均执行时间 < 1 秒
+✅ 无 GUI 依赖
+✅ 无真实文件系统副作用
+```
+
+### 16.7.4 相关文档
+- [冒烟测试指南](./smoke_testing_guide.md)
+
+---
+
+## 16.8 阶段结论
+
+Step 7 Matrix Internal Consolidation 已全部完成。Matrix 模块内部边界已清晰：
+- `MatrixProjectController` 明确拥有项目/工作区入口
+- `MatrixController` 明确拥有页面运行时控制
+- `MatrixService` 已收缩为模型所有者、表格/运行时服务根、服务组合根
+- Workspace/Session 语义完全保留在 Matrix 拥有的边界内
+- Shell 与 Matrix 的耦合已降至最低（仅通过 `MatrixWorkspaceFacade`）
+- 高风险流程已建立冒烟测试覆盖
+
+下一阶段建议：
+1. 继续 Matrix 内部优化（可选）
+2. 进入其他 feature 模块的重构
+3. 建立更完整的集成测试覆盖
 
 ## 15. Phase 15 Report Export Boundary Cleanup（2026-04-12）
 

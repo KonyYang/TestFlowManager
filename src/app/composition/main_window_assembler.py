@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from src.features.main_window.view.main_window_ui import MainWindow
-from src.features.main_window.facade.matrix_workspace_facade import MatrixWorkspaceFacade
+from src.features.matrix.workspace.matrix_workspace_facade import MatrixWorkspaceFacade
 
 
 def assemble_main_window(splash_screen=None) -> MainWindow:

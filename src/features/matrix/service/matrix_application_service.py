@@ -21,7 +21,15 @@ class MatrixApplicationService:
         return self.export_service.export_matrix_excel_with_result(file_path, export_type)
 
     def import_from_spec(self, file_path, page_number=None, keyword=None):
-        raw_result = self.matrix_service.import_from_spec(file_path, page_number, keyword)
+        """
+        从Spec导入数据 - 应用层工作流编排
+
+        直接使用 MatrixImportService，不经过 MatrixService 转发
+        """
+        # 直接使用 import_service 执行导入
+        raw_result = self.matrix_service.import_service.import_from_spec(
+            file_path, page_number, keyword
+        )
         return self._build_spec_import_result(raw_result)
 
     def auto_import_from_project(self, project_context: Optional[ProjectContext]) -> bool:
@@ -48,7 +56,9 @@ class MatrixApplicationService:
         self.matrix_service.export_controller.set_project_context(project_context)
 
     def set_ltr_data(self, ltr_data) -> None:
-        self.matrix_service.set_ltr_data(ltr_data)
+        """设置LTR数据到导出控制器"""
+        # 将LTR数据设置到导出控制器中
+        self.matrix_service.export_controller.set_ltr_data(ltr_data)
 
     def initialize_with_ltr_data(self, ltr_integration_service) -> bool:
         if not ltr_integration_service or not ltr_integration_service.is_project_loaded():
@@ -62,6 +72,36 @@ class MatrixApplicationService:
         ltr_integration_service.get_test_info()
         return True
 
+    def extract_test_methods_from_spec(self):
+        """
+        从已导入的规格书中提取测试方法标准并填充到Matrix中
+
+        Returns:
+            bool: 是否成功提取并填充测试方法
+        """
+        # 直接使用 spec_processing_service，不经过 MatrixService 转发
+        return self.matrix_service.spec_processing_service.extract_test_methods_from_spec()
+
+    def update_standard_versions(self):
+        """
+        更新测试方法的标准版本号
+
+        Returns:
+            dict: 更新结果，包含是否成功更新以及更新详情
+        """
+        # 直接使用 spec_processing_service，不经过 MatrixService 转发
+        result = self.matrix_service.spec_processing_service.update_standard_versions()
+        if result.get("success"):
+            # 成功后解析并结构化数据
+            self._parse_and_structure_matrix_data()
+        return result
+
+    def _parse_and_structure_matrix_data(self):
+        """
+        解析Matrix原始数据并构造成结构化数据
+        """
+        self.matrix_service.data_structure_service.parse_and_structure_matrix_data()
+
     def standardize_and_fill(self):
         """执行 Matrix 标准化填充主流程。"""
         init_result = self.matrix_service.initialize_matrix()
@@ -73,8 +113,9 @@ class MatrixApplicationService:
                 "update_result": {"success": False},
             }
 
-        extract_result = self.matrix_service.extract_test_methods_from_spec()
-        update_result = self.matrix_service.update_standard_versions()
+        # 使用本类方法，不再经过 MatrixService
+        extract_result = self.extract_test_methods_from_spec()
+        update_result = self.update_standard_versions()
 
         return {
             "success": bool(extract_result or update_result.get("success", False)),
