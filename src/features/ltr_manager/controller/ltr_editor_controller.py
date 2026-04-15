@@ -3,13 +3,15 @@ LTR编辑器控制器模块
 处理LTR编辑器的业务逻辑和事件
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, TYPE_CHECKING
 from PyQt5.QtWidgets import QDialog
 from src.core.logger import logger
 from src.features.ltr_manager.model.ltr_editor_data import LTREditorData
 from src.features.ltr_manager.service.ltr_editor_service import LTREditorService
 from src.features.ltr_manager.model.ltr_viewer_data import LTRViewerData
-from src.features.ltr_manager.view.ltr_editor_dialog import LTREditorDialog
+
+if TYPE_CHECKING:
+    from src.features.ltr_manager.view.ltr_editor_dialog import LTREditorDialog
 
 
 class LTREditorController:
@@ -41,6 +43,9 @@ class LTREditorController:
         Returns:
             包含操作结果和修改后数据的字典
         """
+        # 延迟导入避免循环依赖
+        from src.features.ltr_manager.view.ltr_editor_dialog import LTREditorDialog
+
         # 初始化数据模型
         dl_number = dl_data.get('dl_number', '')
         original_data = dl_data.get('data', {})
@@ -48,17 +53,22 @@ class LTREditorController:
         self.editor_data_model.set_dl_number(dl_number)
         self.editor_data_model.set_original_data(original_data)
 
+        # 创建回调函数，用于对话框内的更新操作
+        def update_callback(dlnum: str, modified: Dict[str, Any]) -> bool:
+            """对话框内更新的回调函数"""
+            return self.update_ltr_data(dlnum, modified, parent)
+
         # 创建并显示对话框
-        dialog = LTREditorDialog(dl_data, parent)
-        print("[DEBUG] Showing dialog with exec_()...")
+        dialog = LTREditorDialog(dl_data, parent, update_callback=update_callback)
+        logger.debug("显示 LTR 编辑对话框...")
         result = dialog.exec_()
-        print(f"[DEBUG] Dialog result: {result}")
+        logger.debug(f"对话框返回结果: {result}")
 
         if result == QDialog.Accepted:
-            print("[DEBUG] User accepted the dialog")
+            logger.debug("用户确认了对话框")
             # 获取修改后的数据
             modified_data = dialog.get_modified_data()
-            print(f"[DEBUG] Modified data from dialog: {modified_data}")
+            logger.debug(f"获取到的修改数据: {modified_data}")
 
             # 更新数据模型
             self.editor_data_model.set_modified_data(modified_data)
@@ -69,17 +79,17 @@ class LTREditorController:
                 "dl_number": dl_number,
                 "modified_data": modified_data
             }
-            print(f"[DEBUG] Returning success result: {return_value}")
+            logger.debug(f"返回成功结果: {return_value}")
             return return_value
         else:
-            print("[DEBUG] User cancelled the dialog or dialog was rejected")
+            logger.debug("用户取消了对话框")
             # 用户取消操作
             return_value = {
                 "success": False,
                 "dl_number": None,
                 "modified_data": None
             }
-            print(f"[DEBUG] Returning cancel result: {return_value}")
+            logger.debug(f"返回取消结果: {return_value}")
             return return_value
 
     def update_ltr_data(self, dl_number: str, modified_data: Dict[str, Any] = None, parent=None) -> bool:

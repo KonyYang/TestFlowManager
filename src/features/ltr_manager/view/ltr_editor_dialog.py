@@ -3,6 +3,8 @@ LTR编辑对话框模块
 提供一个对话框用于显示和编辑LTR信息
 """
 
+from typing import Callable, Optional
+
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
                              QTableWidget, QTableWidgetItem, QHeaderView,
                              QWidget, QScrollArea, QDesktopWidget)
@@ -19,18 +21,25 @@ class LTREditorDialog(QDialog):
     用于显示和编辑指定DL编号的LTR信息（E到Q列）
     """
 
-    def __init__(self, dl_data, parent=None):
+    def __init__(
+        self,
+        dl_data,
+        parent=None,
+        update_callback: Optional[Callable[[str, dict], bool]] = None,
+    ):
         """
         初始化LTR编辑对话框
 
         Args:
             dl_data: 包含DL编号和相关数据的字典
             parent: 父窗口
+            update_callback: 更新回调函数，签名为 (dl_number, modified_data) -> bool
         """
         super().__init__(parent)
         self.parent_window = parent
         self.dl_data = dl_data
         self.data_model = LTREditorData()
+        self._update_callback = update_callback
 
         self.dl_number = dl_data.get('dl_number', '')
         # 转换数据格式
@@ -43,14 +52,14 @@ class LTREditorDialog(QDialog):
 
         # 获取字段映射关系
         self.field_mapping = self.data_model.get_field_mapping()
-        
+
         # 检查字段映射是否为空
         if not self.field_mapping:
             logger.warning("字段映射为空，对话框可能无法正常显示")
 
         self._setup_ui()
         self._populate_data()
-        print("[DEBUG] Data population completed")
+        logger.debug("LTR 编辑对话框数据填充完成")
 
     def _setup_ui(self):
         """设置用户界面"""
@@ -211,16 +220,12 @@ class LTREditorDialog(QDialog):
         # 更新数据模型中的修改数据
         self.data_model.set_modified_data(self.modified_data)
 
-        # 调用父控制器执行更新操作
-        from src.features.ltr_manager.controller.ltr_editor_controller import LTREditorController
-        from src.features.ltr_manager.controller.ltr_viewer_controller import LTRViewerController
-
-        # 创建LTR控制器和服务实例（在实际应用中，这些应该通过依赖注入传递）
-        ltr_controller = LTRViewerController()
-        ltr_editor_controller = LTREditorController(ltr_controller.data_model, ltr_controller.service)
-
-        # 执行更新操作
-        success = ltr_editor_controller.update_ltr_data(self.dl_number, self.modified_data, self.parent_window)
+        # 使用依赖注入的回调函数执行更新操作
+        if self._update_callback:
+            success = self._update_callback(self.dl_number, self.modified_data)
+        else:
+            logger.error("LTR 编辑对话框未提供更新回调函数")
+            success = False
 
         if success:
             # 更新成功，刷新"当前值"列
