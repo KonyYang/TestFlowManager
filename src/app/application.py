@@ -102,20 +102,34 @@ def main():
         exit_code = app.exec_()
         logger.info(f"应用程序主循环结束，退出码: {exit_code}")
         
-        # 应用程序退出前清理Word资源
-        logger.info("清理Word资源")
-        word_utils.cleanup_word_resources()
-        logger.info("Word资源清理完成")
+        # 应用程序退出前执行清理（通过 shutdown_registry）
+        logger.info("执行应用程序清理...")
         
-        # 应用程序退出前清理Excel资源
-        logger.info("清理Excel资源")
-        try:
-            from src.utils import excel_utils
-            excel_utils.release_excel_app()
-            logger.info("Excel资源清理完成")
-        except Exception as e:
-            logger.error(f"清理Excel资源时出错: {e}")
+        # 注册全局 COM 清理钩子（如果在主窗口关闭时未执行）
+        from src.core.shutdown_registry import shutdown_registry
         
+        def _release_all_com_objects():
+            """释放所有 COM 对象"""
+            try:
+                from src.utils import word_utils, excel_utils
+                word_utils.release_word_app()
+                excel_utils.release_excel_app()
+                logger.info("COM objects released successfully")
+            except Exception as e:
+                logger.error(f"Failed to release COM objects: {e}")
+        
+        # 动态注册 COM 清理（确保在 application 层执行）
+        if shutdown_registry.hook_count == 0:
+            # 如果 shutdown_registry 为空（主窗口未正常加载），手动执行清理
+            logger.warning("ShutdownRegistry is empty, executing fallback cleanup")
+            _release_all_com_objects()
+        elif not shutdown_registry.has_executed:
+            # 执行所有注册的清理钩子（仅当未被执行过）
+            shutdown_registry.execute_all()
+        else:
+            logger.debug("Shutdown hooks already executed by MainWindowController")
+        
+        logger.info("应用程序清理完成")
         sys.exit(exit_code)
         
     except Exception as e:

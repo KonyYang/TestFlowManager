@@ -32,6 +32,14 @@ class LTRStatusCoordinator:
         self._bound = False
         self._setup_event_subscriptions()
         
+        # 注册清理钩子
+        from src.core.shutdown_registry import shutdown_registry
+        shutdown_registry.register(
+            name="LTRStatusCoordinator.cleanup",
+            cleanup_fn=self.cleanup,
+            priority=20
+        )
+        
     def _setup_event_subscriptions(self) -> None:
         """Subscribe to LTR-related events."""
         from src.core.event_dispatcher import event_dispatcher

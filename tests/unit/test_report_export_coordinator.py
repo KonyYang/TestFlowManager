@@ -15,15 +15,19 @@ class DummyGenerationService:
         self.loaded_projects = []
         self.generated = []
 
-    def load_project_data(self, project_path: str):
-        self.loaded_projects.append(project_path)
+    def load_project_data(self, project_context: ProjectContext):
+        """接受 ProjectContext 对象而不是字符串路径"""
+        self.loaded_projects.append(project_context)
         return {"report_no": "R123"}
 
     def create_report_from_template(
-        self, header_data, *, project_path: str, project_context, output_dir=None
+        self, header_data, *, output_dir=None, project_context=None
     ):
-        self.generated.append((header_data, project_path, project_context, output_dir))
-        return f"{project_context.project_path}/report.docx"
+        """匹配实际 ReportGenerationService 的签名"""
+        self.generated.append((header_data, project_context, output_dir))
+        if project_context:
+            return f"{project_context.project_path}/report.docx"
+        return "report.docx"
 
 
 class DummyUpdaterService:
@@ -54,7 +58,8 @@ def test_coordinator_loads_header_data(project_context):
 
     header_data = coord.load_header_data()
     assert header_data["report_no"] == "R123"
-    assert gen_service.loaded_projects == [project_context.project_path]
+    # load_project_data 现在接收的是 ProjectContext 对象
+    assert gen_service.loaded_projects == [project_context]
 
 
 def test_coordinator_requires_context_for_generation(project_context):
@@ -68,10 +73,9 @@ def test_coordinator_requires_context_for_generation(project_context):
     assert "report.docx" in output_path
     assert gen_service.generated
 
-    # ensure project_path/context forwarded
-    hdr, path_arg, context_arg, dir_arg = gen_service.generated[-1]
+    # ensure project_context forwarded
+    hdr, context_arg, dir_arg = gen_service.generated[-1]
     assert context_arg == project_context
-    assert path_arg == project_context.project_path
     assert dir_arg == "out/"
 
 def test_coordinator_update_equipment_calls_service(project_context):

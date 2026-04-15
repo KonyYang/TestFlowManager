@@ -1,3 +1,13 @@
+"""
+Project Initialization Service - Core domain service for project preparation.
+
+Handles project data preparation and context building when opening projects.
+This is a pure business logic service with no UI dependencies.
+
+Moved from: src/features/main_window/service/project_open_service.py
+Updated: 2026-04-15
+"""
+
 import json
 import os
 from dataclasses import dataclass
@@ -6,35 +16,50 @@ from typing import Dict, Optional
 from src.core.config_manager import config_manager
 from src.core.logger import logger
 from src.core.project_context import ProjectContext
-from src.features.ltr_manager.service.application_processing.data_extractor import (
-    LTRApplicationDataExtractor,
-)
-from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
 
 
 @dataclass(frozen=True)
-class ProjectOpenResult:
+class ProjectInitializationResult:
+    """Result of project initialization."""
     project_context: ProjectContext
     json_file_path: str
     project_data: Dict
     created_application_data: bool = False
 
 
-class ProjectOpenService:
-    """处理打开项目时的项目数据补建与上下文准备。"""
+class ProjectInitializationService:
+    """
+    Core domain service for project initialization.
+
+    Responsibilities:
+    - Prepare project data (ensure JSON file exists)
+    - Extract test request data from Submitted Material folder
+    - Build application_data.json with defaults
+    - Create ProjectContext for downstream use
+    """
 
     def resolve_default_project_path(self) -> str:
+        """Get the configured default project path."""
         default_project_path = config_manager.get_path("default_project_path", "")
         if default_project_path and os.path.exists(default_project_path):
             return default_project_path
         return ""
 
-    def prepare_project(self, project_path: str) -> ProjectOpenResult:
+    def prepare_project(self, project_path: str) -> ProjectInitializationResult:
+        """
+        Prepare project for opening.
+
+        Args:
+            project_path: Path to the project folder.
+
+        Returns:
+            ProjectInitializationResult with context and data.
+        """
         json_file_path, created = self._ensure_project_data_file(project_path)
         project_data = self._load_project_data(json_file_path)
         dl_number = project_data.get("DL") or os.path.basename(project_path)
         project_context = ProjectContext.from_project_path(project_path, dl_number)
-        return ProjectOpenResult(
+        return ProjectInitializationResult(
             project_context=project_context,
             json_file_path=json_file_path,
             project_data=project_data,
@@ -42,6 +67,7 @@ class ProjectOpenService:
         )
 
     def _ensure_project_data_file(self, project_path: str) -> tuple[str, bool]:
+        """Ensure project data JSON file exists, create if not."""
         json_files = sorted(
             [f for f in os.listdir(project_path) if f.endswith(".json")]
         )
@@ -60,6 +86,7 @@ class ProjectOpenService:
         return json_file_path, True
 
     def _extract_test_request_data(self, project_path: str, dl_number: str) -> Dict:
+        """Extract test request data from Submitted Material folder."""
         submitted_material_path = self._resolve_submitted_material_path(project_path, dl_number)
         if not submitted_material_path:
             logger.info(f"未找到以DL编号'{dl_number}'开头的子文件夹，跳过查找Submitted Material文件夹并继续后续逻辑")
@@ -91,6 +118,7 @@ class ProjectOpenService:
         return extracted
 
     def _resolve_submitted_material_path(self, project_path: str, dl_number: str) -> Optional[str]:
+        """Resolve the Submitted Material folder path."""
         for item in sorted(os.listdir(project_path)):
             item_path = os.path.join(project_path, item)
             if os.path.isdir(item_path) and item.startswith(dl_number):
@@ -98,6 +126,8 @@ class ProjectOpenService:
         return None
 
     def _build_application_data(self, dl_number: str, test_request_data: Dict) -> Dict:
+        """Build application_data.json with defaults."""
+        from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
         config_loader = LTRFieldConfigLoader()
         field_mapping = config_loader.load_application_field_mapping()
         application_data = {}
@@ -118,6 +148,7 @@ class ProjectOpenService:
         return application_data
 
     def _get_default_field_value(self, key: str) -> str:
+        """Get default value for a field."""
         if key == "project_leader":
             return config_manager.get_default("project_leader", "")
         if key == "sub_contract":
@@ -135,6 +166,8 @@ class ProjectOpenService:
         return ""
 
     def _extract_info_from_test_request(self, docx_file_path: str) -> Dict:
+        """Extract info from test request docx file."""
+        from src.features.ltr_manager.service.application_processing.data_extractor import LTRApplicationDataExtractor
         try:
             logger.info(f"开始从测试申请文档中提取信息: {docx_file_path}")
             extractor = LTRApplicationDataExtractor()
@@ -150,6 +183,7 @@ class ProjectOpenService:
             return {}
 
     def _load_project_data(self, json_file_path: str) -> Dict:
+        """Load project data from JSON file."""
         try:
             with open(json_file_path, "r", encoding="utf-8") as handle:
                 return json.load(handle)

@@ -1,5 +1,5 @@
 """
-MainWindow Feature Registry - Shell-facing feature controller assembly layer.
+MainWindow Feature Facade - Shell-facing feature controller assembly layer.
 
 Responsibilities:
 - Own lazy construction of shell-triggered feature controllers.
@@ -9,8 +9,8 @@ Responsibilities:
 This object is a shell-facing assembly and forwarding layer only.
 Business logic remains inside feature modules.
 
-> Updated: 2026-04-14
-> Scope: Step 6 of main_window_shell_refactor_guide.md
+> Updated: 2026-04-15
+> Scope: Moved from service/ to integration/ for proper architectural placement
 """
 
 from src.core.logger import logger
@@ -20,9 +20,9 @@ from src.features.document_parser.controller.document_parser_controller import D
 from src.features.report_updater.controller.report_updater_controller import ReportUpdaterController
 
 
-class MainWindowFeatureRegistry:
+class MainWindowFeatureFacade:
     """
-    Registry for shell-triggered feature controllers.
+    Facade for shell-triggered feature controllers.
 
     MainWindow uses this to avoid directly instantiating or holding
     references to feature-specific controllers.
@@ -30,7 +30,7 @@ class MainWindowFeatureRegistry:
 
     def __init__(self, main_window):
         """
-        Initialize the registry with a reference to the main window shell.
+        Initialize the facade with a reference to the main window shell.
 
         Args:
             main_window: The MainWindow instance for UI context access.
@@ -83,7 +83,7 @@ class MainWindowFeatureRegistry:
             project_context: Current project context from MainWindowController.
             matrix_controller: Current MatrixController for data access.
         """
-        logger.debug("FeatureRegistry: run_create_report")
+        logger.debug("FeatureFacade: run_create_report")
         controller = self.get_report_wizard_controller()
         controller.set_project_context(project_context)
         controller.set_matrix_controller(matrix_controller)
@@ -96,7 +96,7 @@ class MainWindowFeatureRegistry:
         Args:
             project_context: Current project context from MainWindowController.
         """
-        logger.debug("FeatureRegistry: run_update_report")
+        logger.debug("FeatureFacade: run_update_report")
         controller = self.get_report_updater_controller()
         controller.set_project_context(project_context)
         controller.show_report_updater_dialog()
@@ -111,7 +111,7 @@ class MainWindowFeatureRegistry:
         Returns:
             True if conversion succeeded, False otherwise.
         """
-        logger.debug("FeatureRegistry: run_convert_customer_report")
+        logger.debug("FeatureFacade: run_convert_customer_report")
         controller = self.get_customer_report_controller()
         return controller.handle_generate_customer_report_with_context(project_context)
 
@@ -122,7 +122,7 @@ class MainWindowFeatureRegistry:
         Args:
             file_path: Path to the Word document selected by user.
         """
-        logger.debug(f"FeatureRegistry: run_edit_body_content -> {file_path}")
+        logger.debug(f"FeatureFacade: run_edit_body_content -> {file_path}")
         controller = self.get_document_parser_controller()
         controller.show_body_content_editor(file_path)
 
@@ -131,7 +131,7 @@ class MainWindowFeatureRegistry:
         Launch file encryption workflow with folder selection.
         Uses method-local import to avoid startup-time dependency.
         """
-        logger.debug("FeatureRegistry: run_encrypt_test_files")
+        logger.debug("FeatureFacade: run_encrypt_test_files")
         # Method-local import to defer FileEncryptionController loading
         from src.features.file_encryption.controller.file_encryption_controller import FileEncryptionController
 

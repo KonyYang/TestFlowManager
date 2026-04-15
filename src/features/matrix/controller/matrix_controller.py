@@ -35,6 +35,14 @@ class MatrixController:
         self.ltr_integration_service = None
         self.project_context = None
         self.ltr_number = None
+        
+        # 注册清理钩子
+        from src.core.shutdown_registry import shutdown_registry
+        shutdown_registry.register(
+            name="MatrixController.auto_export",
+            cleanup_fn=self.auto_export_matrix_data_on_shutdown,
+            priority=40
+        )
 
     def _activate_matrix_workspace_runtime(self):
         """

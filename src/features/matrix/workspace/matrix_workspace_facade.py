@@ -13,6 +13,7 @@ from src.features.matrix.service.matrix_session_debug_facade import MatrixSessio
 from src.features.matrix.service.matrix_session_entry_facade import MatrixSessionEntryFacade
 from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
 from src.features.matrix.workspace.matrix_workspace_coordinator import MatrixWorkspaceCoordinator
+from src.core.shutdown_registry import shutdown_registry
 
 if TYPE_CHECKING:
     from src.features.matrix.view.matrix_page import MatrixPage
@@ -69,6 +70,13 @@ class MatrixWorkspaceFacade:
             matrix_session_entry_policies=self.matrix_session_entry_policies,
         )
         self._shared_session = None
+        
+        # 注册清理钩子
+        shutdown_registry.register(
+            name="MatrixWorkspaceFacade.cleanup_sessions",
+            cleanup_fn=self._cleanup_all_sessions,
+            priority=30
+        )
 
     def assemble_shared_session(self, session_id: str, entry_name: str):
         """绑定视图并组装共享 session"""
@@ -80,6 +88,23 @@ class MatrixWorkspaceFacade:
             entry_name=entry_name,
         )
         return self._shared_session
+    
+    def _cleanup_all_sessions(self) -> None:
+        """清理所有 Matrix sessions（由 shutdown_registry 调用）"""
+        # 清除页面绑定
+        if self.matrix_session_manager:
+            cleared = None
+            if hasattr(self.matrix_session_manager, "clear_page_session_bindings"):
+                cleared = self.matrix_session_manager.clear_page_session_bindings()
+            if cleared:
+                logger.info(f"Cleared page bindings: {cleared}")
+            
+            # 关闭非默认 sessions
+            closed = None
+            if hasattr(self.matrix_session_manager, "close_by_mode"):
+                closed = self.matrix_session_manager.close_by_mode("isolated")
+            if closed:
+                logger.info(f"Closed isolated sessions: {closed}")
 
     def ensure_preview_session_manager(self) -> MatrixSessionManager:
         """提供预览会话管理器（延迟访问点）"""
@@ -330,6 +355,62 @@ class MatrixWorkspaceFacade:
         """代理 initialize_table 调用"""
         if self._matrix_page is not None:
             self._matrix_page.initialize_table()
+
+    # =========================================================================
+    # Pilot Entry Points (Shell Integration)
+    # =========================================================================
+    # 这些方法为 shell (MainWindow) 提供 pilot 功能的入口，
+    # 封装了 session 激活和 workspace 一致性检查的逻辑。
+
+    def open_preview_pilot(self, *, pilot_enabled: bool = True) -> Optional[str]:
+        """
+        打开预览 pilot session。
+
+        Args:
+            pilot_enabled: 是否启用 pilot，默认从环境变量读取
+
+        Returns:
+            session_id 或 None
+        """
+        if pilot_enabled is None:
+            pilot_enabled = self.is_preview_pilot_enabled()
+
+        session_id = self.resolve_preview_pilot_session_id(pilot_enabled=pilot_enabled)
+        if not session_id:
+            return None
+
+        session = self.open_preview_session(session_id, entry_name="preview")
+        matrix_project_controller = getattr(session, "matrix_project_controller", None)
+        if matrix_project_controller and hasattr(matrix_project_controller, "open_matrix_workspace"):
+            matrix_project_controller.open_matrix_workspace()
+        return session_id
+
+    def close_preview_pilot(self, *, pilot_enabled: bool = None) -> bool:
+        """
+        关闭预览 pilot session。
+
+        Args:
+            pilot_enabled: 是否启用 pilot，默认从环境变量读取
+
+        Returns:
+            是否成功关闭
+        """
+        if pilot_enabled is None:
+            pilot_enabled = self.is_preview_pilot_enabled()
+
+        session_id = self.resolve_preview_pilot_session_id(pilot_enabled=pilot_enabled)
+        if not session_id:
+            return False
+
+        active_session_id = self.get_active_session_id()
+        closed = self.close_preview_session(session_id)
+        if not closed:
+            return False
+
+        if active_session_id == session_id:
+            self.activate_session("main:shared")
+
+        return True
 
     def _ensure_workspace_session_consistency(self, page_id: str) -> dict:
         """内部方法：确保 workspace session 与页面绑定一致"""

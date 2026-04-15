@@ -12,10 +12,17 @@ from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
 from PyQt5.QtCore import Qt, QDate
 from PyQt5.QtWidgets import QDesktopWidget
 
-from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
+# 使用延迟导入避免循环导入问题
+# LTRFieldConfigLoader 位于 ltr_manager.utils，但直接导入会触发 ltr_manager/__init__.py
 from src.common.widgets import EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
 from src.core.window_utils import WindowUtils
 from src.core.config_manager import config_manager
+
+
+def _get_field_config_loader():
+    """延迟导入 LTRFieldConfigLoader，避免循环导入"""
+    from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
+    return LTRFieldConfigLoader
 
 # Configure logging for this module
 logger = logging.getLogger(__name__)
@@ -40,7 +47,8 @@ class BaseInfoDialog(QDialog):
         self.parent_window = parent
         self.data = data
 
-        # 从配置文件加载字段映射关系
+        # 从配置文件加载字段映射关系（使用延迟导入）
+        LTRFieldConfigLoader = _get_field_config_loader()
         config_loader = LTRFieldConfigLoader()
         self._default_items_structure = config_loader.load_application_field_mapping()
 

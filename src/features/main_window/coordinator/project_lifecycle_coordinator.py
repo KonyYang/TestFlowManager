@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
 from src.core.logger import logger
 from src.core.project_context import ProjectContext
 from src.core.project_session_service import project_session_service
-from src.features.main_window.service.project_open_service import ProjectOpenService
+from src.core.project_initialization_service import ProjectInitializationService, ProjectInitializationResult
 from src.features.main_window.view.dialogs.basic_info_dialog import BasicInfoDialog
 
 
@@ -27,11 +27,11 @@ class ProjectLifecycleCoordinator:
         self,
         view: QWidget,
         status_updater: Callable[[str], None],
-        project_open_service: Optional[ProjectOpenService] = None,
+        project_initialization_service: Optional[ProjectInitializationService] = None,
     ):
         self.view = view
         self.status_updater = status_updater
-        self.project_open_service = project_open_service or ProjectOpenService()
+        self.project_initialization_service = project_initialization_service or ProjectInitializationService()
 
     def handle_open_project(self) -> bool:
         """
@@ -49,7 +49,7 @@ class ProjectLifecycleCoordinator:
         try:
             logger.debug("LifecycleCoordinator: Handling open project request")
 
-            default_project_path = self.project_open_service.resolve_default_project_path()
+            default_project_path = self.project_initialization_service.resolve_default_project_path()
 
             # 显示文件夹选择对话框
             project_path = QFileDialog.getExistingDirectory(
@@ -62,11 +62,11 @@ class ProjectLifecycleCoordinator:
             if not project_path:
                 return False
 
-            project_result = self.project_open_service.prepare_project(project_path)
+            project_result = self.project_initialization_service.prepare_project(project_path)
             if project_result.created_application_data:
                 logger.info("LifecycleCoordinator: 显示基本信息对话框供用户确认和编辑")
                 self._show_basic_info_dialog(project_result.project_data, project_result.json_file_path)
-                project_result = self.project_open_service.prepare_project(project_path)
+                project_result = self.project_initialization_service.prepare_project(project_path)
 
             # 通过事件系统派发项目打开事件
             # 项目打开的副作用由事件消费者（MainWindowController）统一处理
@@ -80,6 +80,42 @@ class ProjectLifecycleCoordinator:
             QMessageBox.critical(self.view, "错误", f"打开项目失败: {str(e)}")
             if self.status_updater:
                 self.status_updater("打开项目失败")
+            return False
+
+    def handle_new_file(self) -> bool:
+        """
+        处理新建项目事件。
+
+        委托给 ProjectCreatorController 执行新建流程。
+
+        Returns:
+            是否处理成功
+        """
+        try:
+            logger.debug("LifecycleCoordinator: Handling new file request")
+
+            from src.features.project_creator.controller.project_creator_controller import (
+                ProjectCreatorController,
+            )
+
+            # 创建项目创建控制器
+            project_creator = ProjectCreatorController(
+                self.view,
+                matrix_session_registry=None,
+                matrix_session_mode="isolated",
+                matrix_session_id=None,
+            )
+            success = project_creator.handle_create_new_project()
+
+            # 清理资源
+            project_creator.cleanup()
+
+            return success
+        except Exception as e:
+            logger.error(f"LifecycleCoordinator: Failed to create new project: {e}")
+            QMessageBox.critical(self.view, "错误", f"新建项目失败: {str(e)}")
+            if self.status_updater:
+                self.status_updater("新建项目失败")
             return False
 
     def _show_basic_info_dialog(self, project_data: dict, json_file_path: str) -> None:

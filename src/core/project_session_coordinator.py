@@ -8,12 +8,60 @@ from src.core.project_context import ProjectContext
 
 
 class ProjectSessionCoordinator:
-    """统一编排项目会话建立后的跨模块副作用。"""
+    """
+    统一编排项目会话建立后的跨模块副作用。
+    
+    现在作为 project.opened 事件的独立消费者，
+    不依赖 MainWindowController 的直接调用。
+    """
 
     def __init__(self, view, matrix_project_controller=None, status_updater=None):
         self.view = view
         self.matrix_project_controller = matrix_project_controller
         self.status_updater = status_updater
+        self._bound = False
+        
+        # 直接订阅 project.opened 事件
+        self._subscribe_to_events()
+
+    def _subscribe_to_events(self) -> None:
+        """订阅项目打开事件"""
+        if not self._bound:
+            from src.core.event_dispatcher import event_dispatcher
+            event_dispatcher.subscribe("project.opened", self._on_project_opened)
+            self._bound = True
+            logger.info("ProjectSessionCoordinator: Subscribed to project.opened")
+
+    def _on_project_opened(self, data: dict) -> None:
+        """
+        处理项目打开事件 - 作为独立的事件消费者。
+        
+        Args:
+            data: 包含 project_path 和 dl_number 的事件数据
+        """
+        try:
+            project_context = ProjectContext.from_event_data(data)
+            if not project_context:
+                logger.warning("ProjectSessionCoordinator: Invalid project context in event")
+                return
+            
+            # 执行所有副作用
+            self.apply_project_context(
+                project_context,
+                status_message=f"当前项目: {project_context.dl_number or os.path.basename(project_context.project_path)}",
+                log_message=f"Project opened: {project_context.project_path}",
+                trigger_matrix_auto_import=True,
+            )
+        except Exception as e:
+            logger.error(f"ProjectSessionCoordinator: Failed to handle project.opened: {e}")
+
+    def cleanup(self) -> None:
+        """取消事件订阅"""
+        if self._bound:
+            from src.core.event_dispatcher import event_dispatcher
+            event_dispatcher.unsubscribe("project.opened", self._on_project_opened)
+            self._bound = False
+            logger.info("ProjectSessionCoordinator: Unsubscribed from project.opened")
 
     def apply_project_context(
         self,

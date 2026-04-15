@@ -34,7 +34,7 @@ from PyQt5.QtGui import QMouseEvent
 from src.core.logger import logger
 from src.core.font_utils import FontUtils
 from src.features.main_window.controller.main_window_controller import MainWindowController
-from src.features.main_window.service.main_window_feature_registry import MainWindowFeatureRegistry
+from src.features.main_window.integration.main_window_feature_facade import MainWindowFeatureFacade
 
 from src.features.matrix.workspace.matrix_workspace_facade import MatrixWorkspaceFacade
 
@@ -203,10 +203,12 @@ class MainWindow(QMainWindow):
         splash_screen=None,
         *,
         matrix_workspace_facade: Optional[MatrixWorkspaceFacade] = None,
+        project_session_coordinator=None,  # Phase 4: 从 Assembler 注入
     ):
         super().__init__()
         self.splash_screen = splash_screen
         self.controller = None
+        self._project_session_coordinator = project_session_coordinator  # Phase 4
 
         # 通过 facade 统一访问所有 Matrix session 对象（私有属性，不对外暴露）
         self._workspace_facade = matrix_workspace_facade or MatrixWorkspaceFacade(parent_view=self)
@@ -685,13 +687,15 @@ class MainWindow(QMainWindow):
 
     def _initialize_controllers(self):
         """初始化控制器 - 采用延迟加载策略"""
+        # Phase 4: 使用从 Assembler 注入的 ProjectSessionCoordinator
         self.controller = MainWindowController(
             self,
             matrix_workspace_facade=self._workspace_facade,
+            project_session_coordinator=self._project_session_coordinator,
         )
 
         # Feature registry: shell-triggered feature controller assembly
-        self._feature_registry = MainWindowFeatureRegistry(self)
+        self._feature_registry = MainWindowFeatureFacade(self)
 
         # Matrix project controller remains lazy (accessed via controller)
         self._matrix_project_controller = None
@@ -1229,16 +1233,18 @@ class MainWindow(QMainWindow):
         self.controller.handle_about()
 
     def _on_open_isolated_matrix_preview_pilot(self) -> None:
+        """Pilot: 打开隔离 Matrix 预览 session"""
         logger.debug("Open isolated matrix preview pilot action triggered")
-        if self.controller and hasattr(self.controller, "handle_open_isolated_matrix_preview_pilot"):
-            session_id = self.controller.handle_open_isolated_matrix_preview_pilot()
+        if self._workspace_facade:
+            session_id = self._workspace_facade.open_preview_pilot()
             if session_id:
                 self._update_status()
 
     def _on_close_isolated_matrix_preview_pilot(self) -> None:
+        """Pilot: 关闭隔离 Matrix 预览 session"""
         logger.debug("Close isolated matrix preview pilot action triggered")
-        if self.controller and hasattr(self.controller, "handle_close_isolated_matrix_preview_pilot"):
-            if self.controller.handle_close_isolated_matrix_preview_pilot():
+        if self._workspace_facade:
+            if self._workspace_facade.close_preview_pilot():
                 self._update_status()
 
     def _update_status(self) -> None:
