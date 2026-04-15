@@ -97,9 +97,6 @@ TestFlowManager/
 │   │   ├── event_dispatcher.py     # 全局事件分发器单例
 │   │   ├── state_manager.py        # 全局状态管理器单例
 │   │   └── logger.py               # 全局日志记录器
-│   ├── managers/                     # 管理器模块
-│   │   ├── action_manager.py       # 操作管理器
-│   │   └── window_manager.py       # 窗口管理器
 │   ├── common/                       # 公共组件
 │   │   ├── exceptions/             # 自定义异常类
 │   │   ├── services/               # 跨模块共享服务

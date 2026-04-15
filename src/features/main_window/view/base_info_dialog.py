@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QDesktopWidget
 
 # 使用延迟导入避免循环导入问题
 # LTRFieldConfigLoader 位于 ltr_manager.utils，但直接导入会触发 ltr_manager/__init__.py
-from src.common.widgets import EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
+# EnglishDateEdit 等控件也采用延迟导入
 from src.core.window_utils import WindowUtils
 from src.core.config_manager import config_manager
 
@@ -23,6 +23,16 @@ def _get_field_config_loader():
     """延迟导入 LTRFieldConfigLoader，避免循环导入"""
     from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
     return LTRFieldConfigLoader
+
+
+def _get_english_date_edit_components():
+    """延迟导入 EnglishDateEdit 相关组件，避免循环导入"""
+    from src.features.ltr_manager.widgets import (
+        EnglishDateEdit,
+        convert_to_english_format,
+        MONTH_ABBREVIATIONS,
+    )
+    return EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
 
 # Configure logging for this module
 logger = logging.getLogger(__name__)
@@ -53,7 +63,7 @@ class BaseInfoDialog(QDialog):
         self._default_items_structure = config_loader.load_application_field_mapping()
 
         self.table_items_data: List[Dict[str, Any]] = []
-        self.date_fields: Dict[int, EnglishDateEdit] = {}  # 存储日期字段的引用
+        self.date_fields: Dict[int, object] = {}  # 存储日期字段的引用
 
         self._setup_ui(title)
         self._populate_data()
@@ -139,6 +149,9 @@ class BaseInfoDialog(QDialog):
 
     def _populate_data(self):
         """填充数据到表格"""
+        # 延迟导入 EnglishDateEdit 相关组件
+        EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS = _get_english_date_edit_components()
+        
         # 获取数据
         data = self.data
         logger.debug(f"开始填充数据到表格，数据: {data}")

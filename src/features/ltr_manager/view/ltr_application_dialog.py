@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import QDesktopWidget
 from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
 from src.features.ltr_manager.service.ltr_application_service import LTRApplicationService
 from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
-from src.common.widgets import EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
+from src.features.ltr_manager.widgets import EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
 from src.core.event_dispatcher import event_dispatcher
 from src.core.window_utils import WindowUtils  # 导入窗口工具类
 from src.features.main_window.view.base_info_dialog import BaseInfoDialog

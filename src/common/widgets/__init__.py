@@ -1,19 +1,10 @@
 """
 通用控件模块初始化文件
+注意：此模块已精简，大部分控件已迁移至各自功能模块
 """
 
-# 导入通用控件，方便其他模块使用
-from .custom_dialog import CustomDialog, InfoDialog, ConfirmDialog
-from .date_edit import DateEdit, EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
-from .file_selector import FileSelector
+# 此模块已清空，所有控件已迁移至更合适的位置：
+# - EnglishDateEdit -> src.features.ltr_manager.widgets
+# - SplashScreen -> src.app.bootstrap.splash_screen
 
-__all__ = [
-    'CustomDialog',
-    'InfoDialog',
-    'ConfirmDialog',
-    'DateEdit',
-    'EnglishDateEdit',
-    'convert_to_english_format',
-    'MONTH_ABBREVIATIONS',
-    'FileSelector'
-]
+__all__ = []

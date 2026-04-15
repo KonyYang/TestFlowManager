@@ -10,7 +10,6 @@ from abc import ABC, abstractmethod
 from typing import Optional, Any, Dict
 from src.core.logger import logger
 from src.core.config_manager import config_manager
-from src.common.exceptions.validation_error import ProcessingError, ConfigurationError, FileOperationError
 
 
 class BaseService(ABC):
@@ -45,7 +44,7 @@ class BaseService(ABC):
         """记录错误日志"""
         self.logger.error(f"[{self.service_name}] {message}")
 
-    def handle_processing_error(self, message: str, operation: str = None) -> ProcessingError:
+    def handle_processing_error(self, message: str, operation: str = None) -> Exception:
         """
         处理操作错误
 
@@ -54,13 +53,13 @@ class BaseService(ABC):
             operation: 操作名称
 
         Returns:
-            ProcessingError 异常实例
+            Exception 异常实例
         """
         error_msg = f"[{self.service_name}] {message}"
         self.log_error(message)
-        return ProcessingError(error_msg, operation)
+        return Exception(error_msg)
 
-    def handle_configuration_error(self, message: str, config_key: str = None) -> ConfigurationError:
+    def handle_configuration_error(self, message: str, config_key: str = None) -> Exception:
         """
         处理配置错误
 
@@ -69,13 +68,13 @@ class BaseService(ABC):
             config_key: 配置键名
 
         Returns:
-            ConfigurationError 异常实例
+            Exception 异常实例
         """
         error_msg = f"[{self.service_name}] {message}"
         self.log_error(message)
-        return ConfigurationError(error_msg, config_key)
+        return Exception(error_msg)
 
-    def handle_file_operation_error(self, message: str, file_path: str = None) -> FileOperationError:
+    def handle_file_operation_error(self, message: str, file_path: str = None) -> Exception:
         """
         处理文件操作错误
 
@@ -84,11 +83,11 @@ class BaseService(ABC):
             file_path: 相关文件路径
 
         Returns:
-            FileOperationError 异常实例
+            Exception 异常实例
         """
         error_msg = f"[{self.service_name}] {message}"
         self.log_error(message)
-        return FileOperationError(error_msg, file_path)
+        return Exception(error_msg)
 
     # 配置管理相关功能
     def get_config_value(self, key: str, default: Any = None) -> Any:
