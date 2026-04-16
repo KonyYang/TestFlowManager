@@ -141,7 +141,7 @@ def matrix_table_widget(qtbot):
 @pytest.fixture
 def main_window(mock_controller, mock_matrix_controller):
     """主窗口固件（带模拟控制器）"""
-    from src.features.main_window.view.main_window_ui import MainWindow
+    from src.shell.main_window.view.main_window_ui import MainWindow
     
     # 创建窗口时使用模拟控制器
     window = MainWindow()

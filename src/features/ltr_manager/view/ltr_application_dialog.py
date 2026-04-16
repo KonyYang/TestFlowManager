@@ -16,15 +16,15 @@ from src.features.ltr_manager.model.ltr_application_data import LTRApplicationDa
 from src.features.ltr_manager.service.ltr_application_service import LTRApplicationService
 from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
 from src.features.ltr_manager.widgets import EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
+from src.features.ltr_manager.view import LTRFormDialogBase
 from src.core.event_dispatcher import event_dispatcher
-from src.core.window_utils import WindowUtils  # 导入窗口工具类
-from src.features.main_window.view.base_info_dialog import BaseInfoDialog
+from src.core.window_utils import WindowUtils
 
 # Configure logging for this module
 logger = logging.getLogger(__name__)
 
 
-class LTRApplicationDialog(BaseInfoDialog):
+class LTRApplicationDialog(LTRFormDialogBase):
     """LTRApplicationDialog
     LTR申请单对话框类
     用于显示和编辑LTR申请单信息

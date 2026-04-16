@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (
 from src.core.logger import logger
 from src.features.report_wizard.view.body_content_page import BodyContentPage
 from src.features.report_wizard.view.header_info_page import HeaderInfoPage
-from src.features.report_wizard.view.test_spec_tables_page import TestSpecTablesPage
+from src.features.report_wizard.view.product_spec_tables_page import TestSpecTablesPage
 
 
 class ReportWizardDialog(QDialog):

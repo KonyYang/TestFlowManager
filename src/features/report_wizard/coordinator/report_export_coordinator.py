@@ -17,6 +17,10 @@ class ReportExportCoordinator:
         self.project_context: Optional[ProjectContext] = None
 
     def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
+        from src.core.logger import logger
+        logger.info(f"ReportExportCoordinator: set_project_context called with project_context={project_context is not None}")
+        if project_context:
+            logger.info(f"ReportExportCoordinator: project_context.project_path={project_context.project_path}")
         self.project_context = project_context
         self.updater_service.set_project_context(project_context)
 
@@ -31,6 +35,8 @@ class ReportExportCoordinator:
         *,
         output_dir: Optional[str] = None,
     ) -> str:
+        from src.core.logger import logger
+        logger.info(f"ReportExportCoordinator: create_report_from_template - project_context={self.project_context is not None}")
         if not self.project_context:
             raise ValueError("ProjectContext is required to generate a report.")
         return self.generation_service.create_report_from_template(

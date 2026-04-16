@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from PyQt5.QtWidgets import QWidget
 
-from src.features.main_window.view.main_window_ui import MainWindow
+from src.shell.main_window.view.main_window_ui import MainWindow
 from src.features.matrix.workspace.matrix_workspace_facade import MatrixWorkspaceFacade
 from src.core.project_session_coordinator import ProjectSessionCoordinator
 

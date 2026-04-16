@@ -23,6 +23,10 @@ class ReportWizardController:
         self.matrix_controller = None
 
     def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
+        from src.core.logger import logger
+        logger.info(f"ReportWizardController: set_project_context called with project_context={project_context is not None}")
+        if project_context:
+            logger.info(f"ReportWizardController: project_context.project_path={project_context.project_path}")
         self.project_context = project_context
         self.export_coordinator.set_project_context(project_context)
 
@@ -39,6 +43,9 @@ class ReportWizardController:
 
         if self.matrix_controller:
             self.view.set_matrix_controller(self.matrix_controller)
+        
+        if self.project_context:
+            self.view.set_project_context(self.project_context)
 
         project_data = self.export_coordinator.load_header_data()
         if project_data:

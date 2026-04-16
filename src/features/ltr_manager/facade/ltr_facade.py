@@ -13,7 +13,7 @@ from src.core.logger import logger
 # LTR 控制器导入
 from src.features.ltr_manager.controller.ltr_viewer_controller import LTRViewerController
 from src.features.ltr_manager.controller.ltr_editor_controller import LTREditorController
-from src.features.main_window.view.dialogs.dl_input_dialog import DLInputDialog
+from src.features.ltr_manager.view import LTRNumberInputDialog
 
 if TYPE_CHECKING:
     from PyQt5.QtWidgets import QWidget
@@ -92,7 +92,7 @@ class LTRFacade:
             ltr_controller, ltr_editor_controller = self._ensure_controllers()
 
             # 显示 DL 编号输入对话框
-            dialog = DLInputDialog(parent_view)
+            dialog = LTRNumberInputDialog(parent_view)
             result = dialog.exec_()
 
             # 如果用户点击取消，则直接返回

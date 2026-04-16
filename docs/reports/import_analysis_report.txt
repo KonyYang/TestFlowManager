@@ -1,0 +1,97 @@
+================================================================================
+TestFlowManager 循环依赖检测报告
+================================================================================
+
+项目根目录: D:\PythonProject\TestFlowManager
+分析的模块数: 172
+
+--------------------------------------------------------------------------------
+1. 循环依赖检测结果
+--------------------------------------------------------------------------------
+发现 1 个循环依赖:
+
+  循环 1: src.features.ltr_manager.controller.ltr_editor_controller -> src.features.ltr_manager.view.ltr_editor_dialog -> src.features.ltr_manager.controller.ltr_editor_controller
+
+--------------------------------------------------------------------------------
+2. 高风险模式检测
+--------------------------------------------------------------------------------
+
+🔴 高风险 (2):
+  - 双向导入: src.features.ltr_manager.controller.ltr_editor_controller <-> src.features.ltr_manager.view.ltr_editor_dialog
+  - 双向导入: src.features.ltr_manager.view.ltr_editor_dialog <-> src.features.ltr_manager.controller.ltr_editor_controller
+
+🟡 中风险 (68):
+  - 深层导入链: src.app.application (深度=21)
+  - 深层导入链: src.core.output_paths (深度=7)
+  - 深层导入链: src.core.project_document_context (深度=6)
+  - 深层导入链: src.core.project_initialization_service (深度=6)
+  - 深层导入链: src.core.project_session_coordinator (深度=6)
+  - 深层导入链: src.core.project_session_service (深度=6)
+  - 深层导入链: src.managers.window_manager (深度=20)
+  - 深层导入链: src.features.step_record_generator.controller.step_record_controller (深度=8)
+  - 深层导入链: src.features.report_wizard.controller.report_wizard_controller (深度=10)
+  - 深层导入链: src.features.report_wizard.coordinator.report_export_coordinator (深度=9)
+  - 深层导入链: src.features.report_wizard.service.report_generation_service (深度=8)
+  - 深层导入链: src.features.report_wizard.service.test_spec_tables_service (深度=6)
+  - 深层导入链: src.features.report_wizard.view.body_content_page (深度=6)
+  - 深层导入链: src.features.report_wizard.view.report_wizard_dialog (深度=8)
+  - 深层导入链: src.features.report_wizard.view.test_spec_tables_page (深度=7)
+  - 深层导入链: src.features.report_updater.controller.report_updater_controller (深度=10)
+  - 深层导入链: src.features.report_updater.model.report_updater_data (深度=8)
+  - 深层导入链: src.features.report_updater.service.report_updater_service (深度=8)
+  - 深层导入链: src.features.report_updater.view.report_updater_dialog (深度=9)
+  - 深层导入链: src.features.project_creator.controller.project_creator_controller (深度=13)
+  - 深层导入链: src.features.project_creator.service.project_creation_application_service (深度=7)
+  - 深层导入链: src.features.project_creator.service.project_creator_service (深度=8)
+  - 深层导入链: src.features.matrix.controller.matrix_controller (深度=8)
+  - 深层导入链: src.features.matrix.controller.matrix_project_controller (深度=9)
+  - 深层导入链: src.features.matrix.service.matrix_application_service (深度=7)
+  - 深层导入链: src.features.matrix.service.matrix_export_service (深度=6)
+  - 深层导入链: src.features.matrix.service.matrix_import_service (深度=6)
+  - 深层导入链: src.features.matrix.service.matrix_service (深度=10)
+  - 深层导入链: src.features.matrix.service.matrix_service_backup (深度=10)
+  - 深层导入链: src.features.matrix.service.matrix_session_components (深度=10)
+  - 深层导入链: src.features.matrix.service.matrix_session_debug_facade (深度=15)
+  - 深层导入链: src.features.matrix.service.matrix_session_factory (深度=12)
+  - 深层导入链: src.features.matrix.service.matrix_session_manager (深度=13)
+  - 深层导入链: src.features.matrix.service.matrix_session_orchestrator (深度=14)
+  - 深层导入链: src.features.matrix.service.matrix_session_registry (深度=11)
+  - 深层导入链: src.features.matrix.view.matrix_page (深度=10)
+  - 深层导入链: src.features.matrix.workspace.matrix_workspace_coordinator (深度=16)
+  - 深层导入链: src.features.matrix.workspace.matrix_workspace_facade (深度=17)
+  - 深层导入链: src.features.matrix.view.handlers.matrix_event_handlers (深度=9)
+  - 深层导入链: src.features.matrix.view.managers.import_export_manager (深度=6)
+  - 深层导入链: src.features.matrix.service.processing.matrix_test_method_manager (深度=6)
+  - 深层导入链: src.features.matrix.service.spec.matrix_spec_processing_service (深度=7)
+  - 深层导入链: src.features.matrix.service.export.controller.export_controller (深度=9)
+  - 深层导入链: src.features.matrix.service.export.controller.record_data_table_export_controller (深度=8)
+  - 深层导入链: src.features.matrix.service.export.service.fee_sheet_export_service (深度=8)
+  - 深层导入链: src.features.main_window.components.header_components (深度=20)
+  - 深层导入链: src.features.main_window.components.sidebar_components (深度=20)
+  - 深层导入链: src.features.main_window.controller.main_window_controller (深度=18)
+  - 深层导入链: src.features.main_window.coordinator.project_lifecycle_coordinator (深度=7)
+  - 深层导入链: src.features.main_window.integration.event_bindings (深度=6)
+  - 深层导入链: src.features.main_window.integration.main_window_feature_facade (深度=11)
+  - 深层导入链: src.features.main_window.view.main_window_ui (深度=19)
+  - 深层导入链: src.features.ltr_manager.controller.ltr_application_controller (深度=9)
+  - 深层导入链: src.features.ltr_manager.controller.ltr_editor_controller (深度=6)
+  - 深层导入链: src.features.ltr_manager.facade.ltr_facade (深度=7)
+  - 深层导入链: src.features.ltr_manager.service.ltr_application_service (深度=7)
+  - 深层导入链: src.features.ltr_manager.view.ltr_application_dialog (深度=8)
+  - 深层导入链: src.features.ltr_manager.view.ltr_editor_dialog (深度=7)
+  - 深层导入链: src.features.ltr_manager.service.application_processing.ltr_number_generator (深度=6)
+  - 深层导入链: src.features.folder_manager.controller.folder_manager_controller (深度=6)
+  - 深层导入链: src.features.email_extractor.view.email_selector_dialog (深度=6)
+  - 深层导入链: src.features.document_parser.controller.document_parser_controller (深度=8)
+  - 深层导入链: src.features.customer_report_generator.controller.customer_report_controller (深度=7)
+  - 深层导入链: src.features.customer_report_generator.service.customer_report_service (深度=6)
+  - 深层导入链: src.features.content_editor.controller.content_editor_controller (深度=7)
+  - 深层导入链: src.features.content_editor.utils.document_content_editor (深度=7)
+  - 深层导入链: src.features.content_editor.view.body_content_dialog (深度=6)
+  - 深层导入链: src.app.composition.main_window_assembler (深度=20)
+
+--------------------------------------------------------------------------------
+3. 建议
+--------------------------------------------------------------------------------
+建议优先处理高风险问题，参考 docs/tasks/001-fix-circular-imports.md
+================================================================================
