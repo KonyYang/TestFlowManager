@@ -42,12 +42,12 @@ class LTRStatusCoordinator:
         
     def _setup_event_subscriptions(self) -> None:
         """Subscribe to LTR-related events."""
-        from src.core.event_dispatcher import event_dispatcher
+        from src.core.event_dispatcher import event_dispatcher, EventTopics
         
-        event_dispatcher.subscribe("ltr.processing.started", self._on_ltr_processing_started)
-        event_dispatcher.subscribe("ltr.processing.completed", self._on_ltr_processing_completed)
-        event_dispatcher.subscribe("ltr.processing.failed", self._on_ltr_processing_failed)
-        event_dispatcher.subscribe("ltr.application.confirmed", self._on_ltr_application_confirmed)
+        event_dispatcher.subscribe(EventTopics.LTR_PROCESSING_STARTED, self._on_ltr_processing_started)
+        event_dispatcher.subscribe(EventTopics.LTR_PROCESSING_COMPLETED, self._on_ltr_processing_completed)
+        event_dispatcher.subscribe(EventTopics.LTR_PROCESSING_FAILED, self._on_ltr_processing_failed)
+        event_dispatcher.subscribe(EventTopics.LTR_APPLICATION_CONFIRMED, self._on_ltr_application_confirmed)
         
         self._bound = True
         logger.info("LTRStatusCoordinator: Subscribed to LTR events")
@@ -94,12 +94,12 @@ class LTRStatusCoordinator:
         if not self._bound:
             return
             
-        from src.core.event_dispatcher import event_dispatcher
+        from src.core.event_dispatcher import event_dispatcher, EventTopics
         
-        event_dispatcher.unsubscribe("ltr.processing.started", self._on_ltr_processing_started)
-        event_dispatcher.unsubscribe("ltr.processing.completed", self._on_ltr_processing_completed)
-        event_dispatcher.unsubscribe("ltr.processing.failed", self._on_ltr_processing_failed)
-        event_dispatcher.unsubscribe("ltr.application.confirmed", self._on_ltr_application_confirmed)
+        event_dispatcher.unsubscribe(EventTopics.LTR_PROCESSING_STARTED, self._on_ltr_processing_started)
+        event_dispatcher.unsubscribe(EventTopics.LTR_PROCESSING_COMPLETED, self._on_ltr_processing_completed)
+        event_dispatcher.unsubscribe(EventTopics.LTR_PROCESSING_FAILED, self._on_ltr_processing_failed)
+        event_dispatcher.unsubscribe(EventTopics.LTR_APPLICATION_CONFIRMED, self._on_ltr_application_confirmed)
         
         self._bound = False
         logger.info("LTRStatusCoordinator: Unsubscribed from LTR events")

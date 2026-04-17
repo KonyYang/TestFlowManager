@@ -9,7 +9,7 @@ from typing import Optional
 from PyQt5.QtWidgets import QAction, QMainWindow
 from PyQt5.QtGui import QFont
 
-from src.core.font_utils import FontUtils
+from src.common.ui.font_utils import FontUtils
 
 
 class ShortcutRegistry:

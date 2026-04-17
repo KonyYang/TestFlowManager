@@ -11,9 +11,9 @@ from typing import Dict, Any, Optional
 import pythoncom
 from src.core.config_manager import config_manager
 from src.core.logger import logger
-from src.core.output_paths import OutputPathResolver
+from src.domain.project.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext
-from src.core.project_document_context import ProjectDocumentContext
+from src.domain.project.project_document_context import ProjectDocumentContext
 from src.features.report_wizard.service.header_modifier import HeaderModifier
 from src.utils.word_utils import open_docx_document, save_docx_document, get_shared_word_app
 from src.features.report_wizard.model.header_data import HeaderData

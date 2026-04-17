@@ -5,7 +5,7 @@ LTR编号输入对话框模块
 
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton
 from PyQt5.QtCore import Qt
-from src.core.font_utils import FontUtils
+from src.common.ui.font_utils import FontUtils
 from src.core.logger import logger
 
 

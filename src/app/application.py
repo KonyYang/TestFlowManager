@@ -2,11 +2,21 @@
 """
 主应用程序入口
 负责启动和管理整个应用程序
+
+启动性能优化记录：
+- 移除模块级 word_utils 导入（避免启动时加载 COM 库）
+- 移除 initialize_numpy()（NumPy 改为按需导入）
+- MainWindowController 非核心组件延迟初始化
+- Spec 改用 onedir 模式（避免运行时解压归档）
 """
 
 import sys
 import os
+import time
 import logging
+
+# ========== 启动计时开始 ==========
+_START_TIME = time.perf_counter()
 
 # 添加项目根目录到 Python 路径，这样可以正确导入模块
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -17,31 +27,7 @@ from PyQt5.QtGui import QIcon
 from src.app.composition.main_window_assembler import assemble_main_window
 from src.core.logger import logger
 from src.core.config_manager import config_manager
-from src.utils import word_utils
 import src
-
-def initialize_numpy():
-    """
-    初始化NumPy以防止在PyInstaller打包的应用程序中出现重复初始化错误
-    """
-    try:
-        # 在应用程序启动时设置环境变量，防止NumPy重复初始化
-        os.environ['OPENBLAS_NUM_THREADS'] = '1'
-        os.environ['MKL_NUM_THREADS'] = '1'
-        os.environ['NUMEXPR_NUM_THREADS'] = '1'
-        os.environ['OMP_NUM_THREADS'] = '1'
-        os.environ['NPY_DISABLE_CPU_FEATURES'] = '1'
-        
-        # 尝试预先导入numpy相关模块
-        try:
-            import numpy
-            logger.info(f"NumPy版本: {numpy.__version__}")
-        except Exception as e:
-            # 这里我们忽略NumPy初始化警告，因为它不影响应用程序的基本功能
-            logger.debug(f"NumPy预导入警告（可忽略）: {e}")
-            
-    except Exception as e:
-        logger.warning(f"NumPy初始化处理失败: {e}")
 
 def create_main_window(splash_screen=None):
     """创建主窗口的工厂函数
@@ -66,15 +52,18 @@ def create_main_window(splash_screen=None):
 
 def main():
     """主函数"""
+    _t_main = time.perf_counter()
+    logger.info(f"[启动耗时] 模块导入完成: {_t_main - _START_TIME:.3f}s")
+    
     try:
-        # 在应用程序启动时初始化NumPy
-        initialize_numpy()
-        
         # 设置应用程序属性
         app = QApplication(sys.argv)
         app.setStyle("Fusion")
         app.setApplicationName("TestFlowManager")
         app.setApplicationVersion(src.__version__)
+        
+        _t_qt = time.perf_counter()
+        logger.info(f"[启动耗时] PyQt5 初始化: {_t_qt - _t_main:.3f}s")
         
         # 设置应用程序图标
         icon_path = os.path.join(os.path.dirname(__file__), "resources", "icons", "app_icon.ico")
@@ -93,8 +82,13 @@ def main():
 
         # 直接启动主窗口（启动已优化至<0.1秒，无需进度提示）
         logger.info("直接启动主窗口")
+        _t_create = time.perf_counter()
         main_window = create_main_window(None)
+        logger.info(f"[启动耗时] 主窗口创建: {time.perf_counter() - _t_create:.3f}s")
         main_window.show()
+        _t_show = time.perf_counter()
+        logger.info(f"[启动耗时] 主窗口显示: {_t_show - _t_create:.3f}s")
+        logger.info(f"[启动耗时] 总耗时(到显示): {_t_show - _START_TIME:.3f}s")
         logger.info("主窗口已显示")
         
         # 运行应用程序

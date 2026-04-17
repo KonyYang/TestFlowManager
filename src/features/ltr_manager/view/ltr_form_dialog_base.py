@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
 from PyQt5.QtCore import Qt, QDate
 from PyQt5.QtWidgets import QDesktopWidget
 
-from src.core.window_utils import WindowUtils
+from src.common.ui.window_utils import WindowUtils
 
 logger = logging.getLogger(__name__)
 

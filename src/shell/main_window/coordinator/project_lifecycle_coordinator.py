@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
 from src.core.logger import logger
 from src.core.project_context import ProjectContext
 from src.core.project_session_service import project_session_service
-from src.core.project_initialization_service import ProjectInitializationService, ProjectInitializationResult
+from src.domain.project.project_initialization_service import ProjectInitializationService, ProjectInitializationResult
 from src.features.project_creator.view import ProjectInfoDialog
 
 

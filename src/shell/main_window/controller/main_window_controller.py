@@ -7,17 +7,17 @@ from typing import List, Optional, TYPE_CHECKING
 from PyQt5.QtWidgets import QWidget, QMessageBox
 from src.core.logger import logger
 from src.core.config_manager import config_manager
-from src.core.project_session_coordinator import ProjectSessionCoordinator
+from src.shell.main_window.coordinator.project_session_coordinator import ProjectSessionCoordinator
 from src.shell.main_window.model.main_window_data import MainWindowData
 from src.core.project_context import ProjectContext
 from src.features.matrix.workspace.matrix_workspace_facade import MatrixWorkspaceFacade
 from src.shell.main_window.coordinator.project_lifecycle_coordinator import ProjectLifecycleCoordinator
-from src.features.ltr_manager.facade.ltr_facade import LTRFacade
-from src.shell.main_window.integration.file_operations_facade import FileOperationsFacade
 
 # 类型导入仅用于类型检查，运行时不依赖具体类
 if TYPE_CHECKING:
     from src.features.matrix.service.matrix_session_manager import MatrixSessionManager
+    from src.features.ltr_manager.facade.ltr_facade import LTRFacade
+    from src.shell.main_window.integration.file_operations_facade import FileOperationsFacade
 
 
 class MainWindowController:
@@ -93,32 +93,32 @@ class MainWindowController:
                 status_updater=self.data_model.update_status,
             )
 
-        # 初始化事件绑定管理器（只订阅 project.opened 和 state.changed）
-        from src.shell.main_window.integration.event_bindings import EventBindingManager
-        self.event_binding_manager = EventBindingManager(
-            controller=self,
-            status_service=self.data_model,
-        )
-        self.event_binding_manager.bind_all()
+        # 非核心 Facade/Coordinator 延迟到 initialize() 中创建，避免启动时加载 COM 等重型依赖
+        self.event_binding_manager = None
+        self.ltr_status_coordinator = None
+        self._file_operations_facade = None
+        self._ltr_facade = None
 
-        # 初始化 LTR 状态协调器（处理 LTR 领域事件）
-        from src.features.ltr_manager.integration.ltr_status_coordinator import LTRStatusCoordinator
-        self.ltr_status_coordinator = LTRStatusCoordinator(
-            status_updater=self.data_model.update_status,
-        )
+    @property
+    def ltr_facade(self):
+        """安全访问 LTR Facade（确保已初始化）"""
+        if self._ltr_facade is None:
+            from src.features.ltr_manager.facade.ltr_facade import LTRFacade
+            self._ltr_facade = LTRFacade()
+        return self._ltr_facade
 
-        # =========================================================================
-        # 文件操作 Facade（统一管理文件操作和最近文件）
-        # =========================================================================
-        self._file_operations_facade = FileOperationsFacade(
-            parent_view=view,
-            data_model=self.data_model,
-            matrix_facade=self._matrix_facade,
-            lifecycle_coordinator=self.lifecycle_coordinator,
-        )
-
-        # LTR Facade（处理 LTR 申请单相关操作）
-        self._ltr_facade = LTRFacade()
+    @property
+    def file_operations_facade(self):
+        """安全访问 FileOperationsFacade（确保已初始化）"""
+        if self._file_operations_facade is None:
+            from src.shell.main_window.integration.file_operations_facade import FileOperationsFacade
+            self._file_operations_facade = FileOperationsFacade(
+                parent_view=self.view,
+                data_model=self.data_model,
+                matrix_facade=self._matrix_facade,
+                lifecycle_coordinator=self.lifecycle_coordinator,
+            )
+        return self._file_operations_facade
 
     def on_page_visible(self, page_id: str) -> dict:
         """当页面变为可见时调用 - 委托给 MatrixWorkspaceFacade 处理。"""
@@ -163,13 +163,41 @@ class MainWindowController:
 
     def initialize(self) -> bool:
         """
-        初始化控制器
+        初始化控制器（延迟创建非核心 Facade/Coordinator，减少启动耗时）
 
         Returns:
             初始化是否成功
         """
         try:
             logger.info("Initializing MainWindowController")
+
+            # --- 延迟创建非核心组件（启动优化） ---
+            # 事件绑定管理器
+            from src.shell.main_window.integration.event_bindings import EventBindingManager
+            self.event_binding_manager = EventBindingManager(
+                controller=self,
+                status_service=self.data_model,
+            )
+            self.event_binding_manager.bind_all()
+
+            # LTR 状态协调器
+            from src.features.ltr_manager.integration.ltr_status_coordinator import LTRStatusCoordinator
+            self.ltr_status_coordinator = LTRStatusCoordinator(
+                status_updater=self.data_model.update_status,
+            )
+
+            # 文件操作 Facade
+            from src.shell.main_window.integration.file_operations_facade import FileOperationsFacade
+            self._file_operations_facade = FileOperationsFacade(
+                parent_view=self.view,
+                data_model=self.data_model,
+                matrix_facade=self._matrix_facade,
+                lifecycle_coordinator=self.lifecycle_coordinator,
+            )
+
+            # LTR Facade
+            from src.features.ltr_manager.facade.ltr_facade import LTRFacade
+            self._ltr_facade = LTRFacade()
 
             # 加载最近文件列表
             recent_files = self.data_model.get_recent_files()
@@ -189,7 +217,7 @@ class MainWindowController:
             是否成功打开LTR文件
         """
         logger.debug("Handling view LTR file request (delegated to LTRFacade)")
-        return self._ltr_facade.handle_view_ltr(self.view)
+        return self.ltr_facade.handle_view_ltr(self.view)
 
 
     def handle_open_file(self, file_path: str) -> bool:
@@ -203,7 +231,7 @@ class MainWindowController:
             是否处理成功
         """
         logger.debug(f"MainWindowController: Delegating handle_open_file to FileOperationsFacade")
-        return self._file_operations_facade.handle_open_file(file_path)
+        return self.file_operations_facade.handle_open_file(file_path)
 
     def handle_new_file(self) -> bool:
         """
@@ -213,7 +241,7 @@ class MainWindowController:
             是否处理成功
         """
         logger.debug("MainWindowController: Delegating handle_new_file to FileOperationsFacade")
-        return self._file_operations_facade.handle_new_file()
+        return self.file_operations_facade.handle_new_file()
 
     def handle_open_project(self) -> bool:
         """
@@ -248,11 +276,11 @@ class MainWindowController:
 
     def get_recent_files(self) -> List[str]:
         """获取最近打开的文件列表（委托给 FileOperationsFacade）"""
-        return self._file_operations_facade.get_recent_files()
+        return self.file_operations_facade.get_recent_files()
 
     def clear_recent_files(self) -> None:
         """清空最近打开的文件列表（委托给 FileOperationsFacade）"""
-        self._file_operations_facade.clear_recent_files()
+        self.file_operations_facade.clear_recent_files()
 
     def get_status(self) -> str:
         """获取当前状态"""

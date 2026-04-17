@@ -7,7 +7,7 @@ import logging
 import os
 from typing import Dict, Any, Optional, Tuple
 from src.core.logger import logger
-from src.core.event_dispatcher import event_dispatcher
+from src.core.event_dispatcher import event_dispatcher, EventTopics
 from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
 from src.features.ltr_manager.service.application_processing.document_validator import LTRApplicationFormValidator
 from src.features.ltr_manager.service.application_processing.data_extractor import LTRApplicationDataExtractor
@@ -260,7 +260,7 @@ class LTRApplicationService:
         logger.info(f"Processing application file: {doc_filepath}")
 
         # 发送处理开始事件
-        self.event_dispatcher.dispatch("ltr.processing.started", {
+        self.event_dispatcher.dispatch(EventTopics.LTR_PROCESSING_STARTED, {
             "file_path": doc_filepath
         })
 
@@ -270,7 +270,7 @@ class LTRApplicationService:
             error_msg = "无法获取Word应用实例"
             logger.error(error_msg)
             # 发送处理失败事件
-            self.event_dispatcher.dispatch("ltr.processing.failed", {
+            self.event_dispatcher.dispatch(EventTopics.LTR_PROCESSING_FAILED, {
                 "file_path": doc_filepath,
                 "error": error_msg
             })
@@ -284,7 +284,7 @@ class LTRApplicationService:
                     error_msg = validation_result.get("error", "文档不是有效的申请单")
                     logger.warning(f"Document {doc_filepath} is not a valid application form")
                     # 发送处理失败事件
-                    self.event_dispatcher.dispatch("ltr.processing.failed", {
+                    self.event_dispatcher.dispatch(EventTopics.LTR_PROCESSING_FAILED, {
                         "file_path": doc_filepath,
                         "error": error_msg
                     })
@@ -296,7 +296,7 @@ class LTRApplicationService:
                 error_msg = "不支持的文件类型"
                 logger.warning(f"Unsupported file type: {doc_filepath}")
                 # 发送处理失败事件
-                self.event_dispatcher.dispatch("ltr.processing.failed", {
+                self.event_dispatcher.dispatch(EventTopics.LTR_PROCESSING_FAILED, {
                     "file_path": doc_filepath,
                     "error": error_msg
                 })
@@ -306,7 +306,7 @@ class LTRApplicationService:
             result = self.extractor.extract_application_data(doc_filepath)
 
             # 发送处理完成事件
-            self.event_dispatcher.dispatch("ltr.processing.completed", {
+            self.event_dispatcher.dispatch(EventTopics.LTR_PROCESSING_COMPLETED, {
                 "file_path": doc_filepath,
                 "data": result
             })
@@ -317,7 +317,7 @@ class LTRApplicationService:
             error_msg = f"处理申请单文件时出错: {str(e)}"
             logger.error(f"Error processing application file: {e}", exc_info=True)
             # 发送处理失败事件
-            self.event_dispatcher.dispatch("ltr.processing.failed", {
+            self.event_dispatcher.dispatch(EventTopics.LTR_PROCESSING_FAILED, {
                 "file_path": doc_filepath,
                 "error": error_msg
             })

@@ -32,7 +32,7 @@ from PyQt5.QtCore import QRect, QPoint, pyqtSignal, Qt
 from PyQt5.QtGui import QMouseEvent
 
 from src.core.logger import logger
-from src.core.font_utils import FontUtils
+from src.common.ui.font_utils import FontUtils
 from src.shell.main_window.controller.main_window_controller import MainWindowController
 from src.shell.main_window.integration.main_window_feature_facade import MainWindowFeatureFacade
 from src.shell.main_window.components.header_components import HeaderComponents

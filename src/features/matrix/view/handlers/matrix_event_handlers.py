@@ -2,7 +2,7 @@
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QInputDialog
 import os
 from src.core.logger import logger
-from src.core.project_document_context import ProjectDocumentContext
+from src.domain.project.project_document_context import ProjectDocumentContext
 from src.features.matrix.view.matrix_filter_dialog import MatrixFilterDialog
 from src.features.step_record_generator.controller.step_record_controller import StepRecordController
 

@@ -8,9 +8,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from src.core.config_manager import config_manager
-from src.core.output_paths import OutputPathResolver
+from src.domain.project.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext
-from src.core.project_document_context import ProjectDocumentContext
+from src.domain.project.project_document_context import ProjectDocumentContext
 
 
 @dataclass

@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QGridLayout,
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QFont
 from src.core.logger import logger
-from src.core.font_utils import FontUtils
+from src.common.ui.font_utils import FontUtils
 from src.features.report_updater.model.report_updater_data import ReportUpdaterData
 
 

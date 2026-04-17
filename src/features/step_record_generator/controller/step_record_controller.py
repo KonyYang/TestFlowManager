@@ -8,9 +8,9 @@ import os
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from src.core.logger import logger
-from src.core.output_paths import OutputPathResolver
+from src.domain.project.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext
-from src.core.project_document_context import ProjectDocumentContext
+from src.domain.project.project_document_context import ProjectDocumentContext
 from src.features.step_record_generator.service.step_record_service import StepRecordService
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 

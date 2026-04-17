@@ -10,8 +10,8 @@ from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent
 from src.core.logger import logger
-from src.core.font_utils import FontUtils  # 导入字体工具类
-from src.core.window_utils import WindowUtils  # 导入窗口工具类
+from src.common.ui.font_utils import FontUtils  # 导入字体工具类
+from src.common.ui.window_utils import WindowUtils  # 导入窗口工具类
 
 
 class EmailSelectorDialog(QDialog):

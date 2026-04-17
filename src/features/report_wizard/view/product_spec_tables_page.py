@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (
 
 from src.core.logger import logger
 from src.core.project_context import ProjectContext
-from src.core.project_document_context import ProjectDocumentContext
+from src.domain.project.project_document_context import ProjectDocumentContext
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 from src.features.report_wizard.service.test_spec_tables_service import TestSpecTablesService
 

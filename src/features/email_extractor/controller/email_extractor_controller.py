@@ -7,7 +7,7 @@ import os
 import traceback
 from PyQt5.QtWidgets import QMessageBox
 from src.core.logger import logger
-from src.core.base_controller import BaseController
+from src.common.ui.base_controller import BaseController
 from src.features.email_extractor.model.email_extractor_data import EmailExtractorData
 from src.features.email_extractor.service.email_extractor_service import EmailExtractorService
 

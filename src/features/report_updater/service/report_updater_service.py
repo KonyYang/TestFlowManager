@@ -16,9 +16,9 @@ import win32com.client as win32
 import win32com.client.gencache as gencache
 from src.core.logger import logger
 from src.core.config_manager import config_manager
-from src.core.output_paths import OutputPathResolver
+from src.domain.project.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext
-from src.core.project_document_context import ProjectDocumentContext
+from src.domain.project.project_document_context import ProjectDocumentContext
 
 
 class EquipmentConfigManager:

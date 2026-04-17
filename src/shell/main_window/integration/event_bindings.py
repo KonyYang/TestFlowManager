@@ -4,44 +4,50 @@ Event Binding Manager for MainWindow.
 Centralizes event subscription management, separating infrastructure
 concerns from business logic in MainWindowController.
 
-NOTE: This manager only handles 1 event now:
-- state.changed - handles application_status directly
+设计决策 (2026-04-16 方案A收口):
+- StateManager 不再自动派发 state.changed 事件 (纯状态容器)
+- 本管理器直接订阅业务领域事件 project.opened
+- 所有跨模块通信统一走 event_dispatcher 显式派发
 
-project.opened is consumed directly by ProjectSessionCoordinator (event decoupling).
+职责范围:
+- project.opened → 更新 controller._project_context
 
-All LTR-related events are handled by LTRStatusCoordinator.
+不负责:
+- LTR events (LTRStatusCoordinator)
+- Matrix 自动导入 (ProjectSessionCoordinator)
+- application_status (由 controller 直接设置)
 """
-from src.core.event_dispatcher import event_dispatcher
+from src.core.event_dispatcher import event_dispatcher, EventTopics
 from src.core.project_context import ProjectContext
 from src.core.logger import logger
 
 
 class EventBindingManager:
     """
-    Manages event subscriptions for MainWindow shell.
-    
-    Responsibilities:
-    - Subscribe to shell-level state changes only
-    - Update shell internal state
-    
-    Does NOT handle:
-    - project.opened (handled by ProjectSessionCoordinator directly)
-    - LTR events (handled by LTRStatusCoordinator)
-    - Business logic implementation
+    管理 MainWindow shell 的事件订阅。
+
+    职责：
+    - 订阅 shell 级别的领域事件
+    - 更新 shell 内部状态（如 controller 的项目上下文引用）
+
+    不处理：
+    - project.opened 的副作用编排（由 ProjectSessionCoordinator 负责）
+    - LTR 相关事件（由 LTRStatusCoordinator 负责）
+    - 业务逻辑实现
     """
-    
+
     def __init__(self, controller, status_service):
         """
-        Initialize event binding manager.
-        
+        初始化事件绑定管理器。
+
         Args:
-            controller: MainWindowController instance for internal state updates
-            status_service: Object with update_status method (e.g., MainWindowData)
+            controller: MainWindowController 实例，用于更新内部状态
+            status_service: 具有 update_status 方法的对象（如 MainWindowData）
         """
         self.controller = controller
         self.status_service = status_service
         self._bound = False
-        
+
         # 注册清理钩子
         from src.core.shutdown_registry import shutdown_registry
         shutdown_registry.register(
@@ -49,58 +55,56 @@ class EventBindingManager:
             cleanup_fn=self.unbind_all,
             priority=10  # 高优先级，最先执行
         )
-        
+
     def bind_all(self) -> None:
-        """Bind all event subscriptions."""
+        """绑定所有事件订阅。"""
         if self._bound:
             logger.warning("EventBindingManager already bound, skipping")
             return
-            
-        self._bind_shell_state_events()
-        
+
+        self._bind_project_events()
+
         self._bound = True
-        logger.info("EventBindingManager: Bound to state.changed only (project.opened moved to coordinator)")
-        
+        logger.info("EventBindingManager: Bound to project.opened")
+
     def unbind_all(self) -> None:
-        """Unbind all event subscriptions (for cleanup/testing)."""
+        """解绑所有事件订阅（用于清理/测试）。"""
         if not self._bound:
             return
-            
-        event_dispatcher.unsubscribe("state.changed", self._on_state_changed)
-        
+
+        event_dispatcher.unsubscribe(EventTopics.PROJECT_OPENED, self._on_project_opened)
+
         self._bound = False
         logger.info("EventBindingManager: All events unbound")
-        
-    def _bind_shell_state_events(self) -> None:
-        """Bind shell-level state change events."""
-        event_dispatcher.subscribe("state.changed", self._on_state_changed)
-            
-    def _on_state_changed(self, data: dict) -> None:
+
+    def _bind_project_events(self) -> None:
+        """绑定项目相关领域事件。"""
+        event_dispatcher.subscribe(EventTopics.PROJECT_OPENED, self._on_project_opened)
+
+    def _on_project_opened(self, data: dict) -> None:
         """
-        Handle state changed event.
-        
+        处理 project.opened 事件。
+
+        职责：仅更新 controller 内部持有的项目上下文引用。
+        副作用编排（窗口标题、Matrix 导入等）由 ProjectSessionCoordinator 负责。
+
         Args:
-            data: Event data containing key and new_value
+            data: 事件数据，包含 project_path、dl_number 等
         """
-        from src.core.logger import logger
-        key = data.get("key")
-        logger.info(f"EventBindingManager._on_state_changed: key={key}")
-        
-        if key == "application_status":
-            # Direct status update
-            new_value = data.get("new_value")
-            self.status_service.update_status(new_value)
-            logger.debug("EventBindingManager: application_status updated")
-            
-        elif key == "current_project_context":
-            # Update controller internal state
-            new_value = data.get("new_value")
+        logger.info(f"EventBindingManager._on_project_opened: received event")
+
+        try:
+            project_context = ProjectContext.from_event_data(data)
+            if not project_context:
+                logger.warning("EventBindingManager: Invalid project context in event")
+                return
+
+            # 更新 controller 内部的项目上下文引用
             if hasattr(self.controller, '_project_context'):
-                self.controller._project_context = new_value
-                from src.core.logger import logger
-                logger.info(f"EventBindingManager: Updated controller project_context={new_value is not None}")
-                if new_value:
-                    logger.info(f"EventBindingManager: project_context.project_path={new_value.project_path}")
-            
-        else:
-            logger.debug(f"EventBindingManager: Ignored state key: {key}")
+                self.controller._project_context = project_context
+                logger.info(
+                    f"EventBindingManager: Updated controller "
+                    f"project_context={project_context.project_path}"
+                )
+        except Exception as e:
+            logger.error(f"EventBindingManager: Error handling project.opened: {e}")

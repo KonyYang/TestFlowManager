@@ -21,7 +21,7 @@ from src.features.matrix.service.matrix_session_factory import MatrixSessionFact
 # 添加事件调度器
 from src.core.event_dispatcher import event_dispatcher
 from src.core.project_context import ProjectContext
-from src.core.project_session_coordinator import ProjectSessionCoordinator
+from src.shell.main_window.coordinator.project_session_coordinator import ProjectSessionCoordinator
 from src.core.project_session_service import project_session_service
 
 if TYPE_CHECKING:
@@ -101,7 +101,7 @@ class ProjectCreatorController:
     def _subscribe_to_events(self):
         """订阅事件，确保不会重复订阅"""
         if not self._event_subscribed:
-            event_dispatcher.subscribe("ltr.application.processed", self._on_ltr_application_processed)
+            event_dispatcher.subscribe(EventTopics.LTR_APPLICATION_PROCESSED, self._on_ltr_application_processed)
             self._event_subscribed = True
             logger.info("Subscribed to ltr.application.processed event")
         else:
@@ -110,7 +110,7 @@ class ProjectCreatorController:
     def cleanup(self):
         """清理资源，取消事件订阅"""
         if self._event_subscribed:
-            event_dispatcher.unsubscribe("ltr.application.processed", self._on_ltr_application_processed)
+            event_dispatcher.unsubscribe(EventTopics.LTR_APPLICATION_PROCESSED, self._on_ltr_application_processed)
             self._event_subscribed = False
             logger.info("Unsubscribed from ltr.application.processed event")
         scope = getattr(self, "_matrix_session_scope", None)

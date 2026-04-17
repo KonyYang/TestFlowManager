@@ -3,7 +3,7 @@ from typing import Optional
 
 from src.core.logger import logger
 from src.core.project_context import ProjectContext
-from src.core.project_document_context import ProjectDocumentContext
+from src.domain.project.project_document_context import ProjectDocumentContext
 from src.core.project_session_service import project_session_service
 
 

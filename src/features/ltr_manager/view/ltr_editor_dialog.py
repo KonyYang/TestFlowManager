@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt
 from src.core.logger import logger
 from src.features.ltr_manager.model.ltr_editor_data import LTREditorData
 from src.features.ltr_manager.view.components.ltr_field_widgets import LTRTextEdit, LTRComboBox, LTRTableWidgetItem
-from src.core.window_utils import WindowUtils  # 导入窗口工具类
+from src.common.ui.window_utils import WindowUtils  # 导入窗口工具类
 
 
 class LTREditorDialog(QDialog):

@@ -6,9 +6,9 @@
 from typing import Dict, Any, List, Optional
 from src.core.config_manager import config_manager
 from src.core.logger import logger
-from src.core.output_paths import OutputPathResolver
+from src.domain.project.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext
-from src.core.project_document_context import ProjectDocumentContext
+from src.domain.project.project_document_context import ProjectDocumentContext
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 import os
 import pythoncom

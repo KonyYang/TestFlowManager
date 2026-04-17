@@ -12,7 +12,7 @@ from src.features.ltr_manager.view.ltr_application_dialog import LTRApplicationD
 from src.features.folder_manager.controller.folder_manager_controller import FolderManagerController
 from src.utils.ltr_data_manager import LTRDataManager
 # 添加事件调度器
-from src.core.event_dispatcher import event_dispatcher
+from src.core.event_dispatcher import event_dispatcher, EventTopics
 
 
 class LTRApplicationController:
@@ -36,7 +36,7 @@ class LTRApplicationController:
         # 添加LTR数据管理器
         self.ltr_data_manager = LTRDataManager()
         # 添加事件订阅
-        event_dispatcher.subscribe("ltr.application.processed", self._on_ltr_application_processed)
+        event_dispatcher.subscribe(EventTopics.LTR_APPLICATION_PROCESSED, self._on_ltr_application_processed)
         # 添加属性来存储选中的文件名
         self.selected_filename = None
 
@@ -156,7 +156,7 @@ class LTRApplicationController:
 
                 # 发布事件而不是直接返回数据
                 # 注意：对于新申请单，dl_number是空的，因为还没有分配编号
-                event_dispatcher.dispatch("ltr.application.confirmed", {
+                event_dispatcher.dispatch(EventTopics.LTR_APPLICATION_CONFIRMED, {
                     "dl_number": self.application_data.dl_number,  # 可能为空
                     "data": processed_data,
                     "controller": self
@@ -258,7 +258,7 @@ class LTRApplicationController:
                         # 只有在有有效的LTR编号时才发布事件
                         if result.get('ltr_number') and result['ltr_number'].strip():
                             # 发布事件通知项目创建成功，携带项目路径信息
-                            event_dispatcher.dispatch("ltr.application.processed", {
+                            event_dispatcher.dispatch(EventTopics.LTR_APPLICATION_PROCESSED, {
                                 "dl_number": result['ltr_number'],
                                 "status": "success",
                                 "project_path": project_result,  # 添加项目路径
@@ -273,7 +273,7 @@ class LTRApplicationController:
                         # 只有在有有效的LTR编号时才发布事件
                         if result.get('ltr_number') and result['ltr_number'].strip():
                             # 发布事件通知项目创建失败
-                            event_dispatcher.dispatch("ltr.application.processed", {
+                            event_dispatcher.dispatch(EventTopics.LTR_APPLICATION_PROCESSED, {
                                 "dl_number": result['ltr_number'],
                                 "status": "failed",
                                 "error": "项目文件夹创建失败",
@@ -298,7 +298,7 @@ class LTRApplicationController:
                     
                 # LTR编号申请成功但用户选择不创建项目文件夹
                 # 仍然需要发布事件通知其他组件
-                event_dispatcher.dispatch("ltr.application.processed", {
+                event_dispatcher.dispatch(EventTopics.LTR_APPLICATION_PROCESSED, {
                     "dl_number": result.get('ltr_number', ''),
                     "status": "success",
                     "application_data": application_data,
@@ -314,7 +314,7 @@ class LTRApplicationController:
             dl_number = form_data.get("dl_number", "")
             if dl_number and dl_number.strip():
                 # 发布事件通知项目创建失败
-                event_dispatcher.dispatch("ltr.application.processed", {
+                event_dispatcher.dispatch(EventTopics.LTR_APPLICATION_PROCESSED, {
                     "dl_number": dl_number,
                     "status": "failed",
                     "error": str(e),

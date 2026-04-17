@@ -12,7 +12,7 @@ def test_application_create_main_window_uses_composition_assembler():
     source = source_path.read_text(encoding="utf-8")
 
     assert "from src.app.composition.main_window_assembler import assemble_main_window" in source
-    assert "from src.features.main_window.view.main_window_ui import MainWindow" not in source
+    assert "from src.shell.main_window.view.main_window_ui import MainWindow" not in source
     assert "MainWindow(" not in source
     assert "assemble_main_window(" in source
 

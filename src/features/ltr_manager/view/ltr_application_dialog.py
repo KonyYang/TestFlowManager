@@ -18,7 +18,7 @@ from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoa
 from src.features.ltr_manager.widgets import EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
 from src.features.ltr_manager.view import LTRFormDialogBase
 from src.core.event_dispatcher import event_dispatcher
-from src.core.window_utils import WindowUtils
+from src.common.ui.window_utils import WindowUtils
 
 # Configure logging for this module
 logger = logging.getLogger(__name__)

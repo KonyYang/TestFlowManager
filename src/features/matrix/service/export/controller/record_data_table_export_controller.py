@@ -1,9 +1,9 @@
 from src.features.matrix.service.export.service.llcr_cr_export_service import LLCRCRExportService
 from src.features.matrix.service.export.view.llcr_cr_record_parameters_dialog import LLCR_CR_RecordParametersDialog
 from src.core.logger import logger
-from src.core.output_paths import OutputPathResolver
+from src.domain.project.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext
-from src.core.project_document_context import ProjectDocumentContext
+from src.domain.project.project_document_context import ProjectDocumentContext
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialog
 import os
 
