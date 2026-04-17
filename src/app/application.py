@@ -18,32 +18,34 @@ import logging
 # ========== 启动计时开始 ==========
 _START_TIME = time.perf_counter()
 
-# 添加项目根目录到 Python 路径，这样可以正确导入模块
+# 添加项目根目录到 Python 路径（仅在开发模式下需要）
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
+if not getattr(sys, 'frozen', False):
+    sys.path.insert(0, project_root)
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
 from src.app.composition.main_window_assembler import assemble_main_window
 from src.core.logger import logger
 from src.core.config_manager import config_manager
+from src.core.path_utils import get_resource_path, get_executable_dir
 import src
 
 def create_main_window(splash_screen=None):
     """创建主窗口的工厂函数
-    
+
     Args:
         splash_screen: 启动进度窗口实例
     """
     try:
         logger.info("开始创建主窗口...")
         main_window = assemble_main_window(splash_screen)
-        
-        # 设置应用程序图标
-        icon_path = os.path.join(os.path.dirname(__file__), "resources", "icons", "app_icon.ico")
+
+        # 设置应用程序图标（兼容开发和打包模式）
+        icon_path = get_resource_path("resources", "icons", "app_icon.png")
         if os.path.exists(icon_path):
             main_window.setWindowIcon(QIcon(icon_path))
-            
+
         logger.info("主窗口创建完成")
         return main_window
     except Exception as e:
@@ -65,8 +67,8 @@ def main():
         _t_qt = time.perf_counter()
         logger.info(f"[启动耗时] PyQt5 初始化: {_t_qt - _t_main:.3f}s")
         
-        # 设置应用程序图标
-        icon_path = os.path.join(os.path.dirname(__file__), "resources", "icons", "app_icon.ico")
+        # 设置应用程序图标（兼容开发和打包模式）
+        icon_path = get_resource_path("resources", "icons", "app_icon.png")
         if os.path.exists(icon_path):
             app.setWindowIcon(QIcon(icon_path))
 

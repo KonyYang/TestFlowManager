@@ -55,8 +55,11 @@ class BodyContentService:
             ]
         }
 
-        # 尝试从配置文件加载预定义描述
-        config_path = os.path.join(os.path.dirname(__file__), "body_content_config.json")
+        # 尝试从配置文件加载预定义描述（兼容打包模式）
+        from src.core.path_utils import get_resource_path
+        config_path = get_resource_path(
+            "content_editor_service", "body_content_config.json"
+        )
         if os.path.exists(config_path):
             try:
                 with open(config_path, 'r', encoding='utf-8') as f:

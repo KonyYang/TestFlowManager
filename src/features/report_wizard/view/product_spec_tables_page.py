@@ -101,9 +101,7 @@ class TestSpecTablesWorker(QThread):
         logger.info("=" * 80)
         try:
             logger.info(
-                "Start filling Test Spec tables. document=%s, rows=%s",
-                self.document_path,
-                len(self.matrix_rows),
+                f"Start filling Test Spec tables. document={self.document_path}, rows={len(self.matrix_rows)}"
             )
             logger.info("Creating TestSpecTablesService...")
             service = TestSpecTablesService()
@@ -293,14 +291,17 @@ class TestSpecTablesPage(QFrame):
             # 找到 ReportWizardDialog 并关闭它
             if isinstance(parent_wizard, QDialog):
                 logger.info(f"Level {level}: Found QDialog type")
-                from src.features.report_wizard.view.report_wizard_dialog import ReportWizardDialog
-                if isinstance(parent_wizard, ReportWizardDialog):
-                    logger.info(f"Level {level}: Found ReportWizardDialog! Calling accept()...")
+                # (循环导入已移除，改用 duck typing)
+                if hasattr(parent_wizard, "wizard_finished"):
+                    logger.info(f"Level {level}: Found ReportWizardDialog! Scheduling accept()...")
                     try:
-                        parent_wizard.accept()
-                        logger.info("ReportWizardDialog.accept() called successfully")
+                        # 使用 QTimer.singleShot 延迟关闭，避免在信号槽回调中
+                        # 直接调用 accept() 导致的 Qt 重入析构崩溃 (0xC0000409)
+                        from PyQt5.QtCore import QTimer
+                        QTimer.singleShot(0, parent_wizard.accept)
+                        logger.info("ReportWizardDialog.accept() scheduled via singleShot")
                     except Exception as e:
-                        logger.error(f"Error calling parent_wizard.accept(): {e}", exc_info=True)
+                        logger.error(f"Error scheduling parent_wizard.accept(): {e}", exc_info=True)
                     break
                 else:
                     logger.info(f"Level {level}: QDialog but not ReportWizardDialog, continuing...")

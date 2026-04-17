@@ -259,7 +259,7 @@ class MainWindowController:
             app_info = {
                 'name': config_manager.get("app.name", "TestFlowManager"),
                 'version': config_manager.get("app.version", "1.0.0"),
-                'author': config_manager.get("app.author", "Unknown")
+                'author': config_manager.get("app.author", "Even")
             }
 
             # 显示关于对话框

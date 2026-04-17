@@ -5,11 +5,82 @@
 注意：组件通过 duck typing 使用 main_window 的属性，不需要导入 MainWindow 类型。
 """
 
-from typing import Any
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QToolButton
-from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QMouseEvent
+from typing import Any, Optional
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel
+from PyQt5.QtCore import Qt, QPoint, QTimer, pyqtSignal, QSize, QEvent
+from PyQt5.QtGui import QMouseEvent, QPainter, QColor, QFont, QPaintEvent
 from src.core.logger import logger
+
+
+class TitleBarButton(QWidget):
+    """自定义标题栏按钮 — 自绘渲染，轻量可靠"""
+
+    clicked = pyqtSignal()
+
+    def __init__(self, icon_text: str, hover_bg: str = "rgba(255,255,255,0.15)",
+                 parent: Optional[QWidget] = None):
+        super().__init__(parent)
+        self._icon = icon_text
+        self._hover_bg = hover_bg
+        self._hovered = False
+        self._pressed = False
+        self.setFixedSize(46, 32)
+        self.setMouseTracking(True)
+        self.setCursor(Qt.PointingHandCursor)
+
+    def sizeHint(self) -> QSize:
+        return QSize(46, 32)
+
+    @property
+    def icon(self) -> str:
+        return self._icon
+
+    @icon.setter
+    def icon(self, value: str) -> None:
+        if self._icon != value:
+            self._icon = value
+            self.update()
+
+    # ---- 绘制 ----
+
+    def paintEvent(self, event: QPaintEvent) -> None:
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        bg = None
+        if self._pressed:
+            bg = QColor("rgba(255,255,255,0.25)")
+        elif self._hovered:
+            bg = QColor(self._hover_bg)
+        if bg:
+            p.fillRect(self.rect(), bg)
+        p.setPen(QColor(255, 255, 255, 230))
+        font = QFont("Segoe UI Symbol", 11)
+        p.setFont(font)
+        p.drawText(self.rect(), Qt.AlignCenter, self._icon)
+        p.end()
+
+    # ---- 事件 ----
+
+    def enterEvent(self, event: QEvent) -> None:
+        self._hovered = True
+        self.update()
+
+    def leaveEvent(self, event: QEvent) -> None:
+        self._hovered = False
+        self._pressed = False
+        self.update()
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        if event.button() == Qt.LeftButton:
+            self._pressed = True
+            self.update()
+
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        if event.button() == Qt.LeftButton and self._pressed:
+            self._pressed = False
+            self.update()
+            if self.rect().contains(event.pos()):
+                self.clicked.emit()
 
 
 class HeaderComponents:
@@ -75,36 +146,20 @@ class HeaderComponents:
         actions_layout.setContentsMargins(0, 0, 0, 0)
         actions_layout.setSpacing(8)
 
-        # 快捷按钮：全屏切换
-        fullscreen_btn = QToolButton()
-        fullscreen_btn.setObjectName("LimsHeaderMenuButton")
-        fullscreen_btn.setText("⛶")
-        fullscreen_btn.setToolTip("切换全屏模式 (F11)")
-        fullscreen_btn.clicked.connect(self.main_window._toggle_fullscreen)
-
-        # 快捷按钮：最小化
-        minimize_btn = QToolButton()
-        minimize_btn.setObjectName("LimsHeaderMenuButton")
-        minimize_btn.setText("─")
-        minimize_btn.setToolTip("最小化窗口")
-        minimize_btn.clicked.connect(self.main_window.showMinimized)
-
-        # 快捷按钮：最大化
-        self.main_window._maximize_btn = QToolButton()
-        self.main_window._maximize_btn.setObjectName("LimsHeaderMenuButton")
-        self.main_window._maximize_btn.setText("□")
+        # 快捷按钮：最大化/还原
+        self.main_window._maximize_btn = TitleBarButton("□")
         self.main_window._maximize_btn.setToolTip("最大化窗口")
-        self.main_window._maximize_btn.clicked.connect(self.main_window._toggle_maximize)
+        self.main_window._maximize_btn.clicked.connect(lambda: QTimer.singleShot(0, self.main_window._toggle_maximize))
 
-        # 快捷按钮：关闭
-        close_btn = QToolButton()
-        close_btn.setObjectName("LimsHeaderMenuButton")
-        close_btn.setText("✕")
+        # 快捷按钮：关闭（hover 时红色背景）
+        close_btn = TitleBarButton("✕", hover_bg="rgba(232, 17, 35, 0.9)")
         close_btn.setToolTip("关闭应用")
         close_btn.clicked.connect(self.main_window.close)
 
-        # 右侧快捷操作区
-        actions_layout.addWidget(fullscreen_btn)
+        # 右侧快捷操作区（─ □ ✕）
+        minimize_btn = TitleBarButton("─")
+        minimize_btn.setToolTip("最小化窗口")
+        minimize_btn.clicked.connect(lambda: QTimer.singleShot(0, self.main_window.showMinimized))
         actions_layout.addWidget(minimize_btn)
         actions_layout.addWidget(self.main_window._maximize_btn)
         actions_layout.addWidget(close_btn)

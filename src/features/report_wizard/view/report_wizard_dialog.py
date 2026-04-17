@@ -15,7 +15,6 @@ from PyQt5.QtWidgets import (
 from src.core.logger import logger
 from src.features.report_wizard.view.body_content_page import BodyContentPage
 from src.features.report_wizard.view.header_info_page import HeaderInfoPage
-from src.features.report_wizard.view.product_spec_tables_page import TestSpecTablesPage
 
 
 class ReportWizardDialog(QDialog):
@@ -84,6 +83,8 @@ class ReportWizardDialog(QDialog):
         self.update_navigation_buttons()
 
     def add_test_spec_tables_page(self):
+        from src.features.report_wizard.view.product_spec_tables_page import TestSpecTablesPage
+
         document_path = None
         if len(self.pages) > 1 and hasattr(self.pages[1], "get_document_path"):
             document_path = self.pages[1].get_document_path()

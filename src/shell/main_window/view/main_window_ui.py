@@ -461,10 +461,10 @@ class MainWindow(QMainWindow):
         return False
 
     def _set_window_icon(self):
-        """设置窗口图标"""
+        """设置窗口图标（兼容开发和打包模式）"""
         try:
-            icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "app", "resources", "icons", "app_icon.ico")
-            icon_path = os.path.normpath(icon_path)
+            from src.core.path_utils import get_resource_path
+            icon_path = get_resource_path("resources", "icons", "app_icon.png")
             if os.path.exists(icon_path):
                 self.setWindowIcon(QIcon(icon_path))
                 logger.debug(f"成功设置窗口图标: {icon_path}")
@@ -478,6 +478,11 @@ class MainWindow(QMainWindow):
 
     def changeEvent(self, event):
         self._chrome_manager.handle_window_state_change(event)
+        if event.type() == event.WindowStateChange and hasattr(self, '_maximize_btn') and self._maximize_btn:
+            if self.isMaximized():
+                self._maximize_btn.icon = "❐"
+            else:
+                self._maximize_btn.icon = "□"
         super().changeEvent(event)
 
     def resizeEvent(self, event):

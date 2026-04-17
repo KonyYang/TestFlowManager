@@ -249,6 +249,9 @@ class LTRFormDialogBase(QDialog):
     def _collect_form_data(self) -> Dict[str, Any]:
         """收集表单数据"""
         logger.debug("开始收集表单数据")
+        # 延迟导入 EnglishDateEdit，与 _populate_data() 保持一致
+        EnglishDateEdit, _, _ = _get_english_date_edit_components()
+
         saved_data = {}
         for row_index in range(self.info_table.rowCount()):
             key = self.table_items_data[row_index]['key']

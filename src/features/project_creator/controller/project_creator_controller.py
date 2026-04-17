@@ -19,7 +19,7 @@ from src.features.project_creator.service.ltr_project_integration_service import
 # 添加Matrix会话工厂
 from src.features.matrix.service.matrix_session_factory import MatrixSessionFactory
 # 添加事件调度器
-from src.core.event_dispatcher import event_dispatcher
+from src.core.event_dispatcher import event_dispatcher, EventTopics
 from src.core.project_context import ProjectContext
 from src.shell.main_window.coordinator.project_session_coordinator import ProjectSessionCoordinator
 from src.core.project_session_service import project_session_service

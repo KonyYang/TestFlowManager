@@ -89,23 +89,7 @@ QLabel#LimsPageSubtitle {
     padding-left: 6px;
 }
 
-/* ==================== 顶栏按钮样式 ==================== */
-QToolButton#LimsHeaderMenuButton {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 18px;
-    border: none;
-    padding: 10px 16px;
-    background: transparent;
-    border-radius: 6px;
-}
-QToolButton#LimsHeaderMenuButton:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-}
-QToolButton#LimsHeaderMenuButton::menu-indicator {
-    image: none;
-    width: 0px;
-}
+/* 顶栏按钮已改为自绘 TitleBarButton，无需 QSS 样式 */
 
 /* ==================== 状态栏样式 ==================== */
 QStatusBar {

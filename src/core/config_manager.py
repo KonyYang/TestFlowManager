@@ -127,48 +127,37 @@ class ConfigManager:
         if getattr(sys, 'frozen', False):
             # 如果是可执行文件模式，优先从生产环境路径加载配置
             production_config_path = os.path.join("D:", "TestFlowManager", relative_path)
-            # print(f"[DEBUG] Frozen mode, checking production config path: {production_config_path}")
             if os.path.exists(production_config_path):
-                # print(f"[DEBUG] Using production config path: {production_config_path}")
                 return production_config_path
-            
+
             # 如果生产环境路径不存在，则从可执行文件所在目录加载配置
             base_path = os.path.dirname(sys.executable)
-            # print(f"[DEBUG] Frozen mode, using executable directory: {base_path}")
-            
+
             # 在可执行文件模式下，检查生成环境路径
             generated_env_path = os.path.join(base_path, relative_path)
-            # print(f"[DEBUG] Checking generated environment path: {generated_env_path}")
             if os.path.exists(generated_env_path):
-                # print(f"[DEBUG] Using generated environment path: {generated_env_path}")
                 return generated_env_path
             else:
                 # 如果直接路径不存在，尝试在config子目录中查找
                 config_path = os.path.join(base_path, "config", os.path.basename(relative_path))
-                # print(f"[DEBUG] Checking config path: {config_path}")
                 if os.path.exists(config_path):
-                    # print(f"[DEBUG] Using config path: {config_path}")
                     return config_path
         else:
             # 如果是开发模式，需要检查当前工作目录来确定正确的基路径
             base_path = os.path.abspath(".")
-            # print(f"[DEBUG] Development mode, using current directory: {base_path}")
-            
+
             # 检查当前目录是否为src/app目录
             if os.path.basename(base_path) == "app" and os.path.basename(os.path.dirname(base_path)) == "src":
                 # 如果当前在src/app目录下，需要向上两级到达项目根目录
                 project_root = os.path.dirname(os.path.dirname(base_path))
                 result_path = os.path.join(project_root, "src", "app", relative_path)
-                # print(f"[DEBUG] Development mode resource path from src/app: {result_path}")
                 return result_path
             else:
                 # 否则假设当前在项目根目录
                 result_path = os.path.join(base_path, "src", "app", relative_path)
-                # print(f"[DEBUG] Development mode resource path: {result_path}")
                 return result_path
 
         result_path = os.path.join(base_path, relative_path)
-        # print(f"[DEBUG] Final resource path: {result_path}")
         return result_path
 
     def get_main_config_path(self) -> str:

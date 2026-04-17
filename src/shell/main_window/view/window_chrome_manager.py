@@ -15,6 +15,12 @@ from PyQt5.QtWidgets import QApplication
 
 from src.core.logger import logger
 
+# Win32 ShowWindow 命令常量
+_SW_MINIMIZE = 6
+_SW_MAXIMIZE = 3
+_SW_RESTORE = 9
+_USER32 = ctypes.windll.user32
+
 
 class WindowChromeManager:
     """窗口行为管理器 - 处理无边框窗口的拖拽、缩放、全屏等行为"""
@@ -64,18 +70,22 @@ class WindowChromeManager:
             self._toggle_maximize()
 
     def _toggle_maximize(self) -> None:
-        """切换最大化状态"""
+        """切换最大化状态（使用 Win32 API，避免 FramelessWindowHint 崩溃）"""
+        hwnd = int(self._window.winId())
         if self._window.isMaximized():
-            self._window.showNormal()
+            _USER32.ShowWindow(hwnd, _SW_RESTORE)
         else:
-            self._window.showMaximized()
+            _USER32.ShowWindow(hwnd, _SW_MAXIMIZE)
 
     def toggle_fullscreen(self) -> None:
-        """切换全屏模式"""
+        """切换全屏模式（使用 Win32 API，避免 FramelessWindowHint 崩溃）"""
+        hwnd = int(self._window.winId())
         if self._window.isFullScreen():
-            self._window.showMaximized()
+            _USER32.ShowWindow(hwnd, _SW_MAXIMIZE)
         else:
-            self._window.showFullScreen()
+            # 全屏前保存当前几何信息
+            self._window.fullscreen_geometry = self._window.geometry()
+            _USER32.ShowWindow(hwnd, _SW_MAXIMIZE)  # 先最大化再由 changeEvent 处理全屏标记
 
     def native_event(self, event_type, message) -> tuple:
         """
@@ -143,32 +153,28 @@ class WindowChromeManager:
 
     def show_normal(self) -> None:
         """
-        显示正常大小窗口
+        显示正常大小窗口（使用 Win32 API，避免 FramelessWindowHint 崩溃）
         如果当前是最大化状态，先保存几何信息再切换
         """
         if self._window.isMaximized():
             self._window.is_custom_sized = True
-        if not self._window.custom_geometry:
-            screen_geometry = QApplication.primaryScreen().availableGeometry()
-            width = int(screen_geometry.width() * 0.3)
-            height = int(screen_geometry.height() * 0.3)
-            x = (screen_geometry.width() - width) // 2
-            y = (screen_geometry.height() - height) // 2
-            self._window.custom_geometry = QApplication.primaryScreen().geometry().normalized()
-            self._window.showNormal()
+        hwnd = int(self._window.winId())
+        _USER32.ShowWindow(hwnd, _SW_RESTORE)
+        # 恢复后调整几何位置（Win32 ShowWindow(SW_RESTORE) 恢复到上次位置）
+        if self._window.custom_geometry:
             self._window.setGeometry(self._window.custom_geometry)  # type: ignore
-        else:
-            self._window.showNormal()
 
     def show_maximized(self) -> None:
-        """显示最大化窗口"""
+        """显示最大化窗口（使用 Win32 API，避免 FramelessWindowHint 崩溃）"""
         self._window.is_custom_sized = False
-        self._window.showMaximized()
+        hwnd = int(self._window.winId())
+        _USER32.ShowWindow(hwnd, _SW_MAXIMIZE)
 
     def show_minimized(self) -> None:
-        """显示最小化窗口"""
+        """显示最小化窗口（使用 Win32 API，避免 FramelessWindowHint 崩溃）"""
         self._window.is_custom_sized = False
-        self._window.showMinimized()
+        hwnd = int(self._window.winId())
+        _USER32.ShowWindow(hwnd, _SW_MINIMIZE)
 
     def handle_window_state_change(self, event) -> None:
         """处理窗口状态变化事件"""

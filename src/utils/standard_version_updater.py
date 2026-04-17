@@ -352,17 +352,18 @@ def update_test_method_versions(matrix_data: list) -> dict:
         # 获取测试标准文件路径
         standard_file_path = config_manager.get_standard_file("standard_version_info_file")
         
-        # 检查是否在可执行文件环境中，如果是，则尝试使用相对路径
+        # 检查是否在可执行文件环境中，如果是，则尝试使用相对路径降级
         if getattr(sys, 'frozen', False):
-            # 在可执行文件环境中，尝试使用相对路径
             if standard_file_path and not os.path.exists(standard_file_path):
-                # 尝试在可执行文件目录下查找标准文件
                 exe_dir = os.path.dirname(sys.executable)
-                relative_standard_file_path = os.path.join(exe_dir, standard_file_path)
-                if os.path.exists(relative_standard_file_path):
-                    standard_file_path = relative_standard_file_path
+                # 使用 basename 提取文件名，避免绝对路径导致 join 无效
+                filename = os.path.basename(standard_file_path)
+                candidate = os.path.join(exe_dir, filename)
+                if os.path.exists(candidate):
+                    standard_file_path = candidate
+                    logger.info(f"在exe目录下找到标准文件: {candidate}")
                 else:
-                    logger.warning(f"相对路径下也未找到标准文件: {relative_standard_file_path}")
+                    logger.warning(f"exe目录下也未找到标准文件: {candidate}")
         
         if not standard_file_path:
             # 再次尝试获取，确保没有遗漏

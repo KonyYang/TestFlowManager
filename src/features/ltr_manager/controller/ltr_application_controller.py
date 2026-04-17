@@ -41,62 +41,6 @@ class LTRApplicationController:
         self.selected_filename = None
 
 
-    def handle_word_application(self, doc_filepath: str) -> bool:
-        """
-        处理Word格式的LTR申请单
-
-        Args:
-            doc_filepath: Word文档路径
-
-        Returns:
-            是否处理成功
-        """
-        try:
-            logger.info(f"Handling Word application: {doc_filepath}")
-
-            # 处理Word申请单
-            self.application_data = self.service.process_word_application(doc_filepath)
-
-            if self.application_data.status == "failed":
-                logger.error(f"Failed to process Word application: {self.application_data.error_message}")
-                if self.parent_view:
-                    QMessageBox.critical(
-                        self.parent_view,
-                        "错误",
-                        f"处理申请单失败: {self.application_data.error_message}"
-                    )
-                return False
-
-            logger.info("Successfully processed Word application")
-            return True
-
-        except Exception as e:
-            logger.error(f"Error handling Word application: {e}")
-            if self.parent_view:
-                QMessageBox.critical(self.parent_view, "错误", f"处理申请单时出错: {str(e)}")
-            return False
-
-    def handle_new_application(self) -> bool:
-        """
-        处理新的空白LTR申请单
-
-        Returns:
-            是否处理成功
-        """
-        try:
-            logger.info("Handling new blank LTR application")
-            # 创建新的空白申请单
-            self.application_data = self.service.create_new_application()
-
-            logger.info("Successfully created new blank LTR application")
-            return True
-
-        except Exception as e:
-            logger.error(f"Error handling new application: {e}")
-            if self.parent_view:
-                QMessageBox.critical(self.parent_view, "错误", f"创建新申请单时出错: {str(e)}")
-            return False
-
     def show_application_dialog(self, temp_folder_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
         显示LTR申请单对话框
@@ -117,21 +61,12 @@ class LTRApplicationController:
                 'data': self.application_data.to_dict()
             }
 
-            # 获取从Word文档提取的完整数据（如果存在的话）
-            # 如果application_data是从Word文档处理得到的，它应该包含原始的提取数据
-            extracted_word_data = None
-            if hasattr(self.application_data, 'file_path') and self.application_data.file_path:
-                # 如果有文件路径，重新处理一次以获取完整的提取数据
-                try:
-                    # 使用extractor提取完整的数据
-                    from src.features.ltr_manager.service.application_processing.data_extractor import LTRApplicationDataExtractor
-                    extractor = LTRApplicationDataExtractor()
-                    extracted_word_data = extractor.extract_application_data(self.application_data.file_path)
-                    logger.debug(f"从Word文档重新提取的数据: {extracted_word_data}")
-                except Exception as e:
-                    logger.warning(f"重新提取Word文档数据失败: {e}")
-                    # 如果重新提取失败，使用当前application_data中的数据
-                    extracted_word_data = self.application_data.to_dict()
+            # 直接使用已有的 application_data，避免重复解析 Word 文档。
+            # 上游（ProjectCreatorController / EmailExtractorController）已通过
+            # set_application_data() 传入完整的解析结果，无需再次读取同一文件。
+            extracted_word_data = self.application_data.to_dict() if self.application_data else None
+            if extracted_word_data:
+                logger.debug(f"复用已有的 application_data (file_path={getattr(self.application_data, 'file_path', None)})")
 
             # 创建并显示对话框，传递临时文件夹路径和提取的Word文档数据
             dialog = LTRApplicationDialog(dialog_data, self.parent_view, self, temp_folder_path, extracted_word_data)

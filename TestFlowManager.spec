@@ -21,6 +21,11 @@ current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 datas = [
     # 包含配置文件到config目录
     (os.path.join(current_dir, 'src', 'app', 'config'), 'config'),
+    # 包含资源文件（图标等）
+    (os.path.join(current_dir, 'src', 'app', 'resources'), 'resources'),
+    # 包含内容编辑器配置
+    (os.path.join(current_dir, 'src', 'features', 'content_editor', 'service',
+                   'body_content_config.json'), 'content_editor_service'),
 ]
 
 # 收集其他可能需要的数据文件
@@ -47,6 +52,11 @@ a = Analysis(
         *collect_submodules('openpyxl'),
         'extract_msg',
         *collect_submodules('docx'),
+        # src.utils 懒加载模块（必须显式声明，PyInstaller 无法检测 __getattr__ 动态导入）
+        *collect_submodules('src.utils'),
+        # 核心业务模块
+        'src.core.path_utils',
+        'src.core.shutdown_registry',
     ],
     hookspath=[],
     hooksconfig={},
@@ -108,7 +118,7 @@ exe = EXE(
     upx_exclude=[],
     console=False,
     disable_windowed_traceback=False,
-    icon=os.path.join(current_dir, 'src', 'app', 'resources', 'icons', 'app_icon.ico') if os.path.exists(os.path.join(current_dir, 'src', 'app', 'resources', 'icons', 'app_icon.ico')) else None
+    icon=os.path.join(current_dir, 'src', 'app', 'resources', 'icons', 'app_icon.png') if os.path.exists(os.path.join(current_dir, 'src', 'app', 'resources', 'icons', 'app_icon.png')) else None
 )
 
 # 二进制文件、数据文件等放到同目录下（而非嵌入 exe）
