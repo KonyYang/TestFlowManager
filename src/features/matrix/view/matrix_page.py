@@ -9,6 +9,7 @@ from src.core.logger import logger
 from src.core.project_context import ProjectContext, resolve_project_data_file_path
 from src.features.matrix.controller.matrix_controller import MatrixController
 from src.features.matrix.view.components.matrix_context_menus import MatrixContextMenus
+from src.features.matrix.view.components.matrix_table_styles import MATRIX_TABLE_STYLESHEET
 from src.features.matrix.view.components.matrix_toolbar import MatrixToolbar
 from src.features.matrix.view.handlers.matrix_event_handlers import MatrixEventHandlers
 from src.features.matrix.view.managers.data_sync_manager import DataSyncManager
@@ -349,43 +350,7 @@ class MatrixPage(QWidget):
 
         # 创建并配置表格控件
         self.matrix_table_widget = QTableWidget()
-        self.matrix_table_widget.setStyleSheet(
-            """
-            QTableWidget {
-                background-color: #ffffff;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                gridline-color: #edf2f7;
-                selection-background-color: #bee3f8;
-                font-size: 16px;
-            }
-            QTableWidget::item {
-                padding: 8px 12px;
-                border-bottom: 1px solid #edf2f7;
-            }
-            QTableWidget::item:alternate {
-                background-color: #f7fafc;
-            }
-            QTableWidget::item:selected {
-                background-color: #bee3f8;
-                color: #1a3a5c;
-            }
-            QHeaderView::section {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #f7fafc, stop:1 #edf2f7);
-                color: #4a5568;
-                padding: 12px;
-                border: none;
-                border-bottom: 2px solid #cbd5e0;
-                font-weight: bold;
-                font-size: 16px;
-            }
-            QHeaderView::section:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #edf2f7, stop:1 #e2e8f0);
-            }
-            """
-        )
+        self.matrix_table_widget.setStyleSheet(MATRIX_TABLE_STYLESHEET)
         # 配置表头行为
         self.matrix_table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         self.matrix_table_widget.verticalHeader().setSectionResizeMode(QHeaderView.Interactive)

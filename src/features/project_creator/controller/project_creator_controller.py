@@ -17,15 +17,14 @@ from src.features.email_extractor.controller.email_extractor_controller import E
 # 添加LTR项目集成服务
 from src.features.project_creator.service.ltr_project_integration_service import LTRProjectIntegrationService
 # 添加Matrix会话工厂
-from src.features.matrix.service.matrix_session_factory import MatrixSessionFactory
+from src.features.matrix.service.session.matrix_session_factory import MatrixSessionFactory
 # 添加事件调度器
 from src.core.event_dispatcher import event_dispatcher, EventTopics
 from src.core.project_context import ProjectContext
-from src.shell.main_window.coordinator.project_session_coordinator import ProjectSessionCoordinator
-from src.core.project_session_service import project_session_service
+from src.app.composition.project_session_application_service import project_session_app_service
 
 if TYPE_CHECKING:
-    from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
+    from src.features.matrix.service.session.matrix_session_registry import MatrixSessionRegistry
 
 
 class ProjectCreatorController:
@@ -89,10 +88,9 @@ class ProjectCreatorController:
             self.ltr_integration_service,
             self.matrix_project_controller,
         )
-        self.project_session_coordinator = ProjectSessionCoordinator(
-            parent_view,
-            matrix_project_controller=self.matrix_project_controller,
-        )
+        # S1-3: 移除直接构造的 ProjectSessionCoordinator。
+        # 项目会话副作用统一通过 project_session_app_service (S1-2) 编排，
+        # 不再由 feature controller 本地兜底。
         # 添加标志以避免重复订阅事件
         self._event_subscribed = False
         # 订阅LTR申请处理完成事件
@@ -509,14 +507,6 @@ class ProjectCreatorController:
         if self.parent_view and hasattr(self.parent_view, "set_matrix_project_context"):
             self.parent_view.set_matrix_project_context(project_context)
 
-    def _should_apply_session_side_effects_locally(self) -> bool:
-        """若主窗口主控制器不存在，则由当前控制器兜底编排会话副作用。"""
-        return not (
-            self.parent_view
-            and hasattr(self.parent_view, "controller")
-            and self.parent_view.controller is not None
-        )
-        
     def _on_ltr_application_processed(self, data):
         """
         处理LTR申请单处理完成事件，打开Matrix编辑器窗口
@@ -560,21 +550,12 @@ class ProjectCreatorController:
                 logger.warning("No project path or DL number provided")
                 return
 
-            apply_side_effects_locally = self._should_apply_session_side_effects_locally()
             matrix_session_mode = getattr(self, "matrix_session_mode", "shared")
 
-            if apply_side_effects_locally:
-                self.project_session_coordinator.apply_project_context(
-                    session_result.project_context,
-                    status_message=f"当前项目: {session_result.dl_number}",
-                    trigger_matrix_auto_import=True,
-                )
-
-            # When the main window controller exists, project-open side effects must be centralized
-            # in `project.opened` consumption -> ProjectSessionCoordinator. For the isolated matrix
-            # pilot entry, the created Matrix session is not the shared mainline workspace, so we
-            # still apply the Matrix-side project context locally.
-            if apply_side_effects_locally or matrix_session_mode == "isolated":
+            # S1-3: 项目会话副作用统一通过 app_service 编排（S1-2 入口），
+            # 不再本地构造 Coordinator 兜底。
+            # Matrix-side context 在 isolated 模式下仍需本地设置（非共享工作区）。
+            if matrix_session_mode == "isolated":
                 self._apply_matrix_project_context(session_result.project_context)
                 if (
                     self.parent_view
@@ -623,14 +604,12 @@ class ProjectCreatorController:
         try:
             logger.info(f"Triggering Matrix update after project creation: {project_path}")
             project_context = ProjectContext.from_project_path(project_path)
-            project_session_service.apply_project_context(project_context)
+            # S1-2: 统一入口完成状态写入 + 事件派发 + UI 副作用编排
+            project_session_app_service.activate_existing_context(
+                project_context,
+                trigger_matrix_auto_import=False,  # Matrix import 由事件消费者处理
+            )
 
-            if self._should_apply_session_side_effects_locally():
-                self.project_session_coordinator.apply_project_context(
-                    project_context,
-                    trigger_matrix_auto_import=True,
-                )
-                
         except Exception as e:
             logger.error(f"Failed to trigger Matrix update after project creation: {e}", exc_info=True)
     

@@ -595,7 +595,7 @@ After:
 
 - **架构基线**: [architecture/refactor_baseline.md](./refactor_baseline.md)
 - **壳层重构**: [completed/step1-6_shell_refactoring.md](./step1-6_shell_refactoring.md)
-- **任务看板**: [tasks/README.md](../tasks/README.md)
+- **任务看板**: [tasks/README.md](README.md)
 
 ---
 

@@ -8,16 +8,16 @@ single point for later page/ProjectContext integration.
 from typing import Optional
 
 from src.features.matrix.controller.matrix_project_controller import MatrixProjectController
-from src.features.matrix.service.matrix_session_components import (
+from src.features.matrix.service.session.matrix_session_components import (
     MatrixSessionComponents,
 )
-from src.features.matrix.service.matrix_session_factory import MatrixSessionFactory
-from src.features.matrix.service.matrix_session_manager import MatrixSessionManager
-from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
-from src.features.matrix.service.matrix_session_orchestrator import MatrixSessionOrchestrator
-from src.features.matrix.service.matrix_session_debug_facade import MatrixSessionDebugFacade
-from src.features.matrix.service.matrix_session_entry_facade import MatrixSessionEntryFacade
-from src.features.matrix.service.matrix_session_entry_policy import (
+from src.features.matrix.service.session.matrix_session_factory import MatrixSessionFactory
+from src.features.matrix.service.session.matrix_session_manager import MatrixSessionManager
+from src.features.matrix.service.session.matrix_session_registry import MatrixSessionRegistry
+from src.features.matrix.service.session.matrix_session_orchestrator import MatrixSessionOrchestrator
+from src.features.matrix.service.session.matrix_session_debug_facade import MatrixSessionDebugFacade
+from src.features.matrix.service.session.matrix_session_entry_facade import MatrixSessionEntryFacade
+from src.features.matrix.service.session.matrix_session_entry_policy import (
     MatrixSessionEntryPolicyTable,
 )
 

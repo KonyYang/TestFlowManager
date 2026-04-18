@@ -19,7 +19,7 @@ current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 # 定义要包含的配置文件和资源文件
 datas = [
-    # 包含配置文件到config目录
+    # 包含配置文件到 _internal/config 目录（打包时嵌入的资源，作为 fallback）
     (os.path.join(current_dir, 'src', 'app', 'config'), 'config'),
     # 包含资源文件（图标等）
     (os.path.join(current_dir, 'src', 'app', 'resources'), 'resources'),
@@ -118,10 +118,10 @@ exe = EXE(
     upx_exclude=[],
     console=False,
     disable_windowed_traceback=False,
-    icon=os.path.join(current_dir, 'src', 'app', 'resources', 'icons', 'app_icon.png') if os.path.exists(os.path.join(current_dir, 'src', 'app', 'resources', 'icons', 'app_icon.png')) else None
+    icon=os.path.join(current_dir, 'src', 'app', 'resources', 'icons', 'app_icon.ico') if os.path.exists(os.path.join(current_dir, 'src', 'app', 'resources', 'icons', 'app_icon.ico')) else None
 )
 
-# 二进制文件、数据文件等放到同目录下（而非嵌入 exe）
+# 二进制文件、数据文件等放到 TestFlowManager 目录下
 coll = COLLECT(
     exe,
     a.binaries,
@@ -130,5 +130,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='TestFlowManager',
+    name='TestFlowManager',  # ← 恢复为 'TestFlowManager'
 )

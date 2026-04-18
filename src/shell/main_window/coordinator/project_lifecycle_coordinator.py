@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 from src.core.logger import logger
 from src.core.project_context import ProjectContext
-from src.core.project_session_service import project_session_service
+from src.app.composition.project_session_application_service import project_session_app_service
 from src.domain.project.project_initialization_service import ProjectInitializationService, ProjectInitializationResult
 from src.features.project_creator.view import ProjectInfoDialog
 
@@ -68,9 +68,11 @@ class ProjectLifecycleCoordinator:
                 self._show_basic_info_dialog(project_result.project_data, project_result.json_file_path)
                 project_result = self.project_initialization_service.prepare_project(project_path)
 
-            # 通过事件系统派发项目打开事件
-            # 项目打开的副作用由事件消费者（MainWindowController）统一处理
-            project_session_service.apply_project_context(project_result.project_context)
+            # 通过统一入口完成项目打开（S1-2: ProjectSessionApplicationService）
+            project_session_app_service.open_project(
+                project_path,
+                dl_number=project_result.project_context.dl_number,
+            )
 
             logger.info(f"LifecycleCoordinator: Project opened successfully: {project_path}")
             return True

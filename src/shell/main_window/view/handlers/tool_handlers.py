@@ -41,7 +41,7 @@ class ToolActionHandlers:
         """Pilot: 打开隔离 Matrix 预览 session"""
         logger.debug("Open isolated matrix preview pilot action triggered")
         if self._main_window._workspace_facade:
-            session_id = self._main_window._workspace_facade.open_preview_pilot()
+            session_id = self._main_window._workspace_facade.session.open_preview_pilot()
             if session_id:
                 self._update_status()
 
@@ -49,7 +49,7 @@ class ToolActionHandlers:
         """Pilot: 关闭隔离 Matrix 预览 session"""
         logger.debug("Close isolated matrix preview pilot action triggered")
         if self._main_window._workspace_facade:
-            if self._main_window._workspace_facade.close_preview_pilot():
+            if self._main_window._workspace_facade.session.close_preview_pilot():
                 self._update_status()
 
     def _update_status(self) -> None:

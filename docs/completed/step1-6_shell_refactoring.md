@@ -400,7 +400,7 @@ assert hasattr(controller._facade, 'ensure_preview_session_manager')
 ## 🔗 相关文档
 
 - **架构基线**: [architecture/refactor_baseline.md](./refactor_baseline.md)
-- **任务看板**: [tasks/README.md](../tasks/README.md)
+- **任务看板**: [tasks/README.md](README.md)
 - **冒烟测试指南**: [guides/smoke_testing_guide.md](../guides/smoke_testing_guide.md)
 
 ---

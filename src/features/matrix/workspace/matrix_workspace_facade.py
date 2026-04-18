@@ -6,12 +6,8 @@ from typing import Mapping, Optional, TYPE_CHECKING, Any, Tuple
 from PyQt5.QtWidgets import QWidget
 
 from src.core.logger import logger
-from src.features.matrix.service.matrix_session_entry_policy import MatrixSessionEntryPolicyTable
-from src.features.matrix.service.matrix_session_manager import MatrixSessionManager
-from src.features.matrix.service.matrix_session_orchestrator import MatrixSessionOrchestrator
-from src.features.matrix.service.matrix_session_debug_facade import MatrixSessionDebugFacade
-from src.features.matrix.service.matrix_session_entry_facade import MatrixSessionEntryFacade
-from src.features.matrix.service.matrix_session_registry import MatrixSessionRegistry
+from src.features.matrix.workspace.matrix_session_facade import MatrixSessionFacade
+from src.features.matrix.service.session.matrix_session_manager import MatrixSessionManager
 from src.features.matrix.workspace.matrix_workspace_coordinator import MatrixWorkspaceCoordinator
 from src.core.shutdown_registry import shutdown_registry
 
@@ -35,41 +31,28 @@ class MatrixWorkspaceFacade:
         self,
         parent_view: Optional[QWidget],
         matrix_controller: Optional = None,
-        matrix_session_registry: Optional[MatrixSessionRegistry] = None,
-        matrix_session_entry_policies: Optional[MatrixSessionEntryPolicyTable] = None,
-        matrix_session_manager: Optional[MatrixSessionManager] = None,
-        matrix_session_orchestrator: Optional[MatrixSessionOrchestrator] = None,
-        matrix_session_debug_facade: Optional[MatrixSessionDebugFacade] = None,
-        matrix_session_entry_facade: Optional[MatrixSessionEntryFacade] = None,
+        matrix_session_facade: Optional[MatrixSessionFacade] = None,
         matrix_workspace_coordinator: Optional[MatrixWorkspaceCoordinator] = None,
     ):
         self.parent_view = parent_view
         self._matrix_controller = matrix_controller
         self._matrix_page = None  # MatrixPage 引用，由 facade 自己创建并持有
-        self.matrix_session_registry = matrix_session_registry or MatrixSessionRegistry()
-        self.matrix_session_entry_policies = matrix_session_entry_policies or MatrixSessionEntryPolicyTable()
-        self.matrix_session_manager = matrix_session_manager or MatrixSessionManager(
+        
+        # Step 1.x: Session 职责委托给独立的 SessionFacade
+        self.matrix_session_facade = matrix_session_facade or MatrixSessionFacade(
             parent_view=self.parent_view,
-            registry=self.matrix_session_registry,
         )
-        self.matrix_session_orchestrator = matrix_session_orchestrator or MatrixSessionOrchestrator(self.matrix_session_manager)
-        self.matrix_session_debug_facade = matrix_session_debug_facade or MatrixSessionDebugFacade(
-            orchestrator=self.matrix_session_orchestrator,
-            entry_policies=self.matrix_session_entry_policies,
-        )
-        self.matrix_session_entry_facade = matrix_session_entry_facade or MatrixSessionEntryFacade(
-            entry_policies=self.matrix_session_entry_policies,
-        )
+        
+        # Workspace 协调器（保留 page visibility 等 workspace 特有逻辑）
         self.matrix_workspace_coordinator = matrix_workspace_coordinator or MatrixWorkspaceCoordinator(
             parent_view=self.parent_view,
-            matrix_session_registry=self.matrix_session_registry,
-            matrix_session_manager=self.matrix_session_manager,
-            matrix_session_orchestrator=self.matrix_session_orchestrator,
-            matrix_session_debug_facade=self.matrix_session_debug_facade,
-            matrix_session_entry_facade=self.matrix_session_entry_facade,
-            matrix_session_entry_policies=self.matrix_session_entry_policies,
+            matrix_session_registry=self.matrix_session_facade.matrix_session_registry,
+            matrix_session_manager=self.matrix_session_facade.matrix_session_manager,
+            matrix_session_orchestrator=self.matrix_session_facade.matrix_session_orchestrator,
+            matrix_session_debug_facade=self.matrix_session_facade.matrix_session_debug_facade,
+            matrix_session_entry_facade=self.matrix_session_facade.matrix_session_entry_facade,
+            matrix_session_entry_policies=self.matrix_session_facade.matrix_session_entry_policies,
         )
-        self._shared_session = None
         
         # 注册清理钩子
         shutdown_registry.register(
@@ -79,142 +62,25 @@ class MatrixWorkspaceFacade:
         )
 
     def assemble_shared_session(self, session_id: str, entry_name: str):
-        """绑定视图并组装共享 session"""
-        if self.parent_view:
-            self.matrix_workspace_coordinator.bind_parent_view(self.parent_view)
-        self._shared_session = self.matrix_workspace_coordinator.assemble_shared_session(
-            parent_view=self.parent_view,
-            session_id=session_id,
-            entry_name=entry_name,
-        )
-        return self._shared_session
+        """绑定视图并组装共享 session（委托给 SessionFacade）"""
+        return self.matrix_session_facade.assemble_shared_session(session_id, entry_name)
     
     def _cleanup_all_sessions(self) -> None:
-        """清理所有 Matrix sessions（由 shutdown_registry 调用）"""
-        # 清除页面绑定
-        if self.matrix_session_manager:
-            cleared = None
-            if hasattr(self.matrix_session_manager, "clear_page_session_bindings"):
-                cleared = self.matrix_session_manager.clear_page_session_bindings()
-            if cleared:
-                logger.info(f"Cleared page bindings: {cleared}")
-            
-            # 关闭非默认 sessions
-            closed = None
-            if hasattr(self.matrix_session_manager, "close_by_mode"):
-                closed = self.matrix_session_manager.close_by_mode("isolated")
-            if closed:
-                logger.info(f"Closed isolated sessions: {closed}")
+        """清理所有 Matrix sessions（由 shutdown_registry 调用，委托给 SessionFacade）"""
+        self.matrix_session_facade.cleanup_all_sessions()
 
     def ensure_preview_session_manager(self) -> MatrixSessionManager:
         """提供预览会话管理器（延迟访问点）"""
-        return self.matrix_workspace_coordinator.matrix_session_manager
+        return self.matrix_session_facade.matrix_session_manager
 
-    # =========================================================================
-    # Pilot Flag Checks (Facade-level)
-    # =========================================================================
-    # 这些方法将 session entry policy 知识封装在 facade 内部，
-    # 避免 shell 代码直接导入 MatrixSessionEntryFacade。
+    @property
+    def session(self) -> MatrixSessionFacade:
+        """访问 Session 子系统
 
-    def is_new_file_pilot_enabled(self, env: Mapping[str, str] | None = None) -> bool:
-        """检查新建文件隔离 session pilot 是否启用"""
-        return self.matrix_workspace_coordinator.is_new_file_pilot_enabled(env)
-
-    def is_preview_pilot_enabled(self, env: Mapping[str, str] | None = None) -> bool:
-        """检查预览隔离 session pilot 是否启用"""
-        return self.matrix_workspace_coordinator.is_preview_pilot_enabled(env)
-
-    def is_debug_commands_enabled(self) -> bool:
-        """检查 debug 命令是否启用（通过环境变量 TFM_ENABLE_DEBUG_COMMANDS）"""
-        value = os.getenv("TFM_ENABLE_DEBUG_COMMANDS", "")
-        return value.strip().lower() in {"1", "true", "yes", "on"}
-
-    # =========================================================================
-    # Preview/Debug Session Operations (Facade-level)
-    # =========================================================================
-
-    def open_preview_session(self, session_id: str, *, entry_name: str = "preview"):
-        """打开隔离预览 session"""
-        return self.matrix_workspace_coordinator.open_preview_session(
-            session_id,
-            entry_name=entry_name,
-        )
-
-    def close_preview_session(self, session_id: str) -> bool:
-        """关闭隔离预览 session"""
-        return self.matrix_workspace_coordinator.close_preview_session(session_id)
-
-    def open_debug_preview_session(self, session_id: str | None = None) -> Tuple[str | None, Any]:
-        """打开 debug 预览 session，返回 (resolved_session_id, session)"""
-        return self.matrix_workspace_coordinator.open_debug_preview_session(
-            session_id=session_id
-        )
-
-    def close_debug_preview_session(self, session_id: str | None = None) -> tuple[bool, str | None]:
-        """关闭 debug 预览 session，返回 (closed, target_id)"""
-        return self.matrix_workspace_coordinator.close_debug_preview_session(
-            session_id=session_id
-        )
-
-    def switch_preview_session(self, session_id: str):
-        """切换到指定预览 session"""
-        return self.matrix_workspace_coordinator.switch_preview_session(session_id)
-
-    def resolve_preview_pilot_session_id(self, *, pilot_enabled: bool) -> str | None:
-        """根据 pilot 启用状态解析预览 session ID"""
-        return self.matrix_workspace_coordinator.resolve_preview_pilot_session_id(
-            pilot_enabled=pilot_enabled
-        )
-
-    def resolve_new_file_session_config(self, *, pilot_enabled: bool):
-        """解析新建文件的 session 配置"""
-        return self.matrix_workspace_coordinator.resolve_new_file_session_config(
-            pilot_enabled=pilot_enabled
-        )
-
-    # =========================================================================
-    # Debug State and Formatting (Facade-level)
-    # =========================================================================
-
-    def get_debug_state(self, registry_snapshot=None) -> dict:
-        """获取 debug 状态快照"""
-        return self.matrix_workspace_coordinator.get_debug_state(
-            registry_snapshot=registry_snapshot
-        )
-
-    def format_debug_state_status(self, action: str, state: dict) -> str:
-        """格式化 debug 状态为状态栏文本"""
-        return self.matrix_workspace_coordinator.format_debug_state_status(
-            action,
-            state,
-        )
-
-    def format_switch_success(self, session_id: str, entry_name: str, state: dict) -> str:
-        """格式化切换成功消息"""
-        return self.matrix_workspace_coordinator.format_switch_success(
-            session_id,
-            entry_name,
-            state,
-        )
-
-    def format_switch_failed(self, reason: str, session_id: str) -> str:
-        """格式化切换失败消息"""
-        return self.matrix_workspace_coordinator.format_switch_failed(
-            reason,
-            session_id,
-        )
-
-    def get_registry_snapshot(self):
-        """获取 registry 快照（用于 debug state）"""
-        return self.matrix_workspace_coordinator.get_registry_snapshot()
-
-    def activate_session(self, session_id: str) -> bool:
-        """激活指定 session"""
-        return self.matrix_workspace_coordinator.activate_session(session_id)
-
-    def get_active_session_id(self) -> str | None:
-        """获取当前 active session ID"""
-        return self.matrix_workspace_coordinator.get_active_session_id()
+        Shell 通过此属性访问 Pilot/Preview/Debug/Lifecycle 能力，
+        避免在 WorkspaceFacade 上维护冗余透传方法。
+        """
+        return self.matrix_session_facade
 
     # =========================================================================
     # Page Visibility Handlers
@@ -278,7 +144,7 @@ class MatrixWorkspaceFacade:
         if page_id != "matrix.main":
             return False
 
-        manager = self.matrix_session_manager
+        manager = self.matrix_session_facade.matrix_session_manager
         if hasattr(manager, "unbind_page_session"):
             return bool(manager.unbind_page_session(page_id))
         return False
@@ -357,64 +223,12 @@ class MatrixWorkspaceFacade:
             self._matrix_page.initialize_table()
 
     # =========================================================================
-    # Pilot Entry Points (Shell Integration)
+    # Internal: Workspace Session Consistency
     # =========================================================================
-    # 这些方法为 shell (MainWindow) 提供 pilot 功能的入口，
-    # 封装了 session 激活和 workspace 一致性检查的逻辑。
-
-    def open_preview_pilot(self, *, pilot_enabled: bool = True) -> Optional[str]:
-        """
-        打开预览 pilot session。
-
-        Args:
-            pilot_enabled: 是否启用 pilot，默认从环境变量读取
-
-        Returns:
-            session_id 或 None
-        """
-        if pilot_enabled is None:
-            pilot_enabled = self.is_preview_pilot_enabled()
-
-        session_id = self.resolve_preview_pilot_session_id(pilot_enabled=pilot_enabled)
-        if not session_id:
-            return None
-
-        session = self.open_preview_session(session_id, entry_name="preview")
-        matrix_project_controller = getattr(session, "matrix_project_controller", None)
-        if matrix_project_controller and hasattr(matrix_project_controller, "open_matrix_workspace"):
-            matrix_project_controller.open_matrix_workspace()
-        return session_id
-
-    def close_preview_pilot(self, *, pilot_enabled: bool = None) -> bool:
-        """
-        关闭预览 pilot session。
-
-        Args:
-            pilot_enabled: 是否启用 pilot，默认从环境变量读取
-
-        Returns:
-            是否成功关闭
-        """
-        if pilot_enabled is None:
-            pilot_enabled = self.is_preview_pilot_enabled()
-
-        session_id = self.resolve_preview_pilot_session_id(pilot_enabled=pilot_enabled)
-        if not session_id:
-            return False
-
-        active_session_id = self.get_active_session_id()
-        closed = self.close_preview_session(session_id)
-        if not closed:
-            return False
-
-        if active_session_id == session_id:
-            self.activate_session("main:shared")
-
-        return True
 
     def _ensure_workspace_session_consistency(self, page_id: str) -> dict:
         """内部方法：确保 workspace session 与页面绑定一致"""
-        orchestrator = self.matrix_session_orchestrator
+        orchestrator = self.matrix_session_facade.matrix_session_orchestrator
         active_session_id = None
         bound_session_id = None
 
@@ -447,7 +261,7 @@ class MatrixWorkspaceFacade:
 
     def _get_session_binding(self, page_id: str) -> dict:
         """内部方法：获取页面绑定的 session 信息"""
-        manager = self.matrix_session_manager
+        manager = self.matrix_session_facade.matrix_session_manager
         active_session_id = None
         active_entry_name = None
         active_mode = "shared"

@@ -94,7 +94,7 @@ def copy_required_files():
 这是一个独立的Windows应用程序，可以直接运行而无需安装Python。
 
 目录结构说明:
-- TestFlowManager.exe: 主程序文件
+- TestFlowManager_v{{version}}_{{timestamp}}.exe: 主程序文件（带版本号和时闰戳）
 - config/: 配置文件目录
 - Template/: 模板文件目录
 - Projects/: 项目文件目录
@@ -108,7 +108,7 @@ def copy_required_files():
    - 修改实际路径配置（如ltr_file等）
    - 更新密码配置（如ltr_password）
    - 根据使用者不同调整默认值配置（如project_leader）
-3. 双击 TestFlowManager.exe 即可运行程序
+3. 双击 TestFlowManager_v*.exe 即可运行程序
 
 注意事项:
 1. 请勿删除或移动此目录中的任何文件，否则可能导致程序无法正常运行。
@@ -130,11 +130,30 @@ def copy_required_files():
         f.write(readme_content)
     print("创建 README.txt 文件")
     
-    # 创建启动批处理文件
+    # 创建启动批处理文件（自动查找最新的 EXE 文件）
     bat_content = """@echo off
 cd /d %~dp0
-TestFlowManager.exe
-pause
+
+REM 自动查找最新的 TestFlowManager EXE 文件
+for /f "delims=" %%i in ('dir TestFlowManager_v*.exe /b /o-d 2^>nul') do (
+    set "EXE_FILE=%%i"
+    goto :run
+)
+
+REM 如果没有找到带版本号的 EXE，尝试默认的
+if not defined EXE_FILE (
+    if exist TestFlowManager.exe (
+        set "EXE_FILE=TestFlowManager.exe"
+    ) else (
+        echo 错误: 找不到 TestFlowManager EXE 文件!
+        pause
+        exit /b 1
+    )
+)
+
+:run
+echo 启动 %EXE_FILE% ...
+start "" "%EXE_FILE%"
 """
     
     bat_path = dist_dir / "start.bat"
@@ -147,46 +166,104 @@ def build_executable():
     """使用PyInstaller构建可执行文件"""
     print("开始构建可执行文件...")
     
+    # 清理 dist 目录中的旧构建文件（保留 config, Template 等用户数据）
+    dist_dir = Path.cwd() / "dist"
+    if dist_dir.exists():
+        print("清理旧的构建文件...")
+        # 只删除 PyInstaller 生成的文件和目录
+        items_to_remove = [
+            dist_dir / "_internal",
+            dist_dir / "TestFlowManager.exe",
+            dist_dir / "base_library.zip",
+        ]
+        for item in items_to_remove:
+            if item.exists():
+                if item.is_file():
+                    item.unlink()
+                    print(f"  删除: {item.name}")
+                elif item.is_dir():
+                    shutil.rmtree(item)
+                    print(f"  删除目录: {item.name}")
+    
     try:
-        # 使用PyInstaller构建
+        # 使用PyInstaller构建（不使用 --clean，避免清理整个 dist 目录）
         cmd = [
             sys.executable, "-m", "PyInstaller",
-            "--clean",
-            "--noconfirm",
+            "--noconfirm",  # ← 移除 --clean，避免权限问题
             "TestFlowManager.spec"
         ]
         
         print(f"执行命令: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        # 修复编码问题：使用 utf-8 编码读取输出
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            encoding='utf-8',  # 强制使用 UTF-8 编码
+            errors='replace'   # 遇到无法解码的字符用 ? 替换
+        )
         
         if result.returncode == 0:
-            print("可执行文件构建成功!")
-            print(result.stdout)
-            # 重命名生成的exe文件以包含版本号和时间戳
+            print("✅ 可执行文件构建成功!")
+            if result.stdout:
+                print(result.stdout)
+            
+            # 获取版本号和时闰戳
             version = get_version()
             from datetime import datetime
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            dist_dir = Path.cwd() / "dist"
-            old_exe = dist_dir / "TestFlowManager.exe"
-            new_exe = dist_dir / f"TestFlowManager_v{version}_{timestamp}.exe"
             
-            if old_exe.exists():
-                # 如果新文件已存在，先删除它
-                if new_exe.exists():
-                    new_exe.unlink()
-                    print(f"已删除已存在的文件: {new_exe.name}")
+            # PyInstaller onedir 模式生成 dist/TestFlowManager/ 目录
+            # 我们需要将所有文件移动到 dist/ 根目录
+            build_dir = dist_dir / "TestFlowManager"
+            
+            if build_dir.exists():
+                print(f"\n📦 整理文件结构...")
+                print(f"   将 {build_dir}/ 下的文件移动到 {dist_dir}/")
                 
-                old_exe.rename(new_exe)
-                print(f"已将可执行文件重命名为: TestFlowManager_v{version}_{timestamp}.exe")
+                # 移动所有文件和子目录到 dist/ 根目录
+                for item in build_dir.iterdir():
+                    dest = dist_dir / item.name
+                    if dest.exists():
+                        if dest.is_dir():
+                            shutil.rmtree(dest)
+                        else:
+                            dest.unlink()
+                    shutil.move(str(item), str(dist_dir))
+                    print(f"   ✅ 移动: {item.name}")
+                
+                # 删除空的 TestFlowManager 目录
+                build_dir.rmdir()
+                print(f"   ✅ 删除空目录: TestFlowManager/")
+                
+                # 重命名 EXE 文件
+                old_exe = dist_dir / "TestFlowManager.exe"
+                new_exe_name = f"TestFlowManager_v{version}_{timestamp}.exe"
+                new_exe = dist_dir / new_exe_name
+                
+                if old_exe.exists():
+                    if new_exe.exists():
+                        new_exe.unlink()
+                    old_exe.rename(new_exe)
+                    print(f"\n✅ 已将可执行文件重命名为: {new_exe_name}")
+                else:
+                    print(f"\n⚠️  警告: 未找到 {old_exe}")
+            else:
+                print(f"❌ 错误: 未找到构建目录 {build_dir}")
+                return False
             
             return True
         else:
-            print("构建过程中出现错误:")
-            print(result.stderr)
+            print("❌ 构建过程中出现错误:")
+            if result.stderr:
+                print(result.stderr)
             return False
             
     except Exception as e:
-        print(f"构建可执行文件时发生异常: {e}")
+        print(f"❌ 构建可执行文件时发生异常: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 

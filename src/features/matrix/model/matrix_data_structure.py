@@ -2,7 +2,12 @@ from typing import Dict, List, Any, Set, Tuple
 from src.core.logger import logger
 import re
 from src.utils.string_utils import normalize_text
-from src.features.matrix.utils.matrix_text_utils import clean_step_numbers, clean_group_name
+from src.features.matrix.utils.matrix_text_utils import (
+    clean_step_numbers,
+    clean_group_name,
+    extract_between_separators,
+    extract_from_colon_to_end,
+)
 from src.features.matrix.utils.matrix_validation_utils import validate_step_sequence
 from src.features.matrix.utils.matrix_parsing_utils import find_sample_size_row
 
@@ -264,13 +269,13 @@ class MatrixDataStructure:
                     initial_end = after_test_match.start()
                     initial_requirement = requirement[initial_start:initial_end].strip()
                     # 提取":"和";"之间的内容
-                    initial_requirement = self._extract_between_separators(initial_requirement, ":", ";")
+                    initial_requirement = extract_between_separators(initial_requirement, ":", ";")
                     
                     # 提取After test部分的requirement（After test之后的内容）
                     after_test_start = after_test_match.end()
                     after_test_requirement = requirement[after_test_start:].strip()
                     # 提取"After test:"到结尾的内容
-                    after_test_requirement = self._extract_from_colon_to_end(after_test_requirement)
+                    after_test_requirement = extract_from_colon_to_end(after_test_requirement)
                     
                     # logger.info(f"Initial requirement: '{initial_requirement}'")
                     # logger.info(f"After test requirement: '{after_test_requirement}'")
@@ -358,68 +363,6 @@ class MatrixDataStructure:
             warnings.append("未找到样品数量行（应包含'sample'关键字且位于表格末尾几行），请检查数据格式")
             
         return warnings
-
-    def _extract_between_separators(self, text: str, start_sep: str, end_sep: str) -> str:
-        """
-        提取两个分隔符之间的内容
-        
-        Args:
-            text: 原始文本
-            start_sep: 起始分隔符
-            end_sep: 结束分隔符
-            
-        Returns:
-            提取出的内容
-        """
-        # 查找起始分隔符
-        start_pos = text.find(start_sep)
-        # 查找结束分隔符
-        end_pos = text.find(end_sep)
-        
-        if start_pos != -1 and end_pos != -1:
-            # 如果两个分隔符都存在，且起始分隔符在结束分隔符之前
-            if start_pos < end_pos:
-                # 提取两个分隔符之间的内容
-                result = text[start_pos + len(start_sep):end_pos]
-                return result.strip()
-            else:
-                # 如果起始分隔符在结束分隔符之后，只提取到结束分隔符之前的内容
-                result = text[:end_pos]
-                return result.strip()
-        elif start_pos != -1:
-            # 如果只有起始分隔符存在，提取其后所有内容
-            result = text[start_pos + len(start_sep):]
-            return result.strip()
-        elif end_pos != -1:
-            # 如果只有结束分隔符存在，提取到结束分隔符之前的内容
-            result = text[:end_pos]
-            return result.strip()
-        else:
-            # 如果两个分隔符都不存在，返回原文本
-            return text.strip()
-
-    def _extract_from_colon_to_end(self, text: str) -> str:
-        """
-        提取从冒号(:)到文本结尾的内容，并清理多余空格
-        
-        Args:
-            text: 原始文本
-            
-        Returns:
-            提取并清理后的内容
-        """
-        # 查找冒号位置
-        colon_pos = text.find(':')
-        if colon_pos != -1:
-            # 如果找到冒号，提取其后内容
-            result = text[colon_pos + 1:].strip()
-        else:
-            # 如果没找到冒号，返回原文本并清理
-            result = text.strip()
-            
-        # 清理多余的空格和换行符
-        result = " ".join(result.split())
-        return result
 
     # ==================== 数据访问方法 ====================
     

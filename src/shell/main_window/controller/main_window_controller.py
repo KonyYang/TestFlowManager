@@ -7,15 +7,14 @@ from typing import List, Optional, TYPE_CHECKING
 from PyQt5.QtWidgets import QWidget, QMessageBox
 from src.core.logger import logger
 from src.core.config_manager import config_manager
-from src.shell.main_window.coordinator.project_session_coordinator import ProjectSessionCoordinator
+from src.shell.main_window.coordinator.project_lifecycle_coordinator import ProjectLifecycleCoordinator
 from src.shell.main_window.model.main_window_data import MainWindowData
 from src.core.project_context import ProjectContext
 from src.features.matrix.workspace.matrix_workspace_facade import MatrixWorkspaceFacade
-from src.shell.main_window.coordinator.project_lifecycle_coordinator import ProjectLifecycleCoordinator
 
 # 类型导入仅用于类型检查，运行时不依赖具体类
 if TYPE_CHECKING:
-    from src.features.matrix.service.matrix_session_manager import MatrixSessionManager
+    from src.features.matrix.service.session.matrix_session_manager import MatrixSessionManager
     from src.features.ltr_manager.facade.ltr_facade import LTRFacade
     from src.shell.main_window.integration.file_operations_facade import FileOperationsFacade
 
@@ -34,6 +33,7 @@ class MainWindowController:
         view: QWidget,
         matrix_workspace_facade: Optional[MatrixWorkspaceFacade] = None,
         project_session_coordinator=None,  # Phase 4: 从 Assembler 注入
+        project_session_app_service=None,  # S1-2: 应用层编排器
     ):
         """
         初始化主窗口控制器（Shell 协调层）
@@ -42,6 +42,7 @@ class MainWindowController:
             view: 主窗口视图实例
             matrix_workspace_facade: Matrix 工作区协同件
             project_session_coordinator: 项目会话协调器（Phase 4: 从 Assembler 注入）
+            project_session_app_service: 项目会话应用层编排器（S1-2: 唯一主入口）
         """
         self.view = view
         self.data_model = MainWindowData()
@@ -77,21 +78,17 @@ class MainWindowController:
             status_updater=self.data_model.update_status,
         )
 
-        # Phase 4: 项目会话协调器
-        # 如果从 Assembler 注入了协调器，则使用注入的；否则向后兼容（自己创建）
-        if project_session_coordinator is not None:
-            # 使用注入的协调器，并更新其依赖引用
-            self.project_session_coordinator = project_session_coordinator
+        # Phase 4: 项目会话协调器（由 Assembler 注入）
+        self.project_session_coordinator = project_session_coordinator
+        if self.project_session_coordinator:
             self.project_session_coordinator.view = view
             self.project_session_coordinator.matrix_project_controller = self.matrix_project_controller
             self.project_session_coordinator.status_updater = self.data_model.update_status
-        else:
-            # 向后兼容：自己创建协调器
-            self.project_session_coordinator = ProjectSessionCoordinator(
-                view,
-                matrix_project_controller=self.matrix_project_controller,
-                status_updater=self.data_model.update_status,
-            )
+
+        # S1-2: 应用层编排器（由 Assembler 注入，唯一主入口）
+        self.project_session_app_service = project_session_app_service
+        if self.project_session_app_service and self.project_session_coordinator:
+            self.project_session_app_service.coordinator = self.project_session_coordinator
 
         # 非核心 Facade/Coordinator 延迟到 initialize() 中创建，避免启动时加载 COM 等重型依赖
         self.event_binding_manager = None

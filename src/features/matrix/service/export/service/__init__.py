@@ -7,11 +7,11 @@ from .base_export_service import BaseExportService
 from .test_status_export_service import TestStatusTableExportService
 from .excel_formatting_service import ExcelFormattingService
 from .ir_dwv_export_service import IRDWVExportService
-from .llcr_cr_export_service import LLCRCRExportService
-from .llcr_cr_formula_service import LLCRCRFormulaService
-from .llcr_cr_styling_service import LLCRCRStylingService
-from .llcr_cr_summary_service import LLCRCRSpecSummaryService
-from .llcr_cr_table_structure_service import LLCRCRTableStructureService
+from .llcr_cr.llcr_cr_export_service import LLCRCRExportService
+from .llcr_cr.llcr_cr_formula_service import LLCRCRFormulaService
+from .llcr_cr.llcr_cr_styling_service import LLCRCRStylingService
+from .llcr_cr.llcr_cr_summary_service import LLCRCRSpecSummaryService
+from .llcr_cr.llcr_cr_table_structure_service import LLCRCRTableStructureService
 from .mating_unmating_export_service import MatingUnmatingExportService
 from .matrix_editor_export_service import MatrixEditorExcelExportService
 from .fee_sheet_export_service import FeeSheetExportService

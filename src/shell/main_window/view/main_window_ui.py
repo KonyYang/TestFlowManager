@@ -68,11 +68,13 @@ class MainWindow(QMainWindow):
         *,
         matrix_workspace_facade: Optional[MatrixWorkspaceFacade] = None,
         project_session_coordinator=None,  # Phase 4: 从 Assembler 注入
+        project_session_app_service=None,  # S1-2: 应用层编排器
     ):
         super().__init__()
         self.splash_screen = splash_screen
         self.controller = None
         self._project_session_coordinator = project_session_coordinator  # Phase 4
+        self._project_session_app_service = project_session_app_service  # S1-2
 
         # 通过 facade 统一访问所有 Matrix session 对象（私有属性，不对外暴露）
         self._workspace_facade = matrix_workspace_facade or MatrixWorkspaceFacade(parent_view=self)
@@ -341,10 +343,12 @@ class MainWindow(QMainWindow):
     def _initialize_controllers(self):
         """初始化控制器 - 采用延迟加载策略"""
         # Phase 4: 使用从 Assembler 注入的 ProjectSessionCoordinator
+        # S1-2: 传递应用层编排器
         self.controller = MainWindowController(
             self,
             matrix_workspace_facade=self._workspace_facade,
             project_session_coordinator=self._project_session_coordinator,
+            project_session_app_service=self._project_session_app_service,
         )
 
         # Feature registry: shell-triggered feature controller assembly

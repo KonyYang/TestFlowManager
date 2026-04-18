@@ -4,7 +4,7 @@ from typing import Optional
 from src.core.logger import logger
 from src.core.project_context import ProjectContext
 from src.domain.project.project_document_context import ProjectDocumentContext
-from src.core.project_session_service import project_session_service
+from src.app.composition.project_session_application_service import project_session_app_service
 
 
 @dataclass(frozen=True)
@@ -41,10 +41,13 @@ class ProjectCreationApplicationService:
             logger.warning("Project creation session skipped: no dl_number resolved")
             return None
 
-        # Trigger-side unification: build context + apply via ProjectSessionService.
-        # All UI/Matrix side effects must run via `project.opened` consumption (MainWindow) or a controlled local fallback.
+        # Trigger-side unification: build context + activate via ProjectSessionApplicationService.
+        # All UI/Matrix side effects run through the single entry (S1-2).
         project_context = ProjectContext.from_project_path(project_path, dl_number)
-        project_session_service.apply_project_context(project_context)
+        project_session_app_service.activate_existing_context(
+            project_context,
+            trigger_matrix_auto_import=False,  # Matrix import handled by caller or event consumer
+        )
 
         ltr_project_loaded = False
         loaded_data = self.ltr_integration_service.load_ltr_project(project_path)

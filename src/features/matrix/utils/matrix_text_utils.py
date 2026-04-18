@@ -59,3 +59,37 @@ def clean_group_name(group_header: str) -> str:
         cleaned = match.group(0)
         
     return cleaned
+
+
+def extract_between_separators(text: str, start_sep: str, end_sep: str) -> str:
+    """提取两个分隔符之间的内容"""
+    start_pos = text.find(start_sep)
+    end_pos = text.find(end_sep)
+    
+    if start_pos != -1 and end_pos != -1:
+        if start_pos < end_pos:
+            result = text[start_pos + len(start_sep):end_pos]
+            return result.strip()
+        else:
+            result = text[:end_pos]
+            return result.strip()
+    elif start_pos != -1:
+        result = text[start_pos + len(start_sep):]
+        return result.strip()
+    elif end_pos != -1:
+        result = text[:end_pos]
+        return result.strip()
+    else:
+        return text.strip()
+
+
+def extract_from_colon_to_end(text: str) -> str:
+    """提取从冒号(:)到文本结尾的内容，并清理多余空格"""
+    colon_pos = text.find(':')
+    if colon_pos != -1:
+        result = text[colon_pos + 1:].strip()
+    else:
+        result = text.strip()
+    
+    result = " ".join(result.split())
+    return result

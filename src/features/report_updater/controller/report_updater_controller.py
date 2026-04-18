@@ -12,6 +12,13 @@ from src.features.report_updater.view.report_updater_dialog import ReportUpdater
 from src.features.report_wizard.coordinator.report_export_coordinator import (
     ReportExportCoordinator,
 )
+# ✅ 导入专用异常，用于 Service 层抛出的错误
+from src.features.report_updater.service.exceptions import (
+    EquipmentDataSourceNotFoundError,
+    EquipmentDataReadError,
+    EquipmentTableNotFoundError,
+    NoEquipmentIdsFoundError,
+)
 
 
 class ReportUpdaterController:
@@ -110,17 +117,42 @@ class ReportUpdaterController:
             
             # 直接使用服务层执行实际的更新操作，不需要传入设备数据
             # 因为新的实现会从外部源（Excel文件）获取设备数据
-            success = self.export_coordinator.update_equipment_list(selected_report)
-            
-            if success:
-                # 更新数据模型
-                QMessageBox.information(self.parent, "成功", f"设备列表已成功更新到报告:\n{os.path.basename(selected_report)}")
-                logger.info(f"Equipment list updated successfully in {selected_report}")
-            else:
-                QMessageBox.warning(self.parent, "警告", "设备列表更新失败！")
-                logger.warning("Equipment list update failed")
-            
-            return success
+            try:
+                success = self.export_coordinator.update_equipment_list(selected_report)
+                
+                if success:
+                    # 更新数据模型
+                    QMessageBox.information(self.parent, "成功", f"设备列表已成功更新到报告:\n{os.path.basename(selected_report)}")
+                    logger.info(f"Equipment list updated successfully in {selected_report}")
+                else:
+                    QMessageBox.warning(self.parent, "警告", "设备列表更新失败！")
+                    logger.warning("Equipment list update failed")
+                
+                return success
+            except EquipmentDataSourceNotFoundError as e:
+                # ✅ 处理设备数据源未找到异常，展示友好的错误消息
+                logger.error(f"Equipment data source not found: {e.file_path}")
+                logger.debug(e.get_debug_info())
+                
+                msg_box = QMessageBox(self.parent)
+                msg_box.setIcon(QMessageBox.Critical)
+                msg_box.setWindowTitle("文件未找到")
+                msg_box.setText(str(e))
+                msg_box.setInformativeText("请检查配置文件中的路径设置是否正确。")
+                msg_box.setDetailedText(e.get_debug_info())
+                msg_box.exec_()
+                return False
+            except (EquipmentDataReadError, EquipmentTableNotFoundError, NoEquipmentIdsFoundError) as e:
+                # ✅ 处理其他设备相关异常
+                logger.error(f"Equipment update error: {e}")
+                
+                msg_box = QMessageBox(self.parent)
+                msg_box.setIcon(QMessageBox.Warning)
+                msg_box.setWindowTitle("设备列表更新失败")
+                msg_box.setText(str(e))
+                msg_box.setInformativeText("请检查源文件格式是否正确。")
+                msg_box.exec_()
+                return False
             
         except Exception as e:
             logger.error(f"Error handling equipment update: {e}")

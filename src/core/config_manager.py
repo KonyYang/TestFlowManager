@@ -8,6 +8,9 @@ import os
 import sys
 from typing import Dict, Any, Optional
 
+# 使用统一的路径解析工具，避免硬编码路径
+from src.core.path_utils import get_resource_path as utils_get_resource_path, get_executable_dir, is_frozen
+
 
 class ConfigManager:
     """
@@ -15,8 +18,8 @@ class ConfigManager:
     管理应用程序的配置信息，支持从文件加载和保存配置
     """
 
-    DEFAULT_MAIN_CONFIG = "config/settings.json"
-    DEFAULT_PATHS_CONFIG = "config/paths.ini"
+    DEFAULT_MAIN_CONFIG = "src/app/config/settings.json"
+    DEFAULT_PATHS_CONFIG = "src/app/config/paths.ini"
 
     def __init__(self, config_file: str = DEFAULT_MAIN_CONFIG):
         self.config_file = config_file
@@ -56,7 +59,7 @@ class ConfigManager:
             # print(f"[DEBUG] Config file not found, using default config")
             self._config = self._get_default_config()
 
-    def load_paths_config(self, paths_file: str = "config/paths.ini") -> None:
+    def load_paths_config(self, paths_file: str = "src/app/config/paths.ini") -> None:
         """
         从INI格式的路径配置文件加载路径配置
 
@@ -115,50 +118,33 @@ class ConfigManager:
     def _get_resource_path(self, relative_path: str) -> str:
         """
         获取资源配置文件的绝对路径
-        在开发模式下返回相对路径，在可执行模式下返回可执行文件目录下的路径
-
+        
+        策略：
+        - 打包环境(onedir): 优先从 exe 同级目录的 config/ 读取（用户可编辑）
+        - 开发环境: 从 src/app/config/ 读取
+        
         Args:
-            relative_path: 相对路径
+            relative_path: 相对路径 (如 "src/app/config/settings.json")
 
         Returns:
             资源文件的绝对路径
         """
-        # 1. 首先检查是否为可执行文件模式
-        if getattr(sys, 'frozen', False):
-            # 如果是可执行文件模式，优先从生产环境路径加载配置
-            production_config_path = os.path.join("D:", "TestFlowManager", relative_path)
-            if os.path.exists(production_config_path):
-                return production_config_path
-
-            # 如果生产环境路径不存在，则从可执行文件所在目录加载配置
-            base_path = os.path.dirname(sys.executable)
-
-            # 在可执行文件模式下，检查生成环境路径
-            generated_env_path = os.path.join(base_path, relative_path)
-            if os.path.exists(generated_env_path):
-                return generated_env_path
-            else:
-                # 如果直接路径不存在，尝试在config子目录中查找
-                config_path = os.path.join(base_path, "config", os.path.basename(relative_path))
-                if os.path.exists(config_path):
-                    return config_path
-        else:
-            # 如果是开发模式，需要检查当前工作目录来确定正确的基路径
-            base_path = os.path.abspath(".")
-
-            # 检查当前目录是否为src/app目录
-            if os.path.basename(base_path) == "app" and os.path.basename(os.path.dirname(base_path)) == "src":
-                # 如果当前在src/app目录下，需要向上两级到达项目根目录
-                project_root = os.path.dirname(os.path.dirname(base_path))
-                result_path = os.path.join(project_root, "src", "app", relative_path)
-                return result_path
-            else:
-                # 否则假设当前在项目根目录
-                result_path = os.path.join(base_path, "src", "app", relative_path)
-                return result_path
-
-        result_path = os.path.join(base_path, relative_path)
-        return result_path
+        # ✅ 打包环境：从 exe 同级目录的 config/ 读取
+        if is_frozen():
+            # 提取文件名，忽略原始路径结构
+            filename = os.path.basename(relative_path)
+            exe_dir = get_executable_dir()
+            external_config_path = os.path.join(exe_dir, "config", filename)
+            
+            # 如果外部配置文件存在，优先使用（用户可编辑）
+            if os.path.exists(external_config_path):
+                return external_config_path
+            
+            # 否则 fallback 到 _internal/config/ （打包时嵌入的资源）
+            return utils_get_resource_path(relative_path)
+        
+        # ✅ 开发环境：从源码目录读取
+        return utils_get_resource_path(relative_path)
 
     def get_main_config_path(self) -> str:
         """获取主配置文件实际路径。"""
@@ -245,17 +231,98 @@ class ConfigManager:
     def get_path(self, key: str, default: str = "") -> str:
         return self.get(f"paths.{key}", default)
 
-    def get_template_dir(self, default: str = r"D:\TestFlowManager\Template") -> str:
-        return self.get_path("template_dir", default)
+    def get_template_dir(self, default: str = None) -> str:
+        r"""
+        获取模板目录路径。
+        
+        优先级:
+        1. 配置文件中的绝对路径 (如 D:\TestFlowManager\Template)
+        2. 传入的 default 参数
+        3. 基于 exe 目录的动态默认值 (仅当配置未定义时)
+        """
+        # 首先尝试从配置文件读取
+        config_value = self.get_path("template_dir", "")
+        
+        # 如果配置文件中定义了路径(无论是绝对还是相对),优先使用
+        if config_value:
+            # 如果是绝对路径,直接返回
+            if os.path.isabs(config_value):
+                return config_value
+            # 如果是相对路径,在打包环境下转换为绝对路径
+            if is_frozen():
+                return os.path.join(get_executable_dir(), config_value)
+            return config_value
+        
+        # 配置文件中未定义,使用默认值
+        if default is None:
+            default = os.path.join(get_executable_dir(), "Template")
+        return default
 
-    def get_default_project_dir(self, default: str = r"D:\TestFlowManager\Projects") -> str:
-        return self.get_path("default_project_path", default)
+    def get_default_project_dir(self, default: str = None) -> str:
+        """
+        获取默认项目目录路径。
+        
+        优先级:
+        1. 配置文件中的绝对路径
+        2. 传入的 default 参数
+        3. 基于 exe 目录的动态默认值
+        """
+        config_value = self.get_path("default_project_path", "")
+        
+        if config_value:
+            if os.path.isabs(config_value):
+                return config_value
+            if is_frozen():
+                return os.path.join(get_executable_dir(), config_value)
+            return config_value
+        
+        if default is None:
+            default = os.path.join(get_executable_dir(), "Projects")
+        return default
 
-    def get_backup_dir(self, default: str = r"D:\TestFlowManager\Backup") -> str:
-        return self.get_path("backup_path", default)
+    def get_backup_dir(self, default: str = None) -> str:
+        """
+        获取备份目录路径。
+        
+        优先级:
+        1. 配置文件中的绝对路径
+        2. 传入的 default 参数
+        3. 基于 exe 目录的动态默认值
+        """
+        config_value = self.get_path("backup_path", "")
+        
+        if config_value:
+            if os.path.isabs(config_value):
+                return config_value
+            if is_frozen():
+                return os.path.join(get_executable_dir(), config_value)
+            return config_value
+        
+        if default is None:
+            default = os.path.join(get_executable_dir(), "Backup")
+        return default
 
-    def get_temp_dir(self, default: str = r"D:\TestFlowManager\Temp") -> str:
-        return self.get_path("temp_dir", default)
+    def get_temp_dir(self, default: str = None) -> str:
+        """
+        获取临时目录路径。
+        
+        优先级:
+        1. 配置文件中的绝对路径
+        2. 传入的 default 参数
+        3. 基于 exe 目录的动态默认值
+        """
+        config_value = self.get_path("temp_dir", "")
+        
+        if config_value:
+            if os.path.isabs(config_value):
+                return config_value
+            if is_frozen():
+                return os.path.join(get_executable_dir(), config_value)
+            return config_value
+        
+        if default is None:
+            default = os.path.join(get_executable_dir(), "Temp")
+        return default
 
     def get_default(self, key: str, default: Any = "") -> Any:
         return self.get(f"defaults.{key}", default)

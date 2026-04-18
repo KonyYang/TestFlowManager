@@ -1,6 +1,8 @@
 """
 文档编辑器基类组件
 提供文档编辑功能的共用组件和方法，可以被QDialog和QWidget类型使用
+
+注意：此 Mixin 只负责 UI 装配和信号连接，业务逻辑已移至 DocumentContentService
 """
 
 from PyQt5.QtWidgets import (
@@ -10,8 +12,6 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal
 from src.core.logger import logger
-# 延迟导入 BodyContentService 以避免循环导入
-# from src.features.content_editor.service.body_content_service import BodyContentService
 
 
 class DocumentEditorMixin:
@@ -31,14 +31,14 @@ class DocumentEditorMixin:
         self.file_path = file_path
         self.current_edits = {}
         
-        # 只有当 body_content_service 不存在时才创建新实例
-        if not hasattr(self, 'body_content_service') or self.body_content_service is None:
-            # 延迟导入 BodyContentService 以避免循环导入
-            from src.features.content_editor.service.body_content_service import BodyContentService
-            self.body_content_service = BodyContentService()
-            logger.info(f"BodyContentService 实例已创建，预设描述内容: {self.body_content_service.predefined_descriptions}")
+        # 只有当 document_content_service 不存在时才创建新实例
+        if not hasattr(self, 'document_content_service') or self.document_content_service is None:
+            # 延迟导入 DocumentContentService 以避免循环依赖
+            from src.features.content_editor.service.document_content_service import DocumentContentService
+            self.document_content_service = DocumentContentService()
+            logger.info("DocumentContentService 实例已创建")
         else:
-            logger.info(f"BodyContentService 实例已存在，预设描述内容: {self.body_content_service.predefined_descriptions}")
+            logger.info("DocumentContentService 实例已存在")
 
         # 不要重新初始化编辑器、预设列表等组件，因为它们可能已经在UI初始化时创建了
         # 只初始化那些需要的属性
@@ -158,20 +158,20 @@ class DocumentEditorMixin:
         # 额外调试：检查混入类初始化状态
         logger.info(f"混入类初始化状态检查:")
         logger.info(f"  - file_path: {getattr(self, 'file_path', '未设置')}")
-        logger.info(f"  - body_content_service: {getattr(self, 'body_content_service', '未设置') is not None}")
+        logger.info(f"  - document_content_service: {getattr(self, 'document_content_service', '未设置') is not None}")
         logger.info(f"  - edit_purpose_content: {getattr(self, 'edit_purpose_content', '未设置') is not None}")
         logger.info(f"  - edit_conclusions_content: {getattr(self, 'edit_conclusions_content', '未设置') is not None}")
         
-        # 检查 body_content_service 是否存在以及预设描述是否加载
-        if hasattr(self, 'body_content_service') and self.body_content_service:
-            logger.info(f"body_content_service 预设描述内容: {self.body_content_service.predefined_descriptions}")
+        # 检查 document_content_service 是否存在以及预设描述是否加载
+        if hasattr(self, 'document_content_service') and self.document_content_service:
+            logger.info(f"document_content_service 预设描述内容: {self.document_content_service.predefined_descriptions}")
             
-            # 如果 body_content_service 已存在，立即加载预设描述
-            logger.info("body_content_service 已存在，立即加载预设描述")
+            # 如果 document_content_service 已存在，立即加载预设描述
+            logger.info("document_content_service 已存在，立即加载预设描述")
             self._load_preset_descriptions("PURPOSE", self.purpose_preset_list)
             self._load_preset_descriptions("CONCLUSIONS", self.conclusions_preset_list)
         else:
-            logger.warning("body_content_service 未初始化或不存在")
+            logger.warning("document_content_service 未初始化或不存在")
         
         return panel
     
@@ -216,9 +216,9 @@ class DocumentEditorMixin:
         try:
             logger.info(f"开始加载文档内容，文件路径: {self.file_path}")
             
-            # 检查 body_content_service 是否存在
-            if not hasattr(self, 'body_content_service') or not self.body_content_service:
-                logger.error("body_content_service 未初始化")
+            # 检查 document_content_service 是否存在
+            if not hasattr(self, 'document_content_service') or not self.document_content_service:
+                logger.error("document_content_service 未初始化")
                 return
             
             # 检查编辑器组件是否已初始化
@@ -237,7 +237,7 @@ class DocumentEditorMixin:
                 return
             
             # 使用优化后的方法，一次性获取所有需要的内容，只需遍历文档一次
-            all_sections_content = self.body_content_service.get_all_content_sections(self.file_path)
+            all_sections_content = self.document_content_service.get_all_content_sections(self.file_path)
             logger.info(f"获取到的所有章节内容: {list(all_sections_content.keys())}")
             
             # 获取 PURPOSE 到 CONCLUSIONS 的内容
@@ -273,9 +273,9 @@ class DocumentEditorMixin:
             logger.info(f"PURPOSE 预设列表组件状态: {getattr(self, 'purpose_preset_list', None) is not None}")
             logger.info(f"CONCLUSIONS 预设列表组件状态: {getattr(self, 'conclusions_preset_list', None) is not None}")
             
-            # 检查 body_content_service 中的预设描述
-            logger.info(f"body_content_service 中的 PURPOSE 预设: {self.body_content_service.get_predefined_descriptions('PURPOSE')}")
-            logger.info(f"body_content_service 中的 CONCLUSIONS 预设: {self.body_content_service.get_predefined_descriptions('CONCLUSIONS')}")
+            # 检查 document_content_service 中的预设描述
+            logger.info(f"document_content_service 中的 PURPOSE 预设: {self.document_content_service.get_predefined_descriptions('PURPOSE')}")
+            logger.info(f"document_content_service 中的 CONCLUSIONS 预设: {self.document_content_service.get_predefined_descriptions('CONCLUSIONS')}")
             
             # 检查预设列表组件是否存在
             if hasattr(self, 'purpose_preset_list') and self.purpose_preset_list is not None:
@@ -299,13 +299,13 @@ class DocumentEditorMixin:
         """加载预设描述"""
         logger.info(f"开始加载 {category} 预设描述")
         try:
-            # 检查 body_content_service 是否存在
-            if not hasattr(self, 'body_content_service') or not self.body_content_service:
-                logger.error(f"body_content_service 未初始化，无法加载 {category} 预设描述")
+            # 检查 document_content_service 是否存在
+            if not hasattr(self, 'document_content_service') or not self.document_content_service:
+                logger.error(f"document_content_service 未初始化，无法加载 {category} 预设描述")
                 return
             
             # 从服务获取预设描述
-            descriptions = self.body_content_service.get_predefined_descriptions(category)
+            descriptions = self.document_content_service.get_predefined_descriptions(category)
             logger.info(f"获取到 {len(descriptions)} 个 {category} 预设描述: {descriptions}")
             
             # 检查列表小部件是否已初始化
@@ -386,7 +386,7 @@ class DocumentEditorMixin:
             current_text = self.edit_purpose_content.toPlainText().strip()
             if current_text:
                 # 添加到服务的预设描述
-                self.body_content_service.add_predefined_description("PURPOSE", current_text)
+                self.document_content_service.add_predefined_description("PURPOSE", current_text)
                 
                 # 重新加载预设列表
                 self._load_preset_descriptions("PURPOSE", self.purpose_preset_list)
@@ -402,7 +402,7 @@ class DocumentEditorMixin:
             current_text = self.edit_conclusions_content.toPlainText().strip()
             if current_text:
                 # 添加到服务的预设描述
-                self.body_content_service.add_predefined_description("CONCLUSIONS", current_text)
+                self.document_content_service.add_predefined_description("CONCLUSIONS", current_text)
                 
                 # 重新加载预设列表
                 self._load_preset_descriptions("CONCLUSIONS", self.conclusions_preset_list)
@@ -462,7 +462,7 @@ class DocumentEditorMixin:
             logger.info("开始保存修改")
             
             # 先获取当前文档的所有章节内容，以确定是否需要更新到文档末尾
-            all_sections_content = self.body_content_service.get_all_content_sections(self.file_path)
+            all_sections_content = self.document_content_service.get_all_content_sections(self.file_path)
             
             # 准备批量更新的数据
             updates = {}
@@ -487,7 +487,7 @@ class DocumentEditorMixin:
             
             if updates:
                 # 使用批量更新方法，只需打开文档一次
-                success = self.body_content_service.update_multiple_sections_content(self.file_path, updates)
+                success = self.document_content_service.update_multiple_sections_content(self.file_path, updates)
                 
                 if success:
                     logger.info(f"成功更新 {len(updates)} 个部分的内容")
@@ -534,7 +534,7 @@ class DocumentEditorMixin:
                 return False
             
             # 先获取当前文档的所有章节内容，以确定是否需要更新到文档末尾
-            all_sections_content = self.body_content_service.get_all_content_sections(self.file_path)
+            all_sections_content = self.document_content_service.get_all_content_sections(self.file_path)
             
             # 准备批量更新的数据
             updates = {}
@@ -561,7 +561,7 @@ class DocumentEditorMixin:
             
             if updates:
                 # 使用批量更新方法，只需打开文档一次
-                success = self.body_content_service.update_multiple_sections_content(self.file_path, updates)
+                success = self.document_content_service.update_multiple_sections_content(self.file_path, updates)
                 
                 if success:
                     logger.info(f"成功更新 {len(updates)} 个部分的内容到文档")

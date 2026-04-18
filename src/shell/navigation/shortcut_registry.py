@@ -126,7 +126,7 @@ class ShortcutRegistry:
         window.addAction(about_action)
 
         # === Pilot 功能（条件注册）===
-        if workspace_facade.is_preview_pilot_enabled(env):
+        if workspace_facade.session.is_preview_pilot_enabled(env):
             preview_pilot_action = QAction("[PILOT] 打开隔离 Matrix 预览", window)
             preview_pilot_action.setShortcut("Ctrl+Alt+Shift+P")
             preview_pilot_action.triggered.connect(tool_handlers.on_open_isolated_matrix_preview)

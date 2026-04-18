@@ -25,8 +25,8 @@ class MatrixExportService:
         """导出Matrix到Excel - 完整的导出流程控制"""
         # 同步数据到模型
         self._sync_table_to_model()
-        # 解析并结构化数据
-        self.matrix_service._parse_and_structure_matrix_data()
+        # 解析并结构化数据（直接使用 data_structure_service，不经过 MatrixService 兼容层）
+        self.matrix_service.data_structure_service.parse_and_structure_matrix_data()
         # 执行导出
         return self._export_to_excel(file_path, export_type)
 
