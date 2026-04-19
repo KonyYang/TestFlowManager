@@ -215,14 +215,9 @@ class FileEncryptionService:
             
         except Exception as e:
             error_msg = f"处理 Word 文件失败：{str(e)}"
-            print(f"\n  ❌ 【异常捕获】process_word_file 出错")
-            print(f"  错误类型：{type(e).__name__}")
-            print(f"  错误信息：{error_msg}")
             import traceback
-            print(f"  详细堆栈:\n{traceback.format_exc()}")
             logger.error(f"❌ {error_msg}")
             logger.error(f"错误类型：{type(e).__name__}")
-            import traceback
             logger.error(f"详细错误：{traceback.format_exc()}")
             return False, error_msg
     

@@ -11,9 +11,13 @@ from src.features.project_creator.service.project_creator_service import Project
 from src.features.project_creator.service.project_creation_application_service import (
     ProjectCreationApplicationService,
 )
-from src.features.project_creator.model.project_creator_data import EmailData, EmailAttachment, ProjectCreationContext
-from src.features.email_extractor.view.email_selector_dialog import EmailSelectorDialog
-from src.features.email_extractor.controller.email_extractor_controller import EmailExtractorController
+from src.features.project_creator.controller.runtime.project_creator_email_flow_coordinator import (
+    ProjectCreatorEmailFlowCoordinator,
+)
+from src.features.project_creator.controller.runtime.project_creator_ltr_result_coordinator import (
+    ProjectCreatorLtrResultCoordinator,
+)
+from src.features.project_creator.model.project_creator_data import ProjectCreationContext
 # 添加LTR项目集成服务
 from src.features.project_creator.service.ltr_project_integration_service import LTRProjectIntegrationService
 # 添加Matrix会话工厂
@@ -56,6 +60,8 @@ class ProjectCreatorController:
         self.context = ProjectCreationContext()
         self.email_extractor_controller = None  # 添加这一行来保存controller引用
         self.selected_attachment = None  # 用于存储选中的附件
+        self.email_flow_coordinator = ProjectCreatorEmailFlowCoordinator(self)
+        self.ltr_result_coordinator = ProjectCreatorLtrResultCoordinator(self)
         # 添加LTR项目集成服务
         self.ltr_integration_service = LTRProjectIntegrationService()
         if (
@@ -158,64 +164,7 @@ class ProjectCreatorController:
         Returns:
             是否成功获取邮件数据
         """
-        try:
-            logger.info("正在初始化邮件提取控制器...")
-            # 创建邮件选择对话框
-            dialog = EmailSelectorDialog(self.parent_view)
-            controller = EmailExtractorController(dialog)
-
-            # 初始化控制器
-            if controller.initialize():
-                logger.info("邮件提取控制器初始化成功")
-                # 显示对话框
-                result = dialog.exec_()
-
-                # 如果用户点击了"选择"按钮（即接受了对话框）
-                if result == QDialog.Accepted:
-                    logger.debug("Email selector dialog accepted")
-                    # 保存controller引用以便后续使用
-                    self.email_extractor_controller = controller
-                    # 保存选中的附件
-                    self.selected_attachment = controller.get_selected_attachment()
-                    # 获取处理后的邮件数据
-                    email_data_dict = controller.get_processed_email_data()
-                    self.context.selected_file_path = controller.get_selected_file_path()
-
-                    if email_data_dict:
-                        # 转换为EmailData对象
-                        attachments = [
-                            EmailAttachment(
-                                filename=att.get('filename', ''),
-                                content=att.get('content', b''),
-                                content_type=att.get('content_type'),
-                                size=att.get('size')
-                            )
-                            for att in email_data_dict.get("attachments", [])
-                        ]
-
-                        self.context.email_data = EmailData(
-                            subject=email_data_dict.get("subject", ""),
-                            sender=email_data_dict.get("sender", ""),
-                            received_time=email_data_dict.get("received_time", ""),
-                            body=email_data_dict.get("body", ""),
-                            attachments=attachments,
-                            file_path=self.context.selected_file_path or ""
-                        )
-
-                        logger.info("Successfully obtained email data")
-                        return True
-                else:
-                    # 用户点击了取消按钮
-                    logger.info("User cancelled email selection")
-                    return False  # 明确返回False表示取消操作
-
-            return False
-
-        except Exception as e:
-            logger.error(f"Error showing email selector dialog: {e}")
-            if self.parent_view:
-                QMessageBox.critical(self.parent_view, "错误", f"无法打开邮件选择对话框: {str(e)}")
-            return False
+        return self.email_flow_coordinator.show_email_selector_dialog()
 
     def _continue_project_creation(self):
         """
@@ -350,128 +299,19 @@ class ProjectCreatorController:
         Returns:
             选中的附件或None
         """
-        # 优先使用保存的选中附件
-        if self.selected_attachment:
-            filename = self.selected_attachment.get('filename', 'Unknown') if self.selected_attachment else 'None'
-            logger.debug(f"Using saved selected attachment: {filename}")
-            return self.selected_attachment
-
-        # 备用方案：通过email_extractor_controller获取选中的附件
-        if hasattr(self, 'email_extractor_controller') and self.email_extractor_controller:
-            attachment = self.email_extractor_controller.get_selected_attachment()
-            filename = attachment.get('filename', 'Unknown') if attachment else 'None'
-            logger.debug(f"Got attachment from controller: {filename}")
-            return attachment
-
-        logger.debug("No selected attachment found")
-        return None
+        return self.email_flow_coordinator.get_selected_attachment()
 
     def _handle_failed_extraction(self):
         """
         处理提取失败的情况，询问用户选择
         """
-        from PyQt5.QtWidgets import QMessageBox
-
-        logger.debug("Handling failed extraction - showing options dialog")
-        msg_box = QMessageBox(self.parent_view)
-        msg_box.setWindowTitle("选择操作")
-        msg_box.setText("没有找到有效的申请单信息，您希望？")
-        msg_box.setIcon(QMessageBox.Question)
-
-        blank_form_button = msg_box.addButton("填写空白申请表", QMessageBox.AcceptRole)
-        reselect_button = msg_box.addButton("重新选择附件", QMessageBox.RejectRole)
-        cancel_button = msg_box.addButton("取消", QMessageBox.DestructiveRole)
-
-        msg_box.setDefaultButton(blank_form_button)
-        result = msg_box.exec_()
-        
-        logger.debug(f"User selection in options dialog: {msg_box.clickedButton()}")
-
-        if msg_box.clickedButton() == blank_form_button:
-            logger.debug("User selected to fill blank form")
-            # 填写空白申请表
-            self._show_ltr_application_dialog(None, '')  # 空文件名
-        elif msg_box.clickedButton() == reselect_button:
-            logger.debug("User selected to reselect attachment")
-            # 重新选择附件，但保持邮件信息不变
-            self._reselect_attachment()
-        else:
-            logger.debug("User cancelled the operation")
-        # 如果点击取消，则不执行任何操作
+        self.email_flow_coordinator.handle_failed_extraction()
 
     def _reselect_attachment(self):
         """
         重新选择附件，但保持邮件信息不变
         """
-        try:
-            logger.debug("Reselecting attachment while keeping email data")
-
-            # 创建邮件选择对话框
-            from src.features.email_extractor.view.email_selector_dialog import EmailSelectorDialog
-            dialog = EmailSelectorDialog(self.parent_view)
-            
-            # 为对话框创建并关联控制器
-            from src.features.email_extractor.controller.email_extractor_controller import EmailExtractorController
-            controller = EmailExtractorController(dialog)
-            controller.initialize()
-
-            # 设置邮件上下文信息
-            if self.context.email_data:
-                # 准备邮件信息
-                subject = self.context.email_data.subject
-                sender = self.context.email_data.sender
-                received_time = self.context.email_data.received_time
-                email_info = f"主题: {subject}\n发件人: {sender}  时间: {received_time}"
-
-                attachments = []
-                for att in self.context.email_data.attachments:
-                    attachments.append({
-                        'filename': att.filename,
-                        'content': att.content,
-                        'content_type': att.content_type,
-                        'size': att.size
-                    })
-
-                # 设置邮件上下文
-                dialog.set_email_context(email_info, attachments, self.context.email_data.file_path)
-                
-                # 重要：确保对话框知道这是重新选择模式，不需要重新处理MSG文件
-                dialog.is_reselect_mode = True
-
-            # 显示对话框
-            result = dialog.exec_()
-            
-            logger.debug(f"Reselect attachment dialog result: {result}")
-            
-            # 如果用户确认选择
-            if result == EmailSelectorDialog.Accepted:
-                # 获取选中的附件
-                selected_attachment = dialog.get_selected_attachment()
-                if selected_attachment:
-                    # 更新上下文中的附件信息
-                    self.context.selected_attachment = selected_attachment
-                    # 更新选中的附件变量，确保后续流程可以获取到
-                    self.selected_attachment = selected_attachment
-                    logger.debug(f"已重新选择附件: {selected_attachment.get('filename', 'Unknown')}")
-                    
-                    # 更新界面显示（如果父视图有相应的方法）
-                    if self.parent_view and hasattr(self.parent_view, 'update_attachment_info'):
-                        filename = selected_attachment.get('filename', 'Unknown')
-                        self.parent_view.update_attachment_info(filename)
-                        
-                    # 继续项目创建流程
-                    self._continue_project_creation()
-                else:
-                    logger.debug("用户未选择附件")
-                    # 当用户未选择附件时，显示选择操作对话框
-                    self._handle_failed_extraction()
-            else:
-                logger.debug("用户取消了附件重新选择")
-
-        except Exception as e:
-            logger.error(f"重新选择附件时发生错误: {e}")
-            from PyQt5.QtWidgets import QMessageBox
-            QMessageBox.critical(self.parent_view, "错误", f"重新选择附件时发生错误: {str(e)}")
+        self.email_flow_coordinator.reselect_attachment()
             
     def set_project_path(self, project_path):
         """
@@ -514,24 +354,7 @@ class ProjectCreatorController:
         Args:
             data: 事件数据，包含处理结果
         """
-        dl_number = data.get("dl_number")
-        status = data.get("status")
-        project_path = data.get("project_path")  # 获取项目路径
-
-        logger.debug(f"_on_ltr_application_processed called with dl_number={dl_number}, status={status}, project_path={project_path}")
-
-        # 如果没有DL编号或状态不是success，不执行任何操作
-        if not dl_number or not dl_number.strip() or status != "success":
-            logger.warning(f"LTR application processed but no valid DL number provided or status not success, dl_number={dl_number}, status={status}")
-            return
-
-        logger.info(f"LTR application processed successfully: {dl_number}")
-        # Session side effects (title, dl display, auto import) are orchestrated by:
-        # - MainWindowController (when available, via project.opened)
-        # - ProjectSessionCoordinator (local fallback when main window controller does not exist)
-        # 使用QTimer延迟执行UI操作，避免在事件处理中直接操作UI
-        from PyQt5.QtCore import QTimer
-        QTimer.singleShot(0, lambda: self._open_matrix_editor_with_ltr_number(dl_number, project_path))
+        self.ltr_result_coordinator.on_ltr_application_processed(data)
 
     def _open_matrix_editor_with_ltr_number(self, dl_number, project_path=None):
         """
@@ -541,34 +364,10 @@ class ProjectCreatorController:
             dl_number: LTR编号
             project_path: 项目路径
         """
-        try:
-            logger.info(f"Updating Matrix editor with LTR number: {dl_number}")
-            logger.debug(f"Received dl_number: {dl_number}, project_path: {project_path}")
-
-            session_result = self.project_creation_service.open_created_project(project_path, dl_number)
-            if not session_result:
-                logger.warning("No project path or DL number provided")
-                return
-
-            matrix_session_mode = getattr(self, "matrix_session_mode", "shared")
-
-            # S1-3: 项目会话副作用统一通过 app_service 编排（S1-2 入口），
-            # 不再本地构造 Coordinator 兜底。
-            # Matrix-side context 在 isolated 模式下仍需本地设置（非共享工作区）。
-            if matrix_session_mode == "isolated":
-                self._apply_matrix_project_context(session_result.project_context)
-                if (
-                    self.parent_view
-                    and hasattr(self.parent_view, "refresh_table")
-                    and session_result.ltr_project_loaded
-                ):
-                    self.parent_view.refresh_table()
-                
-        except Exception as e:
-            logger.error(f"Error updating Matrix editor with LTR number: {e}", exc_info=True)
-            # 显示错误消息给用户
-            if self.parent_view:
-                QMessageBox.critical(self.parent_view, "错误", f"更新Matrix编辑器时出错: {str(e)}")
+        self.ltr_result_coordinator.open_matrix_editor_with_ltr_number(
+            dl_number,
+            project_path,
+        )
 
     def _safe_open_matrix_workspace(self, dl_number):
         """

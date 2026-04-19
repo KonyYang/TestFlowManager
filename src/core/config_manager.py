@@ -4,12 +4,15 @@
 """
 
 import json
+import logging
 import os
 import sys
 from typing import Dict, Any, Optional
 
 # 使用统一的路径解析工具，避免硬编码路径
 from src.core.path_utils import get_resource_path as utils_get_resource_path, get_executable_dir, is_frozen
+
+module_logger = logging.getLogger(__name__)
 
 
 class ConfigManager:
@@ -38,21 +41,33 @@ class ConfigManager:
                     self._config = json.load(f)
                 # print(f"[DEBUG] Loaded config: {self._config}")
             except Exception as e:
-                print(f"Failed to load config from {config_path} with utf-8-sig: {e}")
+                module_logger.warning(
+                    "Failed to load config from %s with utf-8-sig: %s",
+                    config_path,
+                    e,
+                )
                 try:
                     # 如果 utf-8-sig 失败，尝试使用 utf-8 编码
                     with open(config_path, 'r', encoding='utf-8') as f:
                         self._config = json.load(f)
                     # print(f"[DEBUG] Loaded config with utf-8: {self._config}")
                 except Exception as e2:
-                    print(f"Failed to load config from {config_path} with utf-8: {e2}")
+                    module_logger.warning(
+                        "Failed to load config from %s with utf-8: %s",
+                        config_path,
+                        e2,
+                    )
                     try:
                         # 如果都失败了，尝试使用默认编码
                         with open(config_path, 'r') as f:
                             self._config = json.load(f)
                         # print(f"[DEBUG] Loaded config with default encoding: {self._config}")
                     except Exception as e3:
-                        print(f"Failed to load config from {config_path} with default encoding: {e3}")
+                        module_logger.error(
+                            "Failed to load config from %s with default encoding: %s",
+                            config_path,
+                            e3,
+                        )
                         self._config = {}
         else:
             # 如果配置文件不存在，使用默认配置
@@ -104,16 +119,22 @@ class ConfigManager:
                 equipment_sections = ['EquipmentDataSources', 'EQUIPMENT_DATA_SOURCES', 'equipmentdatasources']
                 for section_name in equipment_sections:
                     if section_name in paths_config:
-                        print(f"[INFO] Loading equipment data sources from section: {section_name}")
+                        module_logger.info(
+                            "Loading equipment data sources from section: %s",
+                            section_name,
+                        )
                         for key, value in paths_config[section_name].items():
                             self.set(f"equipment_data_sources.{key.lower()}", value)
                         break  # 找到第一个匹配的节就停止
             else:
-                print(f"[DEBUG] Paths config file not found: {paths_path}")
+                module_logger.debug("Paths config file not found: %s", paths_path)
         except Exception as e:
-            print(f"Failed to load paths config from {paths_file}: {e}")
-            import traceback
-            traceback.print_exc()
+            module_logger.error(
+                "Failed to load paths config from %s: %s",
+                paths_file,
+                e,
+                exc_info=True,
+            )
 
     def _get_resource_path(self, relative_path: str) -> str:
         """
@@ -158,6 +179,25 @@ class ConfigManager:
         """获取实际配置根目录。"""
         return os.path.dirname(self.get_main_config_path())
 
+    def get_app_config_path(self, filename: str) -> str:
+        """
+        获取 app/config/ 下指定配置文件的绝对路径（公共便捷方法）。
+
+        供 feature 层配置加载器使用，避免各模块重复构造 "src/app/config/" 路径前缀。
+        内部委托 _get_resource_path() 统一处理开发/打包双模式解析。
+
+        Args:
+            filename: 配置文件名 (如 "ltr_fields.json")
+
+        Returns:
+            配置文件的绝对路径
+
+        示例:
+            >>> config_manager.get_app_config_path("ltr_fields.json")
+            'd:/.../src/app/config/ltr_fields.json'
+        """
+        return self._get_resource_path(f"src/app/config/{filename}")
+
     def describe_config_source(self) -> str:
         """返回当前运行模式下的配置来源描述。"""
         mode = "生产环境配置" if getattr(sys, "frozen", False) else "开发环境配置"
@@ -175,7 +215,7 @@ class ConfigManager:
             with open(config_path, 'w', encoding='utf-8') as f:
                 json.dump(self._config, f, indent=4, ensure_ascii=False)
         except Exception as e:
-            print(f"Failed to save config to {config_path}: {e}")
+            module_logger.error("Failed to save config to %s: %s", config_path, e)
 
     def _get_default_config(self) -> Dict[str, Any]:
         """获取默认配置"""

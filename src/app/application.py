@@ -129,11 +129,7 @@ def main():
         sys.exit(exit_code)
         
     except Exception as e:
-        logger.error(f"Application error: {e}", exc_info=True)
-        # 添加额外的错误信息输出到控制台，便于调试
-        print(f"严重错误: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.critical(f"Application error: {e}", exc_info=True)
         sys.exit(1)
 
 

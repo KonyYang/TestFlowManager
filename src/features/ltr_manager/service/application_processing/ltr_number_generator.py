@@ -10,6 +10,7 @@ import sys
 from datetime import datetime
 from PyQt5.QtWidgets import QMessageBox, QInputDialog
 from src.core.config_manager import config_manager
+from src.core.logger import logger
 from src.utils.excel_utils import get_sheet_by_name, close_workbook, release_excel_app
 from src.features.ltr_manager.service.ltr_base_service import LTRBaseService
 from src.features.ltr_manager.service.ltr_editor_service import LTREditorService
@@ -52,7 +53,7 @@ class LTRNumberGenerator:
                 return self._handle_empty_dl(data_columns)
             elif DL.strip().startswith(('W', 'w')):
                 # 情况2: W开头的字符串
-                print(f"[DEBUG] 处理W后缀编号: {DL}")
+                logger.debug("处理 W 后缀编号: %s", DL)
                 return self._handle_w_prefix_dl(DL.strip(), data_columns)
             elif re.fullmatch(r"DL-\d{4}-\d{2}-\d{3}", DL.strip()):
                 # 情况3: 基础编号
@@ -84,7 +85,7 @@ class LTRNumberGenerator:
         """打开LTR文件"""
         try:
             ltr_file_path = config_manager.get_path("ltr_file")
-            print(f"[DEBUG] 获取LTR文件路径: {ltr_file_path}")
+            logger.debug("获取 LTR 文件路径: %s", ltr_file_path)
             if not ltr_file_path or not os.path.exists(ltr_file_path):
                 # 检查路径是否为相对路径
                 if ltr_file_path and not os.path.isabs(ltr_file_path):
@@ -96,7 +97,7 @@ class LTRNumberGenerator:
                         # 开发模式
                         base_path = os.path.abspath(".")
                     ltr_file_path = os.path.join(base_path, ltr_file_path)
-                    print(f"[DEBUG] 尝试在目录查找LTR文件: {ltr_file_path}")
+                    logger.debug("尝试在目录查找 LTR 文件: %s", ltr_file_path)
                     
                 # 再次检查文件是否存在
                 if not os.path.exists(ltr_file_path):
@@ -130,9 +131,9 @@ class LTRNumberGenerator:
                     QMessageBox.critical(self.parent, "错误", f"未找到{sheet_name}或{self.current_year - 1}工作表")
                 return False
             else:
-                print(f"[DEBUG] 成功定位到工作表: {self.worksheet.Name}")
+                logger.debug("成功定位到工作表: %s", self.worksheet.Name)
 
-            print("[DEBUG] LTR文件打开成功")
+            logger.debug("LTR 文件打开成功")
             return True
         except Exception as e:
             if self.parent:
@@ -168,31 +169,31 @@ class LTRNumberGenerator:
     def _handle_w_prefix_dl(self, dl, data_columns):
         """处理W开头的DL编号"""
         try:
-            print(f"[DEBUG] 开始验证W前缀编号: {dl}")
+            logger.debug("开始验证 W 前缀编号: %s", dl)
             # 验证W后缀格式：W/w后面只能跟数字或字母
             pattern = r'^[Ww][A-Za-z0-9]*$'
             is_valid = re.match(pattern, dl)
-            print(f"[DEBUG] 正则表达式 {pattern} 匹配结果: {is_valid}")
+            logger.debug("正则表达式 %s 匹配结果: %s", pattern, bool(is_valid))
             if not is_valid:
-                print(f"[DEBUG] W前缀编号格式验证失败: {dl}")
+                logger.debug("W 前缀编号格式验证失败: %s", dl)
                 if self.parent:
                     QMessageBox.warning(self.parent, "格式错误", f"W后缀编号格式无效，只能包含字母和数字: {dl}")
                 else:
-                    print(f"[DEBUG] parent为None，无法显示警告对话框")
+                    logger.debug("parent 为 None，无法显示警告对话框")
                 return {
                     'executed_write': False,
                     'ltr_number': None
                 }
 
-            print(f"[DEBUG] W前缀编号格式验证通过: {dl}")
+            logger.debug("W 前缀编号格式验证通过: %s", dl)
             # 生成当月的基础编号
             base_number = self._generate_monthly_ltr_number()
-            print(f"[DEBUG] 生成的基础编号: {base_number}")
+            logger.debug("生成的基础编号: %s", base_number)
             # 添加后缀
             suffix = dl.upper()  # 转换为大写并使用整个字符串作为后缀
-            print(f"[DEBUG] 提取的后缀: '{suffix}'")
+            logger.debug("提取的后缀: %s", suffix)
             ltr_number = base_number + suffix
-            print(f"[DEBUG] 最终LTR编号: {ltr_number}")
+            logger.debug("最终 LTR 编号: %s", ltr_number)
             target_row = self._find_target_row()
 
             # 写入数据

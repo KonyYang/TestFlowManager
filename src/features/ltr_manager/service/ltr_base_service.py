@@ -67,7 +67,10 @@ class LTRBaseService:
             
             if with_password:
                 ltr_password = config_manager.get_password("ltr_password")
-                print(f"[DEBUG] Password from config: {ltr_password}")
+                logger.debug(
+                    "LTR password retrieved from config (masked, length=%s)",
+                    len(ltr_password) if ltr_password else 0,
+                )
                 workbook = open_excel_file(ltr_file_path, read_only=False, password=ltr_password)
                 mode = "读写模式"
             else:

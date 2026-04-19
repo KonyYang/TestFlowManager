@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from src.core.config_manager import config_manager
+from src.core.logger import logger
 from src.domain.project.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext
 from src.domain.project.project_document_context import ProjectDocumentContext
@@ -109,5 +110,5 @@ class ReportUpdaterData:
             self.config.last_update_time = datetime.now()
             return True
         except Exception as e:
-            print(f"更新设备列表时出错: {e}")
+            logger.error(f"更新设备列表时出错: {e}")
             return False

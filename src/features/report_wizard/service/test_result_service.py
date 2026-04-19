@@ -507,8 +507,12 @@ class TestResultService:
             processed_requirement = self._replace_greater_lesser_symbols(filtered_requirement)
             processed_requirement = self._clean_text(processed_requirement)
             
-            # 打印获取的值
-            print(f"DEBUG: requirement='{requirement}', filtered_requirement='{filtered_requirement}', processed_requirement='{processed_requirement}'")
+            logger.debug(
+                "Requirement pipeline: requirement=%r, filtered=%r, processed=%r",
+                requirement,
+                filtered_requirement,
+                processed_requirement,
+            )
             
             # 填充单元格
             cells = [step_number, test_item, requirement, step_desc, processed_requirement, 'Pass']

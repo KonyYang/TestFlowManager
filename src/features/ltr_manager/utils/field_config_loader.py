@@ -8,7 +8,6 @@ import os
 from typing import Any, Dict, List
 
 from src.core.logger import logger
-from src.core.path_utils import get_executable_dir
 
 
 class LTRFieldConfigLoader:
@@ -24,21 +23,14 @@ class LTRFieldConfigLoader:
         """
         获取LTR字段配置文件路径。
 
-        使用统一的路径解析，兼容开发模式和打包模式。
-        - 打包模式: <_internal>/config/ltr_fields.json（PyInstaller 数据目录）
-        - 开发模式: <项目根>/src/app/config/ltr_fields.json（源码实际位置）
+        委托给 ConfigManager.get_app_config_path() 统一处理开发/打包双模式路径解析，
+        消除重复的 is_frozen / get_executable_dir 分支逻辑。
 
         Returns:
             配置文件的绝对路径
         """
-        from src.core.path_utils import get_resource_path, is_frozen
-
-        if is_frozen():
-            # 打包模式：datas 在 _internal/config/ 下（见 TestFlowManager.spec）
-            return get_resource_path("config", "ltr_fields.json")
-        else:
-            # 开发模式：源码实际位于 src/app/config/
-            return get_resource_path("src", "app", "config", "ltr_fields.json")
+        from src.core.config_manager import config_manager
+        return config_manager.get_app_config_path("ltr_fields.json")
 
     def _get_default_config_path(self) -> str:
         """获取默认配置文件路径（与主路径相同）。"""

@@ -51,7 +51,7 @@ class DocumentParserController:
                 logger.warning(f"正文内容编辑对话框未成功处理，文件路径: {file_path}")
             
         except Exception as e:
-            print(f"显示正文内容编辑器时出错: {e}")
+            logger.error(f"显示正文内容编辑器时出错: {e}")
             if self.parent_window:
                 QMessageBox.critical(self.parent_window, "错误", f"显示正文内容编辑器时出错: {str(e)}")
 
@@ -69,6 +69,6 @@ class DocumentParserController:
                 if self.parent_window:
                     QMessageBox.information(self.parent_window, "成功", "文档内容已成功更新")
         except Exception as e:
-            print(f"更新文档内容时出错: {e}")
+            logger.error(f"更新文档内容时出错: {e}")
             if self.parent_window:
                 QMessageBox.critical(self.parent_window, "错误", f"更新文档内容时出错: {str(e)}")

@@ -24,7 +24,6 @@ _LAZY_MODULES = {
 # 类名 → (模块名, 类名) 映射
 _LAZY_CLASSES = {
     'DocumentEditorMixin': ('document_editor_mixin', 'DocumentEditorMixin'),
-    'ConfigHandler': ('config_handler', 'ConfigHandler'),
     'LTRDataManager': ('ltr_data_manager', 'LTRDataManager'),
 }
 
@@ -71,7 +70,6 @@ __all__ = [
     'string_utils',
     'word_utils',
     # 类
-    'ConfigHandler',
     'LTRDataManager',
     'DocumentEditorMixin',
     # 别名（向后兼容）

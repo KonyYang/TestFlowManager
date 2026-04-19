@@ -51,7 +51,7 @@ class Logger:
                 file_handler = logging.FileHandler(log_file, encoding='utf-8')
                 file_handler.setLevel(log_level)  # 使用与logger相同的级别
             except Exception as e:
-                print(f"无法创建日志文件 {log_file}: {e}")
+                sys.stderr.write(f"无法创建日志文件 {log_file}: {e}\n")
                 # 如果无法创建文件处理器，将继续只使用控制台处理器
 
         # 创建格式器（不包含logger名称，避免重复）

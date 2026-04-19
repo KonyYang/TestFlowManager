@@ -228,7 +228,7 @@ def save_to_excel(file_path, data):
         wb.save(file_path)
         return True
     except Exception as e:
-        print(f"保存Excel失败: {e}")
+        logger.error(f"保存Excel失败: {e}")
         return False
 
 def get_worksheet_names(workbook: Any) -> List[str]:

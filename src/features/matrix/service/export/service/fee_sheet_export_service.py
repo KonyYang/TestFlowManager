@@ -7,13 +7,12 @@ import os
 import time
 from typing import Dict, Any, List, Optional
 
-import pythoncom
-import win32com.client as win32
-
 from src.core.logger import logger
 from src.domain.project.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext
 from src.domain.project.project_document_context import ProjectDocumentContext
+from src.infrastructure.office.facade import OfficeFacade
+from src.infrastructure.office.session import OfficeSession
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 from src.features.matrix.service.export.service.fee_sheet_path_resolver import (
     FeeSheetPathResolver,
@@ -29,10 +28,15 @@ class FeeSheetExportService:
     提供生成费用表的业务逻辑服务（COM + 编排）
     """
 
-    def __init__(self, project_context: Optional[ProjectContext] = None):
+    def __init__(
+        self,
+        project_context: Optional[ProjectContext] = None,
+        office_facade: Optional[OfficeFacade] = None,
+    ):
         """初始化费用表导出服务"""
         self._path_resolver = FeeSheetPathResolver()
         self._anchor_helper = FeeSheetAnchorHelper()
+        self._office_facade = office_facade or OfficeFacade()
         # 兼容性属性（外部代码可能直接访问）
         self.template_dir = self._path_resolver.template_dir
         self.output_dir = self._path_resolver.output_dir
@@ -199,7 +203,7 @@ class FeeSheetExportService:
 
                         if i < len(all_tests):
                             worksheet.Cells(insert_position, 3).Value = all_tests[i].get(
-                                test, ""
+                                "test", ""
                             )
                             logger.debug(
                                 f"  在第{insert_position}行插入新行并填入测试项目: "
@@ -308,9 +312,6 @@ class FeeSheetExportService:
             # ---- 获取测试项目信息 ----
             group_tests_info = self._get_group_tests_from_matrix(matrix_data_structure)
 
-            # ---- COM 操作 ----
-            pythoncom.CoInitialize()
-
             logger.info(f"正在处理费用表文件: {output_path}")
 
             if not use_existing_file:
@@ -323,22 +324,14 @@ class FeeSheetExportService:
                 shutil.copy2(templates[0], output_path)
                 logger.info(f"已复制模板文件到: {output_path}")
 
+            excel_session = None
             excel_app = None
             wb = None
             ws = None
             try:
-                excel_app = win32.Dispatch("Excel.Application")
-                try:
-                    excel_app.Visible = False
-                except Exception:
-                    pass
-                try:
-                    excel_app.DisplayAlerts = False
-                except Exception:
-                    pass
-
-                wb = excel_app.Workbooks.Open(output_path)
+                excel_session, excel_app, wb = self._open_excel_workbook(output_path)
                 ws = wb.Sheets(1)
+                self.excel_app = excel_app
 
                 if use_existing_file:
                     existing_anchor = self._anchor_helper.find_sample_preparation_anchor(ws)
@@ -352,28 +345,19 @@ class FeeSheetExportService:
                         except Exception:
                             pass
                         wb = None
-                        try:
-                            excel_app.Quit()
-                        except Exception:
-                            pass
+                        self._release_excel_session(excel_session)
+                        excel_session = None
                         excel_app = None
+                        self.excel_app = None
 
                         rebuilt = self._path_resolver.rebuild_from_template(output_path)
                         if not rebuilt:
                             return (False, None)
 
                         use_existing_file = False
-                        excel_app = win32.Dispatch("Excel.Application")
-                        try:
-                            excel_app.Visible = False
-                        except Exception:
-                            pass
-                        try:
-                            excel_app.DisplayAlerts = False
-                        except Exception:
-                            pass
-                        wb = excel_app.Workbooks.Open(output_path)
+                        excel_session, excel_app, wb = self._open_excel_workbook(output_path)
                         ws = wb.Sheets(1)
+                        self.excel_app = excel_app
 
                 success = self._fill_group_tests_data(ws, group_tests_info)
 
@@ -413,13 +397,8 @@ class FeeSheetExportService:
                         wb.Close(SaveChanges=True)
                     except Exception:
                         pass
-                if excel_app:
-                    try:
-                        excel_app.Quit()
-                    except Exception:
-                        pass
-
-            pythoncom.CoUninitialize()
+                self._release_excel_session(excel_session)
+                self.excel_app = None
 
             logger.info("费用表导出完成！")
             return (True, output_path)
@@ -514,3 +493,20 @@ class FeeSheetExportService:
             logger.info(f"费用表将保存到默认路径: {output_path}")
 
             return (output_path, self.output_dir, False)
+
+    def _open_excel_workbook(self, output_path: str) -> tuple[OfficeSession, Any, Any]:
+        """通过 OfficeFacade 获取 Excel runtime 并打开工作簿。"""
+        excel_session = self._office_facade.create_session("excel")
+        runtime_handle = excel_session.acquire()
+        excel_app = runtime_handle.application
+        workbook = excel_app.Workbooks.Open(output_path)
+        return excel_session, excel_app, workbook
+
+    def _release_excel_session(self, excel_session: Optional[OfficeSession]) -> None:
+        """释放 Excel runtime session。"""
+        if excel_session is None:
+            return
+        try:
+            excel_session.release()
+        except Exception as exc:
+            logger.warning(f"释放 Excel runtime 时出错: {exc}")

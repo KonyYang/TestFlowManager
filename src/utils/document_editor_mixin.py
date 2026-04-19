@@ -30,15 +30,11 @@ class DocumentEditorMixin:
         logger.info(f"开始初始化文档编辑器组件，文件路径: {file_path}")
         self.file_path = file_path
         self.current_edits = {}
-        
-        # 只有当 document_content_service 不存在时才创建新实例
-        if not hasattr(self, 'document_content_service') or self.document_content_service is None:
-            # 延迟导入 DocumentContentService 以避免循环依赖
-            from src.features.content_editor.service.document_content_service import DocumentContentService
-            self.document_content_service = DocumentContentService()
-            logger.info("DocumentContentService 实例已创建")
+
+        if hasattr(self, 'document_content_service') and self.document_content_service is not None:
+            logger.info("document_content_service 已注入")
         else:
-            logger.info("DocumentContentService 实例已存在")
+            logger.warning("document_content_service 未注入")
 
         # 不要重新初始化编辑器、预设列表等组件，因为它们可能已经在UI初始化时创建了
         # 只初始化那些需要的属性
@@ -236,25 +232,19 @@ class DocumentEditorMixin:
                 logger.error("edit_conclusions_content 未初始化")
                 return
             
-            # 使用优化后的方法，一次性获取所有需要的内容，只需遍历文档一次
-            all_sections_content = self.document_content_service.get_all_content_sections(self.file_path)
-            logger.info(f"获取到的所有章节内容: {list(all_sections_content.keys())}")
-            
-            # 获取 PURPOSE 到 CONCLUSIONS 的内容
-            purpose_content = all_sections_content.get("PURPOSE-CONCLUSIONS", "")
-            logger.info(f"PURPOSE后内容长度: {len(purpose_content)}, 内容预览: {purpose_content[:100] if purpose_content else 'None'}")
+            content = self.document_content_service.load_document_content(self.file_path)
+            purpose_content = content.get("PURPOSE", "")
+            logger.info(
+                f"PURPOSE后内容长度: {len(purpose_content)}, 内容预览: "
+                f"{purpose_content[:100] if purpose_content else 'None'}"
+            )
             self.edit_purpose_content.setPlainText(purpose_content)
-            
-            # 获取 CONCLUSIONS 到 SAMPLE DESCRIPTION 的内容
-            conclusions_content = all_sections_content.get("CONCLUSIONS-SAMPLE DESCRIPTION", "")
-            
-            # 如果没有找到 SAMPLE DESCRIPTION，则尝试获取 CONCLUSIONS 之后的所有内容
-            if not conclusions_content and "CONCLUSIONS-SAMPLE DESCRIPTION" not in all_sections_content:
-                conclusions_content = all_sections_content.get("CONCLUSIONS-END", "")
-                logger.info(f"CONCLUSIONS后内容长度（到文档末尾或表格停止）: {len(conclusions_content)}, 内容预览: {conclusions_content[:100] if conclusions_content else 'None'}")
-            else:
-                logger.info(f"CONCLUSIONS后内容长度（SAMPLE DESCRIPTION之前）: {len(conclusions_content)}, 内容预览: {conclusions_content[:100] if conclusions_content else 'None'}")
-            
+
+            conclusions_content = content.get("CONCLUSIONS", "")
+            logger.info(
+                f"CONCLUSIONS后内容长度: {len(conclusions_content)}, 内容预览: "
+                f"{conclusions_content[:100] if conclusions_content else 'None'}"
+            )
             self.edit_conclusions_content.setPlainText(conclusions_content)
             
             # 保存原始内容用于比较
@@ -292,8 +282,7 @@ class DocumentEditorMixin:
             
         except Exception as e:
             logger.error(f"加载文档内容时出错: {e}")
-            import traceback
-            logger.error(f"错误堆栈: {traceback.format_exc()}")
+            logger.error("加载文档内容失败", exc_info=True)
     
     def _load_preset_descriptions(self, category: str, list_widget: QListWidget):
         """加载预设描述"""
@@ -460,46 +449,27 @@ class DocumentEditorMixin:
         """保存修改"""
         try:
             logger.info("开始保存修改")
-            
-            # 先获取当前文档的所有章节内容，以确定是否需要更新到文档末尾
-            all_sections_content = self.document_content_service.get_all_content_sections(self.file_path)
-            
-            # 准备批量更新的数据
-            updates = {}
-            
-            # 添加 PURPOSE 到 CONCLUSIONS 的内容更新
-            if "PURPOSE" in self.current_edits:
-                new_content = self.current_edits["PURPOSE"]
-                logger.info(f"准备更新 PURPOSE 到 CONCLUSIONS 的内容，新内容长度: {len(new_content)}")
-                updates["PURPOSE-CONCLUSIONS"] = new_content
-            
-            # 添加 CONCLUSIONS 到 SAMPLE DESCRIPTION 的内容更新
-            if "CONCLUSIONS" in self.current_edits:
-                new_content = self.current_edits["CONCLUSIONS"]
-                logger.info(f"准备更新 CONCLUSIONS 到 SAMPLE DESCRIPTION 的内容，新内容长度: {len(new_content)}")
-                
-                # 检查是否存在 CONCLUSIONS-SAMPLE DESCRIPTION 的内容
-                if "CONCLUSIONS-SAMPLE DESCRIPTION" in all_sections_content:
-                    updates["CONCLUSIONS-SAMPLE DESCRIPTION"] = new_content
-                else:
-                    # 如果不存在 SAMPLE DESCRIPTION，更新到文档末尾
-                    updates["CONCLUSIONS-END"] = new_content
-            
-            if updates:
-                # 使用批量更新方法，只需打开文档一次
-                success = self.document_content_service.update_multiple_sections_content(self.file_path, updates)
-                
-                if success:
-                    logger.info(f"成功更新 {len(updates)} 个部分的内容")
-                    # 发送信号通知控制器更新内容
-                    if hasattr(self, 'content_updated'):
-                        self.content_updated.emit(self.current_edits)
-                    if hasattr(self, 'accept'):
-                        self.accept()  # 关闭对话框
-                else:
-                    logger.error("批量更新失败")
+            purpose_content = self.edit_purpose_content.toPlainText()
+            conclusions_content = self.edit_conclusions_content.toPlainText()
+            original_purpose = self.original_purpose_content.toPlainText()
+            original_conclusions = self.original_conclusions_content.toPlainText()
+
+            success = self.document_content_service.save_document_content(
+                self.file_path,
+                purpose_content,
+                conclusions_content,
+                original_purpose,
+                original_conclusions,
+            )
+
+            if success:
+                logger.info("成功保存文档内容")
+                if hasattr(self, 'content_updated'):
+                    self.content_updated.emit(self.current_edits)
+                if hasattr(self, 'accept'):
+                    self.accept()
             else:
-                logger.warning("没有修改内容需要保存")
+                logger.error("保存文档内容失败")
                 
         except Exception as e:
             logger.error(f"保存修改时出错: {e}")
@@ -532,60 +502,34 @@ class DocumentEditorMixin:
             if not hasattr(self, 'file_path') or not self.file_path:
                 logger.error("文档路径未设置，无法保存更改")
                 return False
-            
-            # 先获取当前文档的所有章节内容，以确定是否需要更新到文档末尾
-            all_sections_content = self.document_content_service.get_all_content_sections(self.file_path)
-            
-            # 准备批量更新的数据
-            updates = {}
-            
+
             # 获取当前编辑器中的内容
             current_purpose_content = self.edit_purpose_content.toPlainText()
             current_conclusions_content = self.edit_conclusions_content.toPlainText()
-            
-            # 添加 PURPOSE 到 CONCLUSIONS 的内容更新
-            if current_purpose_content != self.original_purpose_content.toPlainText():
-                logger.info(f" PURPOSE 内容已更改，准备更新，新内容长度: {len(current_purpose_content)}")
-                updates["PURPOSE-CONCLUSIONS"] = current_purpose_content
-            
-            # 添加 CONCLUSIONS 到 SAMPLE DESCRIPTION 的内容更新
-            if current_conclusions_content != self.original_conclusions_content.toPlainText():
-                logger.info(f" CONCLUSIONS 内容已更改，准备更新，新内容长度: {len(current_conclusions_content)}")
-                
-                # 检查是否存在 CONCLUSIONS-SAMPLE DESCRIPTION 的内容
-                if "CONCLUSIONS-SAMPLE DESCRIPTION" in all_sections_content:
-                    updates["CONCLUSIONS-SAMPLE DESCRIPTION"] = current_conclusions_content
-                else:
-                    # 如果不存在 SAMPLE DESCRIPTION，更新到文档末尾
-                    updates["CONCLUSIONS-END"] = current_conclusions_content
-            
-            if updates:
-                # 使用批量更新方法，只需打开文档一次
-                success = self.document_content_service.update_multiple_sections_content(self.file_path, updates)
-                
-                if success:
-                    logger.info(f"成功更新 {len(updates)} 个部分的内容到文档")
-                    
-                    # 更新原始内容，避免重复保存相同的更改
-                    self.original_purpose_content.setPlainText(current_purpose_content)
-                    self.original_conclusions_content.setPlainText(current_conclusions_content)
-                    
-                    # 发送信号通知控制器更新内容
-                    if hasattr(self, 'content_updated'):
-                        self.content_updated.emit(self.file_path)
-                    
-                    # 更新保存按钮状态（此时文档已保存，按钮应被禁用）
-                    self._update_save_button_state()
-                    return True
-                else:
-                    logger.error("批量更新失败")
-                    return False
-            else:
-                logger.info("没有内容更改需要保存")
+
+            success = self.document_content_service.save_document_content(
+                self.file_path,
+                current_purpose_content,
+                current_conclusions_content,
+                self.original_purpose_content.toPlainText(),
+                self.original_conclusions_content.toPlainText(),
+            )
+
+            if success:
+                logger.info("成功更新文档内容")
+                self.original_purpose_content.setPlainText(current_purpose_content)
+                self.original_conclusions_content.setPlainText(current_conclusions_content)
+
+                if hasattr(self, 'content_updated'):
+                    self.content_updated.emit(self.file_path)
+
+                self._update_save_button_state()
                 return True
+
+            logger.error("保存文档内容失败")
+            return False
                 
         except Exception as e:
             logger.error(f"保存更改到文档时出错: {e}")
-            import traceback
-            logger.error(f"错误堆栈: {traceback.format_exc()}")
+            logger.error("保存更改到文档失败", exc_info=True)
             return False

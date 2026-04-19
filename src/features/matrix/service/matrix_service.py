@@ -68,24 +68,6 @@ class MatrixService:
         # 标记为已初始化
         self._initialized = True
 
-    @property
-    def last_imported_spec_path(self):
-        """
-        最近导入的规格书文件路径 - 兼容性属性
-
-        实际数据存储在 spec_processing_service 中，此属性仅为兼容性提供访问
-        """
-        return self.spec_processing_service.last_imported_spec_path
-
-    @last_imported_spec_path.setter
-    def last_imported_spec_path(self, value):
-        """
-        设置最近导入的规格书文件路径 - 兼容性属性
-
-        实际数据存储在 spec_processing_service 中
-        """
-        self.spec_processing_service.last_imported_spec_path = value
-
     def add_column(self, column_name="", position=None):
         """添加新列 - Service层业务逻辑"""
         return self.base_operation_service.add_column(column_name, position)
@@ -173,14 +155,5 @@ class MatrixService:
     def get_redo_cell_operation_text(self):
         """获取重做单元格操作的文本描述"""
         return self.formatting_service.get_redo_cell_operation_text()
-
-    def initialize_matrix(self):
-        """初始化Matrix - Service层业务逻辑"""
-        return self.initializer.initialize_matrix()
-
-    def import_from_excel(self, file_path):
-        """从 Excel 导入 Matrix 数据。"""
-        return self.import_service.import_from_excel(file_path)
-
 
 

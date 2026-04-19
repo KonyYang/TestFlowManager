@@ -535,7 +535,7 @@ if __name__ == "__main__":
     
     # 更新版本号
     result = update_test_method_versions(matrix_data)
-    print(f"成功更新 {result['updated_count']} 行")
-    print("更新后的数据:")
+    logger.info(f"成功更新 {result['updated_count']} 行")
+    logger.info("更新后的数据:")
     for row in matrix_data:
-        print(row)
+        logger.info(row)

@@ -10,6 +10,9 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal
 from src.features.content_editor.service.body_content_service import BodyContentService
+from src.features.content_editor.service.document_content_service import (
+    DocumentContentService,
+)
 from src.core.logger import logger
 from src.utils.document_editor_mixin import DocumentEditorMixin
 
@@ -33,6 +36,7 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
         super().__init__(parent)
         self.document_path = None
         self.body_content_service = BodyContentService()
+        self.document_content_service = DocumentContentService()
         # 添加状态保持变量
         self._cached_purpose_content = ""
         self._cached_conclusions_content = ""
@@ -343,25 +347,18 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
                 self.edit_purpose_content.setPlainText(self._cached_purpose_content)
                 self.edit_conclusions_content.setPlainText(self._cached_conclusions_content)
             else:
-                # 使用优化后的方法，一次性获取所有需要的内容，只需遍历文档一次
-                all_sections_content = self.body_content_service.get_all_content_sections(self.file_path)
-                logger.info(f"获取到的所有章节内容: {list(all_sections_content.keys())}")
-                
-                # 获取 PURPOSE 到 CONCLUSIONS 的内容
-                purpose_content = all_sections_content.get("PURPOSE-CONCLUSIONS", "")
-                logger.info(f"PURPOSE后内容长度: {len(purpose_content)}, 内容预览: {purpose_content[:100] if purpose_content else 'None'}")
+                content = self.document_content_service.load_document_content(self.file_path)
+                purpose_content = content.get("PURPOSE", "")
+                logger.info(
+                    f"PURPOSE后内容长度: {len(purpose_content)}, 内容预览: "
+                    f"{purpose_content[:100] if purpose_content else 'None'}"
+                )
                 self.edit_purpose_content.setPlainText(purpose_content)
-                
-                # 获取 CONCLUSIONS 到 SAMPLE DESCRIPTION 的内容
-                conclusions_content = all_sections_content.get("CONCLUSIONS-SAMPLE DESCRIPTION", "")
-                
-                # 如果没有找到 SAMPLE DESCRIPTION，则尝试获取 CONCLUSIONS 之后的所有内容
-                if not conclusions_content and "CONCLUSIONS-SAMPLE DESCRIPTION" not in all_sections_content:
-                    conclusions_content = all_sections_content.get("CONCLUSIONS-END", "")
-                    logger.info(f"CONCLUSIONS后内容长度（到文档末尾或表格停止）: {len(conclusions_content)}, 内容预览: {conclusions_content[:100] if conclusions_content else 'None'}")
-                else:
-                    logger.info(f"CONCLUSIONS后内容长度（SAMPLE DESCRIPTION之前）: {len(conclusions_content)}, 内容预览: {conclusions_content[:100] if conclusions_content else 'None'}")
-                
+                conclusions_content = content.get("CONCLUSIONS", "")
+                logger.info(
+                    f"CONCLUSIONS后内容长度: {len(conclusions_content)}, 内容预览: "
+                    f"{conclusions_content[:100] if conclusions_content else 'None'}"
+                )
                 self.edit_conclusions_content.setPlainText(conclusions_content)
                 
                 # 保存到缓存中
@@ -384,9 +381,9 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
             logger.info(f"PURPOSE 预设列表组件状态: {getattr(self, 'purpose_preset_list', None) is not None}")
             logger.info(f"CONCLUSIONS 预设列表组件状态: {getattr(self, 'conclusions_preset_list', None) is not None}")
             
-            # 检查 body_content_service 中的预设描述
-            logger.info(f"body_content_service 中的 PURPOSE 预设: {self.body_content_service.get_predefined_descriptions('PURPOSE')}")
-            logger.info(f"body_content_service 中的 CONCLUSIONS 预设: {self.body_content_service.get_predefined_descriptions('CONCLUSIONS')}")
+            # 检查 document_content_service 中的预设描述
+            logger.info(f"document_content_service 中的 PURPOSE 预设: {self.document_content_service.get_predefined_descriptions('PURPOSE')}")
+            logger.info(f"document_content_service 中的 CONCLUSIONS 预设: {self.document_content_service.get_predefined_descriptions('CONCLUSIONS')}")
             
             # 检查预设列表组件是否存在
             if hasattr(self, 'purpose_preset_list') and self.purpose_preset_list is not None:
@@ -405,8 +402,7 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
             
         except Exception as e:
             logger.error(f"加载文档内容时出错: {e}")
-            import traceback
-            logger.error(f"错误堆栈: {traceback.format_exc()}")
+            logger.error("加载文档内容失败", exc_info=True)
 
     def save_current_edits_to_document(self):
         """
@@ -445,49 +441,29 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
                 logger.info("没有内容更改，无需保存")
                 return True
             
-            # 获取当前文档的所有章节内容
-            all_sections_content = self.body_content_service.get_all_content_sections(self.document_path)
-            
-            # 准备批量更新的数据
-            updates = {}
-            if purpose_changed:
-                updates["PURPOSE-CONCLUSIONS"] = current_purpose_content
-                logger.info(f"准备更新 PURPOSE 内容，长度: {len(current_purpose_content)}")
-            
-            if conclusions_changed:
-                # 检查是否存在 CONCLUSIONS-SAMPLE DESCRIPTION 的内容
-                if "CONCLUSIONS-SAMPLE DESCRIPTION" in all_sections_content:
-                    updates["CONCLUSIONS-SAMPLE DESCRIPTION"] = current_conclusions_content
-                else:
-                    # 如果不存在 SAMPLE DESCRIPTION，更新到文档末尾
-                    updates["CONCLUSIONS-END"] = current_conclusions_content
-                logger.info(f"准备更新 CONCLUSIONS 内容，长度: {len(current_conclusions_content)}")
-            
-            if updates:
-                # 使用批量更新方法
-                success = self.body_content_service.update_multiple_sections_content(self.document_path, updates)
-                
-                if success:
-                    logger.info(f"成功更新 {len(updates)} 个部分的内容")
-                    
-                    # 更新原始内容，避免重复保存相同的更改
-                    if self.original_purpose_content:
-                        self.original_purpose_content.setPlainText(current_purpose_content)
-                    if self.original_conclusions_content:
-                        self.original_conclusions_content.setPlainText(current_conclusions_content)
-                    
-                    # 发送信号通知内容已更新
-                    self.content_updated.emit(self.document_path)
-                    return True
-                else:
-                    logger.error("更新文档内容失败")
-                    return False
-            else:
-                logger.info("没有内容更改需要保存")
+            success = self.document_content_service.save_document_content(
+                self.document_path,
+                current_purpose_content,
+                current_conclusions_content,
+                original_purpose_content,
+                original_conclusions_content,
+            )
+
+            if success:
+                logger.info("成功更新文档内容")
+
+                if self.original_purpose_content:
+                    self.original_purpose_content.setPlainText(current_purpose_content)
+                if self.original_conclusions_content:
+                    self.original_conclusions_content.setPlainText(current_conclusions_content)
+
+                self.content_updated.emit(self.document_path)
                 return True
+
+            logger.error("更新文档内容失败")
+            return False
                 
         except Exception as e:
             logger.error(f"保存当前编辑到文档时出错: {e}")
-            import traceback
-            logger.error(f"错误堆栈: {traceback.format_exc()}")
+            logger.error("保存当前编辑到文档失败", exc_info=True)
             return False

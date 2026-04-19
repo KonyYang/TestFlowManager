@@ -10,7 +10,9 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal
 from src.core.logger import logger
-from src.features.content_editor.service.body_content_service import BodyContentService
+from src.features.content_editor.service.document_content_service import (
+    DocumentContentService,
+)
 from src.utils.document_editor_mixin import DocumentEditorMixin
 
 
@@ -32,6 +34,7 @@ class BodyContentDialog(QDialog, DocumentEditorMixin):
             parent: 父窗口
         """
         super().__init__(parent)
+        self.document_content_service = DocumentContentService()
         self._init_document_editor_components(file_path)  # 初始化混入类组件
         
         self.setWindowTitle("正文内容编辑")

@@ -2,6 +2,9 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from src.core.logger import logger
 from src.core.project_context import ProjectContext
+from src.features.matrix.controller.runtime.matrix_export_runtime_coordinator import (
+    MatrixExportRuntimeCoordinator,
+)
 from src.features.matrix.service.matrix_application_service import MatrixApplicationService
 
 
@@ -32,6 +35,7 @@ class MatrixController:
         self.application_service = (
             application_service or MatrixApplicationService(self.service)
         )
+        self.export_runtime_coordinator = MatrixExportRuntimeCoordinator()
         self.ltr_integration_service = None
         self.project_context = None
         self.ltr_number = None
@@ -93,7 +97,7 @@ class MatrixController:
         self.application_service.export_service.sync_table_to_model()
 
     def initialize_matrix(self):
-        return self.service.initialize_matrix()
+        return self.application_service.initialize_matrix()
 
     def extract_test_methods_from_spec(self):
         """从规格书提取测试方法 - 委托给应用服务层"""
@@ -229,15 +233,10 @@ class MatrixController:
 
     def auto_export_matrix_data_on_shutdown(self):
         try:
-            project_context = self.get_project_context()
-            sync_callback = (
-                self.parent.sync_to_model
-                if self.parent and hasattr(self.parent, "sync_to_model")
-                else None
-            )
-            return self.application_service.auto_export_to_project(
-                project_context,
-                sync_callback=sync_callback,
+            return self.export_runtime_coordinator.auto_export_on_shutdown(
+                self.application_service,
+                self.get_project_context(),
+                self.parent,
             )
         except Exception as e:
             logger.error(f"自动导出Matrix数据时出错: {e}", exc_info=True)
@@ -245,57 +244,25 @@ class MatrixController:
 
     def handle_export_matrix_to_excel(self):
         try:
-            if self.parent and hasattr(self.parent, "sync_to_model"):
-                self.parent.sync_to_model()
-
-            project_context = self.get_project_context()
-            default_filename = self.application_service.build_default_export_filename(
-                project_context
+            return self.export_runtime_coordinator.handle_export_matrix_to_excel(
+                self.application_service,
+                self.get_project_context(),
+                self.parent,
             )
-            file_path, _ = QFileDialog.getSaveFileName(
-                self.parent if self.parent else None,
-                "导出窗口矩阵",
-                default_filename,
-                "Excel Files (*.xlsx)",
-            )
-
-            if not file_path:
-                return {"success": False, "message": None, "cancelled": True}
-
-            result = self.application_service.export_to_excel_with_result(
-                file_path,
-                "matrix_excel",
-            )
-            if result["success"]:
-                return {"success": True, "message": None}
-
-            error_kind = result["error_kind"]
-            if error_kind == "permission":
-                return {
-                    "success": False,
-                    "message": "导出失败，文件已被其他程序占用（可能已在Excel中打开），请关闭文件后重试",
-                }
-            if error_kind == "missing_path":
-                return {"success": False, "message": "导出失败，请检查文件路径是否正确"}
-            if error_kind == "general":
-                return {"success": False, "message": "导出失败，请检查文件路径或权限"}
-            return {"success": False, "message": "导出失败，发生未知错误"}
         except Exception as e:
             logger.error(f"导出窗口矩阵时出错: {e}", exc_info=True)
             return {"success": False, "message": f"导出过程中发生异常: {str(e)}"}
 
     def handle_export_llcr(self):
         try:
-            sync_callback = (
-                self.parent.sync_to_model
-                if self.parent and hasattr(self.parent, "sync_to_model")
-                else None
+            return self.export_runtime_coordinator.handle_export_llcr(
+                self.application_service,
+                self.parent,
             )
-            return self.application_service.export_llcr(sync_callback=sync_callback)
         except Exception as e:
             logger.error(f"导出LLCR时出错: {e}", exc_info=True)
-            QMessageBox.warning(
-                self.parent if self.parent else None,
+            self.export_runtime_coordinator.show_export_warning(
+                self.parent,
                 "错误",
                 f"导出LLCR过程中发生异常: {str(e)}",
             )
@@ -303,16 +270,14 @@ class MatrixController:
 
     def handle_export_cr(self):
         try:
-            sync_callback = (
-                self.parent.sync_to_model
-                if self.parent and hasattr(self.parent, "sync_to_model")
-                else None
+            return self.export_runtime_coordinator.handle_export_cr(
+                self.application_service,
+                self.parent,
             )
-            return self.application_service.export_cr(sync_callback=sync_callback)
         except Exception as e:
             logger.error(f"导出CR时出错: {e}", exc_info=True)
-            QMessageBox.warning(
-                self.parent if self.parent else None,
+            self.export_runtime_coordinator.show_export_warning(
+                self.parent,
                 "错误",
                 f"导出CR过程中发生异常: {str(e)}",
             )

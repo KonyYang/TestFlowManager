@@ -11,8 +11,11 @@ class MatrixApplicationService:
         self.matrix_service = matrix_service
         self.export_service = MatrixExportService(matrix_service)
 
+    def initialize_matrix(self):
+        return self.matrix_service.initializer.initialize_matrix()
+
     def import_from_excel(self, file_path: str) -> bool:
-        return self.matrix_service.import_from_excel(file_path)
+        return self.matrix_service.import_service.import_from_excel(file_path)
 
     def export_to_excel(self, file_path, export_type="matrix_excel"):
         return self.export_service.export_matrix_excel(file_path, export_type)
@@ -68,7 +71,7 @@ class MatrixApplicationService:
         if not ltr_data:
             return False
 
-        self.matrix_service.initialize_matrix()
+        self.initialize_matrix()
         ltr_integration_service.get_test_info()
         return True
 
@@ -104,7 +107,7 @@ class MatrixApplicationService:
 
     def standardize_and_fill(self):
         """执行 Matrix 标准化填充主流程。"""
-        init_result = self.matrix_service.initialize_matrix()
+        init_result = self.initialize_matrix()
         if not init_result:
             return {
                 "success": False,
