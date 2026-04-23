@@ -4,16 +4,21 @@ Step Record生成服务
 根据Matrix中的数据自动生成Step Record Word文档
 """
 
-import os
-import re
-from typing import Dict, Any, List, Optional
-from src.core.logger import logger
-from src.core.config_manager import config_manager
-from src.utils.word_utils import get_shared_word_app, release_word_app, open_word_file
-from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
-from src.features.step_record_generator.service.table_structure_service import StepRecordTableStructureService
 import json
+import os
 import shutil
+from typing import Dict, Any, List, Optional
+
+from src.core.config_manager import config_manager
+from src.core.logger import logger
+from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
+from src.features.step_record_generator.service.step_record_data_formatter import (
+    EXCLUDE_REQUIREMENT_VALUES,
+    filter_requirement_text,
+    generate_sample_quantity_text,
+    natural_sort_key,
+)
+from src.infrastructure.office.facade import OfficeFacade
 
 
 class StepRecordService:
@@ -21,12 +26,16 @@ class StepRecordService:
     Step Record文档生成服务
     """
 
-    def __init__(self):
+    def __init__(self, office_facade: OfficeFacade | None = None):
         self.template_prefix = "FDQF-E-036"
-        self.template_dir = config_manager.get_path("template_dir")
-        self.word_app = None
-        # 定义需要排除的Requirement值
-        self.exclude_requirement_values = ["No detrimental condition", "No damage"]
+        self.template_dir = config_manager.get_template_dir()
+        self._office_facade = office_facade
+        self.exclude_requirement_values = list(EXCLUDE_REQUIREMENT_VALUES)
+
+    def _get_office_facade(self) -> OfficeFacade:
+        if self._office_facade is None:
+            self._office_facade = OfficeFacade()
+        return self._office_facade
 
     def _find_template_file(self) -> Optional[str]:
         """
@@ -51,70 +60,9 @@ class StepRecordService:
             logger.error(f"Error searching for template file: {e}")
             return None
 
-    def _clean_sample_quantity(self, sample_quantity: str) -> str:
-        """
-        清理样品数量中的非数字和非+字符
-        
-        Args:
-            sample_quantity: 原始样品数量字符串
-            
-        Returns:
-            清理后的样品数量字符串
-        """
-        # 只保留数字和 + 符号
-        cleaned = re.sub(r'[^0-9+]', '', sample_quantity)
-        return cleaned
-
     def _generate_sample_quantity_text(self, sample_size: str, group_name: str) -> str:
-        """
-        生成样品数量文本
-        
-        Args:
-            sample_size: 样品数量
-            group_name: 组别名称
-            
-        Returns:
-            格式化后的样品数量文本
-        """
-        try:
-            cleaned_size = self._clean_sample_quantity(sample_size)
-            
-            # 处理复合样品 (包含+符号)
-            if '+' in cleaned_size:
-                parts = cleaned_size.split('+')
-                start_number = 1
-                sample_text = ""
-                
-                for i, part in enumerate(parts):
-                    part = part.strip()
-                    if part.isdigit():
-                        part_count = int(part)
-                        end_number = start_number + part_count - 1
-                        
-                        if sample_text:
-                            sample_text += " + "
-                            
-                        sample_text += f"{part_count} sets for (Group{group_name}-{start_number}#"
-                        if start_number != end_number:
-                            sample_text += f"~{end_number}#"
-                        sample_text += ")"
-                        
-                        start_number = end_number + 1
-                
-                return sample_text
-            else:
-                # 处理单一数字
-                if cleaned_size.isdigit():
-                    total_quantity = int(cleaned_size)
-                    if total_quantity == 1:
-                        return "1 set (1#)"
-                    else:
-                        return f"{total_quantity} sets (Group{group_name}-1#~{total_quantity}#)"
-                
-                return ""
-        except Exception as e:
-            logger.error(f"Error generating sample quantity text: {e}")
-            return ""
+        """生成样品数量文本（委托到 step_record_data_formatter）"""
+        return generate_sample_quantity_text(sample_size, group_name)
 
     def _update_group_title(self, doc: Any, table_no: int, group_name: str, sample_size: str) -> bool:
         """
@@ -174,18 +122,8 @@ class StepRecordService:
             logger.error(f"Error ensuring table has enough rows: {e}")
 
     def _filter_requirement_text(self, requirement_text):
-        """
-        过滤Requirement文本，排除特定值
-        
-        Args:
-            requirement_text: 原始Requirement文本
-            
-        Returns:
-            过滤后的文本，如果在排除列表中则返回空字符串
-        """
-        if requirement_text in self.exclude_requirement_values:
-            return ""
-        return requirement_text
+        """过滤Requirement文本（委托到 step_record_data_formatter）"""
+        return filter_requirement_text(requirement_text, self.exclude_requirement_values)
 
     def _fill_record_table_from_dict(self, table: Any, step_dict: Dict) -> None:
         """
@@ -221,16 +159,6 @@ class StepRecordService:
             logger.error(f"Error filling record table: {e}")
 
     def _duplicate_template_sections(self, doc: Any, needed_groups: int) -> None:
-        """
-        复制模板中的段落和表格以适应所需的组别数量
-        
-        Args:
-            doc: Word文档对象
-            needed_groups: 需要的组别数量
-        """
-        self._duplicate_template_sections_simple(doc, needed_groups)
-
-    def _duplicate_template_sections_simple(self, doc: Any, needed_groups: int) -> None:
         """
         简化版本的复制模板段落和表格方法
         
@@ -277,29 +205,8 @@ class StepRecordService:
                 logger.error("文档中表格数量不足，无法正确复制模板段落")
             
         except Exception as e:
-            logger.error(f"Error duplicating template sections: {e}")
-            logger.exception(e)  # 添加完整的异常堆栈信息
+            logger.exception(f"Error duplicating template sections: {e}")
             # 即使出错也继续执行，避免完全失败
-
-    def _get_or_create_table_for_group(self, doc: Any, group_index: int) -> Any:
-        """
-        获取或创建指定组别的表格
-        
-        Args:
-            doc: Word文档对象
-            group_index: 组别索引（从1开始）
-            
-        Returns:
-            表格对象
-        """
-        # 每个组别对应两个表格中的奇数编号表格（1, 3, 5, ...）
-        table_no = group_index * 2 - 1
-        
-        if table_no <= doc.Tables.Count:
-            return doc.Tables(table_no)
-        else:
-            logger.error(f"无法找到第 {group_index} 个组别的表格 (表格编号: {table_no})")
-            return None
 
     def _fill_header_info(self, doc: Any, project_data_file_path: str) -> bool:
         """
@@ -395,7 +302,8 @@ class StepRecordService:
         Returns:
             是否成功生成
         """
-        word_app = None
+        word_session = None
+        new_doc = None
         try:
             # 查找模板文件
             template_path = self._find_template_file()
@@ -424,7 +332,9 @@ class StepRecordService:
             logger.info(f"成功复制模板文件到: {output_path}")
 
             # 初始化Word应用
-            word_app = get_shared_word_app()
+            word_session = self._get_office_facade().create_session("word")
+            word_handle = word_session.acquire()
+            word_app = word_handle.application
             if not word_app:
                 logger.error("Failed to initialize Word application")
                 return False
@@ -433,9 +343,10 @@ class StepRecordService:
             word_app.DisplayAlerts = False
 
             # 打开已复制的文档
-            new_doc = open_word_file(output_path, read_only=False)
-            if not new_doc:
-                logger.error("Failed to open copied document")
+            try:
+                new_doc = word_app.Documents.Open(output_path, ReadOnly=False)
+            except Exception as open_error:
+                logger.error(f"Failed to open copied document: {open_error}")
                 return False
 
             # 从MatrixDataStructure获取解析好的数据
@@ -474,14 +385,6 @@ class StepRecordService:
             logger.info(f"填充前文档表格数量: {new_doc.Tables.Count}")
 
             group_index = 1
-            # 修复：使用自然排序（数值排序）而不是字符串排序
-            def natural_sort_key(key):
-                # 将字符串转换为整数用于排序，如果无法转换则保持原样
-                try:
-                    return int(key)
-                except ValueError:
-                    return key
-                    
             for group_name in sorted(group_steps.keys(), key=natural_sort_key):
                 logger.info(f"处理组别 {group_name}，包含 {len(group_steps[group_name])} 个测试项")
 
@@ -514,8 +417,7 @@ class StepRecordService:
             logger.info(f"准备保存文档到: {output_path}")
 
             new_doc.SaveAs2(output_path)
-            new_doc.Close(SaveChanges=False)
-            logger.info("文档已保存并关闭")
+            logger.info("文档已保存")
 
             logger.info(f"Step Record document generated successfully: {output_path}")
             return True
@@ -525,5 +427,11 @@ class StepRecordService:
             return False
         finally:
             # 清理资源
-            if word_app:
-                release_word_app()
+            if new_doc:
+                try:
+                    new_doc.Close(SaveChanges=False)
+                    logger.info("文档已关闭")
+                except Exception as close_error:
+                    logger.error(f"Failed to close Step Record document: {close_error}")
+            if word_session:
+                word_session.release()

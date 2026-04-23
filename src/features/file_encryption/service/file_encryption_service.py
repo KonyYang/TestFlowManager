@@ -10,6 +10,7 @@ from typing import Dict, Tuple, Optional, Callable
 from PyQt5.QtCore import pyqtSignal, QObject
 from src.core.logger import logger
 import pythoncom
+from src.infrastructure.office.facade import OfficeFacade
 
 
 class SignalEmitter(QObject):
@@ -24,8 +25,8 @@ class FileEncryptionService:
     """文件加密服务类"""
     
     def __init__(self):
-        self.excel_app = None
-        self.word_app = None
+        # 不再直接管理 COM 对象，改用 OfficeFacade workflow API。
+        self._office_facade = OfficeFacade()
         
     @staticmethod
     def extract_password(parent_folder_name: str) -> str:
@@ -67,96 +68,36 @@ class FileEncryptionService:
             logger.error(f"生成新文件名时出错：{e}")
             return ""
     
-    def _get_excel_app(self):
-        """获取 Excel 应用程序实例"""
-        if self.excel_app is None:
-            try:
-                try:
-                    pythoncom.CoInitialize()
-                    logger.debug("COM 已初始化")
-                except Exception as e:
-                    logger.debug(f"COM 可能已初始化：{e}")
-                
-                import win32com.client
-                self.excel_app = win32com.client.Dispatch("Excel.Application")
-                self.excel_app.Visible = False
-                self.excel_app.DisplayAlerts = False
-                logger.debug("创建了新的 Excel 应用程序实例")
-            except Exception as e:
-                logger.error(f"创建 Excel 应用程序实例失败：{e}")
-                raise
-        return self.excel_app
-    
-    def _get_word_app(self):
-        """获取 Word 应用程序实例"""
-        if self.word_app is None:
-            try:
-                try:
-                    pythoncom.CoInitialize()
-                    logger.debug("COM 已初始化")
-                except Exception as e:
-                    logger.debug(f"COM 可能已初始化：{e}")
-                
-                import win32com.client
-                self.word_app = win32com.client.Dispatch("Word.Application")
-                self.word_app.Visible = False
-                self.word_app.DisplayAlerts = False
-                logger.debug("创建了新的 Word 应用程序实例")
-            except Exception as e:
-                logger.error(f"创建 Word 应用程序实例失败：{e}")
-                raise
-        return self.word_app
-    
     def process_excel_file(self, file_path: str, password: str) -> Tuple[bool, str]:
         """处理单个 Excel 文件的加密 - 使用双重密码（打开密码 + 修改密码）"""
         try:
-            # 规范化路径（解决 / 和 \ 混合的问题）
             file_path = os.path.normpath(file_path)
             
             logger.info(f"开始加密 Excel 文件：{file_path}")
             logger.info(f"使用密码：'{password}'")
-            
-            excel_app = self._get_excel_app()
-            
-            logger.debug(f"打开工作簿：{file_path}")
-            workbook = excel_app.Workbooks.Open(file_path)
-            logger.debug("工作簿打开成功")
-            
+
             new_path = self.generate_secured_filename(file_path)
             logger.debug(f"目标文件路径：{new_path}")
             
-            # 先设置打开密码（在 SaveAs 之前设置 workbook 对象的 Password 属性）
-            logger.debug("设置 workbook.Password (打开密码)...")
-            workbook.Password = password
-            logger.debug(f"  ✓ workbook.Password 已设置为：'{password}'")
-            
-            # 设置修改密码
-            logger.debug("设置 workbook.WritePassword (修改密码)...")
-            workbook.WritePassword = password
-            logger.debug(f"  ✓ workbook.WritePassword 已设置为：'{password}'")
-            
-            logger.debug("调用 SaveAs 方法保存并应用密码...")
-            logger.debug(f"  - Filename: {new_path}")
-            logger.debug(f"  - Password (打开密码): '{password}'")
-            logger.debug(f"  - WriteResPassword (修改密码): '{password}'")
-            
-            workbook.SaveAs(
-                Filename=new_path,
-                Password=password,              # 打开密码
-                WriteResPassword=password,      # 修改密码
-                ReadOnlyRecommended=False,
-                CreateBackup=False
+            def _encrypt_workbook(workbook):
+                workbook.Password = password
+                workbook.WritePassword = password
+                workbook.SaveAs(
+                    Filename=new_path,
+                    Password=password,
+                    WriteResPassword=password,
+                    ReadOnlyRecommended=False,
+                    CreateBackup=False,
+                )
+
+            self._office_facade.with_excel_workbook(
+                file_path,
+                _encrypt_workbook,
+                read_only=False,
+                save=False,
             )
             logger.debug("SaveAs 执行成功")
-            
-            # 验证密码是否设置成功
-            logger.debug("验证密码设置:")
-            logger.debug(f"  - workbook.Password: {getattr(workbook, 'Password', 'N/A')}")
-            logger.debug(f"  - workbook.WritePassword: {getattr(workbook, 'WritePassword', 'N/A')}")
-            
-            workbook.Close(SaveChanges=False)
-            logger.debug("工作簿已关闭")
-            
+
             logger.info(f"✅ Excel 文件加密成功：{file_path} -> {new_path}")
             logger.info(f"   打开密码：{password}")
             logger.info(f"   修改密码：{password}")
@@ -178,37 +119,36 @@ class FileEncryptionService:
             
             logger.info(f"开始加密 Word 文件：{file_path}")
             logger.info(f"使用固定密码：'{password}'")
-            
-            word_app = self._get_word_app()
-            
-            logger.debug(f"打开文档：{file_path}")
-            document = word_app.Documents.Open(file_path)
-            logger.debug("文档打开成功")
-            
+
             new_path = self.generate_secured_filename(file_path)
             logger.debug(f"目标文件路径：{new_path}")
-            
-            logger.debug("调用 SaveAs2 方法设置密码...")
-            logger.debug(f"  - Password (打开密码): '{password}'")
-            logger.debug(f"  - WritePassword (修改密码): '{password}'")
-            
-            document.SaveAs2(
-                FileName=new_path,
-                FileFormat=None,
-                LockComments=False,
-                Password=password,
-                AddToRecentFiles=False,
-                WritePassword=password,
-                ReadOnlyRecommended=False,
-                EmbedTrueTypeFonts=False,
-                SaveNativePictureFormat=False,
-                SaveFormsData=False,
-                SaveAsAOCELetter=False
+
+            def _encrypt_document(document):
+                logger.debug("调用 SaveAs2 方法设置密码...")
+                logger.debug(f"  - Password (打开密码): '{password}'")
+                logger.debug(f"  - WritePassword (修改密码): '{password}'")
+
+                document.SaveAs2(
+                    FileName=new_path,
+                    FileFormat=None,
+                    LockComments=False,
+                    Password=password,
+                    AddToRecentFiles=False,
+                    WritePassword=password,
+                    ReadOnlyRecommended=False,
+                    EmbedTrueTypeFonts=False,
+                    SaveNativePictureFormat=False,
+                    SaveFormsData=False,
+                    SaveAsAOCELetter=False
+                )
+                logger.debug("SaveAs2 执行成功")
+
+            self._office_facade.with_word_document(
+                file_path,
+                _encrypt_document,
+                read_only=False,
+                save=False,
             )
-            logger.debug("SaveAs2 执行成功")
-            
-            document.Close(SaveChanges=False)
-            logger.debug("文档已关闭")
             
             logger.info(f"✅ Word 文件加密成功：{file_path} -> {new_path}")
             return True, ""
@@ -222,34 +162,8 @@ class FileEncryptionService:
             return False, error_msg
     
     def cleanup_resources(self):
-        """清理资源"""
-        try:
-            # 先关闭 Word
-            if self.word_app:
-                try:
-                    self.word_app.Quit()
-                    logger.debug("Word 应用程序已关闭")
-                except Exception as e:
-                    logger.debug(f"关闭 Word 应用程序警告：{e}")
-                finally:
-                    self.word_app = None
-
-            # 再关闭 Excel
-            if self.excel_app:
-                try:
-                    self.excel_app.Quit()
-                    logger.debug("Excel 应用程序已关闭")
-                except Exception as e:
-                    logger.debug(f"关闭 Excel 应用程序警告：{e}")
-                finally:
-                    self.excel_app = None
-
-            # 注意：不调用 CoUninitialize()，让 Python 自动管理 COM 生命周期
-            # 多次调用会导致栈溢出错误 (0xC0000409)
-            logger.debug("COM 对象已释放（由 Python 自动管理）")
-
-        except Exception as e:
-            logger.error(f"清理资源时出错：{e}")
+        """兼容旧调用方；单文件流程的资源由 OfficeFacade workflow API 管理。"""
+        logger.debug("FileEncryptionService 无持有型 Office session 需要释放")
 
     
     def encrypt_files_in_folder(self, target_folder: str) -> Dict[str, int]:

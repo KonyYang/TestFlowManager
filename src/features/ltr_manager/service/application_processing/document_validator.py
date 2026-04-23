@@ -5,11 +5,10 @@ LTR申请单验证模块
 
 import os
 import re
-import logging
 from typing import Tuple, Optional, Dict, Any
 
 from src.core.logger import logger
-from src.utils.word_utils import open_word_file, get_shared_word_app, release_word_app
+from src.infrastructure.office.facade import OfficeFacade
 
 class LTRApplicationFormValidator:
     """
@@ -17,9 +16,10 @@ class LTRApplicationFormValidator:
     负责验证Word文档是否为有效的申请单以及版本号提取
     """
 
-    def __init__(self):
+    def __init__(self, office_facade: OfficeFacade | None = None):
         self.target_header_text = "Laboratory Testing Request"
         self.target_footer_rev_pattern = r"Rev\s*([A-Za-z0-9]+)"
+        self.office_facade = office_facade or OfficeFacade()
 
     def validate_application_form(self, doc_filepath: str) -> Dict[str, Any]:
         """
@@ -70,13 +70,21 @@ class LTRApplicationFormValidator:
             logger.error(f"Error: File not found at path: {doc_filepath}")
             return False, None
 
-        # 使用COM接口打开Word文档
-        doc = open_word_file(doc_filepath, read_only=True)
-        if not doc:
-            logger.error(f"无法打开文档: {doc_filepath}")
-            return False, None
+        word_session = None
+        doc = None
 
         try:
+            word_session = self.office_facade.create_session("word")
+            runtime_handle = word_session.acquire()
+            word_app = runtime_handle.application
+            word_app.Visible = False
+            word_app.DisplayAlerts = False
+            doc = word_app.Documents.Open(
+                doc_filepath,
+                ReadOnly=True,
+                PasswordDocument="",
+            )
+
             if not doc.Sections:
                 logger.warning(f"Document: {os.path.basename(doc_filepath)} has no sections. Cannot check headers/footers.")
                 return False, None
@@ -193,8 +201,13 @@ class LTRApplicationFormValidator:
             logger.error(f"An unexpected error occurred while processing Docx file {doc_filepath}: {e}", exc_info=True)
             return False, None
         finally:
-            # 关闭文档但不退出Word应用，因为可能还有其他操作需要使用Word实例
             try:
-                doc.Close(SaveChanges=False)
+                if doc:
+                    doc.Close(SaveChanges=False)
             except Exception as e:
                 logger.warning(f"Failed to close document: {e}")
+            try:
+                if word_session is not None:
+                    word_session.release()
+            except Exception as e:
+                logger.warning(f"Failed to release Word session: {e}")

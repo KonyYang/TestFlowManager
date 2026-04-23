@@ -13,6 +13,9 @@ from PyQt5.QtWidgets import (
 )
 
 from src.core.logger import logger
+from src.features.report_wizard.protocols.matrix_snapshot_provider import (
+    MatrixSnapshotProvider,
+)
 from src.features.report_wizard.view.body_content_page import BodyContentPage
 from src.features.report_wizard.view.header_info_page import HeaderInfoPage
 
@@ -24,6 +27,7 @@ class ReportWizardDialog(QDialog):
         self,
         parent=None,
         project_context=None,
+        matrix_provider: MatrixSnapshotProvider = None,
         matrix_controller=None,
         create_report_callback=None,
     ):
@@ -33,7 +37,7 @@ class ReportWizardDialog(QDialog):
 
         self.current_page_index = 0
         self.pages = []
-        self.matrix_controller = matrix_controller
+        self.matrix_provider = matrix_provider or matrix_controller
         self.project_context = project_context
         self._create_report_callback = create_report_callback
 
@@ -91,7 +95,7 @@ class ReportWizardDialog(QDialog):
 
         page = TestSpecTablesPage(
             document_path=document_path,
-            matrix_controller=self.matrix_controller,
+            matrix_provider=self.matrix_provider,
             project_context=self.project_context,
         )
         self.pages.append(page)
@@ -131,8 +135,8 @@ class ReportWizardDialog(QDialog):
                 test_spec_page = self.pages[2]
                 if hasattr(test_spec_page, "set_document_path"):
                     test_spec_page.set_document_path(document_path)
-                if self.matrix_controller and hasattr(test_spec_page, "set_matrix_controller"):
-                    test_spec_page.set_matrix_controller(self.matrix_controller)
+                if self.matrix_provider and hasattr(test_spec_page, "set_matrix_provider"):
+                    test_spec_page.set_matrix_provider(self.matrix_provider)
                 if hasattr(test_spec_page, "set_project_context"):
                     test_spec_page.set_project_context(self.project_context)
             else:
@@ -162,9 +166,12 @@ class ReportWizardDialog(QDialog):
             data["test_spec_data"] = self.pages[2].get_current_data()
         return data
 
+    def set_matrix_provider(self, matrix_provider: MatrixSnapshotProvider):
+        logger.info(f"ReportWizardDialog接收到Matrix provider: {matrix_provider is not None}")
+        self.matrix_provider = matrix_provider
+
     def set_matrix_controller(self, matrix_controller):
-        logger.info(f"ReportWizardDialog接收到Matrix控制器: {matrix_controller is not None}")
-        self.matrix_controller = matrix_controller
+        self.set_matrix_provider(matrix_controller)
 
     def set_project_context(self, project_context):
         self.project_context = project_context

@@ -23,16 +23,6 @@ class DocumentParserController:
         self.service = DocumentParserService()
         self.body_content_service = BodyContentService()
         self.document_content_editor = DocumentContentEditor()
-        
-        # 确保Word应用程序在后台运行
-        try:
-            from src.utils.word_utils import get_shared_word_app
-            word_app = get_shared_word_app()
-            if word_app:
-                word_app.Visible = False
-                word_app.DisplayAlerts = False
-        except Exception as e:
-            logger.error(f"初始化时设置Word应用程序后台模式失败: {e}")
 
     def show_body_content_editor(self, file_path: str):
         """

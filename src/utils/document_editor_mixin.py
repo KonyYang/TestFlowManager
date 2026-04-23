@@ -160,7 +160,10 @@ class DocumentEditorMixin:
         
         # 检查 document_content_service 是否存在以及预设描述是否加载
         if hasattr(self, 'document_content_service') and self.document_content_service:
-            logger.info(f"document_content_service 预设描述内容: {self.document_content_service.predefined_descriptions}")
+            # 使用 get_predefined_descriptions() 方法而非直接访问属性
+            purpose_descs = self.document_content_service.get_predefined_descriptions("PURPOSE")
+            conclusions_descs = self.document_content_service.get_predefined_descriptions("CONCLUSIONS")
+            logger.info(f"document_content_service 预设描述 - PURPOSE: {len(purpose_descs)}项, CONCLUSIONS: {len(conclusions_descs)}项")
             
             # 如果 document_content_service 已存在，立即加载预设描述
             logger.info("document_content_service 已存在，立即加载预设描述")
@@ -324,23 +327,12 @@ class DocumentEditorMixin:
     def _load_selected_purpose_preset(self):
         """加载选中的PURPOSE预设描述"""
         try:
-            current_item = self.purpose_preset_list.currentItem()
-            if current_item:
-                preset_text = current_item.data(100)
-                current_text = self.edit_purpose_content.toPlainText()
-                # 将预设文本添加到当前编辑内容的末尾
-                if current_text and not current_text.endswith('\n'):
-                    preset_text = '\n' + preset_text
-                new_text = current_text + preset_text
-                self.edit_purpose_content.setPlainText(new_text)
-                
-                # 触发内容变化事件以更新保存按钮状态
-                self._on_purpose_content_changed()
-                
-                # 在向导模式下，立即保存更改到文档
-                if hasattr(self, 'file_path') and self.file_path:
-                    logger.info("在向导模式下，加载预设后立即保存到文档")
-                    self._save_changes_to_document()
+            self._apply_selected_preset(
+                self.purpose_preset_list,
+                self.edit_purpose_content,
+                self._on_purpose_content_changed,
+                self._save_changes_to_document,
+            )
                 
         except Exception as e:
             logger.error(f"加载选中PURPOSE预设时出错: {e}")
@@ -348,23 +340,12 @@ class DocumentEditorMixin:
     def _load_selected_conclusions_preset(self):
         """加载选中的CONCLUSIONS预设描述"""
         try:
-            current_item = self.conclusions_preset_list.currentItem()
-            if current_item:
-                preset_text = current_item.data(100)
-                current_text = self.edit_conclusions_content.toPlainText()
-                # 将预设文本添加到当前编辑内容的末尾
-                if current_text and not current_text.endswith('\n'):
-                    preset_text = '\n' + preset_text
-                new_text = current_text + preset_text
-                self.edit_conclusions_content.setPlainText(new_text)
-                
-                # 触发内容变化事件以更新保存按钮状态
-                self._on_conclusions_content_changed()
-                
-                # 在向导模式下，立即保存更改到文档
-                if hasattr(self, 'file_path') and self.file_path:
-                    logger.info("在向导模式下，加载预设后立即保存到文档")
-                    self._save_changes_to_document()
+            self._apply_selected_preset(
+                self.conclusions_preset_list,
+                self.edit_conclusions_content,
+                self._on_conclusions_content_changed,
+                self._save_changes_to_document,
+            )
                 
         except Exception as e:
             logger.error(f"加载选中CONCLUSIONS预设时出错: {e}")
@@ -372,15 +353,11 @@ class DocumentEditorMixin:
     def _add_current_purpose_to_preset(self):
         """将当前PURPOSE内容添加到预设"""
         try:
-            current_text = self.edit_purpose_content.toPlainText().strip()
-            if current_text:
-                # 添加到服务的预设描述
-                self.document_content_service.add_predefined_description("PURPOSE", current_text)
-                
-                # 重新加载预设列表
-                self._load_preset_descriptions("PURPOSE", self.purpose_preset_list)
-                
-                logger.info(f"将内容添加到 PURPOSE 预设: {current_text[:50]}...")
+            self._add_current_editor_content_to_preset(
+                "PURPOSE",
+                self.edit_purpose_content,
+                self.purpose_preset_list,
+            )
                 
         except Exception as e:
             logger.error(f"添加当前PURPOSE内容到预设时出错: {e}")
@@ -388,18 +365,42 @@ class DocumentEditorMixin:
     def _add_current_conclusions_to_preset(self):
         """将当前CONCLUSIONS内容添加到预设"""
         try:
-            current_text = self.edit_conclusions_content.toPlainText().strip()
-            if current_text:
-                # 添加到服务的预设描述
-                self.document_content_service.add_predefined_description("CONCLUSIONS", current_text)
-                
-                # 重新加载预设列表
-                self._load_preset_descriptions("CONCLUSIONS", self.conclusions_preset_list)
-                
-                logger.info(f"将内容添加到 CONCLUSIONS 预设: {current_text[:50]}...")
+            self._add_current_editor_content_to_preset(
+                "CONCLUSIONS",
+                self.edit_conclusions_content,
+                self.conclusions_preset_list,
+            )
                 
         except Exception as e:
             logger.error(f"添加当前CONCLUSIONS内容到预设时出错: {e}")
+
+    def _apply_selected_preset(self, list_widget, editor, on_changed, save_callback=None):
+        """将选中的预设内容追加到编辑器，并按宿主策略决定是否立即保存。"""
+        current_item = list_widget.currentItem()
+        if not current_item:
+            return
+
+        preset_text = current_item.data(100)
+        current_text = editor.toPlainText()
+        if current_text and not current_text.endswith('\n'):
+            preset_text = '\n' + preset_text
+
+        editor.setPlainText(current_text + preset_text)
+        on_changed()
+
+        if save_callback and hasattr(self, 'file_path') and self.file_path:
+            logger.info("加载预设后立即保存到文档")
+            save_callback()
+
+    def _add_current_editor_content_to_preset(self, category: str, editor, list_widget):
+        """将当前编辑器内容写入预设并刷新对应列表。"""
+        current_text = editor.toPlainText().strip()
+        if not current_text:
+            return
+
+        self.document_content_service.add_predefined_description(category, current_text)
+        self._load_preset_descriptions(category, list_widget)
+        logger.info(f"将内容添加到 {category} 预设: {current_text[:50]}...")
     
     def _on_purpose_content_changed(self):
         """处理PURPOSE编辑内容变化"""

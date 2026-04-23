@@ -11,7 +11,7 @@ from src.features.ltr_manager.service.ltr_application_service import LTRApplicat
 from src.features.ltr_manager.view.ltr_application_dialog import LTRApplicationDialog
 from src.features.folder_manager.controller.folder_manager_controller import FolderManagerController
 from src.utils.ltr_data_manager import LTRDataManager
-# 添加事件调度器
+from src.features.ltr_manager.controller.ltr_application_project_creation_coordinator import LTRApplicationProjectCreationCoordinator
 from src.core.event_dispatcher import event_dispatcher, EventTopics
 
 
@@ -35,10 +35,37 @@ class LTRApplicationController:
         self.folder_manager = FolderManagerController(parent_view)
         # 添加LTR数据管理器
         self.ltr_data_manager = LTRDataManager()
-        # 添加事件订阅
-        event_dispatcher.subscribe(EventTopics.LTR_APPLICATION_PROCESSED, self._on_ltr_application_processed)
+        # 项目创建协调器
+        self._project_creation_coordinator = LTRApplicationProjectCreationCoordinator(
+            self.folder_manager, self.ltr_data_manager
+        )
+        # 添加事件订阅（带防重复标志）
+        self._event_subscribed = False
+        self._subscribe_to_ltr_events()
         # 添加属性来存储选中的文件名
         self.selected_filename = None
+
+    def _subscribe_to_ltr_events(self):
+        """订阅 LTR 事件，避免重复订阅"""
+        if not self._event_subscribed:
+            event_dispatcher.subscribe(EventTopics.LTR_APPLICATION_PROCESSED, self._on_ltr_application_processed)
+            self._event_subscribed = True
+            logger.info("LTRApplicationController: Subscribed to ltr.application.processed")
+        else:
+            logger.warning("LTRApplicationController: Already subscribed, skipping")
+
+    def cleanup(self):
+        """清理资源，取消事件订阅"""
+        if self._event_subscribed:
+            try:
+                event_dispatcher.unsubscribe(
+                    EventTopics.LTR_APPLICATION_PROCESSED,
+                    self._on_ltr_application_processed,
+                )
+                self._event_subscribed = False
+                logger.info("LTRApplicationController: Unsubscribed from ltr.application.processed")
+            except Exception as e:
+                logger.warning(f"LTRApplicationController: Failed to unsubscribe: {e}")
 
 
     def show_application_dialog(self, temp_folder_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
@@ -138,7 +165,6 @@ class LTRApplicationController:
 
             # 如果申请成功，询问是否创建项目文件夹
             if result.get("success") and result.get("ltr_number"):
-                from PyQt5.QtWidgets import QMessageBox
                 reply = QMessageBox.question(
                     parent,
                     "创建项目文件夹",
@@ -148,115 +174,40 @@ class LTRApplicationController:
                 )
 
                 if reply == QMessageBox.Yes:
-                    # 收集完整的申请数据，包括DL编号和选中的文件名
-                    application_data = self.ltr_data_manager.collect_application_data(
-                        form_data, 
-                        result['ltr_number'],
-                        self.selected_filename  # 传递选中的文件名
+                    # 委托给项目创建协调器
+                    creation_result = self._project_creation_coordinator.create_project_folder(
+                        form_data=form_data,
+                        ltr_number=result['ltr_number'],
+                        selected_filename=self.selected_filename,
+                        extracted_data=extracted_data,
+                        temp_folder_path=temp_folder_path
                     )
-                    
-                    # 如果有从Word文档提取的完整数据，合并到application_data中
-                    if extracted_data:
-                        # 保留从UI获取的数据，同时添加从Word文档提取的详细信息
-                        for key, value in extracted_data.items():
-                            # 只有当application_data中没有该字段或字段为空时才使用提取的数据
-                            if key not in application_data or not application_data[key]:
-                                application_data[key] = value
-                        logger.debug(f"已合并从Word文档提取的数据")
-                    
-                    logger.debug(f"收集到的申请数据: {application_data}")
-                    
-                    # 检查申请数据中的file_path
-                    logger.debug(f"申请数据中的file_path: {application_data.get('file_path', 'None')}")
-                    logger.debug(f"传入的临时文件夹路径: {temp_folder_path}")
-                    
-                    # 如果提供了临时文件夹路径，添加到申请数据中
-                    if temp_folder_path:
-                        application_data['file_path'] = temp_folder_path
-                        logger.debug(f"已将临时文件夹路径添加到申请数据中: {temp_folder_path}")
+
+                    if creation_result['status'] == 'created':
+                        QMessageBox.information(parent, "成功", f"项目文件夹已成功创建！\n路径: {creation_result['project_path']}")
                     else:
-                        logger.warning("未提供临时文件夹路径")
-                        # 检查申请数据中是否已经有file_path
-                        if 'file_path' in application_data and application_data['file_path']:
-                            logger.debug(f"使用申请数据中已有的file_path: {application_data['file_path']}")
-                        else:
-                            logger.warning("申请数据中也没有有效的file_path")
-                    
-                    # 使用完整项目结构创建方法
-                    project_result = self.folder_manager.create_complete_project_structure(application_data)
-                    if project_result:
-                        # 保存申请数据
-                        self.ltr_data_manager.save_to_project_file(result['ltr_number'], application_data)
-                        logger.info(f"完整项目结构创建成功: {project_result}")
-                        QMessageBox.information(parent, "成功", f"项目文件夹已成功创建！\n路径: {project_result}")
-                        
-                        # 只有在有有效的LTR编号时才发布事件
-                        if result.get('ltr_number') and result['ltr_number'].strip():
-                            # 发布事件通知项目创建成功，携带项目路径信息
-                            event_dispatcher.dispatch(EventTopics.LTR_APPLICATION_PROCESSED, {
-                                "dl_number": result['ltr_number'],
-                                "status": "success",
-                                "project_path": project_result,  # 添加项目路径
-                                "application_data": application_data
-                            })
-                        else:
-                            logger.warning("LTR number is empty, not dispatching success event")
-                    else:
-                        logger.error("完整项目结构创建失败")
                         QMessageBox.warning(parent, "警告", "项目文件夹创建失败")
-                        
-                        # 只有在有有效的LTR编号时才发布事件
-                        if result.get('ltr_number') and result['ltr_number'].strip():
-                            # 发布事件通知项目创建失败
-                            event_dispatcher.dispatch(EventTopics.LTR_APPLICATION_PROCESSED, {
-                                "dl_number": result['ltr_number'],
-                                "status": "failed",
-                                "error": "项目文件夹创建失败",
-                                "project_path": None  # 添加project_path字段
-                            })
-                        else:
-                            logger.warning("LTR number is empty, not dispatching failure event")
-            # 只在成功申请LTR编号的情况下返回成功结果
+
+            # 只在成功申请LTR编号的情况下（但用户选择不创建项目文件夹）
             elif result.get("success"):
-                # 创建完整的application_data用于事件通知
-                application_data = self.ltr_data_manager.collect_application_data(
-                    form_data, 
-                    result.get('ltr_number', ''),
-                    self.selected_filename
+                # 委托给协调器：通知申请已处理但未创建项目
+                self._project_creation_coordinator.notify_application_processed_without_project(
+                    form_data=form_data,
+                    ltr_number=result.get('ltr_number', ''),
+                    selected_filename=self.selected_filename,
+                    extracted_data=extracted_data
                 )
-                
-                # 如果有从Word文档提取的完整数据，合并到application_data中
-                if extracted_data:
-                    for key, value in extracted_data.items():
-                        if key not in application_data or not application_data[key]:
-                            application_data[key] = value
-                    
-                # LTR编号申请成功但用户选择不创建项目文件夹
-                # 仍然需要发布事件通知其他组件
-                event_dispatcher.dispatch(EventTopics.LTR_APPLICATION_PROCESSED, {
-                    "dl_number": result.get('ltr_number', ''),
-                    "status": "success",
-                    "application_data": application_data,
-                    "project_path": None  # 添加project_path字段，即使为None
-                })
-                
+
             return result
 
         except Exception as e:
-            import traceback
             logger.error(f"处理LTR编号申请时发生错误: {e}", exc_info=True)
-            # 只有在有有效的DL编号时才发布事件
+            # 委托给协调器：派发失败事件
             dl_number = form_data.get("dl_number", "")
-            if dl_number and dl_number.strip():
-                # 发布事件通知项目创建失败
-                event_dispatcher.dispatch(EventTopics.LTR_APPLICATION_PROCESSED, {
-                    "dl_number": dl_number,
-                    "status": "failed",
-                    "error": str(e),
-                    "project_path": None  # 添加project_path字段
-                })
-            else:
-                logger.warning("DL number is empty, not dispatching error event")
+            self._project_creation_coordinator.dispatch_failure_event(
+                dl_number=dl_number,
+                error_message=str(e)
+            )
             return {"success": False, "error": f"处理申请时发生错误: {str(e)}"}
 
     def _process_application_data(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:

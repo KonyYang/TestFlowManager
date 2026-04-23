@@ -5,7 +5,7 @@ from src.core.logger import logger
 class DataSyncManager:
     """数据同步管理器 - 处理视图与数据模型之间的数据同步"""
     
-    def __init__(self, view, _legacy_controller=None):
+    def __init__(self, view):
         self.view = view
         
     def sync_table_to_model(self):

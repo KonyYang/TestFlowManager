@@ -2,10 +2,10 @@
 规格书提取服务
 从不同格式的文档中提取Matrix表格数据
 """
-import pythoncom
 import os
 
 from src.core.logger import logger
+from src.infrastructure.office import OfficeFacade
 from src.features.matrix.service.document_parsers.excel_parser import ExcelParser
 from src.features.matrix.service.document_parsers.word_parser import WordParser
 
@@ -16,9 +16,15 @@ class SpecExtractor:
     支持从PDF、Word、Excel文档中提取Matrix表格数据
     """
 
-    def __init__(self):
+    def __init__(self, office_facade=None):
         """初始化规格书提取器"""
-        pass
+        self._office_facade = office_facade
+
+    def _get_office_facade(self):
+        """Lazily create the shared OfficeFacade dependency."""
+        if self._office_facade is None:
+            self._office_facade = OfficeFacade()
+        return self._office_facade
 
     def extract_from_document(self, file_path: str, page_number=None, keyword=None):
         """
@@ -68,33 +74,23 @@ class SpecExtractor:
             logger.info(f"章节映射数量: {len(chapter_mappings)}")
             logger.debug(f"章节映射详情: {chapter_mappings}")
             test_methods = {}
+
+            if not chapter_mappings:
+                logger.info("章节映射为空，跳过测试方法提取")
+                return test_methods
             
             # 根据文件扩展名选择合适的解析器
             if file_path.lower().endswith(('.doc', '.docx')):
                 logger.info("检测到Word文件，使用Word解析器提取测试方法")
-                # 使用WordParser解析文档
-                parser = WordParser()
-                
-                # 通过COM接口打开文档
-                import win32com.client
-                import pythoncom
-                pythoncom.CoInitialize()
-                
-                word_app = None
+                parser = WordParser(self._office_facade)
                 doc = None
-                existing_word_app = False
+                session = None
                 
                 try:
-                    try:
-                        # 尝试连接到现有的Word应用程序实例
-                        word_app = win32com.client.GetActiveObject("Word.Application")
-                        existing_word_app = True
-                        logger.info("连接到现有的Word应用程序实例")
-                    except:
-                        # 如果没有现有的实例，则创建新的实例
-                        word_app = win32com.client.Dispatch("Word.Application")
-                        logger.info("创建新的Word应用程序实例")
-                        
+                    office_facade = self._get_office_facade()
+                    session = office_facade.create_session("word")
+                    handle = session.acquire()
+                    word_app = handle.application
                     word_app.Visible = False
                     doc = word_app.Documents.Open(os.path.abspath(file_path), ReadOnly=True)
                     
@@ -109,7 +105,6 @@ class SpecExtractor:
                             else:
                                 logger.info(f"第{row_index}行未找到测试方法，章节号: {chapter_number}")
                 finally:
-                    # 关闭文档
                     try:
                         if doc:
                             doc.Close()
@@ -117,15 +112,10 @@ class SpecExtractor:
                         logger.warning(f"关闭Word文档时出错: {e}")
                     
                     try:
-                        if word_app and not existing_word_app:
-                            word_app.Quit()
+                        if session:
+                            session.release()
                     except Exception as e:
-                        logger.warning(f"退出Word应用程序时出错: {e}")
-                        
-                    try:
-                        pythoncom.CoUninitialize()
-                    except Exception as e:
-                        logger.warning(f"COM反初始化时出错: {e}")
+                        logger.warning(f"释放Word session时出错: {e}")
                     
             elif file_path.lower().endswith(('.xls', '.xlsx')):
                 logger.info("检测到Excel文件，跳过测试方法提取")

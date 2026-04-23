@@ -8,7 +8,7 @@ from typing import Optional
 
 from src.core.logger import logger
 from src.core.project_context import ProjectContext
-from src.utils.word_utils import get_shared_word_app
+from src.infrastructure.office.facade import OfficeFacade
 from .utils import HeaderProcessor, ContentCopier, FormatProcessor, DocumentUtils
 
 
@@ -18,8 +18,10 @@ class CustomerReportService:
     提供客户报告生成相关的业务逻辑服务
     """
 
-    def __init__(self):
+    def __init__(self, office_facade: Optional[OfficeFacade] = None):
         """初始化客户报告生成服务"""
+        self.office_facade = office_facade or OfficeFacade()
+        self.word_session = None
         self.word_app = None
         self.source_doc = None
         self.template_doc = None
@@ -28,10 +30,13 @@ class CustomerReportService:
     def _initialize_word_app(self):
         """初始化Word应用程序"""
         try:
-            self.word_app = get_shared_word_app()
+            self.word_session = self.office_facade.create_session("word")
+            runtime_handle = self.word_session.acquire()
+            self.word_app = runtime_handle.application
             if self.word_app is None:
                 raise Exception("无法获取Word应用程序实例")
             self.word_app.Visible = False
+            self.word_app.DisplayAlerts = False
             logger.debug("Word应用程序初始化成功")
         except Exception as e:
             logger.error(f"初始化Word应用程序失败: {e}")
@@ -148,6 +153,13 @@ class CustomerReportService:
     def _cleanup(self):
         """清理资源"""
         DocumentUtils.cleanup_resources(self.template_doc, self.source_doc, self.temp_template_path)
+        try:
+            if self.word_session is not None:
+                self.word_session.release()
+        except Exception as e:
+            logger.warning(f"释放Word session时出错: {e}")
+        self.word_session = None
+        self.word_app = None
         self.template_doc = None
         self.source_doc = None
         self.temp_template_path = None

@@ -4,15 +4,9 @@
 """
 
 import os
-import logging
 from typing import Optional, Dict, Any
-from pathlib import Path
-from docx import Document
-from datetime import datetime
 import pythoncom
-import win32com.client
 from src.core.logger import logger
-from src.utils.word_utils import get_shared_word_app
 
 # 导入拆分的工具模块
 from .utils.date_handler import DateHandler
@@ -33,6 +27,7 @@ class HeaderModifier:
         self.doc = None
         self.win_document = None
         self.word_app = None
+        self._owns_win_document = False
 
     def modify_header(self, header_data: Dict[str, Any]) -> bool:
         """
@@ -77,25 +72,26 @@ class HeaderModifier:
             if self.win_document:
                 return TableHandler.modify_revision_record_date_win32com(self.win_document, header_data, is_customer_report)
             else:
-                # 获取共享的 Word 应用程序实例
-                word_app = get_shared_word_app()
-                if not word_app:
-                    logger.error("无法获取Word应用程序实例")
+                # word_app 必须由调用方提供（通过 OfficeFacade session）
+                if self.word_app is None:
+                    logger.error("word_app 未设置，应由调用方通过 OfficeFacade session 提供")
                     return False
                 
-                word_app.Visible = False
-                word_app.DisplayAlerts = False
+                self.word_app.Visible = False
+                self.word_app.DisplayAlerts = False
                 
                 # 打开文档
-                win_document = word_app.Documents.Open(os.path.normpath(self.file_path))
+                win_document = self.word_app.Documents.Open(os.path.normpath(self.file_path))
                 
                 try:
                     result = TableHandler.modify_revision_record_date_win32com(win_document, header_data, is_customer_report)
                     # 不保存文档，因为后续还有其他操作
                     return result
                 finally:
-                    # 不关闭文档，因为后续操作还需要使用
-                    pass
+                    try:
+                        win_document.Close(SaveChanges=False)
+                    except Exception as close_error:
+                        logger.error(f"关闭修订记录日期文档时出错: {close_error}")
 
         except Exception as e:
             logger.error(f"使用win32com修改修订记录日期失败: {e}", exc_info=True)
@@ -248,6 +244,22 @@ class HeaderModifier:
             target_path = document_path if document_path else self.file_path
             return self._modify_sample_received_date_fallback(target_path)
 
+    def _get_or_open_document(self, document_path: str):
+        """Return the active document or open it via the caller-provided Word app."""
+        if self.win_document:
+            return self.win_document
+
+        if self.word_app is None:
+            logger.error("word_app 未设置，应由调用方通过 OfficeFacade session 提供")
+            return None
+
+        self.word_app.Visible = False
+        self.word_app.DisplayAlerts = False
+        self.win_document = self.word_app.Documents.Open(os.path.normpath(document_path))
+        self._owns_win_document = True
+        logger.debug(f"通过调用方提供的 Word session 打开文档: {document_path}")
+        return self.win_document
+
     def replace_document_placeholders(self, data: Dict[str, Any], document_path: str = None) -> bool:
         """
         使用 win32com.client 根据 JSON 数据替换 Word 文档中的占位符
@@ -265,27 +277,10 @@ class HeaderModifier:
             logger.info(f"使用 win32com.client 根据 JSON 数据替换 Word 文档中的占位符: {target_path}")
             logger.info(f"开始使用占位符替换方式更新文档: {target_path}")
             
-            # 如果已经有打开的文档实例，则直接使用它
-            if self.win_document:
-                win_document = self.win_document
-                logger.debug(f"使用已存在的文档实例操作文档: {target_path}")
-            else:
-                # 获取共享的 Word 应用程序实例
-                word_app = get_shared_word_app()
-                if not word_app:
-                    logger.error("无法获取Word应用程序实例")
-                    return False
-                
-                # 确保Word应用程序不可见
-                word_app.Visible = False
-                word_app.DisplayAlerts = False
-                
-                # 打开文档
-                logger.debug(f"获取共享Word应用程序实例，正在打开文档: {target_path}")
-                win_document = word_app.Documents.Open(os.path.normpath(target_path))
-                # 保存对win_document的引用，以便后续操作使用
-                self.win_document = win_document
-                logger.debug(f"成功打开文档并保存引用: {target_path}")
+            win_document = self._get_or_open_document(target_path)
+            if win_document is None:
+                return False
+            logger.debug(f"使用文档实例操作占位符替换: {target_path}")
             
             # 提取所需字段
             original_date = data.get("date_lab_received_samples", "")
@@ -372,24 +367,9 @@ class HeaderModifier:
         """
         logger.info(f"使用传统方式（fallback）修改样品接收日期: {document_path}")
         try:
-            # 如果已经有打开的文档实例，则直接使用它
-            if self.win_document:
-                win_document = self.win_document
-            else:
-                # 获取共享的 Word 应用程序实例
-                word_app = get_shared_word_app()
-                if not word_app:
-                    logger.error("无法获取Word应用程序实例")
-                    return False
-                
-                # 确保Word应用程序不可见
-                word_app.Visible = False
-                word_app.DisplayAlerts = False
-                
-                # 打开文档
-                win_document = word_app.Documents.Open(os.path.normpath(document_path))
-                # 保存对win_document的引用，以便后续操作使用
-                self.win_document = win_document
+            win_document = self._get_or_open_document(document_path)
+            if win_document is None:
+                return False
 
             # 查找包含样品接收信息的段落并使用当前日期替换
             # 这是简化版本，实际可根据需要扩展
@@ -439,21 +419,23 @@ class HeaderModifier:
         """清理资源"""
         try:
             if self.win_document:
-                # 检查文档是否仍然可用
-                try:
-                    # 尝试访问文档的一个属性来检查连接状态
-                    _ = self.win_document.Name
-                    # 如果能成功访问，则关闭文档
-                    self.win_document.Close()
-                except pythoncom.com_error:
-                    # 如果COM连接已断开，则跳过关闭
-                    logger.debug("Word文档COM连接已断开，跳过关闭")
-                    pass
-                except (AttributeError, Exception):
-                    # 如果文档已断开连接，则跳过关闭
-                    logger.debug("Word文档连接已断开，跳过关闭")
-                    pass
+                if self._owns_win_document:
+                    # 检查文档是否仍然可用
+                    try:
+                        # 尝试访问文档的一个属性来检查连接状态
+                        _ = self.win_document.Name
+                        # 如果能成功访问，则关闭文档
+                        self.win_document.Close(SaveChanges=False)
+                    except pythoncom.com_error:
+                        # 如果COM连接已断开，则跳过关闭
+                        logger.debug("Word文档COM连接已断开，跳过关闭")
+                        pass
+                    except (AttributeError, Exception):
+                        # 如果文档已断开连接，则跳过关闭
+                        logger.debug("Word文档连接已断开，跳过关闭")
+                        pass
                 self.win_document = None
+                self._owns_win_document = False
             
             # 注意：不要关闭word_app，因为它可能是共享实例
             # 但在当前场景下，我们仍需确保它不会显示界面
@@ -474,7 +456,11 @@ class HeaderModifier:
         析构函数，确保Word应用程序资源被正确释放
         """
         try:
-            if hasattr(self, 'win_document') and self.win_document is not None:
+            if (
+                hasattr(self, 'win_document')
+                and self.win_document is not None
+                and getattr(self, '_owns_win_document', False)
+            ):
                 try:
                     self.win_document.Close(SaveChanges=False)
                     logger.debug("HeaderModifier: Document closed on destruction")

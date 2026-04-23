@@ -5,109 +5,24 @@ Word工具模块
 
 from typing import Optional, Any, List, Tuple
 from src.core.logger import logger
-
-# 共享的Word应用实例
-_shared_word_app = None
-_word_instance_count = 0
-_word_initialized = False
+from src.infrastructure.office.legacy_word_runtime_provider import (
+    shared_word_runtime_provider,
+)
 
 
 def get_shared_word_app():
     """获取共享的Word应用实例"""
-    global _shared_word_app, _word_instance_count, _word_initialized
-
-    # 检查Word应用是否仍然可用
-    if _shared_word_app is not None:
-        try:
-            # 尝试访问Word应用的一个基本属性来检查它是否仍然响应
-            _shared_word_app.Name
-        except:
-            # Word应用似乎已经关闭或无响应，需要重新创建
-            _shared_word_app = None
-            _word_instance_count = 0
-            _word_initialized = False
-            logger.debug("Previous Word application instance was not responsive, will create a new one")
-
-    if _shared_word_app is None:
-        try:
-            import pythoncom
-            if not _word_initialized:
-                pythoncom.CoInitialize()
-                _word_initialized = True
-            import win32com.client
-            _shared_word_app = win32com.client.Dispatch("Word.Application")
-            _shared_word_app.Visible = False
-            logger.debug("Created new shared Word application instance")
-        except Exception as e:
-            logger.error(f"Failed to initialize Word application: {e}")
-            return None
-
-    _word_instance_count += 1
-    logger.debug(f"Word instance count increased to {_word_instance_count}")
-    return _shared_word_app
+    return shared_word_runtime_provider.acquire_application()
 
 
 def release_word_app():
     """释放Word应用实例"""
-    global _shared_word_app, _word_instance_count, _word_initialized
-
-    _word_instance_count -= 1
-    logger.debug(f"Word instance count decreased to {_word_instance_count}")
-
-    # 不再主动关闭Word应用，让它保持运行以提高性能
-    # 只有在应用退出时才彻底清理资源
-    if _word_instance_count <= 0 and _shared_word_app:
-        try:
-            # 只关闭所有文档，但保持Word应用运行
-            if _shared_word_app.Documents:
-                for document in _shared_word_app.Documents:
-                    try:
-                        document.Close(SaveChanges=False)
-                    except:
-                        pass
-            logger.debug("Closed all documents but kept Word application running")
-        except Exception as e:
-            logger.error(f"Error while closing documents: {e}")
+    shared_word_runtime_provider.release_application()
 
 
 def cleanup_word_resources():
     """彻底清理Word资源，在应用退出时调用"""
-    global _shared_word_app, _word_instance_count, _word_initialized
-
-    if _shared_word_app:
-        try:
-            # 检查Word应用是否仍然可用
-            try:
-                _shared_word_app.Name  # 测试连接
-                # 只有在Word可用时才尝试关闭文档和退出
-                # 关闭所有文档
-                if _shared_word_app.Documents:
-                    for document in _shared_word_app.Documents:
-                        try:
-                            document.Close(SaveChanges=False)
-                        except:
-                            pass
-
-                # 退出Word应用
-                _shared_word_app.Quit()
-                logger.debug("Word application quit successfully")
-            except:
-                # Word应用已经关闭或无响应，直接清理引用
-                logger.debug("Word application was already closed or unresponsive")
-        except Exception as e:
-            logger.error(f"Error while cleaning up Word resources: {e}")
-        finally:
-            _shared_word_app = None
-
-    # 反初始化COM
-    if _word_initialized:
-        try:
-            import pythoncom
-            pythoncom.CoUninitialize()
-            _word_initialized = False
-            logger.debug("COM library uninitialized")
-        except Exception as e:
-            logger.error(f"Error while uninitializing COM library: {e}")
+    shared_word_runtime_provider.cleanup_resources()
 
 def is_word_closed(word_app: Any) -> bool:
     """
@@ -119,12 +34,7 @@ def is_word_closed(word_app: Any) -> bool:
     Returns:
         如果Word已关闭返回True，否则返回False
     """
-    try:
-        # 尝试访问Word应用程序的一个基本属性
-        word_app.Name
-        return False  # 如果成功访问，说明Word仍在运行
-    except:
-        return True  # 否则认为Word已关闭
+    return shared_word_runtime_provider.is_application_closed(word_app)
 
 
 def close_document(document: Any, save_changes: bool = False) -> bool:

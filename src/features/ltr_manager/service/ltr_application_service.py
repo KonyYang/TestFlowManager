@@ -12,7 +12,7 @@ from src.features.ltr_manager.model.ltr_application_data import LTRApplicationDa
 from src.features.ltr_manager.service.application_processing.document_validator import LTRApplicationFormValidator
 from src.features.ltr_manager.service.application_processing.data_extractor import LTRApplicationDataExtractor
 from src.features.ltr_manager.service.application_processing.ltr_number_generator import LTRNumberGenerator
-from src.utils.word_utils import get_shared_word_app, release_word_app
+from src.infrastructure.office.facade import OfficeFacade
 
 # 配置日志
 processor_logger = logging.getLogger(__name__)
@@ -23,12 +23,13 @@ class LTRApplicationService:
     提供LTR申请单处理相关的服务功能
     """
 
-    def __init__(self):
+    def __init__(self, office_facade: OfficeFacade | None = None):
         """
         初始化LTR申请单服务
         """
-        self.validator = LTRApplicationFormValidator()
-        self.extractor = LTRApplicationDataExtractor()
+        self.office_facade = office_facade or OfficeFacade()
+        self.validator = LTRApplicationFormValidator(office_facade=self.office_facade)
+        self.extractor = LTRApplicationDataExtractor(office_facade=self.office_facade)
 
         self.event_dispatcher = event_dispatcher
         # Note: ltr.application.confirmed 事件由 LTRStatusCoordinator 处理
@@ -264,18 +265,6 @@ class LTRApplicationService:
             "file_path": doc_filepath
         })
 
-        # 获取共享的Word应用实例
-        word_app = get_shared_word_app()
-        if not word_app:
-            error_msg = "无法获取Word应用实例"
-            logger.error(error_msg)
-            # 发送处理失败事件
-            self.event_dispatcher.dispatch(EventTopics.LTR_PROCESSING_FAILED, {
-                "file_path": doc_filepath,
-                "error": error_msg
-            })
-            return {"error": error_msg}
-
         try:
             # 首先验证文档是否为申请单（仅对.docx文件）
             if doc_filepath.lower().endswith('.docx'):
@@ -324,9 +313,6 @@ class LTRApplicationService:
             return {
                 "error": error_msg,
             }
-        finally:
-            # 释放Word应用实例
-            release_word_app()
 
     # 保持其他方法以确保向后兼容性
     def _extract_field_value_from_table(self, doc, search_keyword: str, next_row: bool = False):

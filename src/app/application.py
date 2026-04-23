@@ -19,9 +19,10 @@ import logging
 _START_TIME = time.perf_counter()
 
 # 添加项目根目录到 Python 路径（仅在开发模式下需要）
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.core.path_utils import get_base_path
+
 if not getattr(sys, 'frozen', False):
-    sys.path.insert(0, project_root)
+    sys.path.insert(0, get_base_path())
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
@@ -42,7 +43,7 @@ def create_main_window(splash_screen=None):
         main_window = assemble_main_window(splash_screen)
 
         # 设置应用程序图标（兼容开发和打包模式）
-        icon_path = get_resource_path("resources", "icons", "app_icon.png")
+        icon_path = get_resource_path("src", "app", "resources", "icons", "app_icon.png")
         if os.path.exists(icon_path):
             main_window.setWindowIcon(QIcon(icon_path))
 
@@ -68,7 +69,7 @@ def main():
         logger.info(f"[启动耗时] PyQt5 初始化: {_t_qt - _t_main:.3f}s")
         
         # 设置应用程序图标（兼容开发和打包模式）
-        icon_path = get_resource_path("resources", "icons", "app_icon.png")
+        icon_path = get_resource_path("src", "app", "resources", "icons", "app_icon.png")
         if os.path.exists(icon_path):
             app.setWindowIcon(QIcon(icon_path))
 
@@ -76,6 +77,9 @@ def main():
         logger.info("TestFlowManager应用程序启动")
         logger.info(f"Python版本: {sys.version}")
         logger.info(f"应用程序路径: {os.path.abspath(__file__)}")
+        logger.info(f"配置来源: {config_manager.describe_config_source()}")
+        logger.info(f"配置策略: {config_manager.describe_config_policy()}")
+        logger.info(f"日志文件: {config_manager.get_log_file_path('testflow.log')}")
         
         # 记录系统相关信息
         logger.info(f"操作系统: {os.name}")

@@ -5,12 +5,9 @@
 
 import os
 import shutil
-import json
 from typing import Dict, Any, Optional
-import win32com.client
-import pythoncom
 from src.core.logger import logger
-from src.utils.word_utils import get_shared_word_app, release_word_app, open_word_file
+from src.infrastructure.office import OfficeFacade
 from src.utils.file_utils import ensure_directory_exists
 
 
@@ -20,9 +17,15 @@ class DocumentParserService:
     提供文档解析和处理的核心功能
     """
 
-    def __init__(self):
+    def __init__(self, office_facade=None):
         """初始化文档解析服务"""
-        pass
+        self._office_facade = office_facade
+
+    def _get_office_facade(self):
+        """Lazily create the shared OfficeFacade dependency."""
+        if self._office_facade is None:
+            self._office_facade = OfficeFacade()
+        return self._office_facade
 
     def copy_ltr_application_form(self, application_data: Dict[str, Any], submitted_dir: str, src_dir: str) -> bool:
         """
@@ -204,14 +207,13 @@ class DocumentParserService:
         Returns:
             是否成功更新
         """
-        word_app = None
         doc = None
+        session = None
         try:
-            # 初始化COM
-            pythoncom.CoInitialize()
-            
-            # 创建Word应用实例
-            word_app = win32com.client.Dispatch("Word.Application")
+            office_facade = self._get_office_facade()
+            session = office_facade.create_session("word")
+            handle = session.acquire()
+            word_app = handle.application
             word_app.Visible = False  # 确保Word应用程序不可见
             word_app.DisplayAlerts = False  # 禁用显示警告
             
@@ -272,19 +274,16 @@ class DocumentParserService:
             logger.error(f"更新Word文档时出错: {e}", exc_info=True)
             return False
         finally:
-            # 确保资源被正确释放
             try:
                 if doc:
                     doc.Close()
-                if word_app:
-                    word_app.Quit()
             except Exception as e:
                 logger.error(f"关闭Word文档时出错: {e}")
-            finally:
-                try:
-                    pythoncom.CoUninitialize()
-                except:
-                    pass
+            try:
+                if session:
+                    session.release()
+            except Exception as e:
+                logger.error(f"释放Word session时出错: {e}")
 
     def _update_header_ltr_number(self, doc, dl_number: str) -> bool:
         """
@@ -453,45 +452,14 @@ class DocumentParserService:
 
     def process_word_document(self, file_path: str) -> Dict[str, Any]:
         """
-        处理Word文档，提取内容
+        Legacy placeholder for Word extraction.
 
-        Args:
-            file_path: Word文档路径
-
-        Returns:
-            提取的数据
+        This method never implemented a real extraction contract and has no
+        known callers. Keep an explicit unsupported response instead of
+        retaining a direct COM sample that can leak Word resources.
         """
-        try:
-            # 初始化COM
-            pythoncom.CoInitialize()
-            
-            # 创建Word应用实例
-            word_app = win32com.client.Dispatch("Word.Application")
-            word_app.Visible = False  # 确保Word应用程序不可见
-            word_app.DisplayAlerts = False  # 禁用显示警告
-            
-            # 打开文档
-            doc = word_app.Documents.Open(file_path, ReadOnly=True)
-            
-            # 提取数据的逻辑可以在这里实现
-            # 这里只是示例，实际实现需要根据具体需求来定
-            
-            data = {}
-            
-            # 关闭文档和应用
-            doc.Close()
-            word_app.Quit()
-            
-            # 反初始化COM
-            pythoncom.CoUninitialize()
-            
-            return data
-            
-        except Exception as e:
-            logger.error(f"处理Word文档时出错: {e}", exc_info=True)
-            # 确保即使出错也反初始化COM
-            try:
-                pythoncom.CoUninitialize()
-            except:
-                pass
-            return {"error": str(e)}
+        logger.warning("process_word_document is unsupported legacy placeholder: %s", file_path)
+        return {
+            "error": "unsupported",
+            "message": "process_word_document is a legacy placeholder with no extraction contract",
+        }

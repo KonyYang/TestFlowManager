@@ -8,7 +8,7 @@ import shutil
 from PyQt5.QtWidgets import QFileDialog
 from src.core.logger import logger
 from src.core.config_manager import config_manager
-from src.utils.word_utils import open_word_file, close_document, get_shared_word_app, release_word_app
+from src.utils.word_utils import close_document
 
 
 class DocumentUtils:
@@ -27,7 +27,7 @@ class DocumentUtils:
         """
         try:
             # 从配置中获取模板目录
-            template_dir = config_manager.get_path("template_dir", "")
+            template_dir = config_manager.get_template_dir()
             if not template_dir or not os.path.exists(template_dir):
                 logger.warning(f"模板目录不存在: {template_dir}")
                 return ""
@@ -109,8 +109,12 @@ class DocumentUtils:
             if not os.path.exists(template_path):
                 raise FileNotFoundError(f"模板文档不存在: {template_path}")
             
-            # 使用word_utils中的函数打开源文档（只读模式）
-            source_doc = open_word_file(source_path, read_only=True)
+            # 使用同一个 Word session 打开源文档（只读模式）
+            source_doc = word_app.Documents.Open(
+                source_path,
+                ReadOnly=True,
+                PasswordDocument="",
+            )
             if source_doc is None:
                 raise Exception(f"无法打开源文档: {source_path}")
             logger.debug(f"成功打开源文档: {source_path}")
@@ -305,12 +309,6 @@ class DocumentUtils:
                     logger.debug(f"临时文件已删除: {temp_template_path}")
                 except Exception as e:
                     logger.warning(f"删除临时文件时出错: {e}")
-            
-            # 释放Word应用实例
-            try:
-                release_word_app()
-            except:
-                pass
             
             logger.debug("资源清理完成")
         except Exception as e:

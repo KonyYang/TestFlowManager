@@ -4,14 +4,22 @@ Word COM接口解析器
 """
 
 from src.core.logger import logger
+from src.infrastructure.office import OfficeFacade
 from typing import List, Optional
 import os
-import pythoncom
-import win32com.client
 
 
 class WordCOMParser:
     """Word COM接口解析器"""
+    
+    def __init__(self, office_facade: OfficeFacade):
+        """
+        初始化Word COM解析器
+        
+        Args:
+            office_facade: OfficeFacade实例，用于管理Word运行时生命周期
+        """
+        self._office_facade = office_facade
     
     def parse(self, file_path: str, page_number=None, keyword=None):
         """
@@ -27,51 +35,38 @@ class WordCOMParser:
         """
         word_app = None
         doc = None
-        existing_word_app = False
+        session = None
         doc_already_opened = False
         try:
-            import pythoncom
-            import os
-            
             logger.info(f"开始通过COM接口解析.doc文件: {file_path}")
             
-            # 初始化COM
-            pythoncom.CoInitialize()
+            # 通过OfficeFacade获取Word应用程序
+            session = self._office_facade.create_session("word")
+            handle = session.acquire()
+            word_app = handle.application
             
-            try:
-                # 尝试连接到现有的Word应用程序实例
-                word_app = win32com.client.GetActiveObject("Word.Application")
-                existing_word_app = True
-                logger.info("连接到现有的Word应用程序实例")
-            except:
-                # 如果没有现有的实例，则创建新的实例
-                word_app = win32com.client.Dispatch("Word.Application")
-                logger.info("创建新的Word应用程序实例")
-            
-            # 检查文档是否已经打开
-            doc_already_opened = False
-            try:
-                # 检查文档是否已经在当前Word实例中打开
-                for opened_doc in word_app.Documents:
-                    if os.path.abspath(opened_doc.FullName).lower() == os.path.abspath(file_path).lower():
-                        doc = opened_doc
-                        doc_already_opened = True
-                        logger.info("文档已在Word中打开")
-                        break
-            except Exception as e:
-                logger.warning(f"检查文档是否已打开时出错: {e}")
-
-            # 如果文档未打开，则打开它
-            if not doc:
-                # 以只读模式打开文档
-                doc = word_app.Documents.Open(os.path.abspath(file_path), ReadOnly=True)
-                logger.info(f"成功打开文档: {file_path}")
-
-            # 设置Word应用程序为不可见，不在前台显示文档
+            # 设置Word应用程序为不可见
             try:
                 word_app.Visible = False
             except AttributeError:
                 logger.warning("无法设置Word应用程序可见性属性")
+            
+            # 检查文档是否已经在当前Word实例中打开
+            abs_path = os.path.abspath(file_path)
+            for opened_doc in word_app.Documents:
+                try:
+                    if os.path.abspath(opened_doc.FullName).lower() == abs_path.lower():
+                        doc = opened_doc
+                        doc_already_opened = True
+                        logger.info("文档已在Word中打开")
+                        break
+                except Exception as e:
+                    logger.warning(f"检查已打开文档时出错: {e}")
+            
+            # 如果文档未打开，则打开它
+            if not doc:
+                doc = word_app.Documents.Open(abs_path, ReadOnly=True)
+                logger.info(f"成功打开文档: {file_path}")
             
             # 存储找到的表格数据
             found_tables = []
@@ -126,31 +121,23 @@ class WordCOMParser:
             logger.error(f"通过COM接口解析Word文档时出错: {e}", exc_info=True)
             return []
         finally:
-            # 关闭文档和应用
+            # 只关闭本次流程打开的文档，保留用户已打开的文档
             try:
                 if doc and not doc_already_opened:
                     doc.Close()
-                    logger.info("成功关闭我们打开的Word文档")
+                    logger.info("成功关闭本次打开的Word文档")
                 elif doc and doc_already_opened:
-                    logger.info("保持用户已打开的Word文档开启")
+                    logger.info("保留用户已打开的Word文档")
             except Exception as e:
                 logger.warning(f"关闭Word文档时出错: {e}")
             
+            # 释放session
             try:
-                if word_app and not existing_word_app:
-                    word_app.Quit()
-                    logger.info("退出新创建的Word应用程序实例")
-                elif word_app and existing_word_app:
-                    logger.info("保持现有Word应用程序实例运行")
+                if session:
+                    session.release()
+                    logger.debug("Word session已释放")
             except Exception as e:
-                logger.warning(f"退出Word应用程序时出错: {e}")
-                
-            try:
-                # 反初始化COM
-                pythoncom.CoUninitialize()
-                logger.info("COM反初始化完成")
-            except Exception as e:
-                logger.warning(f"COM反初始化时出错: {e}")
+                logger.warning(f"释放Word session时出错: {e}")
 
     def _is_target_table_com(self, doc, table, table_index: int, page_number=None, keyword=None):
         """

@@ -91,22 +91,6 @@ class Logger:
 
 
 # 创建全局日志实例
-# 从配置中获取日志文件路径
-# 预期日志位置：{项目根目录}/logs/testflow.log
-log_file_path = config_manager.get_logging("file", "testflow.log")
-
-# 如果是相对路径，将其转换为绝对路径
-if not os.path.isabs(log_file_path):
-    # 获取项目根目录
-    # 开发模式：向上三级到达项目根目录
-    # 打包模式：使用可执行文件所在目录（非 _MEIPASS，确保日志持久化）
-    if getattr(sys, 'frozen', False):
-        # 可执行文件模式：日志写到 exe 同级目录
-        base_path = os.path.dirname(sys.executable)
-    else:
-        # 开发模式
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    
-    log_file_path = os.path.join(base_path, log_file_path)
+log_file_path = config_manager.get_log_file_path("testflow.log")
 
 logger = Logger("TestFlowManager", log_file_path)

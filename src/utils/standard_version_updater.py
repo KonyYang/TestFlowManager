@@ -10,9 +10,147 @@ from src.core.config_manager import config_manager
 from src.core.logger import logger
 
 
+class VersionComparator:
+    """
+    版本号比较器（纯逻辑，无外部依赖）
+    
+    负责从测试方法字符串中提取核心方法标识、版本字母，
+    并进行版本比较和标准标识符提取。
+    """
+    
+    @staticmethod
+    def extract_core_method(method: str) -> str:
+        """
+        从测试方法字符串中提取核心方法标识（如 364-xx 部分）
+
+        Args:
+            method (str): 完整的测试方法字符串
+
+        Returns:
+            str: 提取到的核心方法标识，如果未找到则返回空字符串
+        """
+        if not method:
+            return ""
+        
+        # 使用正则表达式匹配 364-后跟两位数字的部分
+        pattern = r"364-\d{2}"
+        match = re.search(pattern, method, re.IGNORECASE)
+        
+        if match:
+            return match.group(0)
+        return ""
+    
+    @staticmethod
+    def extract_version_letter(method: str) -> str:
+        """
+        从测试方法字符串中提取版本字母
+
+        Args:
+            method (str): 完整的测试方法字符串
+
+        Returns:
+            str: 版本字母，如果未找到则返回空字符串
+        """
+        if not method:
+            return ""
+        
+        # 查找核心方法标识后可能存在的版本字母
+        core_method = VersionComparator.extract_core_method(method)
+        if core_method:
+            # 在完整方法中查找核心方法标识的位置
+            pos = method.find(core_method)
+            if pos != -1:
+                # 从核心方法标识后开始查找版本字母
+                start_pos = pos + len(core_method)
+                # 查找后面的字母
+                for i in range(start_pos, len(method)):
+                    if method[i].isalpha():
+                        return method[i]
+        return ""
+    
+    @staticmethod
+    def compare_versions(version1: str, version2: str) -> int:
+        """
+        比较两个版本字母
+
+        Args:
+            version1 (str): 第一个版本字母
+            version2 (str): 第二个版本字母
+
+        Returns:
+            int: 如果version1 > version2返回1，相等返回0，小于返回-1
+        """
+        if version1 == version2:
+            return 0
+        elif version1 > version2:
+            return 1
+        else:
+            return -1
+    
+    @staticmethod
+    def extract_standard_identifier(full_standard: str) -> str:
+        """
+        从完整标准号中提取标准标识符（如从"ANSI/EIA-364-18B-2007"提取"EIA-364-18B"）
+        
+        Args:
+            full_standard (str): 完整的标准号字符串
+            
+        Returns:
+            str: 提取的标准标识符
+        """
+        # 查找核心方法标识
+        core_method = VersionComparator.extract_core_method(full_standard)
+        if not core_method:
+            return full_standard
+        
+        # 查找版本字母（如果存在）
+        version_letter = VersionComparator.extract_version_letter(full_standard)
+        
+        # 查找"EIA"的位置
+        eia_pos = full_standard.find("EIA")
+        if eia_pos == -1:
+            # 如果找不到"EIA"，使用核心方法标识的位置
+            eia_pos = full_standard.find(core_method)
+        
+        # 如果没有版本字母，则返回到年份部分之前的部分
+        if not version_letter:
+            # 查找年份部分的位置（最后一个"-"之前的部分）
+            last_hyphen_pos = full_standard.rfind("-")
+            if eia_pos != -1 and last_hyphen_pos != -1 and last_hyphen_pos > eia_pos:
+                # 特殊处理：如果标准号中包含年份信息，则保留年份
+                # 例如："ANSI/EIA-364-110-2006" 应该提取为 "EIA-364-110-2006"
+                return full_standard[eia_pos:]  # 返回从EIA开始的完整部分
+            # 如果找不到明确的年份部分，返回从EIA开始的部分
+            if eia_pos != -1:
+                return full_standard[eia_pos:]
+            return full_standard
+        else:
+            # 有版本字母，返回"EIA-364-XXY"格式的部分（不包含年份）
+            # 找到版本字母结束的位置
+            method_pos = full_standard.find(core_method)
+            version_start = method_pos + len(core_method)
+            version_end = version_start
+            # 查找版本字母结束的位置
+            for i in range(version_start, len(full_standard)):
+                if full_standard[i].isalpha():
+                    # 找到版本字母后，继续查找直到非字母字符
+                    version_end = i + 1
+                    while version_end < len(full_standard) and full_standard[version_end].isalpha():
+                        version_end += 1
+                    break
+                    
+            # 返回从"EIA"开始到版本字母结束的部分
+            if eia_pos != -1 and version_end > version_start:
+                return full_standard[eia_pos:version_end]
+        
+        return full_standard
+
+
 def extract_core_method(method: str) -> str:
     """
     从测试方法字符串中提取核心方法标识（如 364-xx 部分）
+    
+    注意：此函数为向后兼容保留，委托给 VersionComparator
 
     Args:
         method (str): 完整的测试方法字符串
@@ -20,21 +158,14 @@ def extract_core_method(method: str) -> str:
     Returns:
         str: 提取到的核心方法标识，如果未找到则返回空字符串
     """
-    if not method:
-        return ""
-    
-    # 使用正则表达式匹配 364-后跟两位数字的部分
-    pattern = r"364-\d{2}"
-    match = re.search(pattern, method, re.IGNORECASE)
-    
-    if match:
-        return match.group(0)
-    return ""
+    return VersionComparator.extract_core_method(method)
 
 
 def extract_version_letter(method: str) -> str:
     """
     从测试方法字符串中提取版本字母
+    
+    注意：此函数为向后兼容保留，委托给 VersionComparator
 
     Args:
         method (str): 完整的测试方法字符串
@@ -42,27 +173,14 @@ def extract_version_letter(method: str) -> str:
     Returns:
         str: 版本字母，如果未找到则返回空字符串
     """
-    if not method:
-        return ""
-    
-    # 查找核心方法标识后可能存在的版本字母
-    core_method = extract_core_method(method)
-    if core_method:
-        # 在完整方法中查找核心方法标识的位置
-        pos = method.find(core_method)
-        if pos != -1:
-            # 从核心方法标识后开始查找版本字母
-            start_pos = pos + len(core_method)
-            # 查找后面的字母
-            for i in range(start_pos, len(method)):
-                if method[i].isalpha():
-                    return method[i]
-    return ""
+    return VersionComparator.extract_version_letter(method)
 
 
 def compare_versions(version1: str, version2: str) -> int:
     """
     比较两个版本字母
+    
+    注意：此函数为向后兼容保留，委托给 VersionComparator
 
     Args:
         version1 (str): 第一个版本字母
@@ -71,12 +189,22 @@ def compare_versions(version1: str, version2: str) -> int:
     Returns:
         int: 如果version1 > version2返回1，相等返回0，小于返回-1
     """
-    if version1 == version2:
-        return 0
-    elif version1 > version2:
-        return 1
-    else:
-        return -1
+    return VersionComparator.compare_versions(version1, version2)
+
+
+def extract_standard_identifier(full_standard: str) -> str:
+    """
+    从完整标准号中提取标准标识符（如从"ANSI/EIA-364-18B-2007"提取"EIA-364-18B"）
+    
+    注意：此函数为向后兼容保留，委托给 VersionComparator
+    
+    Args:
+        full_standard (str): 完整的标准号字符串
+        
+    Returns:
+        str: 提取的标准标识符
+    """
+    return VersionComparator.extract_standard_identifier(full_standard)
 
 
 def is_network_path(file_path: str) -> bool:
@@ -201,7 +329,7 @@ def _load_excel_standards(file_path: str) -> dict:
             return standards
             
         # 从配置中获取工作表名称
-            sheet_name = config_manager.get_standard_file("standard_version_sheet_name", "认可标准")
+        sheet_name = config_manager.get_standard_file("standard_version_sheet_name", "认可标准")
         
         # 检查文件是否存在
         if not os.path.exists(file_path):
@@ -274,63 +402,6 @@ def _load_excel_with_xlrd(file_path: str) -> dict:
         
     return standards
 
-
-def extract_standard_identifier(full_standard: str) -> str:
-    """
-    从完整标准号中提取标准标识符（如从"ANSI/EIA-364-18B-2007"提取"EIA-364-18B"）
-    
-    Args:
-        full_standard (str): 完整的标准号字符串
-        
-    Returns:
-        str: 提取的标准标识符
-    """
-    # 查找核心方法标识
-    core_method = extract_core_method(full_standard)
-    if not core_method:
-        return full_standard
-    
-    # 查找版本字母（如果存在）
-    version_letter = extract_version_letter(full_standard)
-    
-    # 查找"EIA"的位置
-    eia_pos = full_standard.find("EIA")
-    if eia_pos == -1:
-        # 如果找不到"EIA"，使用核心方法标识的位置
-        eia_pos = full_standard.find(core_method)
-    
-    # 如果没有版本字母，则返回到年份部分之前的部分
-    if not version_letter:
-        # 查找年份部分的位置（最后一个"-"之前的部分）
-        last_hyphen_pos = full_standard.rfind("-")
-        if eia_pos != -1 and last_hyphen_pos != -1 and last_hyphen_pos > eia_pos:
-            # 特殊处理：如果标准号中包含年份信息，则保留年份
-            # 例如："ANSI/EIA-364-110-2006" 应该提取为 "EIA-364-110-2006"
-            return full_standard[eia_pos:]  # 返回从EIA开始的完整部分
-        # 如果找不到明确的年份部分，返回从EIA开始的部分
-        if eia_pos != -1:
-            return full_standard[eia_pos:]
-        return full_standard
-    else:
-        # 有版本字母，返回"EIA-364-XXY"格式的部分（不包含年份）
-        # 找到版本字母结束的位置
-        method_pos = full_standard.find(core_method)
-        version_start = method_pos + len(core_method)
-        version_end = version_start
-        # 查找版本字母结束的位置
-        for i in range(version_start, len(full_standard)):
-            if full_standard[i].isalpha():
-                # 找到版本字母后，继续查找直到非字母字符
-                version_end = i + 1
-                while version_end < len(full_standard) and full_standard[version_end].isalpha():
-                    version_end += 1
-                break
-                
-        # 返回从"EIA"开始到版本字母结束的部分
-        if eia_pos != -1 and version_end > version_start:
-            return full_standard[eia_pos:version_end]
-    
-    return full_standard
 
 
 def update_test_method_versions(matrix_data: list) -> dict:
@@ -491,37 +562,6 @@ def update_test_method_versions(matrix_data: list) -> dict:
         "is_network_disconnect": is_network_disconnect
     }
 
-
-def _extract_version_symbol(full_standard: str, base_method: str) -> str:
-    """
-    从完整标准编号中提取版本符号
-
-    Args:
-        full_standard (str): 完整的标准编号
-        base_method (str): 基础方法标识
-
-    Returns:
-        str: 版本符号，如果未找到则返回空字符串
-    """
-    try:
-        # 查找基础方法在完整标准中的位置
-        method_pos = full_standard.find(base_method)
-        if method_pos == -1:
-            return ""
-            
-        # 版本号开始位置
-        version_start = method_pos + len(base_method)
-        
-        # 从版本号开始位置查找第一个字母
-        for i in range(version_start, len(full_standard)):
-            char = full_standard[i]
-            if char.isalpha():
-                return char
-                
-    except Exception as e:
-        logger.error(f"提取版本符号时出错: {e}")
-        
-    return ""
 
 
 # 示例用法

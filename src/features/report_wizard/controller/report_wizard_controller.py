@@ -9,6 +9,9 @@ from src.features.report_wizard.coordinator.report_export_coordinator import (
     ReportExportCoordinator,
 )
 from src.features.report_wizard.model.header_data import HeaderData
+from src.features.report_wizard.protocols.matrix_snapshot_provider import (
+    MatrixSnapshotProvider,
+)
 from src.features.report_wizard.view.report_wizard_dialog import ReportWizardDialog
 
 
@@ -20,7 +23,7 @@ class ReportWizardController:
         self.view = None
         self.export_coordinator = report_export_coordinator or ReportExportCoordinator()
         self.project_context: Optional[ProjectContext] = None
-        self.matrix_controller = None
+        self.matrix_provider: Optional[MatrixSnapshotProvider] = None
 
     def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
         from src.core.logger import logger
@@ -30,19 +33,22 @@ class ReportWizardController:
         self.project_context = project_context
         self.export_coordinator.set_project_context(project_context)
 
+    def set_matrix_provider(self, matrix_provider: Optional[MatrixSnapshotProvider]) -> None:
+        self.matrix_provider = matrix_provider
+
     def set_matrix_controller(self, matrix_controller) -> None:
-        self.matrix_controller = matrix_controller
+        self.set_matrix_provider(matrix_controller)
 
     def show_wizard(self):
         self.view = ReportWizardDialog(
             self.parent_window,
             project_context=self.project_context,
-            matrix_controller=self.matrix_controller,
+            matrix_provider=self.matrix_provider,
             create_report_callback=self._create_report,
         )
 
-        if self.matrix_controller:
-            self.view.set_matrix_controller(self.matrix_controller)
+        if self.matrix_provider:
+            self.view.set_matrix_provider(self.matrix_provider)
         
         if self.project_context:
             self.view.set_project_context(self.project_context)

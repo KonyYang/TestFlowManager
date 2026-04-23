@@ -1,121 +1,39 @@
 """
 Excel工具模块
 提供底层的Excel操作工具函数
+
+注意：本模块现在是兼容委托层，实际的 COM 管理逻辑已移至
+src/infrastructure/office/legacy_excel_runtime_provider.py
 """
 import os
 from openpyxl import Workbook
 from typing import List, Optional, Any
-import pythoncom
 from src.core.logger import logger
 
-# 共享的Excel应用实例
-_shared_excel_app = None
-_excel_instance_count = 0
-_excel_initialized = False
+# 导入 provider（兼容委托层）
+from src.infrastructure.office.legacy_excel_runtime_provider import (
+    shared_excel_runtime_provider,
+)
 
 
 def get_shared_excel_app():
-    """获取共享的Excel应用实例"""
-    global _shared_excel_app, _excel_instance_count, _excel_initialized
-
-    if _shared_excel_app is None:
-        try:
-            # 确保COM库已初始化
-            try:
-                pythoncom.CoInitialize()
-                _excel_initialized = True
-            except pythoncom.com_error:
-                # 如果已经初始化，则忽略
-                pass
-            
-            import win32com.client
-            _shared_excel_app = win32com.client.Dispatch("Excel.Application")
-            
-            # 减少等待时间,从0.5秒降至0.2秒
-            import time
-            time.sleep(0.2)
-            
-            # 安全地设置Excel属性，捕获可能的错误
-            try:
-                _shared_excel_app.Visible = False
-            except:
-                # 如果无法设置Visible属性，继续执行
-                pass
-            
-            try:
-                _shared_excel_app.DisplayAlerts = False
-            except:
-                # 如果无法设置DisplayAlerts属性，继续执行
-                pass
-                
-            # 确认Excel应用程序确实可用
-            try:
-                # 尝试访问一个简单的属性来确认Excel已准备好
-                _ = _shared_excel_app.Version
-                logger.debug("Created new shared Excel application instance")
-            except Exception as e:
-                logger.error(f"Excel application not ready: {e}")
-                return None
-                
-        except Exception as e:
-            logger.error(f"Failed to initialize Excel application: {e}")
-            return None
-
-    _excel_instance_count += 1
-    logger.debug(f"Excel instance count increased to {_excel_instance_count}")
-    return _shared_excel_app
+    """获取共享的Excel应用实例（委托给 provider）"""
+    return shared_excel_runtime_provider.acquire_application()
 
 
 def release_excel_app():
-    """释放Excel应用实例"""
-    global _shared_excel_app, _excel_instance_count, _excel_initialized
+    """释放Excel应用实例（委托给 provider）"""
+    shared_excel_runtime_provider.release_application()
 
-    _excel_instance_count -= 1
-    logger.debug(f"Excel instance count decreased to {_excel_instance_count}")
 
-    if _excel_instance_count <= 0 and _shared_excel_app:
-        try:
-            # 关闭所有工作簿
-            if _shared_excel_app.Workbooks:
-                for workbook in _shared_excel_app.Workbooks:
-                    try:
-                        workbook.Close(SaveChanges=False)
-                    except:
-                        pass
+def cleanup_excel_resources():
+    """彻底清理Excel资源，在应用退出时调用（委托给 provider）"""
+    shared_excel_runtime_provider.cleanup_resources()
 
-            # 退出Excel应用
-            _shared_excel_app.Quit()
-            logger.debug("Excel application quit successfully")
-        except Exception as e:
-            logger.error(f"Error while quitting Excel application: {e}")
-        finally:
-            _shared_excel_app = None
-
-        # 反初始化COM
-        if _excel_initialized:
-            try:
-                pythoncom.CoUninitialize()
-                _excel_initialized = False
-                logger.debug("COM library uninitialized")
-            except Exception as e:
-                logger.error(f"Error while uninitializing COM library: {e}")
 
 def is_excel_closed(excel_app: Any) -> bool:
-    """
-    检查Excel应用程序是否已关闭
-
-    Args:
-        excel_app: Excel应用程序对象
-
-    Returns:
-        如果Excel已关闭返回True，否则返回False
-    """
-    try:
-        # 尝试访问Excel应用程序的一个基本属性
-        excel_app.Name
-        return False  # 如果成功访问，说明Excel仍在运行
-    except:
-        return True  # 否则认为Excel已关闭
+    """检查Excel应用程序是否已关闭（委托给 provider）"""
+    return shared_excel_runtime_provider.is_application_closed(excel_app)
 
 def close_workbook(workbook: Any, save_changes: bool = False) -> bool:
     """

@@ -14,6 +14,7 @@ from src.features.matrix.view.components.matrix_toolbar import MatrixToolbar
 from src.features.matrix.view.handlers.matrix_event_handlers import MatrixEventHandlers
 from src.features.matrix.view.managers.data_sync_manager import DataSyncManager
 from src.features.matrix.view.managers.import_export_manager import ImportExportManager
+from src.features.matrix.view.managers.matrix_table_command_bridge import MatrixTableCommandBridge
 from src.features.matrix.view.managers.table_manager import TableManager
 
 
@@ -360,7 +361,8 @@ class MatrixPage(QWidget):
         self.matrix_table_widget.setSelectionBehavior(QTableWidget.SelectItems)
 
         # 初始化管理器组件
-        self.matrix_table_manager = TableManager(self)
+        self._command_bridge = MatrixTableCommandBridge(self.matrix_controller, self)
+        self.matrix_table_manager = TableManager(self, command_bridge=self._command_bridge)
         self.matrix_data_sync_manager = DataSyncManager(self)
         self.matrix_import_export_manager = ImportExportManager(self, self.matrix_controller)
         self.matrix_event_handlers = MatrixEventHandlers(self)

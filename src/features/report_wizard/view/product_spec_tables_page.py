@@ -19,6 +19,9 @@ from src.core.logger import logger
 from src.core.project_context import ProjectContext
 from src.domain.project.project_document_context import ProjectDocumentContext
 from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
+from src.features.report_wizard.protocols.matrix_snapshot_provider import (
+    MatrixSnapshotProvider,
+)
 from src.features.report_wizard.service.test_spec_tables_service import TestSpecTablesService
 
 
@@ -39,12 +42,19 @@ class TestSpecTablesWorker(QThread):
     status_updated = pyqtSignal(str)
     finished = pyqtSignal(bool)
 
-    def __init__(self, document_path, matrix_controller=None, project_context: ProjectContext = None):
+    def __init__(
+        self,
+        document_path,
+        matrix_provider: MatrixSnapshotProvider = None,
+        matrix_controller=None,
+        project_context: ProjectContext = None,
+    ):
         logger.info(f"TestSpecTablesWorker.__init__ started")
         super().__init__()
         self.document_path = document_path
-        self.matrix_controller = matrix_controller
+        self.matrix_provider = matrix_provider or matrix_controller
         self.project_context = project_context
+        self.project_json_data = self._resolve_project_json_data()
         
         logger.info("Calling _resolve_matrix_table_data...")
         try:
@@ -76,21 +86,27 @@ class TestSpecTablesWorker(QThread):
     def _resolve_project_context(self):
         if self.project_context:
             return self.project_context
-        if self.matrix_controller and hasattr(self.matrix_controller, "get_project_context"):
-            return self.matrix_controller.get_project_context()
+        if self.matrix_provider and hasattr(self.matrix_provider, "get_project_context"):
+            return self.matrix_provider.get_project_context()
         return None
 
+    def _resolve_project_json_data(self):
+        project_context = self._resolve_project_context()
+        if not project_context:
+            return {}
+        return ProjectDocumentContext.from_project_context(project_context).project_data
+
     def _resolve_matrix_table_data(self) -> Tuple[List[str], List[List[str]]]:
-        if not self.matrix_controller:
+        if not self.matrix_provider:
             return [], []
         headers = (
-            self.matrix_controller.get_matrix_headers()
-            if hasattr(self.matrix_controller, "get_matrix_headers")
+            self.matrix_provider.get_matrix_headers()
+            if hasattr(self.matrix_provider, "get_matrix_headers")
             else []
         )
         rows = (
-            self.matrix_controller.get_matrix_rows()
-            if hasattr(self.matrix_controller, "get_matrix_rows")
+            self.matrix_provider.get_matrix_rows()
+            if hasattr(self.matrix_provider, "get_matrix_rows")
             else []
         )
         return list(headers or []), list(rows or [])
@@ -111,8 +127,9 @@ class TestSpecTablesWorker(QThread):
                 self.matrix_data_structure,
                 self.matrix_headers,
                 self.matrix_rows,
-                self.progress_updated,
-                self.status_updated,
+                project_json_data=self.project_json_data,
+                progress_callback=self.progress_updated,
+                status_callback=self.status_updated,
             )
             logger.info(f"fill_all_test_spec_tables returned: {success}")
             logger.info(f"Emitting finished signal with value: {bool(success)}")
@@ -145,13 +162,15 @@ class TestSpecTablesPage(QFrame):
         self,
         parent=None,
         document_path=None,
+        matrix_provider: MatrixSnapshotProvider = None,
         matrix_controller=None,
         project_context: ProjectContext = None,
     ):
         super().__init__(parent)
         self.document_path = document_path
-        self.matrix_controller = matrix_controller
+        self.matrix_provider = matrix_provider or matrix_controller
         self.project_context = project_context
+        self.project_json_data = self._resolve_project_json_data()
         self.worker = None
         self.matrix_data_structure = None
         self._processing_started = False  # 防止重复启动
@@ -163,21 +182,27 @@ class TestSpecTablesPage(QFrame):
     def _resolve_project_context(self):
         if self.project_context:
             return self.project_context
-        if self.matrix_controller and hasattr(self.matrix_controller, "get_project_context"):
-            return self.matrix_controller.get_project_context()
+        if self.matrix_provider and hasattr(self.matrix_provider, "get_project_context"):
+            return self.matrix_provider.get_project_context()
         return None
 
+    def _resolve_project_json_data(self):
+        project_context = self._resolve_project_context()
+        if not project_context:
+            return {}
+        return ProjectDocumentContext.from_project_context(project_context).project_data
+
     def _resolve_matrix_table_data(self) -> Tuple[List[str], List[List[str]]]:
-        if not self.matrix_controller:
+        if not self.matrix_provider:
             return [], []
         headers = (
-            self.matrix_controller.get_matrix_headers()
-            if hasattr(self.matrix_controller, "get_matrix_headers")
+            self.matrix_provider.get_matrix_headers()
+            if hasattr(self.matrix_provider, "get_matrix_headers")
             else []
         )
         rows = (
-            self.matrix_controller.get_matrix_rows()
-            if hasattr(self.matrix_controller, "get_matrix_rows")
+            self.matrix_provider.get_matrix_rows()
+            if hasattr(self.matrix_provider, "get_matrix_rows")
             else []
         )
         return list(headers or []), list(rows or [])
@@ -202,16 +227,21 @@ class TestSpecTablesPage(QFrame):
         if self.document_path and self.progress_bar.value() == 0:
             self.start_processing()
 
-    def set_matrix_controller(self, matrix_controller):
-        logger.info(f"Set matrix controller for Test Spec page: {matrix_controller is not None}")
-        self.matrix_controller = matrix_controller
+    def set_matrix_provider(self, matrix_provider: MatrixSnapshotProvider):
+        logger.info(f"Set matrix provider for Test Spec page: {matrix_provider is not None}")
+        self.matrix_provider = matrix_provider
+        self.project_json_data = self._resolve_project_json_data()
         self._refresh_matrix_data_structure()
         # 不在这里启动处理，等待用户明确触发或文档路径设置时启动
         # if self.document_path and self.progress_bar.value() == 0:
         #     self.start_processing()
 
+    def set_matrix_controller(self, matrix_controller):
+        self.set_matrix_provider(matrix_controller)
+
     def set_project_context(self, project_context: ProjectContext):
         self.project_context = project_context
+        self.project_json_data = self._resolve_project_json_data()
         self._refresh_matrix_data_structure()
 
     def start_processing(self):
@@ -232,7 +262,7 @@ class TestSpecTablesPage(QFrame):
 
         self.worker = TestSpecTablesWorker(
             self.document_path,
-            matrix_controller=self.matrix_controller,
+            matrix_provider=self.matrix_provider,
             project_context=self.project_context,
         )
         logger.info("TestSpecTablesWorker created")

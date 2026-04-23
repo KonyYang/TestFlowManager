@@ -468,7 +468,8 @@ class MainWindow(QMainWindow):
         """设置窗口图标（兼容开发和打包模式）"""
         try:
             from src.core.path_utils import get_resource_path
-            icon_path = get_resource_path("resources", "icons", "app_icon.png")
+            # 图标文件位于 src/app/resources/icons/
+            icon_path = get_resource_path("src", "app", "resources", "icons", "app_icon.png")
             if os.path.exists(icon_path):
                 self.setWindowIcon(QIcon(icon_path))
                 logger.debug(f"成功设置窗口图标: {icon_path}")

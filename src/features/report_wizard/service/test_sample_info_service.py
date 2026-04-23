@@ -5,7 +5,7 @@
 
 from typing import Dict, Any, List, Optional
 from src.core.logger import logger
-import win32com.client
+from src.infrastructure.office.facade import OfficeFacade
 
 
 class TestSampleInfoService:
@@ -43,6 +43,12 @@ class TestSampleInfoService:
         word_app = None
         word_doc = None
         
+        # 通过 OfficeFacade 创建 Word session（仅在自己创建时才需要）
+        office_facade = None
+        word_session = None
+        handle = None
+        owns_word_doc = False
+        
         try:
             # 如果提供了文档实例，则直接使用
             if word_doc_instance is not None:
@@ -53,7 +59,16 @@ class TestSampleInfoService:
                 # 如果word_app_instance存在，直接使用，否则创建新的实例
                 if word_app_instance is None:
                     logger.info("创建新的Word应用程序实例")
-                    word_app = win32com.client.Dispatch("Word.Application")
+                    # 通过 OfficeFacade 创建 Word session
+                    office_facade = OfficeFacade()
+                    word_session = office_facade.create_session("word")
+                    handle = word_session.acquire()
+                    
+                    word_app = handle.application
+                    if word_app is None:
+                        logger.error("无法从 OfficeFacade session 获取 Word 应用程序实例")
+                        return False
+                    
                     word_app.Visible = False  # 确保Word应用程序不可见
                     word_app.DisplayAlerts = False  # 关闭警告提示
                 else:
@@ -62,6 +77,7 @@ class TestSampleInfoService:
                 
                 # 打开文档
                 word_doc = word_app.Documents.Open(document_path)
+                owns_word_doc = True
                 logger.info(f"成功打开文档，包含 {word_doc.Paragraphs.Count} 个段落和 {word_doc.Tables.Count} 个表格")
             
             # 检查文档中是否有表格
@@ -130,17 +146,18 @@ class TestSampleInfoService:
             logger.error(f"错误堆栈: {traceback.format_exc()}")
             return False
         finally:
-            # 仅在我们创建了实例的情况下才关闭，否则不关闭共享实例
-            # 如果word_app_instance和word_doc_instance都是None，说明是我们创建的
-            if word_app_instance is None and word_doc_instance is None:
-                try:
-                    if word_doc:
-                        word_doc.Close()
-                    if word_app:
-                        word_app.Quit()
-                except Exception as close_error:
-                    logger.warning(f"关闭Word实例时出错: {close_error}")
-            # 如果只传递了其中一个实例，我们不应该关闭它，因为它可能在其他地方使用
+            try:
+                if owns_word_doc and word_doc is not None:
+                    word_doc.Close(SaveChanges=False)
+            except Exception as e:
+                logger.error(f"关闭测试样品信息文档时出错: {e}")
+
+            # 仅在我们创建了 session 的情况下才释放
+            try:
+                if word_session is not None:
+                    word_session.release()
+            except Exception as e:
+                logger.error(f"释放 Word session 时出错: {e}")
 
     def _fill_header_row(self, header_row):
         """

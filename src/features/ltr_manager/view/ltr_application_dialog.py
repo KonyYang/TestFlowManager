@@ -153,10 +153,10 @@ class LTRApplicationDialog(LTRFormDialogBase):
         """延迟接受对话框，确保所有操作完成"""
         logger.debug("_delayed_accept called")
         try:
-            # 确保所有COM对象被释放
+            # Excel cleanup remains a legacy fallback; Word document/session
+            # lifecycle is owned by the OfficeFacade-backed services.
             try:
-                from src.utils import word_utils, excel_utils
-                word_utils.release_word_app()
+                from src.utils import excel_utils
                 excel_utils.release_excel_app()
             except:
                 pass

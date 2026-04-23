@@ -8,7 +8,7 @@ from src.core.logger import logger
 class MatrixContextMenus:
     """Matrix上下文菜单组件 - 处理所有右键菜单"""
     
-    def __init__(self, view, _legacy_controller=None):
+    def __init__(self, view):
         self.view = view
         self.merge_or_split_action = None
 

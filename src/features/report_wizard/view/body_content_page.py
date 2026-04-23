@@ -5,13 +5,16 @@
 
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
-    QLabel, QGroupBox, QFrame, QTextEdit, QFileDialog,
+    QLabel, QGroupBox, QFrame, QFileDialog,
     QSplitter, QListWidget, QListWidgetItem
 )
 from PyQt5.QtCore import pyqtSignal
 from src.features.content_editor.service.body_content_service import BodyContentService
 from src.features.content_editor.service.document_content_service import (
     DocumentContentService,
+)
+from src.features.report_wizard.view.body_content_page_document_workflow import (
+    BodyContentPageDocumentWorkflow,
 )
 from src.core.logger import logger
 from src.utils.document_editor_mixin import DocumentEditorMixin
@@ -37,13 +40,17 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
         self.document_path = None
         self.body_content_service = BodyContentService()
         self.document_content_service = DocumentContentService()
+        self._document_workflow = BodyContentPageDocumentWorkflow(self.document_content_service)
         # 添加状态保持变量
         self._cached_purpose_content = ""
         self._cached_conclusions_content = ""
         self._content_loaded = False  # 标记内容是否已加载
         logger.info(f"开始初始化正文内容页面，混入类初始化状态检查:")
         logger.info(f"  - body_content_service 实例: {self.body_content_service is not None}")
-        logger.info(f"  - body_content_service 预设描述: {self.body_content_service.predefined_descriptions}")
+        # 使用 get_predefined_descriptions() 方法而非直接访问属性
+        purpose_descs = self.body_content_service.get_predefined_descriptions("PURPOSE") if self.body_content_service else []
+        conclusions_descs = self.body_content_service.get_predefined_descriptions("CONCLUSIONS") if self.body_content_service else []
+        logger.info(f"  - body_content_service 预设描述 - PURPOSE: {len(purpose_descs)}项, CONCLUSIONS: {len(conclusions_descs)}项")
         self.init_ui()
         
         # 调试：检查预设列表是否已初始化
@@ -271,23 +278,12 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
     def _load_selected_purpose_preset(self):
         """加载选中的PURPOSE预设描述"""
         try:
-            current_item = self.purpose_preset_list.currentItem()
-            if current_item:
-                preset_text = current_item.data(100)
-                current_text = self.edit_purpose_content.toPlainText()
-                # 将预设文本添加到当前编辑内容的末尾
-                if current_text and not current_text.endswith('\n'):
-                    preset_text = '\n' + preset_text
-                new_text = current_text + preset_text
-                self.edit_purpose_content.setPlainText(new_text)
-                
-                # 触发内容变化事件以更新保存按钮状态
-                self._on_purpose_content_changed()
-                
-                # 在向导模式下，立即保存更改到文档
-                if self.document_path:
-                    logger.info("在向导模式下，加载PURPOSE预设后立即保存到文档")
-                    self.save_current_edits_to_document()
+            self._apply_selected_preset(
+                self.purpose_preset_list,
+                self.edit_purpose_content,
+                self._on_purpose_content_changed,
+                self.save_current_edits_to_document,
+            )
                 
         except Exception as e:
             logger.error(f"加载选中PURPOSE预设时出错: {e}")
@@ -295,23 +291,12 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
     def _load_selected_conclusions_preset(self):
         """加载选中的CONCLUSIONS预设描述"""
         try:
-            current_item = self.conclusions_preset_list.currentItem()
-            if current_item:
-                preset_text = current_item.data(100)
-                current_text = self.edit_conclusions_content.toPlainText()
-                # 将预设文本添加到当前编辑内容的末尾
-                if current_text and not current_text.endswith('\n'):
-                    preset_text = '\n' + preset_text
-                new_text = current_text + preset_text
-                self.edit_conclusions_content.setPlainText(new_text)
-                
-                # 触发内容变化事件以更新保存按钮状态
-                self._on_conclusions_content_changed()
-                
-                # 在向导模式下，立即保存更改到文档
-                if self.document_path:
-                    logger.info("在向导模式下，加载CONCLUSIONS预设后立即保存到文档")
-                    self.save_current_edits_to_document()
+            self._apply_selected_preset(
+                self.conclusions_preset_list,
+                self.edit_conclusions_content,
+                self._on_conclusions_content_changed,
+                self.save_current_edits_to_document,
+            )
                 
         except Exception as e:
             logger.error(f"加载选中CONCLUSIONS预设时出错: {e}")
@@ -321,18 +306,6 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
         try:
             logger.info(f"开始加载文档内容，文件路径: {self.file_path}")
             
-            # 检查 body_content_service 是否存在
-            if not hasattr(self, 'body_content_service') or not self.body_content_service:
-                logger.error("body_content_service 未初始化")
-                return
-            
-            # 检查编辑器组件是否已初始化
-            logger.info(f"检查编辑器组件初始化状态:")
-            logger.info(f"  - edit_purpose_content: {getattr(self, 'edit_purpose_content', 'NOT SET') is not None}")
-            logger.info(f"  - edit_conclusions_content: {getattr(self, 'edit_conclusions_content', 'NOT SET') is not None}")
-            logger.info(f"  - purpose_preset_list: {getattr(self, 'purpose_preset_list', 'NOT SET') is not None}")
-            logger.info(f"  - conclusions_preset_list: {getattr(self, 'conclusions_preset_list', 'NOT SET') is not None}")
-            
             # 检查编辑器组件是否存在
             if not hasattr(self, 'edit_purpose_content') or self.edit_purpose_content is None:
                 logger.error("edit_purpose_content 未初始化")
@@ -341,58 +314,42 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
                 logger.error("edit_conclusions_content 未初始化")
                 return
             
-            # 检查是否已有缓存内容，如果有则优先使用缓存内容以保持状态
-            if self._content_loaded and hasattr(self, '_cached_purpose_content') and hasattr(self, '_cached_conclusions_content'):
-                logger.info("检测到已缓存的内容，使用缓存内容以保持状态")
-                self.edit_purpose_content.setPlainText(self._cached_purpose_content)
-                self.edit_conclusions_content.setPlainText(self._cached_conclusions_content)
-            else:
-                content = self.document_content_service.load_document_content(self.file_path)
-                purpose_content = content.get("PURPOSE", "")
-                logger.info(
-                    f"PURPOSE后内容长度: {len(purpose_content)}, 内容预览: "
-                    f"{purpose_content[:100] if purpose_content else 'None'}"
-                )
-                self.edit_purpose_content.setPlainText(purpose_content)
-                conclusions_content = content.get("CONCLUSIONS", "")
-                logger.info(
-                    f"CONCLUSIONS后内容长度: {len(conclusions_content)}, 内容预览: "
-                    f"{conclusions_content[:100] if conclusions_content else 'None'}"
-                )
-                self.edit_conclusions_content.setPlainText(conclusions_content)
-                
-                # 保存到缓存中
-                self._cached_purpose_content = purpose_content
-                self._cached_conclusions_content = conclusions_content
+            # 委托文档工作流协作者
+            result = self._document_workflow.load_content(
+                file_path=self.file_path,
+                edit_purpose=self.edit_purpose_content,
+                edit_conclusions=self.edit_conclusions_content,
+                cached_purpose=self._cached_purpose_content,
+                cached_conclusions=self._cached_conclusions_content,
+                content_loaded=self._content_loaded,
+            )
             
-            # 保存原始内容用于比较
-            self.original_purpose_content = QTextEdit()
-            self.original_purpose_content.setPlainText(self._cached_purpose_content)
-            self.original_conclusions_content = QTextEdit()
-            self.original_conclusions_content.setPlainText(self._cached_conclusions_content)
+            # 更新缓存
+            self._cached_purpose_content = result["purpose_content"]
+            self._cached_conclusions_content = result["conclusions_content"]
             
-            # 现在连接信号，确保原始内容已设置
+            # 保存原始内容快照
+            originals = self._document_workflow.snapshot_originals(
+                purpose_content=result["purpose_content"],
+                conclusions_content=result["conclusions_content"],
+            )
+            self.original_purpose_content = originals["original_purpose_content"]
+            self.original_conclusions_content = originals["original_conclusions_content"]
+            
+            # 连接内容变化信号
             logger.info("连接内容变化信号")
             self.edit_purpose_content.textChanged.connect(self._on_purpose_content_changed)
             self.edit_conclusions_content.textChanged.connect(self._on_conclusions_content_changed)
             
-            # 加载预设描述 - 添加调试信息
+            # 加载预设描述
             logger.info("开始加载预设描述")
-            logger.info(f"PURPOSE 预设列表组件状态: {getattr(self, 'purpose_preset_list', None) is not None}")
-            logger.info(f"CONCLUSIONS 预设列表组件状态: {getattr(self, 'conclusions_preset_list', None) is not None}")
-            
-            # 检查 document_content_service 中的预设描述
-            logger.info(f"document_content_service 中的 PURPOSE 预设: {self.document_content_service.get_predefined_descriptions('PURPOSE')}")
-            logger.info(f"document_content_service 中的 CONCLUSIONS 预设: {self.document_content_service.get_predefined_descriptions('CONCLUSIONS')}")
-            
-            # 检查预设列表组件是否存在
             if hasattr(self, 'purpose_preset_list') and self.purpose_preset_list is not None:
-                self._load_preset_descriptions("PURPOSE", self.purpose_preset_list)
+                self._document_workflow.load_preset_descriptions("PURPOSE", self.purpose_preset_list)
             else:
                 logger.warning("PURPOSE 预设列表组件未初始化")
             
             if hasattr(self, 'conclusions_preset_list') and self.conclusions_preset_list is not None:
-                self._load_preset_descriptions("CONCLUSIONS", self.conclusions_preset_list)
+                self._document_workflow.load_preset_descriptions("CONCLUSIONS", self.conclusions_preset_list)
             else:
                 logger.warning("CONCLUSIONS 预设列表组件未初始化")
             
@@ -433,35 +390,24 @@ class BodyContentPage(QFrame, DocumentEditorMixin):
             original_purpose_content = self.original_purpose_content.toPlainText() if self.original_purpose_content else ""
             original_conclusions_content = self.original_conclusions_content.toPlainText() if self.original_conclusions_content else ""
             
-            # 检查是否有更改
-            purpose_changed = current_purpose_content != original_purpose_content
-            conclusions_changed = current_conclusions_content != original_conclusions_content
-            
-            if not purpose_changed and not conclusions_changed:
-                logger.info("没有内容更改，无需保存")
-                return True
-            
-            success = self.document_content_service.save_document_content(
-                self.document_path,
-                current_purpose_content,
-                current_conclusions_content,
-                original_purpose_content,
-                original_conclusions_content,
+            # 委托文档工作流协作者
+            result = self._document_workflow.save_edits(
+                document_path=self.document_path,
+                current_purpose=current_purpose_content,
+                current_conclusions=current_conclusions_content,
+                original_purpose=original_purpose_content,
+                original_conclusions=original_conclusions_content,
             )
 
-            if success:
-                logger.info("成功更新文档内容")
-
+            if result["success"] and result["had_changes"]:
                 if self.original_purpose_content:
                     self.original_purpose_content.setPlainText(current_purpose_content)
                 if self.original_conclusions_content:
                     self.original_conclusions_content.setPlainText(current_conclusions_content)
 
                 self.content_updated.emit(self.document_path)
-                return True
 
-            logger.error("更新文档内容失败")
-            return False
+            return result["success"]
                 
         except Exception as e:
             logger.error(f"保存当前编辑到文档时出错: {e}")

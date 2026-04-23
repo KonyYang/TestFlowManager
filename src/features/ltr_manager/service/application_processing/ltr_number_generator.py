@@ -19,6 +19,9 @@ from src.features.ltr_manager.service.ltr_editor_service import LTREditorService
 class LTRNumberGenerator:
     """LTR编号生成器类"""
 
+    # 具名常量：Excel 扫描上限，防止无限循环
+    MAX_SCAN_ROWS = 10000
+
     def __init__(self, parent=None):
         """初始化LTR编号生成器"""
         self.parent = parent
@@ -166,14 +169,26 @@ class LTRNumberGenerator:
                 'ltr_number': None
             }
 
+    @staticmethod
+    def _is_valid_w_prefix(dl: str) -> bool:
+        """
+        验证 W 前缀格式（仅内部使用）
+        
+        Args:
+            dl: DL 编号字符串
+            
+        Returns:
+            是否为有效的 W 前缀格式（W/w 后跟字母或数字）
+        """
+        return bool(re.match(r'^[Ww][A-Za-z0-9]*$', dl))
+
     def _handle_w_prefix_dl(self, dl, data_columns):
         """处理W开头的DL编号"""
         try:
             logger.debug("开始验证 W 前缀编号: %s", dl)
             # 验证W后缀格式：W/w后面只能跟数字或字母
-            pattern = r'^[Ww][A-Za-z0-9]*$'
-            is_valid = re.match(pattern, dl)
-            logger.debug("正则表达式 %s 匹配结果: %s", pattern, bool(is_valid))
+            is_valid = self._is_valid_w_prefix(dl)
+            logger.debug("W 前缀编号格式验证结果: %s", is_valid)
             if not is_valid:
                 logger.debug("W 前缀编号格式验证失败: %s", dl)
                 if self.parent:
@@ -428,44 +443,72 @@ class LTRNumberGenerator:
                 'ltr_number': None
             }
 
-    def _generate_monthly_ltr_number(self):
-        """生成当月的基础LTR编号"""
+    def _scan_monthly_numbers_from_worksheet(self) -> list:
+        """
+        Worksheet Scan Adapter: 从当前工作表扫描当月已有编号
+        
+        Returns:
+            找到的序号列表（如 [1, 2, 5] 表示已有 001, 002, 005）
+        """
         month_str = f"{self.current_month:02d}"
-        # 查找当前月份已有的编号
         found_numbers = []
         row = 2  # 从第2行开始（跳过标题行）
-
-        while row < 10000:  # 设置上限防止无限循环
+        pattern = re.compile(rf'DL-{self.current_year}-{month_str}-(\d{{3}})[A-Za-z]*')
+        
+        while row < self.MAX_SCAN_ROWS:
             cell_value = self.worksheet.Cells(row, 4).Value  # D列
             if cell_value is None or cell_value == "":
                 break
 
             if isinstance(cell_value, (str, int, float)):
                 cell_value_str = str(cell_value)
-                # 设置匹配模式，匹配当前年月的编号
-                pattern = re.compile(rf'DL-{self.current_year}-{month_str}-(\d{{3}})[A-Za-z]*')
-                match = pattern.search(cell_value_str) # 执行匹配
+                match = pattern.search(cell_value_str)  # 执行匹配
                 if match:
                     try:
-                        number = int(match.group(1)) # 将第一个捕获组的数字内容转换为整数
+                        number = int(match.group(1))  # 将第一个捕获组的数字内容转换为整数
                         found_numbers.append(number)
                     except ValueError:
                         pass
             row += 1
-
-        if not found_numbers:
+        
+        return found_numbers
+    
+    @staticmethod
+    def _format_next_monthly_number(year: int, month: int, existing_numbers: list) -> str:
+        """
+        Pure Number Formatter: 根据已有编号计算下一个编号（纯逻辑）
+        
+        Args:
+            year: 年份
+            month: 月份
+            existing_numbers: 已有序号列表
+            
+        Returns:
+            下一个编号字符串，如 "DL-2026-04-006"
+        """
+        month_str = f"{month:02d}"
+        if not existing_numbers:
             # 当月还没有编号
-            return f"DL-{self.current_year}-{month_str}-001"
+            return f"DL-{year}-{month_str}-001"
         else:
             # 找到最大编号并加1
-            max_number = max(found_numbers)
+            max_number = max(existing_numbers)
             next_number = max_number + 1
-            return f"DL-{self.current_year}-{month_str}-{next_number:03d}"
+            return f"DL-{year}-{month_str}-{next_number:03d}"
+
+    def _generate_monthly_ltr_number(self):
+        """生成当月的基础LTR编号（编排两层逻辑）"""
+        found_numbers = self._scan_monthly_numbers_from_worksheet()
+        return self._format_next_monthly_number(
+            self.current_year, 
+            self.current_month, 
+            found_numbers
+        )
 
     def _find_target_row(self):
         """查找目标写入行"""
         row = 2  # 从第2行开始
-        while row < 10000:
+        while row < self.MAX_SCAN_ROWS:
             cell_value = self.worksheet.Cells(row, 4).Value  # D列
             if cell_value is None or cell_value == "":
                 return row

@@ -17,6 +17,9 @@ from src.features.project_creator.controller.runtime.project_creator_email_flow_
 from src.features.project_creator.controller.runtime.project_creator_ltr_result_coordinator import (
     ProjectCreatorLtrResultCoordinator,
 )
+from src.features.project_creator.controller.runtime.project_creator_attachment_ltr_flow_coordinator import (
+    ProjectCreatorAttachmentLtrFlowCoordinator,
+)
 from src.features.project_creator.model.project_creator_data import ProjectCreationContext
 # 添加LTR项目集成服务
 from src.features.project_creator.service.ltr_project_integration_service import LTRProjectIntegrationService
@@ -62,6 +65,8 @@ class ProjectCreatorController:
         self.selected_attachment = None  # 用于存储选中的附件
         self.email_flow_coordinator = ProjectCreatorEmailFlowCoordinator(self)
         self.ltr_result_coordinator = ProjectCreatorLtrResultCoordinator(self)
+        # 附件处理 + LTR 对话框启动协调器
+        self._attachment_ltr_flow_coordinator = ProjectCreatorAttachmentLtrFlowCoordinator(self)
         # 添加LTR项目集成服务
         self.ltr_integration_service = LTRProjectIntegrationService()
         if (
@@ -101,6 +106,13 @@ class ProjectCreatorController:
         self._event_subscribed = False
         # 订阅LTR申请处理完成事件
         self._subscribe_to_events()
+        # 注册 shutdown 清理（priority 45：在 MatrixController 之后、应用退出前）
+        from src.core.shutdown_registry import shutdown_registry
+        shutdown_registry.register(
+            name="ProjectCreatorController.cleanup",
+            cleanup_fn=self.cleanup,
+            priority=45,
+        )
 
     def _subscribe_to_events(self):
         """订阅事件，确保不会重复订阅"""
@@ -169,62 +181,10 @@ class ProjectCreatorController:
     def _continue_project_creation(self):
         """
         继续项目创建流程
+
+        委托给附件LTR流程协调器处理附件解析、Word提取和LTR对话框启动。
         """
-        try:
-            logger.debug("Continuing project creation process")
-
-            # 创建项目创建服务实例
-            project_service = ProjectCreatorService()
-
-            # 获取来自EmailExtractor的临时文件夹路径
-            temp_folder = None
-            if hasattr(self, 'email_extractor_controller') and self.email_extractor_controller:
-                temp_folder = self.email_extractor_controller.get_temp_folder_path()
-                logger.info(f"使用EmailExtractor提供的临时文件夹路径: {temp_folder}")
-
-            self.context.temp_folder = temp_folder
-
-            # 只处理用户选中的附件
-            selected_attachment = self._get_selected_attachment()
-            word_attachment = None
-
-            if selected_attachment:
-                # 检查选中的附件是否为Word文档
-                filename = selected_attachment.get('filename', '').lower()
-                if filename.endswith(('.doc', '.docx')):
-                    word_attachment = selected_attachment
-                    logger.info(f"Using selected attachment: {filename}")
-                else:
-                    # 选中的附件不是Word文档
-                    logger.info(f"Selected attachment is not a Word document: {filename}")
-            else:
-                # 没有选中的附件
-                logger.info("No attachment selected by user")
-
-            if word_attachment:
-                # 处理Word附件
-                result = project_service.process_word_attachment(word_attachment)
-
-                if result and not result.get("error"):
-                    # 成功提取数据，显示LTR申请窗口
-                    logger.debug("Successfully processed Word attachment, showing LTR application dialog")
-                    self._show_ltr_application_dialog(result, selected_attachment.get('filename', ''))
-                else:
-                    # 未能提取数据，询问用户选择
-                    error_msg = result.get("error", "未知错误") if result else "处理过程中发生错误"
-                    logger.warning(f"Failed to process Word attachment: {error_msg}")
-                    self._handle_failed_extraction()
-            else:
-                # 没有找到Word附件或没有选中附件，询问用户选择
-                logger.info("No valid Word attachment found or selected, prompting user for action")
-                self._handle_failed_extraction()
-
-            logger.info("Project creation process continued successfully")
-
-        except Exception as e:
-            logger.error(f"Error continuing project creation process: {e}")
-            if self.parent_view:
-                QMessageBox.critical(self.parent_view, "错误", f"继续项目创建流程失败: {str(e)}")
+        self._attachment_ltr_flow_coordinator.continue_project_creation()
 
     def _get_attachments(self):
         """
@@ -249,48 +209,10 @@ class ProjectCreatorController:
         return []
 
     def _show_ltr_application_dialog(self, application_data, selected_filename=''):
-        """显示LTR申请窗口"""
-        try:
-            # 准备LTR数据
-            dl_data = {
-                'dl_number': '',  # 新申请，没有DL编号
-                'data': application_data if application_data else {}
-            }
-
-            # 使用正确的LTR控制器
-            from src.features.ltr_manager.controller.ltr_application_controller import LTRApplicationController
-            ltr_controller = LTRApplicationController(self.parent_view)
-            
-            # 设置选中的文件名
-            ltr_controller.set_selected_filename(selected_filename)
-            
-            # 获取临时文件夹路径（如果有的话）
-            temp_folder_path = None
-            if hasattr(self, 'email_extractor_controller') and self.email_extractor_controller:
-                temp_folder_path = self.email_extractor_controller.get_temp_folder_path()
-                logger.debug(f"从email_extractor_controller获取到的临时文件夹路径: {temp_folder_path}")
-                # 检查路径是否存在
-                import os
-                if temp_folder_path and os.path.exists(temp_folder_path):
-                    logger.debug(f"临时文件夹路径存在: {temp_folder_path}")
-                else:
-                    logger.warning(f"临时文件夹路径不存在或为空: {temp_folder_path}")
-
-            # 通过控制器显示对话框并传递临时文件夹路径
-            # 将application_data传递给控制器，以便正确初始化申请单数据
-            if application_data:
-                # 创建一个新的申请单数据对象
-                from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
-                ltr_controller.set_application_data(LTRApplicationData.from_dict(application_data))
-            
-            result = ltr_controller.show_application_dialog(temp_folder_path)
-            # 注意：这里不需要处理result，因为LTRApplicationController会通过事件系统处理后续操作
-
-        except Exception as e:
-            logger.error(f"显示LTR申请窗口时出错: {e}")
-            if self.parent_view:
-                QMessageBox.warning(self.parent_view, "警告", f"无法打开LTR申请窗口: {str(e)}")
-
+        """显示LTR申请窗口 — 委托给附件LTR流程协调器"""
+        self._attachment_ltr_flow_coordinator.show_ltr_application_dialog(
+            application_data, selected_filename
+        )
 
     def _get_selected_attachment(self):
         """

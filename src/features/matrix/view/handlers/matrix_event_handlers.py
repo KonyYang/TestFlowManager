@@ -10,7 +10,7 @@ from src.features.step_record_generator.controller.step_record_controller import
 class MatrixEventHandlers:
     """Matrix事件处理器 - 处理所有用户交互事件"""
     
-    def __init__(self, view, _legacy_controller=None):
+    def __init__(self, view):
         self.view = view
         
     def on_import_clicked(self):

@@ -15,9 +15,14 @@ class WordParser:
     支持解析.doc和.docx格式的Word文档中的表格数据
     """
 
-    def __init__(self):
-        """初始化Word解析器"""
-        pass
+    def __init__(self, office_facade=None):
+        """
+        初始化Word解析器
+
+        Args:
+            office_facade: OfficeFacade实例（.doc格式解析必需）
+        """
+        self._office_facade = office_facade
 
     def parse(self, file_path: str, page_number=None, keyword=None):
         """
@@ -34,8 +39,11 @@ class WordParser:
         # 检查文件扩展名以决定使用哪种解析方法
         if file_path.lower().endswith('.doc'):
             # 对于.doc文件，使用COM接口
+            if self._office_facade is None:
+                from src.infrastructure.office import OfficeFacade
+                self._office_facade = OfficeFacade()
             from .word_com_parser import WordCOMParser
-            parser = WordCOMParser()
+            parser = WordCOMParser(self._office_facade)
             return parser.parse(file_path, page_number, keyword)
         elif file_path.lower().endswith('.docx'):
             # 对于.docx文件，使用python-docx库

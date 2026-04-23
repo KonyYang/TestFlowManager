@@ -6,14 +6,21 @@ from src.core.logger import logger
 class TableManager:
     """表格管理器 - 处理表格相关的操作"""
     
-    def __init__(self, view, _legacy_controller=None):
+    def __init__(self, view, command_bridge=None):
+        """初始化表格管理器。
+        
+        Args:
+            view: MatrixPage 实例，用于获取表格控件和数据模型
+            command_bridge: MatrixTableCommandBridge 实例，用于行列命令转发。
+                            如果为 None，则回退到 view 的旧方法（兼容性）。
+        """
         self.view = view
+        self._command_bridge = command_bridge
         
     def update_table(self):
         """更新表格显示"""
         table_widget = self.view.get_table_widget()
         data_model = self.view.get_data_model()
-        # 移除更新表格显示的详细日志
         # 断开信号连接以避免在更新过程中触发事件
         try:
             table_widget.itemChanged.disconnect(self.view.handle_item_changed)
@@ -65,21 +72,16 @@ class TableManager:
                 
     def add_row(self):
         """添加行"""
-        # 调用服务层添加行
-        self.view.append_row_to_model()
-        # 更新表格显示
+        self._bridge_append_row()
         self.update_table()
 
     def insert_row(self, row):
         """插入行"""
-        # 调用服务层插入行
-        self.view.insert_row_to_model(row)
-        # 更新表格显示
+        self._bridge_insert_row(row)
         self.update_table()
 
     def remove_row(self, row):
         """删除行"""
-        # 弹出确认对话框
         reply = QMessageBox.question(
             self.view, 
             "确认删除", 
@@ -89,21 +91,18 @@ class TableManager:
         )
         
         if reply == QMessageBox.Yes:
-            # 调用服务层删除行
-            self.view.remove_row_from_model(row)
-            # 更新表格显示
+            self._bridge_remove_row(row)
             self.update_table()
 
     def move_row(self, row):
         """移动行"""
         if row >= 0:
-            # 弹出行移动对话框
             new_position, ok = QInputDialog.getInt(
                 self.view, "移动行", "请输入目标行位置(从0开始):", 
                 row, 0, len(self.view.get_data_model().rows)-1)
 
             if ok and new_position != row:
-                if self.view.move_row_in_model(row, new_position):
+                if self._bridge_move_row(row, new_position):
                     self.update_table()
                     return True
                 else:
@@ -115,17 +114,15 @@ class TableManager:
     def copy_row(self, row):
         """复制行"""
         if row >= 0:
-            # 调用服务层复制行
-            copied_row_data = self.view.copy_row_from_model(row)
-            self.view.set_copied_row_data(copied_row_data)
-        return self.view.get_copied_row_data()
+            copied_row_data = self._bridge_copy_row(row)
+            self._bridge_set_copied_row_data(copied_row_data)
+        return self._bridge_get_copied_row_data()
 
     def paste_row(self, row):
         """粘贴行"""
-        copied_row_data = self.view.get_copied_row_data()
+        copied_row_data = self._bridge_get_copied_row_data()
         if row >= 0 and copied_row_data is not None:
-            # 调用服务层粘贴行
-            result = self.view.paste_row_to_model(row, copied_row_data)
+            result = self._bridge_paste_row(row, copied_row_data)
             if result:
                 self.update_table()
             return result
@@ -133,21 +130,16 @@ class TableManager:
 
     def add_column(self):
         """添加列"""
-        # 调用服务层添加列
-        self.view.append_column_to_model()
-        # 更新表格显示
+        self._bridge_append_column()
         self.update_table()
 
     def insert_column(self, col):
         """插入列"""
-        # 调用服务层插入列
-        self.view.insert_column_to_model(col)
-        # 更新表格显示
+        self._bridge_insert_column(col)
         self.update_table()
 
     def remove_column(self, col):
         """删除列"""
-        # 弹出确认对话框
         reply = QMessageBox.question(
             self.view, 
             "确认删除", 
@@ -157,21 +149,18 @@ class TableManager:
         )
         
         if reply == QMessageBox.Yes:
-            # 调用服务层删除列
-            self.view.remove_column_from_model(col)
-            # 更新表格显示
+            self._bridge_remove_column(col)
             self.update_table()
 
     def move_column(self, col):
         """移动列"""
         if col >= 0:
-            # 弹出列移动对话框
             new_position, ok = QInputDialog.getInt(
                 self.view, "移动列", "请输入目标列位置(从0开始):", 
                 col, 0, len(self.view.get_data_model().headers)-1)
 
             if ok and new_position != col:
-                if self.view.move_column_in_model(col, new_position):
+                if self._bridge_move_column(col, new_position):
                     self.update_table()
                     return True
                 else:
@@ -183,18 +172,107 @@ class TableManager:
     def copy_column(self, col):
         """复制列"""
         if col >= 0:
-            # 调用服务层复制列
-            copied_col_data = self.view.copy_column_from_model(col)
-            self.view.set_copied_col_data(copied_col_data)
-        return self.view.get_copied_col_data()
+            copied_col_data = self._bridge_copy_column(col)
+            self._bridge_set_copied_col_data(copied_col_data)
+        return self._bridge_get_copied_col_data()
 
     def paste_column(self, col):
         """粘贴列"""
-        copied_col_data = self.view.get_copied_col_data()
+        copied_col_data = self._bridge_get_copied_col_data()
         if col >= 0 and copied_col_data is not None:
-            # 调用服务层粘贴列
-            result = self.view.paste_column_to_model(col, copied_col_data)
+            result = self._bridge_paste_column(col, copied_col_data)
             if result:
                 self.update_table()
             return result
         return False
+
+    # ==================== Bridge delegation helpers ====================
+    # 这些方法封装了到 CommandBridge（优先）或 view 旧方法（兼容回退）的转发
+
+    def _bridge_append_row(self):
+        if self._command_bridge:
+            self._command_bridge.append_row()
+        else:
+            self.view.append_row_to_model()
+
+    def _bridge_insert_row(self, row):
+        if self._command_bridge:
+            self._command_bridge.insert_row(row)
+        else:
+            self.view.insert_row_to_model(row)
+
+    def _bridge_remove_row(self, row):
+        if self._command_bridge:
+            self._command_bridge.remove_row(row)
+        else:
+            self.view.remove_row_from_model(row)
+
+    def _bridge_move_row(self, row, new_position):
+        if self._command_bridge:
+            return self._command_bridge.move_row(row, new_position)
+        return self.view.move_row_in_model(row, new_position)
+
+    def _bridge_copy_row(self, row):
+        if self._command_bridge:
+            return self._command_bridge.copy_row(row)
+        return self.view.copy_row_from_model(row)
+
+    def _bridge_paste_row(self, row, copied_row_data):
+        if self._command_bridge:
+            return self._command_bridge.paste_row(row, copied_row_data)
+        return self.view.paste_row_to_model(row, copied_row_data)
+
+    def _bridge_get_copied_row_data(self):
+        if self._command_bridge:
+            return self._command_bridge.get_copied_row_data()
+        return self.view.get_copied_row_data()
+
+    def _bridge_set_copied_row_data(self, data):
+        if self._command_bridge:
+            self._command_bridge.set_copied_row_data(data)
+        else:
+            self.view.set_copied_row_data(data)
+
+    def _bridge_append_column(self):
+        if self._command_bridge:
+            self._command_bridge.append_column()
+        else:
+            self.view.append_column_to_model()
+
+    def _bridge_insert_column(self, col):
+        if self._command_bridge:
+            self._command_bridge.insert_column(col)
+        else:
+            self.view.insert_column_to_model(col)
+
+    def _bridge_remove_column(self, col):
+        if self._command_bridge:
+            self._command_bridge.remove_column(col)
+        else:
+            self.view.remove_column_from_model(col)
+
+    def _bridge_move_column(self, col, new_position):
+        if self._command_bridge:
+            return self._command_bridge.move_column(col, new_position)
+        return self.view.move_column_in_model(col, new_position)
+
+    def _bridge_copy_column(self, col):
+        if self._command_bridge:
+            return self._command_bridge.copy_column(col)
+        return self.view.copy_column_from_model(col)
+
+    def _bridge_paste_column(self, col, copied_col_data):
+        if self._command_bridge:
+            return self._command_bridge.paste_column(col, copied_col_data)
+        return self.view.paste_column_to_model(col, copied_col_data)
+
+    def _bridge_get_copied_col_data(self):
+        if self._command_bridge:
+            return self._command_bridge.get_copied_col_data()
+        return self.view.get_copied_col_data()
+
+    def _bridge_set_copied_col_data(self, data):
+        if self._command_bridge:
+            self._command_bridge.set_copied_col_data(data)
+        else:
+            self.view.set_copied_col_data(data)

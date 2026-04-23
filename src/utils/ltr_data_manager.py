@@ -65,10 +65,8 @@ class LTRDataManager:
             application_data_copy = application_data.copy()
             application_data_copy['DL'] = dl_number
 
-            # 获取项目根路径
-            project_root = config_manager.get_path("default_project_path", "")
-            if not project_root:
-                project_root = "D:\\TestFlowManager\\Projects"
+            # 统一复用 ConfigManager 的默认项目目录策略，避免 caller 侧硬编码路径回退。
+            project_root = config_manager.get_default_project_dir()
 
             # 构建项目根目录路径
             project_root_dir = os.path.join(project_root, dl_number)

@@ -15,7 +15,7 @@ from src.domain.project.output_paths import OutputPathResolver
 from src.core.project_context import ProjectContext
 from src.domain.project.project_document_context import ProjectDocumentContext
 from src.features.report_wizard.service.header_modifier import HeaderModifier
-from src.utils.word_utils import open_docx_document, save_docx_document, get_shared_word_app
+from src.infrastructure.office.facade import OfficeFacade
 from src.features.report_wizard.model.header_data import HeaderData
 from src.features.report_wizard.service.test_spec_tables_service import TestSpecTablesService
 
@@ -26,10 +26,16 @@ class ReportGenerationService:
     提供报告生成相关的业务逻辑服务
     """
 
-    def __init__(self):
+    def __init__(self, office_facade: OfficeFacade | None = None):
         """初始化报告生成服务"""
         self.template_dir = config_manager.get_template_dir()
         self.default_output_dir = OutputPathResolver.get_default_output_dir()
+        self._office_facade = office_facade
+
+    def _get_office_facade(self) -> OfficeFacade:
+        if self._office_facade is None:
+            self._office_facade = OfficeFacade()
+        return self._office_facade
     
     def _sanitize_filename(self, filename: str) -> str:
         """
@@ -216,17 +222,25 @@ class ReportGenerationService:
             # 创建页眉修改器实例
             # 使用规范化路径
             header_modifier = HeaderModifier(output_path)
+            word_session = None
             try:
-                # 使用win32com打开文档
-                header_modifier.word_app = get_shared_word_app()
+                # 使用 OfficeFacade session 管理 Word 应用生命周期
+                word_session = self._get_office_facade().create_session("word")
+                runtime_handle = word_session.acquire()
+                header_modifier.word_app = runtime_handle.application
                 if header_modifier.word_app is None:
                     logger.error("无法获取Word应用程序实例")
                     return False
                 header_modifier.word_app.Visible = False
                 header_modifier.word_app.DisplayAlerts = False
                 
-                # 打开文档进行修改
-                header_modifier.win_document = header_modifier.word_app.Documents.Open(os.path.normpath(output_path))
+                # 打开文档进行修改。文档 owner 标记由 HeaderModifier 统一维护。
+                opened_document = header_modifier._get_or_open_document(output_path)
+                if opened_document is None:
+                    logger.error("无法打开报告文档")
+                    return False
+                if header_modifier.win_document is None:
+                    header_modifier.win_document = opened_document
 
                 # 准备页眉数据字典
                 header_dict = {
@@ -335,6 +349,8 @@ class ReportGenerationService:
 
                 # 关闭文档
                 header_modifier.win_document.Close(SaveChanges=False)
+                header_modifier.win_document = None
+                header_modifier._owns_win_document = False
 
                 logger.info("✅ 页眉修改步骤已完成，文档已保存")
 
@@ -342,6 +358,21 @@ class ReportGenerationService:
                 logger.error(f"❌ 文档修改失败: {e}", exc_info=True)
                 return False
             finally:
+                # 当前 workflow 负责关闭自己打开的文档；session release 必须执行。
+                try:
+                    if header_modifier and header_modifier.win_document:
+                        header_modifier.win_document.Close(SaveChanges=False)
+                        header_modifier.win_document = None
+                        header_modifier._owns_win_document = False
+                except Exception as close_error:
+                    logger.debug(f"关闭报告文档时出错，交由 cleanup 兜底: {close_error}")
+
+                try:
+                    if word_session is not None:
+                        word_session.release()
+                except Exception as release_error:
+                    logger.error(f"释放 Word session 时出错: {release_error}")
+
                 # 尝试清理header_modifier资源
                 try:
                     if header_modifier:
