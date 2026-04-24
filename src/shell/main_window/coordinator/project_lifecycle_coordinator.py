@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Callable, Optional
+from importlib import import_module
+from typing import Any, Callable, Optional
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 from src.core.logger import logger
-from src.core.project_context import ProjectContext
-from src.app.composition.project_session_application_service import project_session_app_service
-from src.domain.project.project_initialization_service import ProjectInitializationService, ProjectInitializationResult
-from src.features.project_creator.view import ProjectInfoDialog
+
+
+def _load_symbol(module_path: str, symbol_name: str):
+    """Load project-lifecycle collaborators lazily without adding static feature import edges."""
+    module = import_module(module_path)
+    return getattr(module, symbol_name)
 
 
 class ProjectLifecycleCoordinator:
@@ -27,11 +30,17 @@ class ProjectLifecycleCoordinator:
         self,
         view: QWidget,
         status_updater: Callable[[str], None],
-        project_initialization_service: Optional[ProjectInitializationService] = None,
+        project_initialization_service: Optional[Any] = None,
     ):
         self.view = view
         self.status_updater = status_updater
-        self.project_initialization_service = project_initialization_service or ProjectInitializationService()
+        if project_initialization_service is None:
+            ProjectInitializationService = _load_symbol(
+                "src.domain.project.project_initialization_service",
+                "ProjectInitializationService",
+            )
+            project_initialization_service = ProjectInitializationService()
+        self.project_initialization_service = project_initialization_service
 
     def handle_open_project(self) -> bool:
         """
@@ -69,6 +78,10 @@ class ProjectLifecycleCoordinator:
                 project_result = self.project_initialization_service.prepare_project(project_path)
 
             # 通过统一入口完成项目打开（S1-2: ProjectSessionApplicationService）
+            project_session_app_service = _load_symbol(
+                "src.app.composition.project_session_application_service",
+                "project_session_app_service",
+            )
             project_session_app_service.open_project(
                 project_path,
                 dl_number=project_result.project_context.dl_number,
@@ -96,8 +109,9 @@ class ProjectLifecycleCoordinator:
         try:
             logger.debug("LifecycleCoordinator: Handling new file request")
 
-            from src.features.project_creator.controller.project_creator_controller import (
-                ProjectCreatorController,
+            ProjectCreatorController = _load_symbol(
+                "src.features.project_creator.controller.project_creator_controller",
+                "ProjectCreatorController",
             )
 
             # 创建项目创建控制器
@@ -123,6 +137,10 @@ class ProjectLifecycleCoordinator:
     def _show_basic_info_dialog(self, project_data: dict, json_file_path: str) -> None:
         """在首次打开项目时提示用户补填基础信息"""
         try:
+            ProjectInfoDialog = _load_symbol(
+                "src.features.project_creator.view",
+                "ProjectInfoDialog",
+            )
             dialog = ProjectInfoDialog(
                 project_data,
                 self.view,

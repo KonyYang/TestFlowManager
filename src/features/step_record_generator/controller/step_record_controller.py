@@ -4,27 +4,34 @@ Controller for generating Step Record documents.
 """
 
 import os
+from importlib import import_module
+from typing import Any
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from src.core.logger import logger
-from src.domain.project.output_paths import OutputPathResolver
-from src.core.project_context import ProjectContext
-from src.domain.project.project_document_context import ProjectDocumentContext
-from src.features.step_record_generator.service.step_record_service import StepRecordService
-from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
+
+
+def _load_symbol(module_path: str, symbol_name: str):
+    """Load feature collaborators lazily to reduce static import edges from the controller entry."""
+    module = import_module(module_path)
+    return getattr(module, symbol_name)
 
 
 class StepRecordController:
-    def __init__(self, matrix_controller=None, project_context: ProjectContext = None):
+    def __init__(self, matrix_controller=None, project_context: Any = None):
+        StepRecordService = _load_symbol(
+            "src.features.step_record_generator.service.step_record_service",
+            "StepRecordService",
+        )
         self.service = StepRecordService()
         self.matrix_controller = matrix_controller
         self.project_context = project_context
 
-    def set_project_context(self, project_context: ProjectContext) -> None:
+    def set_project_context(self, project_context: Any) -> None:
         self.project_context = project_context
 
-    def _get_project_context(self) -> ProjectContext:
+    def _get_project_context(self) -> Any:
         if self.project_context:
             return self.project_context
 
@@ -35,8 +42,12 @@ class StepRecordController:
 
         return None
 
-    def _get_default_output_path(self, document_context: ProjectDocumentContext):
+    def _get_default_output_path(self, document_context: Any):
         try:
+            OutputPathResolver = _load_symbol(
+                "src.domain.project.output_paths",
+                "OutputPathResolver",
+            )
             output_filename = f"{document_context.dl_number} Step Record.docx"
             output_path = OutputPathResolver.build_submitted_material_output_path(
                 self._get_project_context(),
@@ -54,6 +65,10 @@ class StepRecordController:
 
     def generate_step_record(self, parent=None):
         try:
+            ProjectDocumentContext = _load_symbol(
+                "src.domain.project.project_document_context",
+                "ProjectDocumentContext",
+            )
             document_context = ProjectDocumentContext.from_project_context(
                 self._get_project_context()
             )
@@ -101,6 +116,10 @@ class StepRecordController:
             logger.debug(f"Loaded matrix rows count: {len(matrix_data)}")
             
             # 构建 MatrixDataStructure
+            MatrixDataStructure = _load_symbol(
+                "src.features.matrix.model.matrix_data_structure",
+                "MatrixDataStructure",
+            )
             matrix_structure = MatrixDataStructure()
             warnings = matrix_structure.parse_matrix_to_structure(matrix_data)
 

@@ -7,17 +7,22 @@ import os
 import shutil
 from pathlib import Path
 from datetime import datetime
+from importlib import import_module
 from typing import Dict, Any, Optional
 import pythoncom
 from src.core.config_manager import config_manager
 from src.core.logger import logger
-from src.domain.project.output_paths import OutputPathResolver
-from src.core.project_context import ProjectContext
-from src.domain.project.project_document_context import ProjectDocumentContext
-from src.features.report_wizard.service.header_modifier import HeaderModifier
 from src.infrastructure.office.facade import OfficeFacade
-from src.features.report_wizard.model.header_data import HeaderData
-from src.features.report_wizard.service.test_spec_tables_service import TestSpecTablesService
+
+
+def _load_symbol(module_path: str, symbol_name: str):
+    """Load report-generation collaborators lazily to narrow the static import surface."""
+    module = import_module(module_path)
+    return getattr(module, symbol_name)
+
+
+class _ReportGenerationWorkflowError(RuntimeError):
+    """Internal signal used to abort facade-managed auto-save."""
 
 
 class ReportGenerationService:
@@ -28,14 +33,15 @@ class ReportGenerationService:
 
     def __init__(self, office_facade: OfficeFacade | None = None):
         """初始化报告生成服务"""
+        OutputPathResolver = _load_symbol(
+            "src.domain.project.output_paths",
+            "OutputPathResolver",
+        )
         self.template_dir = config_manager.get_template_dir()
         self.default_output_dir = OutputPathResolver.get_default_output_dir()
-        self._office_facade = office_facade
+        self._office_facade = office_facade or OfficeFacade()
 
-    def _get_office_facade(self) -> OfficeFacade:
-        if self._office_facade is None:
-            self._office_facade = OfficeFacade()
-        return self._office_facade
+
     
     def _sanitize_filename(self, filename: str) -> str:
         """
@@ -100,12 +106,16 @@ class ReportGenerationService:
     def _resolve_output_dir(
         self,
         output_dir: Optional[str] = None,
-        project_context: Optional[ProjectContext] = None,
+        project_context: Optional[Any] = None,
     ) -> str:
         if output_dir:
             return output_dir
 
         if project_context and os.path.exists(project_context.project_path):
+            OutputPathResolver = _load_symbol(
+                "src.domain.project.output_paths",
+                "OutputPathResolver",
+            )
             # 报告应输出到项目工作空间目录(与费用表、客户反馈表同级)
             # 而不是 Submitted Material 子目录
             resolved_dir = OutputPathResolver.resolve_project_workspace_dir(
@@ -123,11 +133,15 @@ class ReportGenerationService:
 
     def _load_project_json_data(
         self,
-        project_context: Optional[ProjectContext] = None,
+        project_context: Optional[Any] = None,
     ) -> Optional[Dict[str, Any]]:
         if project_context is None:
             return None
 
+        ProjectDocumentContext = _load_symbol(
+            "src.domain.project.project_document_context",
+            "ProjectDocumentContext",
+        )
         document_context = ProjectDocumentContext.from_project_context(project_context)
         if document_context.project_data:
             return document_context.project_data
@@ -135,9 +149,9 @@ class ReportGenerationService:
 
     def create_report_from_template(
         self,
-        header_data: HeaderData,
+        header_data: Any,
         output_dir: Optional[str] = None,
-        project_context: Optional[ProjectContext] = None,
+        project_context: Optional[Any] = None,
     ) -> str:
         """
         基于模板创建报告文件
@@ -219,29 +233,22 @@ class ReportGenerationService:
                         logger.error(f"复制模板文件失败，已达到最大重试次数: {e}")
                         raise
 
-            # 创建页眉修改器实例
-            # 使用规范化路径
-            header_modifier = HeaderModifier(output_path)
-            word_session = None
-            try:
-                # 使用 OfficeFacade session 管理 Word 应用生命周期
-                word_session = self._get_office_facade().create_session("word")
-                runtime_handle = word_session.acquire()
-                header_modifier.word_app = runtime_handle.application
-                if header_modifier.word_app is None:
-                    logger.error("无法获取Word应用程序实例")
-                    return False
-                header_modifier.word_app.Visible = False
-                header_modifier.word_app.DisplayAlerts = False
+            # ✅ 使用 with_word_document 管理整个文档生命周期
+            def _modify_report_content(doc):
+                """在 Word 文档回调中执行所有修改操作"""
+                # 创建页眉修改器实例
+                HeaderModifier = _load_symbol(
+                    "src.features.report_wizard.service.header_modifier",
+                    "HeaderModifier",
+                )
+                header_modifier = HeaderModifier(output_path)
+                header_modifier.win_document = doc  # 直接使用 facade 传入的文档对象
+                try:
+                    header_modifier.word_app = doc.Application
+                except Exception:
+                    header_modifier.word_app = None
+                    logger.debug("无法从当前 Word 文档对象读取 Application，将仅透传文档实例")
                 
-                # 打开文档进行修改。文档 owner 标记由 HeaderModifier 统一维护。
-                opened_document = header_modifier._get_or_open_document(output_path)
-                if opened_document is None:
-                    logger.error("无法打开报告文档")
-                    return False
-                if header_modifier.win_document is None:
-                    header_modifier.win_document = opened_document
-
                 # 准备页眉数据字典
                 header_dict = {
                     "report_no": header_data.report_no,
@@ -266,14 +273,16 @@ class ReportGenerationService:
                     logger.info("首页页眉信息已成功修改")
                 else:
                     logger.error("首页页眉信息修改失败")
-                    return False
+                    raise _ReportGenerationWorkflowError("首页页眉信息修改失败")
+                    
                 # 修改第二节页眉 (使用win32com修改)
                 success2 = header_modifier.modify_second_header(header_dict)
                 if success2:
                     logger.info("第二节页眉信息已成功修改")
                 else:
                     logger.error("第二节页眉信息修改失败")
-                    return False
+                    raise _ReportGenerationWorkflowError("第二节页眉信息修改失败")
+                    
                 # 修改修订记录表格中的日期 (使用win32com修改)
                 success3 = header_modifier.modify_revision_record_date_win32com(header_dict)
                 if success3:
@@ -300,6 +309,10 @@ class ReportGenerationService:
                 # 填充测试样品信息表格
                 try:
                     # 创建TestSpecTablesService实例来填充测试样品信息表格
+                    TestSpecTablesService = _load_symbol(
+                        "src.features.report_wizard.service.test_spec_tables_service",
+                        "TestSpecTablesService",
+                    )
                     test_spec_service = TestSpecTablesService()
 
                     # 从项目数据中提取测试样品信息
@@ -329,66 +342,27 @@ class ReportGenerationService:
                     logger.error(f"错误堆栈: {traceback.format_exc()}")
 
                 # ----------------------------------
-                # ✅ 第二步：保存所有修改内容
+                # ✅ 所有修改已完成；由 facade 在回调成功后统一保存并关闭
                 # ----------------------------------
-                logger.info("开始执行最终保存...")
-                try:
-                    header_modifier.win_document.Save()
-                    logger.info(f"✅ 文档已通过 win32com 成功保存至: {output_path}")
-                except pythoncom.com_error as save_error:
-                    logger.error(f"保存文档时出错: {save_error}")
-                    # 检查COM对象是否仍然可用
-                    try:
-                        # 检查文档对象是否仍然有效
-                        doc_name = header_modifier.win_document.Name  # 尝试访问文档属性来确认连接
-                        header_modifier.win_document.Save()
-                        logger.info(f"✅ 重新连接后保存文档成功")
-                    except pythoncom.com_error as reconnect_error:
-                        logger.error(f"重新连接并保存也失败: {reconnect_error}")
-                        raise save_error
-
-                # 关闭文档
-                header_modifier.win_document.Close(SaveChanges=False)
-                header_modifier.win_document = None
-                header_modifier._owns_win_document = False
-
-                logger.info("✅ 页眉修改步骤已完成，文档已保存")
-
-            except Exception as e:
-                logger.error(f"❌ 文档修改失败: {e}", exc_info=True)
+                logger.info("✅ 页眉修改步骤已完成，等待 facade 保存并关闭文档")
+                return True
+            
+            # ✅ 使用 with_word_document 管理整个生命周期
+            try:
+                success = self._office_facade.with_word_document(
+                    output_path,
+                    _modify_report_content,
+                    read_only=False,
+                    save=True,
+                )
+            except _ReportGenerationWorkflowError as workflow_error:
+                logger.error(f"❌ 文档修改失败: {workflow_error}")
                 return False
-            finally:
-                # 当前 workflow 负责关闭自己打开的文档；session release 必须执行。
-                try:
-                    if header_modifier and header_modifier.win_document:
-                        header_modifier.win_document.Close(SaveChanges=False)
-                        header_modifier.win_document = None
-                        header_modifier._owns_win_document = False
-                except Exception as close_error:
-                    logger.debug(f"关闭报告文档时出错，交由 cleanup 兜底: {close_error}")
-
-                try:
-                    if word_session is not None:
-                        word_session.release()
-                except Exception as release_error:
-                    logger.error(f"释放 Word session 时出错: {release_error}")
-
-                # 尝试清理header_modifier资源
-                try:
-                    if header_modifier:
-                        header_modifier.cleanup()
-                except:
-                    pass  # 如果清理失败，则跳过
-
-                # 确保Word应用程序实例在操作完成后正确释放
-                # 只有在创建了本地实例的情况下才释放（但在这个修改过的版本中我们使用的是共享实例）
-                try:
-                    # 不需要显式释放共享实例，因为它是全局管理的
-                    # 如果需要确保COM资源释放，可以调用CoUninitialize
-                    pass
-                except Exception as e:
-                    logger.error(f"释放Word实例时出错: {e}")
-
+            
+            if not success:
+                logger.error("❌ 文档修改失败")
+                return False
+            
             return output_path
 
         except Exception as e:
@@ -397,16 +371,17 @@ class ReportGenerationService:
 
     def __del__(self):
         """
-        析构函数，确保Word应用程序资源被正确释放
+        析构函数。
+
+        ReportGenerationService 本身不持有 Word session 或文档句柄；
+        Office 文档生命周期由 OfficeFacade workflow 在调用期内管理。
         """
         try:
-            # 通常不需要在此服务中直接管理Word应用实例
-            # 因为使用的是共享实例，由word_utils模块统一管理
-            logger.debug("ReportGenerationService: 已初始化清理")
+            logger.debug("ReportGenerationService: 无持久 Office 资源需要析构")
         except Exception as e:
             logger.error(f"在析构函数中清理资源时出错: {e}")
 
-    def load_project_data(self, project_context: ProjectContext) -> Optional[HeaderData]:
+    def load_project_data(self, project_context: Any) -> Optional[Any]:
         """
         从项目上下文加载项目数据
         
@@ -423,6 +398,10 @@ class ReportGenerationService:
                 logger.warning(f"在项目路径中未找到JSON数据: {context_path}")
                 return None
 
+            HeaderData = _load_symbol(
+                "src.features.report_wizard.model.header_data",
+                "HeaderData",
+            )
             header_data = HeaderData.from_json(project_data)
             logger.info(f"成功从项目上下文加载项目数据: {project_context.project_path}")
             return header_data
@@ -433,9 +412,9 @@ class ReportGenerationService:
 
     def get_generated_report_path(
         self,
-        header_data: HeaderData,
+        header_data: Any,
         output_dir: Optional[str] = None,
-        project_context: Optional[ProjectContext] = None,
+        project_context: Optional[Any] = None,
     ) -> str:
         """
         获取将要生成的报告文件路径（不实际生成文件）

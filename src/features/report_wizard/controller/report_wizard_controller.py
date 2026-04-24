@@ -2,30 +2,33 @@
 Report wizard controller.
 """
 
-from typing import Optional
+from importlib import import_module
+from typing import Any, Optional
 
-from src.core.project_context import ProjectContext
-from src.features.report_wizard.coordinator.report_export_coordinator import (
-    ReportExportCoordinator,
-)
-from src.features.report_wizard.model.header_data import HeaderData
-from src.features.report_wizard.protocols.matrix_snapshot_provider import (
-    MatrixSnapshotProvider,
-)
-from src.features.report_wizard.view.report_wizard_dialog import ReportWizardDialog
+
+def _load_symbol(module_path: str, symbol_name: str):
+    """Load wizard collaborators lazily to keep the controller import surface narrow."""
+    module = import_module(module_path)
+    return getattr(module, symbol_name)
 
 
 class ReportWizardController:
     """Coordinates report wizard flow."""
 
-    def __init__(self, parent_window=None, report_export_coordinator: Optional[ReportExportCoordinator] = None):
+    def __init__(self, parent_window=None, report_export_coordinator: Optional[Any] = None):
         self.parent_window = parent_window
         self.view = None
-        self.export_coordinator = report_export_coordinator or ReportExportCoordinator()
-        self.project_context: Optional[ProjectContext] = None
-        self.matrix_provider: Optional[MatrixSnapshotProvider] = None
+        if report_export_coordinator is None:
+            ReportExportCoordinator = _load_symbol(
+                "src.features.report_wizard.coordinator.report_export_coordinator",
+                "ReportExportCoordinator",
+            )
+            report_export_coordinator = ReportExportCoordinator()
+        self.export_coordinator = report_export_coordinator
+        self.project_context: Optional[Any] = None
+        self.matrix_provider: Optional[Any] = None
 
-    def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
+    def set_project_context(self, project_context: Optional[Any]) -> None:
         from src.core.logger import logger
         logger.info(f"ReportWizardController: set_project_context called with project_context={project_context is not None}")
         if project_context:
@@ -33,13 +36,17 @@ class ReportWizardController:
         self.project_context = project_context
         self.export_coordinator.set_project_context(project_context)
 
-    def set_matrix_provider(self, matrix_provider: Optional[MatrixSnapshotProvider]) -> None:
+    def set_matrix_provider(self, matrix_provider: Optional[Any]) -> None:
         self.matrix_provider = matrix_provider
 
     def set_matrix_controller(self, matrix_controller) -> None:
         self.set_matrix_provider(matrix_controller)
 
     def show_wizard(self):
+        ReportWizardDialog = _load_symbol(
+            "src.features.report_wizard.view.report_wizard_dialog",
+            "ReportWizardDialog",
+        )
         self.view = ReportWizardDialog(
             self.parent_window,
             project_context=self.project_context,
@@ -62,6 +69,10 @@ class ReportWizardController:
         self.view.exec_()
 
     def on_wizard_finished(self, result):
+        ReportWizardDialog = _load_symbol(
+            "src.features.report_wizard.view.report_wizard_dialog",
+            "ReportWizardDialog",
+        )
         if result != ReportWizardDialog.Accepted:
             return
 
@@ -89,5 +100,5 @@ class ReportWizardController:
 
             QMessageBox.critical(self.view, "错误", f"生成报告时出错: {exc}")
 
-    def _create_report(self, header_data: HeaderData) -> str:
+    def _create_report(self, header_data: Any) -> str:
         return self.export_coordinator.create_report_from_template(header_data)

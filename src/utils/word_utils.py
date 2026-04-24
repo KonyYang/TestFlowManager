@@ -1,27 +1,71 @@
 """
 Word工具模块
 提供底层的Word操作工具函数
+
+⚠️ DEPRECATED (2026-04-24): This module contains mixed responsibilities.
+- COM lifecycle functions are deprecated: use OfficeFacade instead
+- Document/table helper functions will be migrated to a dedicated helpers module
+- python-docx utilities will be preserved but relocated
+
+迁移计划:
+- COM 相关函数 → OfficeFacade (已实现)
+- 表格/文本工具函数 → src/utils/word_helpers.py (待迁移)
+- python-docx 工具 → src/utils/docx_helpers.py (待迁移)
 """
 
+import warnings
 from typing import Optional, Any, List, Tuple
 from src.core.logger import logger
 from src.infrastructure.office.legacy_word_runtime_provider import (
     shared_word_runtime_provider,
 )
 
+# Emit deprecation warning for COM-related functions
+warnings.warn(
+    "word_utils COM lifecycle functions are deprecated. "
+    "Use OfficeFacade.with_word_document() or OfficeFacade.create_session('word') instead. "
+    "Helper functions will be migrated to word_helpers module in future.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 
 def get_shared_word_app():
-    """获取共享的Word应用实例"""
+    """获取共享的Word应用实例
+    
+    ⚠️ DEPRECATED: Use OfficeFacade.create_session('word') instead.
+    """
+    warnings.warn(
+        "get_shared_word_app() is deprecated. Use OfficeFacade.create_session('word') instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     return shared_word_runtime_provider.acquire_application()
 
 
 def release_word_app():
-    """释放Word应用实例"""
+    """释放Word应用实例
+    
+    ⚠️ DEPRECATED: OfficeFacade manages session lifecycle automatically.
+    """
+    warnings.warn(
+        "release_word_app() is deprecated. OfficeFacade manages session lifecycle automatically.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     shared_word_runtime_provider.release_application()
 
 
 def cleanup_word_resources():
-    """彻底清理Word资源，在应用退出时调用"""
+    """彻底清理Word资源，在应用退出时调用
+    
+    ⚠️ DEPRECATED: Use shutdown_registry for application cleanup.
+    """
+    warnings.warn(
+        "cleanup_word_resources() is deprecated. Use shutdown_registry for application cleanup.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     shared_word_runtime_provider.cleanup_resources()
 
 def is_word_closed(word_app: Any) -> bool:
@@ -33,7 +77,14 @@ def is_word_closed(word_app: Any) -> bool:
 
     Returns:
         如果Word已关闭返回True，否则返回False
+        
+    ⚠️ DEPRECATED: Not needed with OfficeFacade session management.
     """
+    warnings.warn(
+        "is_word_closed() is deprecated. Not needed with OfficeFacade session management.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     return shared_word_runtime_provider.is_application_closed(word_app)
 
 
@@ -47,7 +98,14 @@ def close_document(document: Any, save_changes: bool = False) -> bool:
 
     Returns:
         是否成功关闭
+        
+    ⚠️ DEPRECATED: OfficeFacade.with_word_document() manages document lifecycle automatically.
     """
+    warnings.warn(
+        "close_document() is deprecated. OfficeFacade.with_word_document() manages document lifecycle automatically.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     try:
         if document:
             document.Close(SaveChanges=save_changes)
@@ -69,7 +127,14 @@ def open_word_file(file_path: str, read_only: bool = True, password: Optional[st
 
     Returns:
         Word文档对象，如果打开失败则返回None
+        
+    ⚠️ DEPRECATED: Use OfficeFacade.with_word_document() instead.
     """
+    warnings.warn(
+        "open_word_file() is deprecated. Use OfficeFacade.with_word_document() instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     try:
         # 检查文件是否存在
         import os

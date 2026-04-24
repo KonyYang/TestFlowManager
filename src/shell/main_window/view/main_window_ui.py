@@ -6,6 +6,7 @@
 import os
 import ctypes
 import ctypes.wintypes
+from importlib import import_module
 from typing import Optional, List, Tuple
 
 from PyQt5.QtWidgets import (
@@ -33,25 +34,18 @@ from PyQt5.QtGui import QMouseEvent
 
 from src.core.logger import logger
 from src.common.ui.font_utils import FontUtils
-from src.shell.main_window.controller.main_window_controller import MainWindowController
 from src.shell.main_window.integration.main_window_feature_facade import MainWindowFeatureFacade
-from src.shell.main_window.components.header_components import HeaderComponents
-from src.shell.main_window.components.sidebar_components import SidebarComponents
-from src.shell.main_window.components.page_factory import PageFactory
-from src.shell.main_window.components.layout_builder import MainWindowLayoutBuilder
-from src.shell.main_window.components.startup_profiler import StartupProfiler
-from src.shell.main_window.view.window_chrome_manager import WindowChromeManager
-from src.shell.main_window.view.handlers.file_handlers import FileActionHandlers
-from src.shell.main_window.view.handlers.export_handlers import ExportActionHandlers
-from src.shell.main_window.view.handlers.report_handlers import ReportActionHandlers
-from src.shell.main_window.view.handlers.tool_handlers import ToolActionHandlers
-from src.shell.navigation import NavigationManager, NavigationEntry, NavigationRegistry, ShortcutRegistry
-
-from src.features.matrix.workspace.matrix_workspace_facade import MatrixWorkspaceFacade
+from src.shell.navigation import NavigationManager, NavigationRegistry, ShortcutRegistry
 
 
 # 主窗口 Lims 风格全局样式（从 constants 模块导入）
 from src.shell.main_window.constants.main_window_styles import LIMS_APP_STYLESHEET
+
+
+def _load_symbol(module_path: str, symbol_name: str):
+    """Load shell collaborators lazily without adding static feature import edges."""
+    module = import_module(module_path)
+    return getattr(module, symbol_name)
 
 
 class MainWindow(QMainWindow):
@@ -66,7 +60,7 @@ class MainWindow(QMainWindow):
         self,
         splash_screen=None,
         *,
-        matrix_workspace_facade: Optional[MatrixWorkspaceFacade] = None,
+        matrix_workspace_facade=None,  # Optional[MatrixWorkspaceFacade]
         project_session_coordinator=None,  # Phase 4: 从 Assembler 注入
         project_session_app_service=None,  # S1-2: 应用层编排器
     ):
@@ -77,6 +71,10 @@ class MainWindow(QMainWindow):
         self._project_session_app_service = project_session_app_service  # S1-2
 
         # 通过 facade 统一访问所有 Matrix session 对象（私有属性，不对外暴露）
+        MatrixWorkspaceFacade = _load_symbol(
+            "src.features.matrix.workspace.matrix_workspace_facade",
+            "MatrixWorkspaceFacade",
+        )
         self._workspace_facade = matrix_workspace_facade or MatrixWorkspaceFacade(parent_view=self)
 
         # Feature registry for shell-triggered feature controllers
@@ -87,16 +85,44 @@ class MainWindow(QMainWindow):
         self.fullscreen_geometry = None
 
         # UI 组件管理器（Step 7.x: 抽取 UI 组件）
+        HeaderComponents = _load_symbol(
+            "src.shell.main_window.components.header_components",
+            "HeaderComponents",
+        )
+        SidebarComponents = _load_symbol(
+            "src.shell.main_window.components.sidebar_components",
+            "SidebarComponents",
+        )
         self._header_components = HeaderComponents(self)
         self._sidebar_components = SidebarComponents(self)
 
         # Action Handlers（Step P1: 抽取动作处理器）
+        FileActionHandlers = _load_symbol(
+            "src.shell.main_window.view.handlers.file_handlers",
+            "FileActionHandlers",
+        )
+        ExportActionHandlers = _load_symbol(
+            "src.shell.main_window.view.handlers.export_handlers",
+            "ExportActionHandlers",
+        )
+        ReportActionHandlers = _load_symbol(
+            "src.shell.main_window.view.handlers.report_handlers",
+            "ReportActionHandlers",
+        )
+        ToolActionHandlers = _load_symbol(
+            "src.shell.main_window.view.handlers.tool_handlers",
+            "ToolActionHandlers",
+        )
         self._file_handlers = FileActionHandlers(self)
         self._export_handlers = ExportActionHandlers(self)
         self._report_handlers = ReportActionHandlers(self)
         self._tool_handlers = ToolActionHandlers(self)
 
         # 窗口行为管理器（Phase 2: 抽取窗口行为）
+        WindowChromeManager = _load_symbol(
+            "src.shell.main_window.view.window_chrome_manager",
+            "WindowChromeManager",
+        )
         self._chrome_manager = WindowChromeManager(self)
 
         # 导航管理器（✅ 使用通用的 NavigationManager）
@@ -138,6 +164,10 @@ class MainWindow(QMainWindow):
         - ✅ 支持启动画面进度更新和 Qt 信号通知
         """
         # 创建性能分析器
+        StartupProfiler = _load_symbol(
+            "src.shell.main_window.components.startup_profiler",
+            "StartupProfiler",
+        )
         profiler = StartupProfiler(
             splash_screen=self.splash_screen,
             progress_signal=self.startup_progress,
@@ -227,6 +257,10 @@ class MainWindow(QMainWindow):
         self._configure_window_properties()
         
         # === 第2步：创建核心组件 ===
+        MainWindowLayoutBuilder = _load_symbol(
+            "src.shell.main_window.components.layout_builder",
+            "MainWindowLayoutBuilder",
+        )
         header = self._header_components.create_app_header()
         sidebar = self._sidebar_components.create_sidebar()
         page_stack = QStackedWidget()
@@ -342,6 +376,12 @@ class MainWindow(QMainWindow):
 
     def _initialize_controllers(self):
         """初始化控制器 - 采用延迟加载策略"""
+        # 延迟导入 MainWindowController
+        MainWindowController = _load_symbol(
+            "src.shell.main_window.controller.main_window_controller",
+            "MainWindowController",
+        )
+        
         # Phase 4: 使用从 Assembler 注入的 ProjectSessionCoordinator
         # S1-2: 传递应用层编排器
         self.controller = MainWindowController(
@@ -389,6 +429,10 @@ class MainWindow(QMainWindow):
         self._setup_matrix_tab()
         
         # === 通过注册表注册所有导航条目 ===
+        PageFactory = _load_symbol(
+            "src.shell.main_window.components.page_factory",
+            "PageFactory",
+        )
         NavigationRegistry.register_all_entries(
             nav_controller=self._nav_controller,
             matrix_tab=self.matrix_tab,

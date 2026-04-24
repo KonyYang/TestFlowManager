@@ -27,9 +27,9 @@ class LTRApplicationService:
         """
         初始化LTR申请单服务
         """
-        self.office_facade = office_facade or OfficeFacade()
-        self.validator = LTRApplicationFormValidator(office_facade=self.office_facade)
-        self.extractor = LTRApplicationDataExtractor(office_facade=self.office_facade)
+        self._office_facade = office_facade or OfficeFacade()
+        self.validator = LTRApplicationFormValidator(office_facade=self._office_facade)
+        self.extractor = LTRApplicationDataExtractor(office_facade=self._office_facade)
 
         self.event_dispatcher = event_dispatcher
         # Note: ltr.application.confirmed 事件由 LTRStatusCoordinator 处理

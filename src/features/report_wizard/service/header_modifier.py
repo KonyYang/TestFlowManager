@@ -21,13 +21,16 @@ class HeaderModifier:
     提供Word文档页眉修改相关的业务逻辑服务
     """
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str, office_facade=None):
         """初始化页眉修改服务"""
+        from src.infrastructure.office.facade import OfficeFacade
         self.file_path = file_path
+        self._office_facade = office_facade or OfficeFacade()
         self.doc = None
         self.win_document = None
         self.word_app = None
         self._owns_win_document = False
+        self._win_document_path = None
 
     def modify_header(self, header_data: Dict[str, Any]) -> bool:
         """
@@ -40,7 +43,8 @@ class HeaderModifier:
         if self.win_document:
             return HeaderManager.modify_first_header_with_document(self.win_document, header_data)
         else:
-            return HeaderManager.modify_first_header(self.file_path, header_data, self.word_app)
+            # ✅ 使用 self._office_facade 管理生命周期
+            return HeaderManager.modify_first_header(self.file_path, header_data, self._office_facade)
 
     def modify_revision_record_date(self, header_data: Dict[str, Any], is_customer_report: bool = False, doc=None) -> bool:
         """
@@ -255,10 +259,62 @@ class HeaderModifier:
 
         self.word_app.Visible = False
         self.word_app.DisplayAlerts = False
+        normalized_path = os.path.normcase(os.path.abspath(os.path.normpath(document_path)))
+        existing_document = self._find_open_document_by_path(normalized_path)
+        if existing_document is not None:
+            self.win_document = existing_document
+            self._owns_win_document = False
+            self._win_document_path = normalized_path
+            logger.debug(f"复用已打开的 Word 文档，不关闭用户文档: {document_path}")
+            return self.win_document
+
         self.win_document = self.word_app.Documents.Open(os.path.normpath(document_path))
         self._owns_win_document = True
+        self._win_document_path = normalized_path
         logger.debug(f"通过调用方提供的 Word session 打开文档: {document_path}")
         return self.win_document
+
+    def _find_open_document_by_path(self, normalized_path: str):
+        """Find an already-open Word document by normalized absolute path."""
+        try:
+            for opened_document in self.word_app.Documents:
+                try:
+                    opened_path = os.path.normcase(
+                        os.path.abspath(os.path.normpath(opened_document.FullName))
+                    )
+                except Exception:
+                    continue
+                if opened_path == normalized_path:
+                    return opened_document
+        except TypeError:
+            logger.debug("当前 Word 文档集合不可遍历，跳过已打开文档检测")
+        except Exception as exc:
+            logger.debug(f"检测已打开 Word 文档失败，继续按新文档打开: {exc}")
+        return None
+
+    def close_owned_document(self) -> bool:
+        """Close the current document only when this workflow owns it."""
+        if self.win_document is None:
+            return False
+
+        if not self._owns_win_document:
+            logger.debug("当前 Word 文档非本流程打开，跳过关闭")
+            self.win_document = None
+            self._win_document_path = None
+            return False
+
+        try:
+            self.win_document.Close(SaveChanges=False)
+            return True
+        except pythoncom.com_error:
+            logger.debug("Word文档COM连接已断开，跳过关闭")
+        except (AttributeError, Exception) as exc:
+            logger.debug(f"关闭Word文档时出错，跳过关闭: {exc}")
+        finally:
+            self.win_document = None
+            self._owns_win_document = False
+            self._win_document_path = None
+        return False
 
     def replace_document_placeholders(self, data: Dict[str, Any], document_path: str = None) -> bool:
         """
@@ -413,29 +469,14 @@ class HeaderModifier:
         if self.win_document:
             return HeaderManager.modify_second_header_with_document(self.win_document, header_data)
         else:
-            return HeaderManager.modify_second_header(self.file_path, header_data, self.word_app)
+            # ✅ 使用 self._office_facade 管理生命周期
+            return HeaderManager.modify_second_header(self.file_path, header_data, self._office_facade)
 
     def cleanup(self):
         """清理资源"""
         try:
             if self.win_document:
-                if self._owns_win_document:
-                    # 检查文档是否仍然可用
-                    try:
-                        # 尝试访问文档的一个属性来检查连接状态
-                        _ = self.win_document.Name
-                        # 如果能成功访问，则关闭文档
-                        self.win_document.Close(SaveChanges=False)
-                    except pythoncom.com_error:
-                        # 如果COM连接已断开，则跳过关闭
-                        logger.debug("Word文档COM连接已断开，跳过关闭")
-                        pass
-                    except (AttributeError, Exception):
-                        # 如果文档已断开连接，则跳过关闭
-                        logger.debug("Word文档连接已断开，跳过关闭")
-                        pass
-                self.win_document = None
-                self._owns_win_document = False
+                self.close_owned_document()
             
             # 注意：不要关闭word_app，因为它可能是共享实例
             # 但在当前场景下，我们仍需确保它不会显示界面
@@ -462,7 +503,7 @@ class HeaderModifier:
                 and getattr(self, '_owns_win_document', False)
             ):
                 try:
-                    self.win_document.Close(SaveChanges=False)
+                    self.close_owned_document()
                     logger.debug("HeaderModifier: Document closed on destruction")
                 except:
                     pass  # 如果关闭失败，跳过

@@ -207,65 +207,59 @@ class DocumentParserService:
         Returns:
             是否成功更新
         """
-        doc = None
-        session = None
         try:
-            office_facade = self._get_office_facade()
-            session = office_facade.create_session("word")
-            handle = session.acquire()
-            word_app = handle.application
-            word_app.Visible = False  # 确保Word应用程序不可见
-            word_app.DisplayAlerts = False  # 禁用显示警告
-            
-            # 打开文档
-            doc = word_app.Documents.Open(file_path, ReadOnly=False)
-            
-            # 先处理页眉中的LTR编号
-            dl_number = application_data.get('DL', application_data.get('dl_number', ''))
-            if dl_number:
-                self._update_header_ltr_number(doc, dl_number)
-            
-            # 定义文档更新字段映射表
-            update_field_map = {
-                'Project Type': ('project_type', True),
-                'Test Type': ('test_type', True),
-                'Requested By:': ('requested_by', False),
-                'Mfg. Site:': ('location', False),
-                'Can testing be subcontracted?': ('sub_contract', False),
-                'Phone #:': ('phone', False),
-                'Email:': ('email_requestor', False),
-                'Lab Performing the Tests:': ('lab_performing_the_tests', False),
-                'Condition of Samples when Received:': ('condition_of_samples_when_received', False),
-                'Lab Personnel Assigned:': ('project_leader', False),
-                'Date Lab Received Samples:': ('date_lab_received_samples', False),
-                'Estimated Completion Date:': ('estimated_completion_date', False),
-            }
-            
-            # 构建要写入文档的字段映射
-            modifications = []
-            for keyword, (field_key, next_row) in update_field_map.items():
-                value = application_data.get(field_key, '')
-                logger.debug(f"字段 '{keyword}' 对应值 '{value}' 准备写入")
-                modifications.append({'keyword': keyword, 'new_value': value, 'next_row': next_row})
-
-            # 应用修改到表格内容
-            for mod in modifications:
-                keyword = mod.get("keyword")
-                new_value = mod.get("new_value", "")
-                next_row = mod.get("next_row", False)
+            def _update_document(doc):
+                # 先处理页眉中的LTR编号
+                dl_number = application_data.get('DL', application_data.get('dl_number', ''))
+                if dl_number:
+                    self._update_header_ltr_number(doc, dl_number)
                 
-                target_cell = self._find_target_cell_after_keyword(doc, keyword, next_row)
-                if target_cell:
-                    success = self._modify_cell_content(target_cell, new_value)
-                    if success:
-                        logger.info(f"修改字段 '{keyword}' 为 '{new_value}'")
-                    else:
-                        logger.warning(f"修改字段 '{keyword}' 失败")
-                else:
-                    logger.warning(f"未找到关键词 '{keyword}'")
+                # 定义文档更新字段映射表
+                update_field_map = {
+                    'Project Type': ('project_type', True),
+                    'Test Type': ('test_type', True),
+                    'Requested By:': ('requested_by', False),
+                    'Mfg. Site:': ('location', False),
+                    'Can testing be subcontracted?': ('sub_contract', False),
+                    'Phone #:': ('phone', False),
+                    'Email:': ('email_requestor', False),
+                    'Lab Performing the Tests:': ('lab_performing_the_tests', False),
+                    'Condition of Samples when Received:': ('condition_of_samples_when_received', False),
+                    'Lab Personnel Assigned:': ('project_leader', False),
+                    'Date Lab Received Samples:': ('date_lab_received_samples', False),
+                    'Estimated Completion Date:': ('estimated_completion_date', False),
+                }
+                
+                # 构建要写入文档的字段映射
+                modifications = []
+                for keyword, (field_key, next_row) in update_field_map.items():
+                    value = application_data.get(field_key, '')
+                    logger.debug(f"字段 '{keyword}' 对应值 '{value}' 准备写入")
+                    modifications.append({'keyword': keyword, 'new_value': value, 'next_row': next_row})
 
-            # 保存文档
-            doc.Save()
+                # 应用修改到表格内容
+                for mod in modifications:
+                    keyword = mod.get("keyword")
+                    new_value = mod.get("new_value", "")
+                    next_row = mod.get("next_row", False)
+                    
+                    target_cell = self._find_target_cell_after_keyword(doc, keyword, next_row)
+                    if target_cell:
+                        success = self._modify_cell_content(target_cell, new_value)
+                        if success:
+                            logger.info(f"修改字段 '{keyword}' 为 '{new_value}'")
+                        else:
+                            logger.warning(f"修改字段 '{keyword}' 失败")
+                    else:
+                        logger.warning(f"未找到关键词 '{keyword}'")
+            
+            # 完全托付给 OfficeFacade 管理生命周期
+            self._office_facade.with_word_document(
+                file_path,
+                _update_document,
+                read_only=False,
+                save=True,
+            )
             
             logger.info(f"成功更新Word文档: {file_path}")
             return True
@@ -273,17 +267,6 @@ class DocumentParserService:
         except Exception as e:
             logger.error(f"更新Word文档时出错: {e}", exc_info=True)
             return False
-        finally:
-            try:
-                if doc:
-                    doc.Close()
-            except Exception as e:
-                logger.error(f"关闭Word文档时出错: {e}")
-            try:
-                if session:
-                    session.release()
-            except Exception as e:
-                logger.error(f"释放Word session时出错: {e}")
 
     def _update_header_ltr_number(self, doc, dl_number: str) -> bool:
         """

@@ -12,16 +12,16 @@ FileOperationsFacade - 文件操作统一入口
 from __future__ import annotations
 
 import os
-from typing import List, Optional, TYPE_CHECKING
+from importlib import import_module
+from typing import List, Optional, Any
 
 from src.core.logger import logger
-from src.shell.main_window.model.main_window_data import MainWindowData
 
-if TYPE_CHECKING:
-    from PyQt5.QtWidgets import QWidget
-    from src.features.matrix.workspace.matrix_workspace_facade import MatrixWorkspaceFacade
-    from src.shell.main_window.coordinator.project_lifecycle_coordinator import ProjectLifecycleCoordinator
 
+def _load_symbol(module_path: str, symbol_name: str):
+    """Load fallback collaborators lazily without adding static feature import edges."""
+    module = import_module(module_path)
+    return getattr(module, symbol_name)
 
 class FileOperationsFacade:
     """
@@ -35,17 +35,17 @@ class FileOperationsFacade:
 
     def __init__(
         self,
-        parent_view: "QWidget",
-        data_model: MainWindowData,
-        matrix_facade: Optional["MatrixWorkspaceFacade"] = None,
-        lifecycle_coordinator: Optional["ProjectLifecycleCoordinator"] = None,
+        parent_view: Any,
+        data_model: Any,
+        matrix_facade: Optional[Any] = None,
+        lifecycle_coordinator: Optional[Any] = None,
     ):
         """
         初始化文件操作 Facade
 
         Args:
             parent_view: 父窗口视图实例
-            data_model: 主窗口数据模型（用于最近文件管理）
+            data_model: 具有 recent-files/status API 的主窗口数据模型
             matrix_facade: Matrix 工作区 Facade（用于 session 配置）
             lifecycle_coordinator: 生命周期协调器（用于项目打开）
         """
@@ -54,11 +54,11 @@ class FileOperationsFacade:
         self._matrix_facade = matrix_facade
         self._lifecycle_coordinator = lifecycle_coordinator
 
-    def set_matrix_facade(self, matrix_facade: "MatrixWorkspaceFacade") -> None:
+    def set_matrix_facade(self, matrix_facade: Any) -> None:
         """设置 Matrix Facade（延迟注入）"""
         self._matrix_facade = matrix_facade
 
-    def set_lifecycle_coordinator(self, coordinator: "ProjectLifecycleCoordinator") -> None:
+    def set_lifecycle_coordinator(self, coordinator: Any) -> None:
         """设置生命周期协调器（延迟注入）"""
         self._lifecycle_coordinator = coordinator
 
@@ -172,8 +172,9 @@ class FileOperationsFacade:
         用于渐进式迁移期间的兼容性。
         """
         try:
-            from src.features.project_creator.controller.project_creator_controller import (
-                ProjectCreatorController,
+            ProjectCreatorController = _load_symbol(
+                "src.features.project_creator.controller.project_creator_controller",
+                "ProjectCreatorController",
             )
 
             # 解析 session 配置

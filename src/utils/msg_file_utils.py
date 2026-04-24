@@ -1,6 +1,8 @@
 """
-.msg文件处理工具模块
-提供处理Outlook .msg文件的功能
+.msg file processing utilities.
+
+Note: This module is used by email_extractor feature.
+Future migration plan: Move to OfficeFacade.create_session("outlook") pattern.
 """
 
 import os

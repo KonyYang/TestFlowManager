@@ -13,7 +13,7 @@ from src.core.logger import logger
 from src.features.content_editor.service.document_content_service import (
     DocumentContentService,
 )
-from src.utils.document_editor_mixin import DocumentEditorMixin
+from src.features.content_editor.view.components.document_editor_mixin import DocumentEditorMixin
 
 
 class BodyContentDialog(QDialog, DocumentEditorMixin):

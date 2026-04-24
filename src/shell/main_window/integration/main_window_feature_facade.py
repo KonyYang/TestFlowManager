@@ -13,11 +13,15 @@ Business logic remains inside feature modules.
 > Scope: Moved from service/ to integration/ for proper architectural placement
 """
 
+from importlib import import_module
+
 from src.core.logger import logger
-from src.features.customer_report_generator.controller.customer_report_controller import CustomerReportController
-from src.features.report_wizard.controller.report_wizard_controller import ReportWizardController
-from src.features.document_parser.controller.document_parser_controller import DocumentParserController
-from src.features.report_updater.controller.report_updater_controller import ReportUpdaterController
+
+
+def _load_symbol(module_path: str, symbol_name: str):
+    """Load a symbol lazily without adding a static shell -> feature import edge."""
+    module = import_module(module_path)
+    return getattr(module, symbol_name)
 
 
 class MainWindowFeatureFacade:
@@ -49,6 +53,10 @@ class MainWindowFeatureFacade:
         """Lazy load CustomerReportController."""
         if self._customer_report_controller is None:
             logger.debug("Lazy loading CustomerReportController")
+            CustomerReportController = _load_symbol(
+                "src.features.customer_report_generator.controller.customer_report_controller",
+                "CustomerReportController",
+            )
             self._customer_report_controller = CustomerReportController(self.main_window)
         return self._customer_report_controller
 
@@ -56,6 +64,10 @@ class MainWindowFeatureFacade:
         """Lazy load ReportWizardController."""
         if self._report_wizard_controller is None:
             logger.debug("Lazy loading ReportWizardController")
+            ReportWizardController = _load_symbol(
+                "src.features.report_wizard.controller.report_wizard_controller",
+                "ReportWizardController",
+            )
             self._report_wizard_controller = ReportWizardController(self.main_window)
         return self._report_wizard_controller
 
@@ -63,6 +75,10 @@ class MainWindowFeatureFacade:
         """Lazy load DocumentParserController."""
         if self._document_parser_controller is None:
             logger.debug("Lazy loading DocumentParserController")
+            DocumentParserController = _load_symbol(
+                "src.features.document_parser.controller.document_parser_controller",
+                "DocumentParserController",
+            )
             self._document_parser_controller = DocumentParserController(self.main_window)
         return self._document_parser_controller
 
@@ -70,6 +86,10 @@ class MainWindowFeatureFacade:
         """Lazy load ReportUpdaterController."""
         if self._report_updater_controller is None:
             logger.debug("Lazy loading ReportUpdaterController")
+            ReportUpdaterController = _load_symbol(
+                "src.features.report_updater.controller.report_updater_controller",
+                "ReportUpdaterController",
+            )
             self._report_updater_controller = ReportUpdaterController(self.main_window)
         return self._report_updater_controller
 
@@ -142,9 +162,10 @@ class MainWindowFeatureFacade:
         Uses method-local import to avoid startup-time dependency.
         """
         logger.debug("FeatureFacade: run_encrypt_test_files")
-        # Method-local import to defer FileEncryptionController loading
-        from src.features.file_encryption.controller.file_encryption_controller import FileEncryptionController
-
+        FileEncryptionController = _load_symbol(
+            "src.features.file_encryption.controller.file_encryption_controller",
+            "FileEncryptionController",
+        )
         controller = FileEncryptionController(self.main_window)
         folder_path = controller.show_folder_selection()
         if folder_path:

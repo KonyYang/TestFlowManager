@@ -10,6 +10,7 @@ from src.core.logger import logger
 from src.common.ui.base_controller import BaseController
 from src.features.email_extractor.model.email_extractor_data import EmailExtractorData
 from src.features.email_extractor.service.email_extractor_service import EmailExtractorService
+from src.infrastructure.office.facade import OfficeFacade
 
 
 class EmailExtractorController(BaseController):
@@ -18,16 +19,17 @@ class EmailExtractorController(BaseController):
     处理简单的邮件文件选择和附件提取
     """
 
-    def __init__(self, view):
+    def __init__(self, view, office_facade: OfficeFacade):
         """
         初始化邮件提取控制器
 
         Args:
             view: 邮件选择对话框视图实例
+            office_facade: OfficeFacade instance for Outlook operations
         """
         super().__init__(view)
         self.data_model = EmailExtractorData()
-        self.service = EmailExtractorService(self.data_model)
+        self.service = EmailExtractorService(self.data_model, office_facade)
 
     def initialize(self) -> bool:
         """

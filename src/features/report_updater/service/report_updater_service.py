@@ -60,7 +60,7 @@ class ReportUpdaterService:
     ):
         """初始化报告更新服务"""
         self.project_context = project_context
-        self.office_facade = office_facade or OfficeFacade()
+        self._office_facade = office_facade or OfficeFacade()
         self.config_manager = EquipmentConfigManager(self.project_context)
         self.config = self.config_manager.get_config()
         self.source_validator = source_validator or ReportUpdaterSourceValidator()
@@ -78,7 +78,7 @@ class ReportUpdaterService:
                 date_formatter=self.date_formatter,
                 table_finder=self.table_finder,
                 table_updater=self.table_updater,
-                office_facade=self.office_facade,
+                office_facade=self._office_facade,
             )
         )
         logger.info("ReportUpdaterService initialized")

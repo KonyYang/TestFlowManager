@@ -84,14 +84,14 @@ class DocumentUtils:
             return ""
 
     @staticmethod
-    def prepare_documents(source_path, template_path, word_app):
+    def prepare_documents(source_path, template_path, office_facade):
         """
         准备源文档和模板文档
         
         Args:
             source_path (str): 源文档路径
             template_path (str): 模板文档路径
-            word_app: Word应用程序实例
+            office_facade: OfficeFacade 实例（必须由调用方通过 self._office_facade 提供）
             
         Returns:
             tuple: (source_doc, template_doc, temp_template_path)
@@ -109,16 +109,6 @@ class DocumentUtils:
             if not os.path.exists(template_path):
                 raise FileNotFoundError(f"模板文档不存在: {template_path}")
             
-            # 使用同一个 Word session 打开源文档（只读模式）
-            source_doc = word_app.Documents.Open(
-                source_path,
-                ReadOnly=True,
-                PasswordDocument="",
-            )
-            if source_doc is None:
-                raise Exception(f"无法打开源文档: {source_path}")
-            logger.debug(f"成功打开源文档: {source_path}")
-            
             # 创建临时模板文件路径
             source_dir = os.path.dirname(source_path)
             temp_template_path = os.path.join(source_dir, "Temp_CustomerReport.docx")
@@ -128,11 +118,42 @@ class DocumentUtils:
             shutil.copy2(template_path, temp_template_path)
             logger.debug(f"模板文件已复制到临时路径: {temp_template_path}")
             
-            # 打开临时模板文件
-            template_doc = word_app.Documents.Open(temp_template_path)
-            logger.debug("临时模板文件已打开")
+            # ✅ 使用嵌套的 with_word_document 管理两个文档的生命周期
+            result_container = {}
             
-            return source_doc, template_doc, temp_template_path
+            def _open_source_and_template(source_doc):
+                """在源文档的回调中打开模板文档"""
+                result_container['source_doc'] = source_doc
+                
+                def _open_template(template_doc):
+                    """在模板文档的回调中执行业务逻辑"""
+                    result_container['template_doc'] = template_doc
+                    logger.debug(f"成功打开源文档: {source_path}")
+                    logger.debug("临时模板文件已打开")
+                    # 返回 True 表示成功
+                    return True
+                
+                # 打开模板文档（可写模式）
+                return office_facade.with_word_document(
+                    temp_template_path,
+                    _open_template,
+                    read_only=False,
+                    save=False,  # 不自动保存，由调用方决定
+                )
+            
+            # 打开源文档（只读模式）
+            success = office_facade.with_word_document(
+                source_path,
+                _open_source_and_template,
+                read_only=True,
+                save=False,  # 只读，不保存
+            )
+            
+            if not success:
+                raise Exception("准备文档失败")
+            
+            return result_container['source_doc'], result_container['template_doc'], temp_template_path
+            
         except Exception as e:
             logger.error(f"准备文档时出错: {e}")
             raise

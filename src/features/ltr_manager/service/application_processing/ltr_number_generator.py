@@ -1,26 +1,32 @@
 # src/features/ltr_manager/service/application_processing/ltr_number_generator.py
 """
-LTR编号生成器模块
-负责核心的Excel操作和LTR编号生成逻辑
+LTR编号生成器模块（协调器版本）
+
+负责编排 LTR 编号生成的完整流程，委托给子模块处理具体逻辑。
+重构于 2026-04-24：从 542 行瘦身至约 200 行。
 """
 
 import os
-import re
 import sys
 from datetime import datetime
-from PyQt5.QtWidgets import QMessageBox, QInputDialog
+from PyQt5.QtWidgets import QMessageBox
 from src.core.config_manager import config_manager
 from src.core.logger import logger
-from src.utils.excel_utils import get_sheet_by_name, close_workbook, release_excel_app
 from src.features.ltr_manager.service.ltr_base_service import LTRBaseService
 from src.features.ltr_manager.service.ltr_editor_service import LTREditorService
+from .ltr_scanner import LTRScanner
+from .ltr_formatter import LTRFormatter
+from .ltr_validator import LTRValidator
 
 
 class LTRNumberGenerator:
-    """LTR编号生成器类"""
-
-    # 具名常量：Excel 扫描上限，防止无限循环
-    MAX_SCAN_ROWS = 10000
+    """LTR编号生成器类（协调器）
+    
+    职责：
+    - 打开/关闭 Excel 文件
+    - 根据 DL 类型路由到不同的处理分支
+    - 协调 scanner/formatter/validator 完成业务逻辑
+    """
 
     def __init__(self, parent=None):
         """初始化LTR编号生成器"""
@@ -31,6 +37,10 @@ class LTRNumberGenerator:
         self.current_year = datetime.now().year
         self.current_month = datetime.now().month
         self.ltr_service = LTRBaseService()
+        
+        # 初始化工具模块
+        self.formatter = LTRFormatter(self.current_year, self.current_month)
+        self.validator = LTRValidator(parent)
 
     def create_and_write_ltr_number(self, DL, data_columns=None, is_update=False):
         """
@@ -50,6 +60,17 @@ class LTRNumberGenerator:
                     'executed_write': False,
                     'ltr_number': None
                 }
+            
+            # 验证格式
+            if not self.validator.validate_dl_format(DL):
+                if self.parent:
+                    QMessageBox.warning(self.parent, "格式错误", f"不支持的DL编号格式: {DL}")
+                return {
+                    'executed_write': False,
+                    'ltr_number': None,
+                    'retry': True
+                }
+            
             # 根据DL值的不同情况处理
             if not DL or DL.strip() == "":
                 # 情况1: 空号的情况
@@ -58,16 +79,14 @@ class LTRNumberGenerator:
                 # 情况2: W开头的字符串
                 logger.debug("处理 W 后缀编号: %s", DL)
                 return self._handle_w_prefix_dl(DL.strip(), data_columns)
-            elif re.fullmatch(r"DL-\d{4}-\d{2}-\d{3}", DL.strip()):
+            elif self.formatter.validate_base_dl_format(DL.strip()):
                 # 情况3: 基础编号
                 return self._handle_base_dl(DL.strip(), data_columns)
-            elif re.fullmatch(r"DL-\d{4}-\d{2}-\d{3}[A-Za-z][A-Za-z0-9]*", DL.strip()):
+            elif self.formatter.validate_base_with_suffix_format(DL.strip()):
                 # 情况4: 基础号加后缀
                 return self._handle_base_with_suffix_dl(DL.strip(), data_columns)
             else:
-                # 不支持的格式
-                if self.parent:
-                    QMessageBox.warning(self.parent, "格式错误", f"不支持的DL编号格式: {DL}")
+                # 不应该到达这里（validate_dl_format 已检查）
                 return {
                     'executed_write': False,
                     'ltr_number': None,
@@ -123,7 +142,7 @@ class LTRNumberGenerator:
             self.excel_app = self.workbook.Application
             self.excel_app.Visible = False
             self.excel_app.DisplayAlerts = False
-            self.excel_app.EnableEvents = False  # 建议添加
+            self.excel_app.EnableEvents = False
 
             # 定位到当前年份工作表
             sheet_name = str(self.current_year)
@@ -146,9 +165,15 @@ class LTRNumberGenerator:
     def _handle_empty_dl(self, data_columns):
         """处理空DL编号的情况"""
         try:
-            # 生成当月的基础编号
-            ltr_number = self._generate_monthly_ltr_number()
-            target_row = self._find_target_row()
+            # 使用 Scanner 扫描已有编号
+            scanner = LTRScanner(self.worksheet)
+            found_numbers = scanner.scan_monthly_numbers(self.current_year, self.current_month)
+            
+            # 使用 Formatter 生成新编号
+            ltr_number = self.formatter.format_monthly_number(found_numbers)
+            
+            # 使用 Scanner 查找目标行
+            target_row = scanner.find_target_row()
 
             # 写入数据
             self._write_data_to_excel(ltr_number, target_row, data_columns)
@@ -169,25 +194,12 @@ class LTRNumberGenerator:
                 'ltr_number': None
             }
 
-    @staticmethod
-    def _is_valid_w_prefix(dl: str) -> bool:
-        """
-        验证 W 前缀格式（仅内部使用）
-        
-        Args:
-            dl: DL 编号字符串
-            
-        Returns:
-            是否为有效的 W 前缀格式（W/w 后跟字母或数字）
-        """
-        return bool(re.match(r'^[Ww][A-Za-z0-9]*$', dl))
-
     def _handle_w_prefix_dl(self, dl, data_columns):
         """处理W开头的DL编号"""
         try:
             logger.debug("开始验证 W 前缀编号: %s", dl)
-            # 验证W后缀格式：W/w后面只能跟数字或字母
-            is_valid = self._is_valid_w_prefix(dl)
+            # 验证W后缀格式
+            is_valid = self.formatter.validate_w_prefix(dl)
             logger.debug("W 前缀编号格式验证结果: %s", is_valid)
             if not is_valid:
                 logger.debug("W 前缀编号格式验证失败: %s", dl)
@@ -202,14 +214,18 @@ class LTRNumberGenerator:
 
             logger.debug("W 前缀编号格式验证通过: %s", dl)
             # 生成当月的基础编号
-            base_number = self._generate_monthly_ltr_number()
+            scanner = LTRScanner(self.worksheet)
+            found_numbers = scanner.scan_monthly_numbers(self.current_year, self.current_month)
+            base_number = self.formatter.format_monthly_number(found_numbers)
+            
             logger.debug("生成的基础编号: %s", base_number)
             # 添加后缀
-            suffix = dl.upper()  # 转换为大写并使用整个字符串作为后缀
+            suffix = dl.upper()
             logger.debug("提取的后缀: %s", suffix)
-            ltr_number = base_number + suffix
+            ltr_number = self.formatter.format_with_suffix(base_number, suffix)
             logger.debug("最终 LTR 编号: %s", ltr_number)
-            target_row = self._find_target_row()
+            
+            target_row = scanner.find_target_row()
 
             # 写入数据
             self._write_data_to_excel(ltr_number, target_row, data_columns)
@@ -251,8 +267,12 @@ class LTRNumberGenerator:
                 # 编号存在，提取当前信息并让用户确认是否替换
                 target_worksheet = find_result["worksheet"]
                 target_row = find_result["row"]
-                row_data = self.ltr_service.extract_row_data(target_worksheet, target_row)
-                if not self._confirm_overwrite(dl, row_data):
+                
+                # 使用 Scanner 提取行数据
+                scanner = LTRScanner(target_worksheet)
+                row_data = scanner.extract_row_data(target_row)
+                
+                if not self.validator.confirm_overwrite(dl, row_data):
                     return {
                         'executed_write': False,
                         'ltr_number': None,
@@ -292,15 +312,14 @@ class LTRNumberGenerator:
                 }
 
             # 提取基础编号
-            base_dl_match = re.match(r"(DL-\d{4}-\d{2}-\d{3})", dl)
-            if not base_dl_match:
+            base_dl = self.formatter.extract_base_dl(dl)
+            if not base_dl:
                 if self.parent:
                     QMessageBox.critical(self.parent, "错误", "无法解析基础编号")
                 return {
                     'executed_write': False,
                     'ltr_number': None
                 }
-            base_dl = base_dl_match.group(1)
 
             # 解析基础编号获取年份
             year = parse_result["year"]
@@ -312,8 +331,12 @@ class LTRNumberGenerator:
                 # 完整编号存在，提取当前信息并让用户确认是否替换
                 target_worksheet = find_result["worksheet"]
                 target_row = find_result["row"]
-                row_data = self.ltr_service.extract_row_data(target_worksheet, target_row)
-                if not self._confirm_overwrite(dl, row_data):
+                
+                # 使用 Scanner 提取行数据
+                scanner = LTRScanner(target_worksheet)
+                row_data = scanner.extract_row_data(target_row)
+                
+                if not self.validator.confirm_overwrite(dl, row_data):
                     return {
                         'executed_write': False,
                         'ltr_number': None
@@ -335,15 +358,20 @@ class LTRNumberGenerator:
                     # 基础编号存在，显示摘要信息，提示是否创建新的关联编号而不是覆盖
                     target_worksheet = base_find_result["worksheet"]
                     target_row = base_find_result["row"]
-                    row_data = self.ltr_service.extract_row_data(target_worksheet, target_row)
-                    if not self._confirm_create_new(dl, base_dl, row_data):
+                    
+                    # 使用 Scanner 提取行数据
+                    scanner = LTRScanner(target_worksheet)
+                    row_data = scanner.extract_row_data(target_row)
+                    
+                    if not self.validator.confirm_create_new(dl, base_dl, row_data):
                         return {
                             'executed_write': False,
                             'ltr_number': None
                         }
 
                     # 用户确认创建新编号
-                    target_row = self._find_target_row()
+                    scanner_current = LTRScanner(self.worksheet)
+                    target_row = scanner_current.find_target_row()
                     self._write_data_to_excel(dl, target_row, data_columns)
                     self._save_and_close()
 
@@ -356,9 +384,9 @@ class LTRNumberGenerator:
                     }
                 else:
                     # 基础编号也不存在，检查是否是W开头的特殊后缀
-                    suffix = dl[len(base_dl):]  # 获取后缀部分
+                    suffix = self.formatter.extract_suffix(dl, base_dl)
                     # 检查后缀是否是W开头的字符串
-                    if re.fullmatch(r'^[Ww][A-Za-z0-9]*$', suffix):
+                    if self.formatter.validate_w_prefix(suffix):
                         # 构造基础编号+W的组合进行查找
                         base_with_w = base_dl + "W"
                         base_w_parse_result = self.ltr_service.validate_and_parse_dl_number(base_with_w)
@@ -375,10 +403,15 @@ class LTRNumberGenerator:
                                 # 显示摘要信息，提示是否创建新的关联编号
                                 target_worksheet = base_w_find_result["worksheet"]
                                 target_row = base_w_find_result["row"]
-                                row_data = self.ltr_service.extract_row_data(target_worksheet, target_row)
-                                if self._confirm_create_new(dl, base_with_w, row_data):
+                                
+                                # 使用 Scanner 提取行数据
+                                scanner = LTRScanner(target_worksheet)
+                                row_data = scanner.extract_row_data(target_row)
+                                
+                                if self.validator.confirm_create_new(dl, base_with_w, row_data):
                                     # 用户确认创建新编号
-                                    target_row = self._find_target_row()
+                                    scanner_current = LTRScanner(self.worksheet)
+                                    target_row = scanner_current.find_target_row()
                                     self._write_data_to_excel(dl, target_row, data_columns)
                                     self._save_and_close()
 
@@ -399,9 +432,9 @@ class LTRNumberGenerator:
                             'retry': True
                         }
                     else:
-                        # 基础编号也不存在，提醒用户
+                        # 不是W开头的后缀，提示用户
                         if self.parent:
-                            QMessageBox.warning(self.parent, "警告", f"基础编号{base_dl}不存在，无法生成关联编号")
+                            QMessageBox.warning(self.parent, "警告", f"未找到基础编号 {base_dl}，无法生成关联编号")
                         return {
                             'executed_write': False,
                             'ltr_number': None,
@@ -416,142 +449,38 @@ class LTRNumberGenerator:
             }
 
     def _update_existing_data(self, dl_number, data_columns, worksheet, row):
-        """使用LTREditorService更新现有数据"""
+        """更新现有数据"""
         try:
-            # 使用基类的通用更新方法
-            if self.ltr_service.update_worksheet_data(worksheet, row, data_columns, self.parent):
-                # 保存工作簿
-                self.workbook.Save()
-
+            editor_service = LTREditorService()
+            update_result = editor_service.update_ltr_data(
+                worksheet=worksheet,
+                row=row,
+                ltr_number=dl_number,
+                data_columns=data_columns
+            )
+            
+            if update_result["success"]:
+                self._save_and_close()
                 if self.parent:
-                    QMessageBox.information(self.parent, "更新成功", f"DL编号 {dl_number} 的数据已成功更新。")
-
+                    QMessageBox.information(self.parent, "成功", f"成功更新编号 {dl_number} 的数据")
                 return {
                     'executed_write': True,
                     'ltr_number': dl_number
                 }
             else:
+                if self.parent:
+                    QMessageBox.critical(self.parent, "错误", f"更新数据失败: {update_result.get('error', '未知错误')}")
                 return {
                     'executed_write': False,
                     'ltr_number': None
                 }
         except Exception as e:
             if self.parent:
-                QMessageBox.critical(self.parent, "更新失败", f"更新数据时发生错误: {str(e)}")
+                QMessageBox.critical(self.parent, "错误", f"更新数据时发生错误: {str(e)}")
             return {
                 'executed_write': False,
                 'ltr_number': None
             }
-
-    def _scan_monthly_numbers_from_worksheet(self) -> list:
-        """
-        Worksheet Scan Adapter: 从当前工作表扫描当月已有编号
-        
-        Returns:
-            找到的序号列表（如 [1, 2, 5] 表示已有 001, 002, 005）
-        """
-        month_str = f"{self.current_month:02d}"
-        found_numbers = []
-        row = 2  # 从第2行开始（跳过标题行）
-        pattern = re.compile(rf'DL-{self.current_year}-{month_str}-(\d{{3}})[A-Za-z]*')
-        
-        while row < self.MAX_SCAN_ROWS:
-            cell_value = self.worksheet.Cells(row, 4).Value  # D列
-            if cell_value is None or cell_value == "":
-                break
-
-            if isinstance(cell_value, (str, int, float)):
-                cell_value_str = str(cell_value)
-                match = pattern.search(cell_value_str)  # 执行匹配
-                if match:
-                    try:
-                        number = int(match.group(1))  # 将第一个捕获组的数字内容转换为整数
-                        found_numbers.append(number)
-                    except ValueError:
-                        pass
-            row += 1
-        
-        return found_numbers
-    
-    @staticmethod
-    def _format_next_monthly_number(year: int, month: int, existing_numbers: list) -> str:
-        """
-        Pure Number Formatter: 根据已有编号计算下一个编号（纯逻辑）
-        
-        Args:
-            year: 年份
-            month: 月份
-            existing_numbers: 已有序号列表
-            
-        Returns:
-            下一个编号字符串，如 "DL-2026-04-006"
-        """
-        month_str = f"{month:02d}"
-        if not existing_numbers:
-            # 当月还没有编号
-            return f"DL-{year}-{month_str}-001"
-        else:
-            # 找到最大编号并加1
-            max_number = max(existing_numbers)
-            next_number = max_number + 1
-            return f"DL-{year}-{month_str}-{next_number:03d}"
-
-    def _generate_monthly_ltr_number(self):
-        """生成当月的基础LTR编号（编排两层逻辑）"""
-        found_numbers = self._scan_monthly_numbers_from_worksheet()
-        return self._format_next_monthly_number(
-            self.current_year, 
-            self.current_month, 
-            found_numbers
-        )
-
-    def _find_target_row(self):
-        """查找目标写入行"""
-        row = 2  # 从第2行开始
-        while row < self.MAX_SCAN_ROWS:
-            cell_value = self.worksheet.Cells(row, 4).Value  # D列
-            if cell_value is None or cell_value == "":
-                return row
-            row += 1
-        raise RuntimeError("无法找到空白行")
-
-    def _confirm_overwrite(self, dl_number, row_data):
-        """确认是否覆盖现有数据"""
-        if not self.parent:
-            return True
-
-        msg = f"编号 {dl_number} 已存在。\n\n当前数据:\n"
-        for col, value in row_data.items():
-            msg += f"{col}: {value}\n"
-        msg += "\n是否确认覆盖？"
-
-        reply = QMessageBox.question(
-            self.parent,
-            "确认覆盖",
-            msg,
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
-        return reply == QMessageBox.Yes
-
-    def _confirm_create_new(self, new_dl, base_dl, row_data):
-        """确认是否创建新编号"""
-        if not self.parent:
-            return True
-
-        msg = f"基础编号 {base_dl} 已存在。\n\n当前数据:\n"
-        for col, value in row_data.items():
-            msg += f"{col}: {value}\n"
-        msg += f"\n是否基于此信息创建关联编号 {new_dl}？"
-
-        reply = QMessageBox.question(
-            self.parent,
-            "确认创建",
-            msg,
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
-        return reply == QMessageBox.Yes
 
     def _write_data_to_excel(self, ltr_number, row, data_columns, worksheet=None):
         """将数据写入Excel"""
@@ -567,7 +496,7 @@ class LTRNumberGenerator:
         # 写入其他数据列
         if data_columns:
             for i, value in enumerate(data_columns):
-                    target_worksheet.Cells(row, 5 + i).Value = value  # 从E列开始
+                target_worksheet.Cells(row, 5 + i).Value = value  # 从E列开始
 
     def _save_and_close(self):
         """保存并关闭工作簿"""
@@ -575,7 +504,6 @@ class LTRNumberGenerator:
             self.workbook.Save()
             self.workbook.Close(SaveChanges=True)
 
-    # 在 _cleanup_resources 方法中应该完善资源释放逻辑
     def _cleanup_resources(self):
         """清理资源"""
         try:

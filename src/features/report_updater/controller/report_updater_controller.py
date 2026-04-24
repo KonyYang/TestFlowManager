@@ -3,12 +3,14 @@
 处理报告更新功能的业务逻辑
 """
 import os
-from typing import Optional, List, Dict
-from PyQt5.QtWidgets import QWidget, QMessageBox, QFileDialog, QDialog
+from typing import Optional, List
+from PyQt5.QtWidgets import QWidget, QMessageBox
 from src.core.logger import logger
 from src.core.project_context import ProjectContext
+from src.features.report_updater.controller.report_updater_dialog_workflow_coordinator import (
+    ReportUpdaterDialogWorkflowCoordinator,
+)
 from src.features.report_updater.model.report_updater_data import ReportUpdaterData
-from src.features.report_updater.view.report_updater_dialog import ReportUpdaterDialog
 from src.features.report_wizard.coordinator.report_export_coordinator import (
     ReportExportCoordinator,
 )
@@ -38,7 +40,8 @@ class ReportUpdaterController:
         self.export_coordinator.set_project_context(self.project_context)
         self.current_project_path = None
         self.data_model.set_project_context(self.project_context)
-        self.view: Optional[ReportUpdaterDialog] = None
+        self.dialog_workflow = ReportUpdaterDialogWorkflowCoordinator()
+        self.view = None
         logger.info("ReportUpdaterController initialized")
     
     def set_project_context(self, project_context: Optional[ProjectContext]) -> None:
@@ -64,32 +67,15 @@ class ReportUpdaterController:
         """
         try:
             logger.info("Showing report updater dialog")
-            
-            # 首先弹出文件选择对话框
-            selected_report = self.select_report_file()
-            if not selected_report:
-                logger.info("User cancelled report file selection")
-                return False
-            
-            # 设置选中的报告文件
-            self.data_model.select_report(selected_report)
-            
-            # 创建对话框，只显示更新功能（不显示文件列表）
-            self.view = ReportUpdaterDialog(self.data_model, parent=self.parent, selected_report=selected_report)
-            
-            # 连接对话框的信号
-            self.view.equipment_update_requested.connect(self.handle_equipment_update)
-            
-            # 显示对话框
-            result = self.view.exec_()
-            
-            if result == QDialog.Accepted:
-                logger.info("Report updater dialog accepted")
-                return True
-            else:
-                logger.info("Report updater dialog cancelled")
-                return False
-                
+
+            accepted, dialog = self.dialog_workflow.run_dialog(
+                parent=self.parent,
+                data_model=self.data_model,
+                on_equipment_update_requested=self.handle_equipment_update,
+            )
+            self.view = dialog
+            return accepted
+
         except Exception as e:
             logger.error(f"Error showing report updater dialog: {e}")
             if self.parent:
@@ -168,31 +154,10 @@ class ReportUpdaterController:
             选中的文件路径，如果取消则返回None
         """
         try:
-            # 根据是否有项目打开来决定起始目录
-            start_directory = self.data_model.get_current_directory()
-            
-            if not os.path.exists(start_directory):
-                start_directory = self.data_model.config.base_directory
-                if not os.path.exists(start_directory):
-                    start_directory = os.path.expanduser("~")
-            
-            # 打开文件选择对话框
-            file_path, _ = QFileDialog.getOpenFileName(
-                self.parent,
-                "选择报告文件",
-                start_directory,
-                "文档文件 (*.docx *.doc *.pdf *.xlsx *.xls);;所有文件 (*)"
+            return self.dialog_workflow.select_report_file(
+                parent=self.parent,
+                data_model=self.data_model,
             )
-            
-            if file_path:
-                # 选择文件成功
-                self.data_model.select_report(file_path)
-                logger.info(f"Selected report file: {file_path}")
-                return file_path
-            else:
-                logger.info("User cancelled report file selection")
-                return None
-                
         except Exception as e:
             logger.error(f"Error selecting report file: {e}")
             if self.parent:

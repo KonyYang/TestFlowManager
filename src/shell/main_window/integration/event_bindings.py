@@ -18,7 +18,6 @@ concerns from business logic in MainWindowController.
 - application_status (由 controller 直接设置)
 """
 from src.core.event_dispatcher import event_dispatcher, EventTopics
-from src.core.project_context import ProjectContext
 from src.core.logger import logger
 
 
@@ -94,17 +93,12 @@ class EventBindingManager:
         logger.info(f"EventBindingManager._on_project_opened: received event")
 
         try:
-            project_context = ProjectContext.from_event_data(data)
-            if not project_context:
+            if hasattr(self.controller, "apply_project_opened_event"):
+                if self.controller.apply_project_opened_event(data):
+                    return
                 logger.warning("EventBindingManager: Invalid project context in event")
                 return
 
-            # 更新 controller 内部的项目上下文引用
-            if hasattr(self.controller, '_project_context'):
-                self.controller._project_context = project_context
-                logger.info(
-                    f"EventBindingManager: Updated controller "
-                    f"project_context={project_context.project_path}"
-                )
+            logger.warning("EventBindingManager: Controller missing apply_project_opened_event")
         except Exception as e:
             logger.error(f"EventBindingManager: Error handling project.opened: {e}")

@@ -20,7 +20,7 @@ class CustomerReportService:
 
     def __init__(self, office_facade: Optional[OfficeFacade] = None):
         """初始化客户报告生成服务"""
-        self.office_facade = office_facade or OfficeFacade()
+        self._office_facade = office_facade or OfficeFacade()
         self.word_session = None
         self.word_app = None
         self.source_doc = None
@@ -30,7 +30,7 @@ class CustomerReportService:
     def _initialize_word_app(self):
         """初始化Word应用程序"""
         try:
-            self.word_session = self.office_facade.create_session("word")
+            self.word_session = self._office_facade.create_session("word")
             runtime_handle = self.word_session.acquire()
             self.word_app = runtime_handle.application
             if self.word_app is None:

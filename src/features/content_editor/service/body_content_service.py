@@ -67,56 +67,35 @@ class BodyContentService:
         Returns:
             是否成功更新
         """
-        word_session = None
-        doc = None
         try:
-            # 使用 Word COM 进行精确操作
-            word_session = self._get_office_facade().create_session("word")
-            word_handle = word_session.acquire()
-            word_app = word_handle.application
-            if not word_app:
-                logger.error("无法获取Word应用程序实例")
+            def _update_paragraph(doc):
+                # 遍历所有段落查找关键词
+                for para in doc.Paragraphs:
+                    para_text = para.Range.Text.strip()
+                    if keyword.upper() in para_text.upper():
+                        # 找到关键词后，更新下一个段落的内容
+                        next_para = self._find_next_paragraph(doc.Application, para)
+                        if next_para:
+                            next_para.Range.Text = new_content
+                            logger.info(f"成功更新 {keyword} 后的段落内容")
+                            return True  # 只更新第一个匹配项
+                
+                logger.warning(f"未找到关键词: {keyword}")
                 return False
-
-            # 确保Word应用程序不可见
-            word_app.Visible = False
-            word_app.DisplayAlerts = False
-
-            doc = word_app.Documents.Open(file_path)
-            found = False
-
-            # 遍历所有段落查找关键词
-            for para in doc.Paragraphs:
-                para_text = para.Range.Text.strip()
-                if keyword.upper() in para_text.upper():
-                    # 找到关键词后，更新下一个段落的内容
-                    next_para = self._find_next_paragraph(word_app, para)
-                    if next_para:
-                        next_para.Range.Text = new_content
-                        found = True
-                        logger.info(f"成功更新 {keyword} 后的段落内容")
-                        break  # 只更新第一个匹配项
-
-            if found:
-                doc.Save()
-
-            # 关闭文档
-            doc.Close()
-            doc = None
-
-            return found
+            
+            # 完全托付给 OfficeFacade 管理生命周期
+            result = self._office_facade.with_word_document(
+                file_path,
+                _update_paragraph,
+                read_only=False,
+                save=True,
+            )
+            
+            return result
 
         except Exception as e:
             logger.error(f"更新关键词后段落时出错: {e}")
             return False
-        finally:
-            if doc is not None:
-                try:
-                    doc.Close(SaveChanges=False)
-                except Exception:
-                    pass
-            if word_session is not None:
-                word_session.release()
 
     # --- 公共 API：预定义描述 ---
 

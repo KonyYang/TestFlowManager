@@ -1,3 +1,10 @@
+"""
+Email utilities for Outlook automation.
+
+Note: This module is used by email_extractor feature.
+Future migration plan: Move to OfficeFacade.create_session("outlook") pattern.
+"""
+
 import win32com.client
 import pythoncom
 from typing import List, Dict, Any, Optional

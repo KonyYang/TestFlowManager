@@ -11,7 +11,6 @@ from typing import Dict, Any, List, Optional
 
 from src.core.config_manager import config_manager
 from src.core.logger import logger
-from src.features.matrix.model.matrix_data_structure import MatrixDataStructure
 from src.features.step_record_generator.service.step_record_data_formatter import (
     EXCLUDE_REQUIREMENT_VALUES,
     filter_requirement_text,
@@ -291,7 +290,7 @@ class StepRecordService:
             logger.error(f"填充页眉信息时发生错误: {e}")
             return False
 
-    def generate_step_record_with_structure(self, matrix_structure: MatrixDataStructure, output_path: str) -> bool:
+    def generate_step_record_with_structure(self, matrix_structure: Any, output_path: str) -> bool:
         """
         根据已解析的Matrix数据结构生成Step Record文档
         

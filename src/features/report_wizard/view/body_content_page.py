@@ -17,7 +17,7 @@ from src.features.report_wizard.view.body_content_page_document_workflow import 
     BodyContentPageDocumentWorkflow,
 )
 from src.core.logger import logger
-from src.utils.document_editor_mixin import DocumentEditorMixin
+from src.features.content_editor.view.components.document_editor_mixin import DocumentEditorMixin
 
 
 class BodyContentPage(QFrame, DocumentEditorMixin):

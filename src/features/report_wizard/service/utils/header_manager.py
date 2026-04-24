@@ -17,50 +17,33 @@ class HeaderManager:
     """
 
     @staticmethod
-    def modify_first_header(file_path: str, header_data: Dict[str, Any], word_app=None) -> bool:
+    def modify_first_header(file_path: str, header_data: Dict[str, Any], office_facade) -> bool:
         """
         使用 win32com.client 精准填写 Word 首页页眉内容
 
         :param file_path: Word文档路径
         :param header_data: 页眉数据字典，包含 report_no, version, date, tester 等字段
-        :param word_app: Word应用程序实例（应由调用方通过 OfficeFacade session 提供）
+        :param office_facade: OfficeFacade 实例（必须由调用方通过 self._office_facade 提供）
         :return: 是否成功
         
         Note: 此方法会自行打开和关闭文档，适用于单次操作场景。
               如需多次操作同一文档，建议调用方先打开文档，然后使用 modify_first_header_with_document()。
         """
-        win_document = None
+        # ✅ 必须使用 with_word_document 管理生命周期
         try:
-            # word_app 必须由调用方提供（通过 OfficeFacade session）
-            if word_app is None:
-                logger.error("word_app 参数不能为 None，应由调用方通过 OfficeFacade session 提供")
-                return False
+            def _modify_header(doc):
+                return HeaderManager._modify_first_header_impl(doc, header_data)
             
-            word_app.Visible = False
-            word_app.DisplayAlerts = False
-            
-            # 打开文档
-            cleaned_path = os.path.normpath(file_path)
-            win_document = word_app.Documents.Open(cleaned_path)
-
-            result = HeaderManager._modify_first_header_impl(win_document, header_data)
-            
-            # 保存修改
-            if result:
-                win_document.Save()
-            
+            result = office_facade.with_word_document(
+                file_path,
+                _modify_header,
+                read_only=False,
+                save=True,
+            )
             return result
-
         except Exception as e:
             logger.error(f"填写首页页眉失败: {e}", exc_info=True)
             return False
-        finally:
-            # 确保文档被关闭，防止资源泄漏
-            if win_document is not None:
-                try:
-                    win_document.Close(SaveChanges=False)  # Already saved above if needed
-                except Exception as e:
-                    logger.error(f"关闭文档时出错: {e}")
 
     @staticmethod
     def _modify_first_header_impl(win_document, header_data: Dict[str, Any]) -> bool:
@@ -127,51 +110,34 @@ class HeaderManager:
             return False
 
     @staticmethod
-    def modify_second_header(file_path: str, header_data: Dict[str, Any], word_app=None) -> bool:
+    def modify_second_header(file_path: str, header_data: Dict[str, Any], office_facade) -> bool:
         """
         使用 win32com.client 精准填写 Word 第二节页眉中的 "Report No." 字段，
         替换其后的内容，保留原格式和换行符。
 
         :param file_path: Word文档路径
         :param header_data: 页眉数据字典，包含 report_no 等字段
-        :param word_app: Word应用程序实例（应由调用方通过 OfficeFacade session 提供）
+        :param office_facade: OfficeFacade 实例（必须由调用方通过 self._office_facade 提供）
         :return: 是否成功
         
         Note: 此方法会自行打开和关闭文档，适用于单次操作场景。
               如需多次操作同一文档，建议调用方先打开文档，然后使用 modify_second_header_with_document()。
         """
-        win_document = None
+        # ✅ 必须使用 with_word_document 管理生命周期
         try:
-            # word_app 必须由调用方提供（通过 OfficeFacade session）
-            if word_app is None:
-                logger.error("word_app 参数不能为 None，应由调用方通过 OfficeFacade session 提供")
-                return False
-
-            word_app.Visible = False
-            word_app.DisplayAlerts = False
-
-            # 打开文档
-            cleaned_path = os.path.normpath(file_path)
-            win_document = word_app.Documents.Open(cleaned_path)
-
-            result = HeaderManager._modify_second_header_impl(win_document, header_data)
+            def _modify_header(doc):
+                return HeaderManager._modify_second_header_impl(doc, header_data)
             
-            # 保存修改
-            if result:
-                win_document.Save()
-            
+            result = office_facade.with_word_document(
+                file_path,
+                _modify_header,
+                read_only=False,
+                save=True,
+            )
             return result
-
         except Exception as e:
             logger.error(f"填写第二节页眉失败: {e}", exc_info=True)
             return False
-        finally:
-            # 确保文档被关闭，防止资源泄漏
-            if win_document is not None:
-                try:
-                    win_document.Close(SaveChanges=False)  # Already saved above if needed
-                except Exception as e:
-                    logger.error(f"关闭文档时出错: {e}")
 
     @staticmethod
     def _modify_second_header_impl(win_document, header_data: Dict[str, Any]) -> bool:

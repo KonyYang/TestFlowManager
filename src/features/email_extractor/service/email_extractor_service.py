@@ -6,15 +6,13 @@
 import os
 import tempfile
 import shutil
-import pythoncom
 import traceback
 from datetime import datetime
 from typing import List, Dict, Optional, Any
 from src.core.logger import logger
 from src.features.email_extractor.model.email_extractor_data import EmailExtractorData
-from src.utils.email_utils import email_utils
-from src.utils.msg_file_utils import process_msg_file
 from src.core.config_manager import config_manager
+from src.infrastructure.office.facade import OfficeFacade
 
 
 class EmailExtractorService:
@@ -23,14 +21,16 @@ class EmailExtractorService:
     提供邮件提取相关的服务功能，支持多种输入方式
     """
 
-    def __init__(self, data_model: EmailExtractorData):
+    def __init__(self, data_model: EmailExtractorData, office_facade: OfficeFacade):
         """
         初始化邮件提取服务
 
         Args:
             data_model: 邮件提取数据模型实例
+            office_facade: OfficeFacade instance for Outlook operations
         """
         self.data_model = data_model
+        self._office_facade = office_facade
         self.temp_folder = None
 
     def connect_to_email_server(self) -> bool:
@@ -42,12 +42,10 @@ class EmailExtractorService:
         """
         try:
             logger.info("正在连接到邮件服务器...")
-            success = email_utils.connect_to_outlook()
-            if success:
-                logger.info("成功连接到邮件服务器")
-            else:
-                logger.error("连接邮件服务器失败")
-            return success
+            # Use OfficeFacade to acquire Outlook session (validates connection)
+            self._office_facade.with_outlook_session(lambda app, runtime: True)
+            logger.info("成功连接到邮件服务器")
+            return True
         except Exception as e:
             logger.error(f"连接邮件服务器时发生错误: {e}")
             logger.debug(traceback.format_exc())
@@ -65,7 +63,9 @@ class EmailExtractorService:
         """
         try:
             logger.info("正在加载邮件列表...")
-            email_list = email_utils.get_inbox_messages(limit)
+            email_list = self._office_facade.with_outlook_session(
+                lambda app, runtime: runtime.get_inbox_messages(app, limit)
+            )
             self.data_model.set_email_list(email_list)
             logger.info(f"成功加载 {len(email_list)} 封邮件")
             return email_list
@@ -118,12 +118,15 @@ class EmailExtractorService:
         """
         try:
             logger.info(f"正在加载邮件附件: {email_id}")
-            email_obj = email_utils.get_message_by_id(email_id)
-            if not email_obj:
-                logger.error("无法获取邮件对象")
-                return []
-
-            attachments = email_utils.get_message_attachments(email_obj)
+            
+            def _get_attachments(app, runtime):
+                email_obj = runtime.get_message_by_id(app, email_id)
+                if not email_obj:
+                    logger.error("无法获取邮件对象")
+                    return []
+                return runtime.get_message_attachments(email_obj)
+            
+            attachments = self._office_facade.with_outlook_session(_get_attachments)
             self.data_model.set_attachments(attachments)
             logger.info(f"成功加载 {len(attachments)} 个附件")
             return attachments
@@ -187,7 +190,10 @@ class EmailExtractorService:
                     logger.error("附件对象无效")
                     return False
 
-            success = email_utils.save_attachment(attachment_obj, save_path)
+            # Use OfficeFacade to save attachment
+            success = self._office_facade.with_outlook_session(
+                lambda app, runtime: runtime.save_attachment(attachment_obj, save_path)
+            )
             if success:
                 logger.info(f"附件已保存到: {save_path}")
             else:
@@ -246,13 +252,14 @@ class EmailExtractorService:
             # 在处理新邮件前，清理旧的临时文件夹
             self.cleanup_temp_folder()
             
-            # 初始化COM库
-            logger.debug("初始化COM库")
-            pythoncom.CoInitialize()
+            if not os.path.exists(file_path):
+                logger.error(f"MSG文件不存在: {file_path}")
+                return {"success": False, "error": f"文件不存在: {file_path}"}
             
-            logger.debug("调用process_msg_file函数处理MSG文件")
-            result = process_msg_file(file_path)
-            logger.debug(f"process_msg_file函数返回结果: {result.get('success')}")
+            # Use OfficeFacade to process MSG file
+            result = self._office_facade.with_outlook_session(
+                lambda app, runtime: self._process_msg_with_outlook(app, file_path)
+            )
             
             if result.get("success"):
                 email_data = result.get("email_data", {})
@@ -277,15 +284,115 @@ class EmailExtractorService:
             logger.debug(traceback.format_exc())
             self.cleanup_temp_folder()
             return {"success": False, "error": str(e)}
+    
+    def _process_msg_with_outlook(self, outlook_app, file_path: str) -> Dict[str, Any]:
+        """
+        Internal method to process MSG file using Outlook COM.
+        Called within with_outlook_session context.
+        """
+        import tempfile
+        import pythoncom
+        
+        msg = None
+        temp_folder = None
+        
+        try:
+            # 创建临时文件夹用于存储附件
+            temp_folder = tempfile.mkdtemp()
+            logger.debug(f"创建临时文件夹: {temp_folder}")
+            
+            success_count = 0
+            attachments_info = []
+            
+            # 打开.msg文件
+            logger.debug(f"打开.msg文件: {file_path}")
+            msg = outlook_app.CreateItemFromTemplate(file_path)
+            logger.debug(".msg文件打开成功")
+
+            # 提取邮件基本信息
+            logger.debug("提取邮件基本信息")
+            email_info = {
+                'subject': getattr(msg, 'Subject', '') or '',
+                'sender': getattr(msg, 'SenderName', '') or '',
+                'received_time': getattr(msg, 'ReceivedTime', '') or '',
+                'body': getattr(msg, 'Body', '') or '',
+                'attachments': []
+            }
+            logger.debug(f"邮件主题: {email_info['subject']}")
+            logger.debug(f"发件人: {email_info['sender']}")
+
+            # 获取附件集合
+            logger.debug("获取附件集合")
+            attachments = msg.Attachments
+            total_count = attachments.Count
+            logger.info(f"找到 {total_count} 个附件")
+
+            # 遍历所有附件
+            logger.debug("遍历所有附件")
+            for i in range(1, total_count + 1):
+                try:
+                    logger.debug(f"处理第 {i} 个附件")
+                    attachment = attachments.Item(i)
+                    attachment_name = attachment.FileName
+                    logger.debug(f"附件名称: {attachment_name}")
+
+                    # 构建完整的保存路径
+                    save_path = os.path.join(temp_folder, attachment_name)
+                    logger.debug(f"附件保存路径: {save_path}")
+
+                    # 处理文件名冲突
+                    counter = 1
+                    base_name, extension = os.path.splitext(attachment_name)
+                    while os.path.exists(save_path):
+                        new_name = f"{base_name}_{counter}{extension}"
+                        save_path = os.path.join(temp_folder, new_name)
+                        counter += 1
+
+                    # 保存附件
+                    logger.debug(f"保存附件到: {save_path}")
+                    attachment.SaveAsFile(save_path)
+                    logger.debug("附件保存完成")
+                    
+                    # 读取附件内容
+                    logger.debug("读取附件内容")
+                    with open(save_path, 'rb') as f:
+                        attachment_data = f.read()
+                    logger.debug(f"附件内容读取完成，大小: {len(attachment_data)} 字节")
+                    
+                    attachment_info = {
+                        'filename': os.path.basename(save_path),
+                        'size': os.path.getsize(save_path),
+                        'content': attachment_data
+                    }
+                    
+                    attachments_info.append(attachment_info)
+                    email_info['attachments'].append(attachment_info)
+                    logger.debug(f"成功提取: {os.path.basename(save_path)}")
+                    success_count += 1
+
+                except Exception as e:
+                    error_msg = f"提取附件 {i} 时出错: {str(e)}"
+                    logger.warning(error_msg)
+                    logger.debug(traceback.format_exc())
+
+            logger.info(f"成功处理MSG文件，提取到 {success_count}/{total_count} 个附件")
+            return {"success": True, "email_data": email_info}
+            
+        except Exception as e:
+            logger.error(f"处理MSG文件时出错: {e}")
+            logger.debug(traceback.format_exc())
+            # 清理临时文件夹
+            if temp_folder:
+                shutil.rmtree(temp_folder, ignore_errors=True)
+            return {"success": False, "error": f"处理文件时出错: {str(e)}"}
         finally:
-            # 反初始化COM库
+            # 确保正确清理COM对象
             try:
-                logger.debug("反初始化COM库")
-                pythoncom.CoUninitialize()
-                logger.debug("COM库反初始化完成")
+                if msg:
+                    msg = None
+                    logger.debug("msg对象清理完成")
             except Exception as e:
-                logger.warning(f"反初始化COM库时出错: {e}")
-                logger.debug(traceback.format_exc())
+                logger.warning(f"清理msg对象时出错: {e}")
 
     def create_temp_folder_with_attachments(self, attachments: List[Dict], msg_file_path: str) -> Optional[str]:
         """
@@ -382,7 +489,8 @@ class EmailExtractorService:
         """断开邮件服务器连接"""
         try:
             logger.info("正在断开邮件服务器连接...")
-            email_utils.disconnect()
+            # OfficeFacade session is automatically released after with_outlook_session
+            # No explicit disconnect needed
             logger.info("已断开邮件服务器连接")
         except Exception as e:
             logger.error(f"断开邮件服务器连接时发生错误: {e}")

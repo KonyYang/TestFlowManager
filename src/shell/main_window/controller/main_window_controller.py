@@ -3,20 +3,20 @@
 处理主窗口的业务逻辑和事件，协调各领域 Facade
 """
 import os
-from typing import List, Optional, TYPE_CHECKING
+from importlib import import_module
+from typing import List, Optional, Any
 from PyQt5.QtWidgets import QWidget, QMessageBox
 from src.core.logger import logger
 from src.core.config_manager import config_manager
 from src.shell.main_window.coordinator.project_lifecycle_coordinator import ProjectLifecycleCoordinator
 from src.shell.main_window.model.main_window_data import MainWindowData
 from src.core.project_context import ProjectContext
-from src.features.matrix.workspace.matrix_workspace_facade import MatrixWorkspaceFacade
 
-# 类型导入仅用于类型检查，运行时不依赖具体类
-if TYPE_CHECKING:
-    from src.features.matrix.service.session.matrix_session_manager import MatrixSessionManager
-    from src.features.ltr_manager.facade.ltr_facade import LTRFacade
-    from src.shell.main_window.integration.file_operations_facade import FileOperationsFacade
+
+def _load_symbol(module_path: str, symbol_name: str):
+    """Load shell collaborators lazily without adding static feature import edges."""
+    module = import_module(module_path)
+    return getattr(module, symbol_name)
 
 
 class MainWindowController:
@@ -31,7 +31,7 @@ class MainWindowController:
     def __init__(
         self,
         view: QWidget,
-        matrix_workspace_facade: Optional[MatrixWorkspaceFacade] = None,
+        matrix_workspace_facade: Optional[Any] = None,
         project_session_coordinator=None,  # Phase 4: 从 Assembler 注入
         project_session_app_service=None,  # S1-2: 应用层编排器
     ):
@@ -96,11 +96,32 @@ class MainWindowController:
         self._file_operations_facade = None
         self._ltr_facade = None
 
+    def apply_project_opened_event(self, data: dict) -> bool:
+        """
+        Update shell-held project context from a project.opened payload.
+
+        Returns:
+            True when the payload produced a valid ProjectContext.
+        """
+        project_context = ProjectContext.from_event_data(data)
+        if not project_context:
+            return False
+
+        self._project_context = project_context
+        logger.info(
+            "MainWindowController: Updated project_context=%s",
+            project_context.project_path,
+        )
+        return True
+
     @property
     def ltr_facade(self):
         """安全访问 LTR Facade（确保已初始化）"""
         if self._ltr_facade is None:
-            from src.features.ltr_manager.facade.ltr_facade import LTRFacade
+            LTRFacade = _load_symbol(
+                "src.features.ltr_manager.facade.ltr_facade",
+                "LTRFacade",
+            )
             self._ltr_facade = LTRFacade()
         return self._ltr_facade
 
@@ -108,7 +129,10 @@ class MainWindowController:
     def file_operations_facade(self):
         """安全访问 FileOperationsFacade（确保已初始化）"""
         if self._file_operations_facade is None:
-            from src.shell.main_window.integration.file_operations_facade import FileOperationsFacade
+            FileOperationsFacade = _load_symbol(
+                "src.shell.main_window.integration.file_operations_facade",
+                "FileOperationsFacade",
+            )
             self._file_operations_facade = FileOperationsFacade(
                 parent_view=self.view,
                 data_model=self.data_model,
@@ -170,7 +194,10 @@ class MainWindowController:
 
             # --- 延迟创建非核心组件（启动优化） ---
             # 事件绑定管理器
-            from src.shell.main_window.integration.event_bindings import EventBindingManager
+            EventBindingManager = _load_symbol(
+                "src.shell.main_window.integration.event_bindings",
+                "EventBindingManager",
+            )
             self.event_binding_manager = EventBindingManager(
                 controller=self,
                 status_service=self.data_model,
@@ -178,13 +205,19 @@ class MainWindowController:
             self.event_binding_manager.bind_all()
 
             # LTR 状态协调器
-            from src.features.ltr_manager.integration.ltr_status_coordinator import LTRStatusCoordinator
+            LTRStatusCoordinator = _load_symbol(
+                "src.features.ltr_manager.integration.ltr_status_coordinator",
+                "LTRStatusCoordinator",
+            )
             self.ltr_status_coordinator = LTRStatusCoordinator(
                 status_updater=self.data_model.update_status,
             )
 
             # 文件操作 Facade
-            from src.shell.main_window.integration.file_operations_facade import FileOperationsFacade
+            FileOperationsFacade = _load_symbol(
+                "src.shell.main_window.integration.file_operations_facade",
+                "FileOperationsFacade",
+            )
             self._file_operations_facade = FileOperationsFacade(
                 parent_view=self.view,
                 data_model=self.data_model,
@@ -193,7 +226,10 @@ class MainWindowController:
             )
 
             # LTR Facade
-            from src.features.ltr_manager.facade.ltr_facade import LTRFacade
+            LTRFacade = _load_symbol(
+                "src.features.ltr_manager.facade.ltr_facade",
+                "LTRFacade",
+            )
             self._ltr_facade = LTRFacade()
 
             # 加载最近文件列表
@@ -351,7 +387,10 @@ class MainWindowController:
             logger.info("Shutting down MainWindowController")
             
             # 一行代码执行所有清理
-            from src.core.shutdown_registry import shutdown_registry
+            shutdown_registry = _load_symbol(
+                "src.core.shutdown_registry",
+                "shutdown_registry",
+            )
             result = shutdown_registry.execute_all()
             
             # 根据结果做进一步处理

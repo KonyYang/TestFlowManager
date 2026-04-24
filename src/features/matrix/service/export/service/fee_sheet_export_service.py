@@ -324,14 +324,10 @@ class FeeSheetExportService:
                 shutil.copy2(templates[0], output_path)
                 logger.info(f"已复制模板文件到: {output_path}")
 
-            excel_session = None
-            excel_app = None
-            wb = None
-            ws = None
-            try:
-                excel_session, excel_app, wb = self._open_excel_workbook(output_path)
-                ws = wb.Sheets(1)
-                self.excel_app = excel_app
+            # ✅ 使用 with_excel_workbook 管理整个生命周期
+            def _fill_excel_data(workbook):
+                ws = workbook.Sheets(1)
+                self.excel_app = workbook.Application
 
                 if use_existing_file:
                     existing_anchor = self._anchor_helper.find_sample_preparation_anchor(ws)
@@ -340,30 +336,13 @@ class FeeSheetExportService:
                             "现有费用表不包含标准模板主体结构，"
                             "将使用标准模板重建后再填充"
                         )
-                        try:
-                            wb.Close(SaveChanges=False)
-                        except Exception:
-                            pass
-                        wb = None
-                        self._release_excel_session(excel_session)
-                        excel_session = None
-                        excel_app = None
-                        self.excel_app = None
-
-                        rebuilt = self._path_resolver.rebuild_from_template(output_path)
-                        if not rebuilt:
-                            return (False, None)
-
-                        use_existing_file = False
-                        excel_session, excel_app, wb = self._open_excel_workbook(output_path)
-                        ws = wb.Sheets(1)
-                        self.excel_app = excel_app
+                        raise ValueError("NEED_REBUILD")
 
                 success = self._fill_group_tests_data(ws, group_tests_info)
 
                 if not success:
                     logger.warning(f"填充测试组别数据失败: {output_path}")
-                    return (False, None)
+                    return False
 
                 if not use_existing_file:
                     if dl_number:
@@ -386,19 +365,39 @@ class FeeSheetExportService:
                         f"使用现有费用表文件: {output_path}，已填充测试组别数据"
                     )
 
-                wb.Save()
+                return True
 
-            except Exception as e:
-                logger.error(f"处理文件时出错: {e}", exc_info=True)
-                return (False, None)
-            finally:
-                if wb:
-                    try:
-                        wb.Close(SaveChanges=True)
-                    except Exception:
-                        pass
-                self._release_excel_session(excel_session)
-                self.excel_app = None
+            try:
+                self._office_facade.with_excel_workbook(
+                    output_path,
+                    _fill_excel_data,
+                    read_only=False,
+                    save=True,
+                )
+            except ValueError as e:
+                if str(e) == "NEED_REBUILD":
+                    # 需要重建文件
+                    rebuilt = self._path_resolver.rebuild_from_template(output_path)
+                    if not rebuilt:
+                        return (False, None)
+
+                    # 重新填充
+                    def _fill_after_rebuild(workbook):
+                        ws = workbook.Sheets(1)
+                        self.excel_app = workbook.Application
+                        success = self._fill_group_tests_data(ws, group_tests_info)
+                        if not success:
+                            return False
+                        return True
+
+                    self._office_facade.with_excel_workbook(
+                        output_path,
+                        _fill_after_rebuild,
+                        read_only=False,
+                        save=True,
+                    )
+                else:
+                    raise
 
             logger.info("费用表导出完成！")
             return (True, output_path)
@@ -494,19 +493,4 @@ class FeeSheetExportService:
 
             return (output_path, self.output_dir, False)
 
-    def _open_excel_workbook(self, output_path: str) -> tuple[OfficeSession, Any, Any]:
-        """通过 OfficeFacade 获取 Excel runtime 并打开工作簿。"""
-        excel_session = self._office_facade.create_session("excel")
-        runtime_handle = excel_session.acquire()
-        excel_app = runtime_handle.application
-        workbook = excel_app.Workbooks.Open(output_path)
-        return excel_session, excel_app, workbook
 
-    def _release_excel_session(self, excel_session: Optional[OfficeSession]) -> None:
-        """释放 Excel runtime session。"""
-        if excel_session is None:
-            return
-        try:
-            excel_session.release()
-        except Exception as exc:
-            logger.warning(f"释放 Excel runtime 时出错: {exc}")

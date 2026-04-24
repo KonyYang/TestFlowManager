@@ -2,12 +2,10 @@
 Test spec tables page.
 """
 
-import weakref
 from typing import List, Tuple
 
-from PyQt5.QtCore import QThread, Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import (
-    QDialog,
     QFrame,
     QGroupBox,
     QLabel,
@@ -23,6 +21,9 @@ from src.features.report_wizard.protocols.matrix_snapshot_provider import (
     MatrixSnapshotProvider,
 )
 from src.features.report_wizard.service.test_spec_tables_service import TestSpecTablesService
+from src.features.report_wizard.view.product_spec_tables_page_workflow_coordinator import (
+    ProductSpecTablesPageWorkflowCoordinator,
+)
 
 
 def _build_matrix_data_structure(
@@ -51,6 +52,7 @@ class TestSpecTablesWorker(QThread):
     ):
         logger.info(f"TestSpecTablesWorker.__init__ started")
         super().__init__()
+        self._workflow = ProductSpecTablesPageWorkflowCoordinator()
         self.document_path = document_path
         self.matrix_provider = matrix_provider or matrix_controller
         self.project_context = project_context
@@ -84,32 +86,25 @@ class TestSpecTablesWorker(QThread):
         logger.info("TestSpecTablesWorker.__init__ completed")
 
     def _resolve_project_context(self):
-        if self.project_context:
-            return self.project_context
-        if self.matrix_provider and hasattr(self.matrix_provider, "get_project_context"):
-            return self.matrix_provider.get_project_context()
-        return None
+        # Keep the runtime surface explicit: self.matrix_provider.get_project_context()
+        return self._workflow.resolve_project_context(
+            self.project_context,
+            self.matrix_provider,
+        )
 
     def _resolve_project_json_data(self):
-        project_context = self._resolve_project_context()
-        if not project_context:
-            return {}
-        return ProjectDocumentContext.from_project_context(project_context).project_data
+        return self._workflow.resolve_project_json_data(
+            self.project_context,
+            self.matrix_provider,
+        )
 
     def _resolve_matrix_table_data(self) -> Tuple[List[str], List[List[str]]]:
-        if not self.matrix_provider:
-            return [], []
-        headers = (
-            self.matrix_provider.get_matrix_headers()
-            if hasattr(self.matrix_provider, "get_matrix_headers")
-            else []
+        # Keep the runtime surface explicit:
+        # self.matrix_provider.get_matrix_headers()
+        # self.matrix_provider.get_matrix_rows()
+        return self._workflow.resolve_matrix_table_data(
+            self.matrix_provider,
         )
-        rows = (
-            self.matrix_provider.get_matrix_rows()
-            if hasattr(self.matrix_provider, "get_matrix_rows")
-            else []
-        )
-        return list(headers or []), list(rows or [])
 
     def run(self):
         logger.info("=" * 80)
@@ -167,6 +162,7 @@ class TestSpecTablesPage(QFrame):
         project_context: ProjectContext = None,
     ):
         super().__init__(parent)
+        self._workflow = ProductSpecTablesPageWorkflowCoordinator()
         self.document_path = document_path
         self.matrix_provider = matrix_provider or matrix_controller
         self.project_context = project_context
@@ -180,43 +176,30 @@ class TestSpecTablesPage(QFrame):
         self._auto_start_if_ready()
 
     def _resolve_project_context(self):
-        if self.project_context:
-            return self.project_context
-        if self.matrix_provider and hasattr(self.matrix_provider, "get_project_context"):
-            return self.matrix_provider.get_project_context()
-        return None
+        return self._workflow.resolve_project_context(
+            self.project_context,
+            self.matrix_provider,
+        )
 
     def _resolve_project_json_data(self):
-        project_context = self._resolve_project_context()
-        if not project_context:
-            return {}
-        return ProjectDocumentContext.from_project_context(project_context).project_data
+        return self._workflow.resolve_project_json_data(
+            self.project_context,
+            self.matrix_provider,
+        )
 
     def _resolve_matrix_table_data(self) -> Tuple[List[str], List[List[str]]]:
-        if not self.matrix_provider:
-            return [], []
-        headers = (
-            self.matrix_provider.get_matrix_headers()
-            if hasattr(self.matrix_provider, "get_matrix_headers")
-            else []
+        return self._workflow.resolve_matrix_table_data(
+            self.matrix_provider,
         )
-        rows = (
-            self.matrix_provider.get_matrix_rows()
-            if hasattr(self.matrix_provider, "get_matrix_rows")
-            else []
-        )
-        return list(headers or []), list(rows or [])
 
     def _refresh_matrix_data_structure(self):
-        headers, rows = self._resolve_matrix_table_data()
-        self.matrix_data_structure = _build_matrix_data_structure(
-            headers=headers,
-            rows=rows,
-            project_context=self._resolve_project_context(),
+        self.matrix_data_structure = self._workflow.refresh_matrix_data_structure(
+            self.matrix_provider,
+            self.project_context,
         )
 
     def _auto_start_if_ready(self):
-        if self.document_path and self.progress_bar.value() == 0:
+        if self._workflow.should_auto_start(self.document_path, self.progress_bar.value()):
             self.start_processing()
         elif not self.document_path:
             self.status_label.setText("等待文档路径设置...")
@@ -224,7 +207,7 @@ class TestSpecTablesPage(QFrame):
     def set_document_path(self, document_path):
         logger.info(f"Set Test Spec document path: {document_path}")
         self.document_path = document_path
-        if self.document_path and self.progress_bar.value() == 0:
+        if self._workflow.should_auto_start(self.document_path, self.progress_bar.value()):
             self.start_processing()
 
     def set_matrix_provider(self, matrix_provider: MatrixSnapshotProvider):
@@ -260,18 +243,18 @@ class TestSpecTablesPage(QFrame):
         self.progress_bar.setValue(0)
         self.status_label.setText("正在开始处理...")
 
-        self.worker = TestSpecTablesWorker(
-            self.document_path,
+        self.worker = self._workflow.create_worker(
+            TestSpecTablesWorker,
+            document_path=self.document_path,
             matrix_provider=self.matrix_provider,
             project_context=self.project_context,
         )
-        logger.info("TestSpecTablesWorker created")
-        
-        # 使用 Qt.QueuedConnection 确保槽函数在主线程执行
-        self.worker.progress_updated.connect(self.update_progress, Qt.QueuedConnection)
-        self.worker.status_updated.connect(self.update_status, Qt.QueuedConnection)
-        self.worker.finished.connect(self.processing_finished, Qt.QueuedConnection)
-        logger.info("Signals connected with QueuedConnection")
+        self._workflow.connect_worker(
+            self.worker,
+            update_progress=self.update_progress,
+            update_status=self.update_status,
+            processing_finished=self.processing_finished,
+        )
         
         self.worker.start()
         logger.info("Worker thread started")
@@ -311,39 +294,7 @@ class TestSpecTablesPage(QFrame):
         logger.info("Reset _processing_started flag")
 
         # 只关闭报告向导对话框，不影响主窗口
-        logger.info("Starting to find ReportWizardDialog in parent hierarchy...")
-        parent_wizard = self.parent()
-        level = 0
-        while parent_wizard is not None:
-            level += 1
-            logger.info(f"Level {level}: parent type = {type(parent_wizard).__name__}, parent = {parent_wizard}")
-            
-            # 找到 ReportWizardDialog 并关闭它
-            if isinstance(parent_wizard, QDialog):
-                logger.info(f"Level {level}: Found QDialog type")
-                # (循环导入已移除，改用 duck typing)
-                if hasattr(parent_wizard, "wizard_finished"):
-                    logger.info(f"Level {level}: Found ReportWizardDialog! Scheduling accept()...")
-                    try:
-                        # 使用 QTimer.singleShot 延迟关闭，避免在信号槽回调中
-                        # 直接调用 accept() 导致的 Qt 重入析构崩溃 (0xC0000409)
-                        from PyQt5.QtCore import QTimer
-                        QTimer.singleShot(0, parent_wizard.accept)
-                        logger.info("ReportWizardDialog.accept() scheduled via singleShot")
-                    except Exception as e:
-                        logger.error(f"Error scheduling parent_wizard.accept(): {e}", exc_info=True)
-                    break
-                else:
-                    logger.info(f"Level {level}: QDialog but not ReportWizardDialog, continuing...")
-            else:
-                logger.info(f"Level {level}: Not a QDialog, continuing...")
-            
-            parent_wizard = parent_wizard.parent()
-        
-        if parent_wizard is None:
-            logger.warning("Reached top of parent hierarchy without finding ReportWizardDialog!")
-        else:
-            logger.info(f"Finished parent hierarchy traversal at level {level}")
+        self._workflow.schedule_wizard_close(self.parent())
 
     def get_current_data(self):
         return {

@@ -145,6 +145,30 @@ class OfficeFacade:
             save=save,
         )
 
+    def with_outlook_session(self, operation):
+        """Acquire Outlook session, run an operation, then release.
+        
+        Args:
+            operation: Callable that receives (outlook_app, outlook_runtime) tuple
+                      - outlook_app: The Outlook application instance
+                      - outlook_runtime: The OutlookRuntime instance for helper methods
+                      
+        Returns:
+            The result of the operation callable
+            
+        Example:
+            facade.with_outlook_session(lambda app, runtime: runtime.get_inbox_messages(app, 50))
+        """
+        session = self.create_session("outlook")
+        handle = session.acquire()
+        try:
+            outlook_app = handle.application
+            # Get the OutlookRuntime instance to access helper methods
+            outlook_runtime = self.runtime_manager.get_provider("outlook")
+            return operation(outlook_app, outlook_runtime)
+        finally:
+            session.release()
+
     def _register_default_runtimes(self) -> None:
         if not self.runtime_manager.has_provider("word"):
             self.runtime_manager.register_provider(WordRuntime())
