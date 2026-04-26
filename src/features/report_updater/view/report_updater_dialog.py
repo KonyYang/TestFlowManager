@@ -3,17 +3,18 @@
 实现报告更新功能的用户界面
 """
 import os
-from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QGridLayout, 
+from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout, 
                              QPushButton, QListWidget, QLabel, QGroupBox, 
                              QComboBox, QFileDialog, QMessageBox, QFrame)
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QFont
 from src.core.logger import logger
+from src.shell.main_window.view.lims_dialog_base import LimsDialogBase
 from src.common.ui.font_utils import FontUtils
 from src.features.report_updater.model.report_updater_data import ReportUpdaterData
 
 
-class ReportUpdaterDialog(QDialog):
+class ReportUpdaterDialog(LimsDialogBase):
     """报告更新功能的对话框类"""
     
     # 定义信号

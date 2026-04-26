@@ -4,7 +4,6 @@ Report wizard dialog.
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import (
-    QDialog,
     QHBoxLayout,
     QLabel,
     QPushButton,
@@ -13,6 +12,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src.core.logger import logger
+from src.shell.main_window.view.lims_dialog_base import LimsDialogBase
 from src.features.report_wizard.protocols.matrix_snapshot_provider import (
     MatrixSnapshotProvider,
 )
@@ -20,7 +20,7 @@ from src.features.report_wizard.view.body_content_page import BodyContentPage
 from src.features.report_wizard.view.header_info_page import HeaderInfoPage
 
 
-class ReportWizardDialog(QDialog):
+class ReportWizardDialog(LimsDialogBase):
     wizard_finished = pyqtSignal(str)
 
     def __init__(
@@ -53,7 +53,7 @@ class ReportWizardDialog(QDialog):
         main_layout.addWidget(title_label)
 
         self.progress_label = QLabel("步骤 1/3: 页眉信息")
-        self.progress_label.setStyleSheet("font-size: 14px; margin: 5px;")
+        self.progress_label.setStyleSheet("margin: 5px;")
         main_layout.addWidget(self.progress_label)
 
         self.page_container = QStackedLayout()

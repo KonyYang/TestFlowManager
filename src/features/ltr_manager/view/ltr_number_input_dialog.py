@@ -3,13 +3,14 @@ LTR编号输入对话框模块
 提供LTR编号输入和验证功能
 """
 
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton
 from PyQt5.QtCore import Qt
 from src.common.ui.font_utils import FontUtils
 from src.core.logger import logger
+from src.shell.main_window.view.lims_dialog_base import LimsDialogBase
 
 
-class LTRNumberInputDialog(QDialog):
+class LTRNumberInputDialog(LimsDialogBase):
     """
     LTR编号输入对话框类
     提供LTR编号输入和验证功能

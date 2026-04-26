@@ -313,7 +313,7 @@ class TestSpecTablesPage(QFrame):
         layout.addWidget(title_label)
 
         desc_label = QLabel("正在从当前 Matrix 快照提取数据并写入 Word 文档...")
-        desc_label.setStyleSheet("font-size: 14px; color: #666666; margin-bottom: 10px;")
+        desc_label.setStyleSheet("font-size: 14px; color: #718096; margin-bottom: 10px;")
         layout.addWidget(desc_label)
 
         progress_group = QGroupBox("处理进度")
@@ -324,13 +324,13 @@ class TestSpecTablesPage(QFrame):
         progress_layout.addWidget(self.progress_bar)
 
         self.status_label = QLabel("准备开始处理...")
-        self.status_label.setStyleSheet("font-size: 14px; color: #333333;")
+        self.status_label.setStyleSheet("font-size: 14px; color: #1a3a5c;")
         progress_layout.addWidget(self.status_label)
         progress_group.setLayout(progress_layout)
         layout.addWidget(progress_group)
 
         info_label = QLabel("提示：处理完成后将自动关闭向导。")
-        info_label.setStyleSheet("font-size: 14px; color: #666666; margin-top: 10px;")
+        info_label.setStyleSheet("font-size: 14px; color: #718096; margin-top: 10px;")
         layout.addWidget(info_label)
 
         layout.addStretch()

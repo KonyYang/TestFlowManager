@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QCheckBox, QLabel, QSpinBox, QListWidget, QListWidgetItem, QMessageBox, QTextEdit
 from PyQt5.QtCore import Qt
 from src.core.logger import logger
+from src.shell.main_window.view.lims_dialog_base import LimsDialogBase
 from src.utils.smart_point_parser import SmartPointParser
 
 

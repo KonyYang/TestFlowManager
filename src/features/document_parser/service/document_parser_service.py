@@ -254,7 +254,7 @@ class DocumentParserService:
                         logger.warning(f"未找到关键词 '{keyword}'")
             
             # 完全托付给 OfficeFacade 管理生命周期
-            self._office_facade.with_word_document(
+            self._get_office_facade().with_word_document(
                 file_path,
                 _update_document,
                 read_only=False,

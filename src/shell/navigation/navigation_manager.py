@@ -18,7 +18,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional
 
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QListWidget, QListWidgetItem, QStackedWidget, QWidget
+from PyQt5.QtCore import Qt
 
 from src.core.logger import logger
 
@@ -35,6 +37,7 @@ class NavigationEntry:
         subtitle: 副标题描述
         action: 点击时执行的可选动作
         page_id: 页面唯一标识符
+        group: 所属分组名称（可选，用于侧栏视觉分组）
     """
     title: str
     breadcrumb: str
@@ -42,6 +45,7 @@ class NavigationEntry:
     subtitle: str = ""
     action: Optional[Callable[[], None]] = None
     page_id: str = ""
+    group: Optional[str] = None
 
 
 class NavigationManager:
@@ -50,6 +54,7 @@ class NavigationManager:
     
     负责将导航条目与页面注册到 UI，并触发动作/标题刷新。
     通过信号槽自动处理导航列表的行变化和点击事件。
+    支持按 group 字段自动插入不可选中的分组标题项。
     
     使用示例：
         from src.shell.navigation import NavigationManager, NavigationEntry
@@ -66,6 +71,7 @@ class NavigationManager:
             subtitle="测试矩阵编辑",
             page=matrix_page,
             page_id="matrix.main",
+            group="项目管理",
         ))
     """
 
@@ -90,7 +96,10 @@ class NavigationManager:
         # 内部状态
         self._entries: List[NavigationEntry] = []
         self._actions: Dict[int, Callable[[], None]] = {}
+        self._list_to_entry: List[int] = []  # 列表项索引 -> entry 索引（-1 表示分组标题）
+        self._current_group: Optional[str] = None
         self._initializing = False
+        self._skip_signal = False
 
         # 连接信号槽
         self._nav_list.currentRowChanged.connect(self._on_row_changed)
@@ -107,8 +116,23 @@ class NavigationManager:
             logger.warning(f"导航控件为 None，跳过注册: {entry.title}")
             return
 
-        index = len(self._entries)
+        # 当分组变化时，插入不可选中的分组标题项
+        if entry.group and entry.group != self._current_group:
+            header_item = QListWidgetItem(entry.group)
+            header_item.setFlags(Qt.NoItemFlags)
+            header_font = header_item.font()
+            header_font.setBold(True)
+            header_font.setPointSize(13)
+            header_item.setFont(header_font)
+            header_item.setForeground(QColor("#90caf9"))
+            self._nav_list.addItem(header_item)
+            self._list_to_entry.append(-1)
+            self._current_group = entry.group
+
+        entry_index = len(self._entries)
         self._entries.append(entry)
+        list_index = self._nav_list.count()
+        self._list_to_entry.append(entry_index)
         
         # 添加到导航列表
         item = QListWidgetItem(entry.title)
@@ -117,23 +141,37 @@ class NavigationManager:
         # 添加到页面堆叠
         self._page_stack.addWidget(entry.page)
 
-        # 注册动作映射
+        # 注册动作映射（按 entry_index）
         if entry.action:
-            self._actions[index] = entry.action
+            self._actions[entry_index] = entry.action
 
-        # 自动选中第一个条目
-        if self._nav_list.count() == 1:
+        # 自动选中第一个有效条目（跳过分组标题）
+        valid_count = sum(1 for idx in self._list_to_entry if idx >= 0)
+        if valid_count == 1:
             self._initializing = True
             try:
-                self._nav_list.setCurrentRow(0)
+                for i, idx in enumerate(self._list_to_entry):
+                    if idx >= 0:
+                        self._nav_list.setCurrentRow(i)
+                        break
             finally:
                 self._initializing = False
 
     def _on_row_changed(self, row: int) -> None:
         """处理选中行变化（由信号槽触发）"""
-        if row < 0 or row >= len(self._entries):
+        if row < 0 or row >= len(self._list_to_entry):
             return
-        self._apply_entry(row)
+        entry_index = self._list_to_entry[row]
+        if entry_index < 0:
+            # 选中分组标题时，自动跳转到下一个有效条目
+            if not self._skip_signal:
+                next_row = self._find_next_valid_row(row)
+                if next_row >= 0:
+                    self._skip_signal = True
+                    self._nav_list.setCurrentRow(next_row)
+                    self._skip_signal = False
+            return
+        self._apply_entry(entry_index)
 
     def _on_item_clicked(self, item: QListWidgetItem) -> None:
         """处理点击事件，统一执行动作（由信号槽触发）"""
@@ -141,10 +179,14 @@ class NavigationManager:
             return
         
         row = self._nav_list.row(item)
-        if row < 0:
+        if row < 0 or row >= len(self._list_to_entry):
             return
         
-        action = self._actions.get(row)
+        entry_index = self._list_to_entry[row]
+        if entry_index < 0:
+            return  # 点击分组标题不执行动作
+        
+        action = self._actions.get(entry_index)
         if not action:
             return
         
@@ -153,29 +195,43 @@ class NavigationManager:
         except Exception as exc:
             logger.error(f"导航动作执行失败: {exc}", exc_info=True)
 
-    def _apply_entry(self, index: int) -> None:
+    def _apply_entry(self, entry_index: int) -> None:
         """应用导航条目（切换页面并触发回调）"""
-        if index >= len(self._entries):
+        if entry_index >= len(self._entries):
             return
         
-        entry = self._entries[index]
+        entry = self._entries[entry_index]
         
         # 切换页面
-        self._page_stack.setCurrentIndex(index)
+        self._page_stack.setCurrentIndex(entry_index)
         
         # 触发回调（更新标题、面包屑等）
         if self._entry_callback:
             self._entry_callback(entry.title, entry.breadcrumb, entry.subtitle)
 
-    def select_entry(self, index: int) -> None:
+    def _find_next_valid_row(self, from_row: int) -> int:
+        """从指定行开始查找下一个有效的（非标题）列表项索引"""
+        for i in range(from_row + 1, len(self._list_to_entry)):
+            if self._list_to_entry[i] >= 0:
+                return i
+        # 向后没有，则向前查找
+        for i in range(from_row - 1, -1, -1):
+            if self._list_to_entry[i] >= 0:
+                return i
+        return -1
+
+    def select_entry(self, entry_index: int) -> None:
         """
-        显式设置当前页面（编程方式切换）
+        显式设置当前页面（按 entry 索引）
         
         Args:
-            index: 导航条目索引
+            entry_index: 导航条目索引
         """
-        if 0 <= index < self._nav_list.count():
-            self._nav_list.setCurrentRow(index)
+        if 0 <= entry_index < len(self._entries):
+            for list_idx, idx in enumerate(self._list_to_entry):
+                if idx == entry_index:
+                    self._nav_list.setCurrentRow(list_idx)
+                    break
 
     def get_entry_count(self) -> int:
         """获取已注册条目数量"""
@@ -189,6 +245,8 @@ class NavigationManager:
             当前导航条目，如果没有选中则返回 None
         """
         current_row = self._nav_list.currentRow()
-        if 0 <= current_row < len(self._entries):
-            return self._entries[current_row]
+        if 0 <= current_row < len(self._list_to_entry):
+            entry_index = self._list_to_entry[current_row]
+            if entry_index >= 0:
+                return self._entries[entry_index]
         return None

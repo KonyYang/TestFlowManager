@@ -4,43 +4,31 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eb45768c-6138-4b42-ba4c-85a3bc2bc60f" name="Changes" comment="feat(content-editor): 添加内容编辑服务和正文内容页面&#10;&#10;- 创建了content_editor/service模块包含BodyContentService、SectionDiscoveryService和SectionUpdateService&#10;- 添加了AGENTS.md项目规范文档定义重构原则和架构约束&#10;- 实现了BodyContentPage视图组件支持向导模式下的文档正文编辑&#10;- 集成了文档内容加载和预设描述功能&#10;- 添加了应用程序入口文件application.py优化启动性能&#10;- 实现了文档编辑混入类和工作流管理功能">
+    <list default="true" id="eb45768c-6138-4b42-ba4c-85a3bc2bc60f" name="Changes" comment="feat(utils): 添加工具模块包的懒加载机制&#10;&#10;- 实现 __getattr__ 懒加载避免启动时一次性导入所有子模块&#10;- 添加 date_utils/email_utils/excel_utils 等模块的延迟加载支持&#10;- 支持 LTRDataManager 类的懒加载和别名兼容机制&#10;- 创建正文内容编辑对话框视图组件&#10;- 实现报告向导中的正文内容编辑页面&#10;- 添加正文内容填充服务提供Word文档内容查找和填充功能&#10;- 实现客户报告生成服务提供完整的报告生成功能&#10;- 添加文档解析服务支持LTR申请单复制等功能&#10;- 集成OfficeFacade管理Word文档操作的生命周期">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/content_editor/service/body_content_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/content_editor/service/body_content_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/content_editor/view/body_content_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/content_editor/view/body_content_dialog.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/customer_report_generator/service/customer_report_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/customer_report_generator/service/customer_report_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/customer_report_generator/service/utils/document_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/customer_report_generator/service/utils/document_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/document_parser/controller/document_parser_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/document_parser/controller/document_parser_controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/document_parser/service/document_parser_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/document_parser/service/document_parser_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/email_extractor/controller/email_extractor_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/email_extractor/controller/email_extractor_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/email_extractor/service/email_extractor_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/email_extractor/service/email_extractor_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/ltr_manager/service/application_processing/document_validator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/ltr_manager/service/application_processing/document_validator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/ltr_manager/service/application_processing/ltr_number_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/ltr_manager/service/application_processing/ltr_number_generator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/ltr_manager/service/ltr_application_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/ltr_manager/service/ltr_application_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/matrix/service/export/service/fee_sheet_export_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/matrix/service/export/service/fee_sheet_export_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/report_updater/controller/report_updater_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_updater/controller/report_updater_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/report_updater/service/report_updater_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_updater/service/report_updater_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/report_wizard/controller/report_wizard_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_wizard/controller/report_wizard_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/report_wizard/coordinator/report_export_coordinator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_wizard/coordinator/report_export_coordinator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/report_wizard/service/header_modifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_wizard/service/header_modifier.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/report_wizard/service/report_generation_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_wizard/service/report_generation_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/report_wizard/service/utils/header_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_wizard/service/utils/header_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/report_wizard/view/body_content_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_wizard/view/body_content_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/email_extractor/view/email_selector_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/email_extractor/view/email_selector_dialog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/folder_manager/service/folder_manager_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/folder_manager/service/folder_manager_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/ltr_manager/controller/ltr_application_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/ltr_manager/controller/ltr_application_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/ltr_manager/view/ltr_editor_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/ltr_manager/view/ltr_editor_dialog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/ltr_manager/view/ltr_form_dialog_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/ltr_manager/view/ltr_form_dialog_base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/ltr_manager/view/ltr_number_input_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/ltr_manager/view/ltr_number_input_dialog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/matrix/service/export/view/export_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/matrix/service/export/view/export_dialog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/matrix/service/export/view/llcr_cr_record_parameters_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/matrix/service/export/view/llcr_cr_record_parameters_dialog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/matrix/view/components/matrix_toolbar.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/matrix/view/components/matrix_toolbar.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/matrix/view/matrix_filter_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/matrix/view/matrix_filter_dialog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/report_updater/view/report_updater_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_updater/view/report_updater_dialog.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/report_wizard/view/product_spec_tables_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_wizard/view/product_spec_tables_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/step_record_generator/controller/step_record_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/step_record_generator/controller/step_record_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/step_record_generator/service/step_record_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/step_record_generator/service/step_record_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/office/facade.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/office/facade.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/main_window/controller/main_window_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/main_window/controller/main_window_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/main_window/coordinator/project_lifecycle_coordinator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/main_window/coordinator/project_lifecycle_coordinator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/main_window/integration/event_bindings.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/main_window/integration/event_bindings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/main_window/integration/file_operations_facade.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/main_window/integration/file_operations_facade.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/main_window/integration/main_window_feature_facade.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/main_window/integration/main_window_feature_facade.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/shell/main_window/view/main_window_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/main_window/view/main_window_ui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/document_editor_mixin.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/email_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/email_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/msg_file_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/msg_file_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/standard_version_updater.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/standard_version_updater.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/word_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/word_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/report_wizard/view/report_wizard_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/report_wizard/view/report_wizard_dialog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shell/main_window/components/header_components.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/main_window/components/header_components.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shell/main_window/components/layout_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/main_window/components/layout_builder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shell/main_window/components/sidebar_components.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/main_window/components/sidebar_components.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shell/main_window/constants/main_window_styles.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/main_window/constants/main_window_styles.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shell/navigation/navigation_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/navigation/navigation_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shell/navigation/navigation_registry.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/shell/navigation/navigation_registry.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/excel_initializer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/excel_initializer.py" afterDir="false" />
     </list>
     <list id="cd1585ca-d35f-42c3-ad4f-96afbeac4d79" name="DelFiles" comment="DelFiles" />
     <list id="52ad285d-ee64-421c-978e-a10523f905df" name="Other changelist" comment="" />
@@ -50,7 +38,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="2263" />
+    <option name="cachedIndexableFilesCount" value="2322" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -267,7 +255,10 @@
       <workItem from="1776853383542" duration="14855000" />
       <workItem from="1776901850895" duration="522000" />
       <workItem from="1776902653417" duration="19607000" />
-      <workItem from="1777037526165" duration="7710000" />
+      <workItem from="1777037526165" duration="23857000" />
+      <workItem from="1777097026664" duration="1136000" />
+      <workItem from="1777117027026" duration="1056000" />
+      <workItem from="1777169926021" duration="327000" />
     </task>
     <task id="LOCAL-00001" summary="docs(project): 更新重构任务看板并优化项目配置与路径策略&#10;&#10;- 完善 .gitignore 文件，添加构建输出、IDE文件、临时文件等忽略规则&#10;- 更新清理脚本，修正 .ipynb_checkpoints 为 nb_checkpoints 目录名&#10;- 删除 matrix_integration 测试固件，移除相关依赖注入配置&#10;- 优化日志配置，添加开发和打包模式下的路径策略说明&#10;- 调整模块导入路径，将 basic_info_dialog 移至 dialogs 子目录&#10;- 新增重构任务看板文档，记录完整的重构阶段规划和实施进展&#10;- 完成 Controller 瘦身阶段，统一项目上下文与工作区语义&#10;- 建立配置与环境治理，统一路径配置访问接口和输出目录策略&#10;- 构建测试基线，新增多个单元测试覆盖核心业务流程&#10;- 实施 Matrix 会话基础接入，建立 session factory/registry 装配链&#10;- 推进正式会话化过渡，完成多会话对象管理的试点入口开发">
       <option name="closed" value="true" />
@@ -365,7 +356,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776954725775</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="feat(utils): 添加工具模块包的懒加载机制&#10;&#10;- 实现 __getattr__ 懒加载避免启动时一次性导入所有子模块&#10;- 添加 date_utils/email_utils/excel_utils 等模块的延迟加载支持&#10;- 支持 LTRDataManager 类的懒加载和别名兼容机制&#10;- 创建正文内容编辑对话框视图组件&#10;- 实现报告向导中的正文内容编辑页面&#10;- 添加正文内容填充服务提供Word文档内容查找和填充功能&#10;- 实现客户报告生成服务提供完整的报告生成功能&#10;- 添加文档解析服务支持LTR申请单复制等功能&#10;- 集成OfficeFacade管理Word文档操作的生命周期">
+      <option name="closed" value="true" />
+      <created>1777045531621</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1777045531621</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -395,7 +394,8 @@
     <MESSAGE value="docs(project): 更新项目规范文档和构建配置&#10;&#10;- 添加详细的 AGENTS.md 项目规范文档，定义重构原则和架构红线&#10;- 更新构建脚本，支持带版本号的时间戳命名和自动查找最新EXE文件&#10;- 优化配置管理器的路径解析逻辑，区分开发和打包环境的资源定位&#10;- 添加文档编辑器基础组件，为内容编辑功能提供UI支持&#10;- 调整.gitignore添加tests目录排除规则" />
     <MESSAGE value="refactor(app): 重构应用程序入口和配置管理模块&#10;&#10;- 移除 utils/__init__.py 中的 ConfigHandler 引用&#10;- 新增 src/app/application.py 文件作为主应用程序入口&#10;- 实现启动性能优化包括移除模块级 word_utils 导入和延迟初始化&#10;- 替换 BodyContentService 为 DocumentContentService 在相关视图中&#10;- 重构配置管理功能，新增 ConfigManager 类替换 ConfigHandler&#10;- 实现配置文件的双模式读取策略（开发/打包环境）&#10;- 添加内容编辑器控制器管理文档内容编辑流程&#10;- 优化文档内容加载和保存逻辑，简化批量更新操作&#10;- 改进错误处理机制，使用 exc_info=True 替代手动异常追踪" />
     <MESSAGE value="feat(content-editor): 添加内容编辑服务和正文内容页面&#10;&#10;- 创建了content_editor/service模块包含BodyContentService、SectionDiscoveryService和SectionUpdateService&#10;- 添加了AGENTS.md项目规范文档定义重构原则和架构约束&#10;- 实现了BodyContentPage视图组件支持向导模式下的文档正文编辑&#10;- 集成了文档内容加载和预设描述功能&#10;- 添加了应用程序入口文件application.py优化启动性能&#10;- 实现了文档编辑混入类和工作流管理功能" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(content-editor): 添加内容编辑服务和正文内容页面&#10;&#10;- 创建了content_editor/service模块包含BodyContentService、SectionDiscoveryService和SectionUpdateService&#10;- 添加了AGENTS.md项目规范文档定义重构原则和架构约束&#10;- 实现了BodyContentPage视图组件支持向导模式下的文档正文编辑&#10;- 集成了文档内容加载和预设描述功能&#10;- 添加了应用程序入口文件application.py优化启动性能&#10;- 实现了文档编辑混入类和工作流管理功能" />
+    <MESSAGE value="feat(utils): 添加工具模块包的懒加载机制&#10;&#10;- 实现 __getattr__ 懒加载避免启动时一次性导入所有子模块&#10;- 添加 date_utils/email_utils/excel_utils 等模块的延迟加载支持&#10;- 支持 LTRDataManager 类的懒加载和别名兼容机制&#10;- 创建正文内容编辑对话框视图组件&#10;- 实现报告向导中的正文内容编辑页面&#10;- 添加正文内容填充服务提供Word文档内容查找和填充功能&#10;- 实现客户报告生成服务提供完整的报告生成功能&#10;- 添加文档解析服务支持LTR申请单复制等功能&#10;- 集成OfficeFacade管理Word文档操作的生命周期" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(utils): 添加工具模块包的懒加载机制&#10;&#10;- 实现 __getattr__ 懒加载避免启动时一次性导入所有子模块&#10;- 添加 date_utils/email_utils/excel_utils 等模块的延迟加载支持&#10;- 支持 LTRDataManager 类的懒加载和别名兼容机制&#10;- 创建正文内容编辑对话框视图组件&#10;- 实现报告向导中的正文内容编辑页面&#10;- 添加正文内容填充服务提供Word文档内容查找和填充功能&#10;- 实现客户报告生成服务提供完整的报告生成功能&#10;- 添加文档解析服务支持LTR申请单复制等功能&#10;- 集成OfficeFacade管理Word文档操作的生命周期" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -413,6 +413,6 @@
     <SUITE FILE_PATH="coverage/TestFlowManager$_tmp_excel_process_check.coverage" NAME="_tmp_excel_process_check Coverage Results" MODIFIED="1776520298805" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tmp" />
     <SUITE FILE_PATH="coverage/TestFlowManager$diagnose_startup.coverage" NAME="diagnose_startup Coverage Results" MODIFIED="1776437945617" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tools" />
     <SUITE FILE_PATH="coverage/TestFlowManager$build_executable.coverage" NAME="build_executable Coverage Results" MODIFIED="1776642454643" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/TestFlowManager$application.coverage" NAME="application Coverage Results" MODIFIED="1777042441890" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/app" />
+    <SUITE FILE_PATH="coverage/TestFlowManager$application.coverage" NAME="application Coverage Results" MODIFIED="1777170208305" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/app" />
   </component>
 </project>

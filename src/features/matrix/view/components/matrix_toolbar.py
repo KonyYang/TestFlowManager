@@ -2,6 +2,7 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFrame
 from PyQt5.QtCore import Qt
 from src.core.logger import logger
+from src.shell.main_window.constants.design_tokens import DesignTokens
 
 
 class MatrixToolbar(QWidget):
@@ -17,14 +18,14 @@ class MatrixToolbar(QWidget):
         # 工具栏容器
         toolbar_frame = QFrame()
         toolbar_frame.setObjectName("MatrixToolbarFrame")
-        toolbar_frame.setStyleSheet("""
-            QFrame#MatrixToolbarFrame {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-                    stop:0 #f7fafc, stop:1 #edf2f7);
+        toolbar_frame.setStyleSheet(f"""
+            QFrame#MatrixToolbarFrame {{
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 {DesignTokens.COLOR_SURFACE_ALT}, stop:1 {DesignTokens.COLOR_SURFACE_HOVER});
                 border-radius: 8px;
-                border: 1px solid #e2e8f0;
+                border: 1px solid {DesignTokens.COLOR_BORDER};
                 padding: 12px;
-            }
+            }}
         """)
         
         main_layout = QHBoxLayout(toolbar_frame)
@@ -32,43 +33,43 @@ class MatrixToolbar(QWidget):
         main_layout.setSpacing(12)
         
         # 定义按钮样式 - 大字体版本（高分辨率屏幕优化）
-        button_style = """
-            QPushButton {
-                background: white;
-                color: #4a5568;
-                border: 1px solid #e2e8f0;
+        button_style = f"""
+            QPushButton {{
+                background: {DesignTokens.COLOR_SURFACE_CARD};
+                color: {DesignTokens.COLOR_TEXT_SECONDARY};
+                border: 1px solid {DesignTokens.COLOR_BORDER};
                 border-radius: 6px;
                 padding: 10px 20px;
                 font-size: 16px;
                 font-weight: 500;
-            }
-            QPushButton:hover {
-                background: #edf2f7;
-                border-color: #cbd5e0;
-            }
-            QPushButton:pressed {
-                background: #e2e8f0;
-            }
+            }}
+            QPushButton:hover {{
+                background: {DesignTokens.COLOR_SURFACE_HOVER};
+                border-color: {DesignTokens.BORDER_LIGHT};
+            }}
+            QPushButton:pressed {{
+                background: {DesignTokens.COLOR_BORDER};
+            }}
         """
-        
-        primary_button_style = """
-            QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-                    stop:0 #4299e1, stop:1 #3182ce);
-                color: white;
+
+        primary_button_style = f"""
+            QPushButton {{
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 {DesignTokens.COLOR_ACCENT_LIGHT}, stop:1 {DesignTokens.COLOR_ACCENT});
+                color: {DesignTokens.COLOR_SURFACE_CARD};
                 border: none;
                 border-radius: 6px;
                 padding: 10px 20px;
                 font-size: 16px;
                 font-weight: 500;
-            }
-            QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-                    stop:0 #3182ce, stop:1 #2b6cb0);
-            }
-            QPushButton:pressed {
-                background: #2b6cb0;
-            }
+            }}
+            QPushButton:hover {{
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 {DesignTokens.COLOR_ACCENT}, stop:1 {DesignTokens.COLOR_ACCENT_DARK});
+            }}
+            QPushButton:pressed {{
+                background: {DesignTokens.COLOR_ACCENT_DARK};
+            }}
         """
         
         # 导入按钮（主要操作）

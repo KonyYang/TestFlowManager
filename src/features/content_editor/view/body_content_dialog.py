@@ -4,19 +4,20 @@
 """
 
 from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QSplitter, 
+    QVBoxLayout, QHBoxLayout, QSplitter, 
     QTextEdit, QListWidget, QListWidgetItem, QPushButton, 
     QLabel, QGroupBox, QFormLayout, QFrame, QScrollArea
 )
 from PyQt5.QtCore import pyqtSignal
 from src.core.logger import logger
+from src.shell.main_window.view.lims_dialog_base import LimsDialogBase
 from src.features.content_editor.service.document_content_service import (
     DocumentContentService,
 )
 from src.features.content_editor.view.components.document_editor_mixin import DocumentEditorMixin
 
 
-class BodyContentDialog(QDialog, DocumentEditorMixin):
+class BodyContentDialog(LimsDialogBase, DocumentEditorMixin):
     """
     正文内容编辑对话框
     提供交互式编辑Word文档正文内容的界面

@@ -58,6 +58,11 @@ QListWidget#LimsNavList::item {
 QListWidget#LimsNavList::item:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
+QListWidget#LimsNavList::item:focus {
+    background-color: rgba(49, 130, 206, 0.35);
+    border: 1px solid rgba(144, 202, 249, 0.6);
+    outline: none;
+}
 QListWidget#LimsNavList::item:selected {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #3182ce, stop:1 #2c5282);
     color: #ffffff;

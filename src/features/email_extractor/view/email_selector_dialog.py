@@ -4,7 +4,7 @@
 """
 
 import os
-from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
+from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QPushButton,
                              QTableWidget, QTableWidgetItem, QHeaderView,
                              QLabel, QFileDialog, QMessageBox, QFrame)
 from PyQt5.QtCore import Qt, pyqtSignal
@@ -12,9 +12,10 @@ from PyQt5.QtGui import QDragEnterEvent, QDropEvent
 from src.core.logger import logger
 from src.common.ui.font_utils import FontUtils  # 导入字体工具类
 from src.common.ui.window_utils import WindowUtils  # 导入窗口工具类
+from src.shell.main_window.view.lims_dialog_base import LimsDialogBase
 
 
-class EmailSelectorDialog(QDialog):
+class EmailSelectorDialog(LimsDialogBase):
     """
     邮件选择对话框类
     用于选择单个.msg邮件文件或拖拽邮件
@@ -60,7 +61,6 @@ class EmailSelectorDialog(QDialog):
         self.select_msg_file_button.setFont(font)
 
         self.drop_info_label = QLabel("或将.msg邮件文件拖拽到此对话框")
-        self.drop_info_label.setStyleSheet("color: black; font-weight: bold;")
         self.drop_info_label.setFont(font)
 
         file_select_layout.addWidget(self.select_msg_file_button)
@@ -72,8 +72,8 @@ class EmailSelectorDialog(QDialog):
         self.email_info_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.email_info_label.setStyleSheet("""
             font-weight: bold;
-            color: #2E7D32;
-            background-color: #E8F5E9;
+            color: #1a3a5c;
+            background-color: #e3f2fd;
             padding: 8px;
             border-radius: 4px;
         """)

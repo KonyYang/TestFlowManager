@@ -21,6 +21,8 @@ class SidebarComponents:
         """创建现代化侧边栏：分组导航"""
         side = QWidget()
         side.setObjectName("LimsSidebar")
+        side.setAccessibleName("侧边导航栏")
+        side.setAccessibleDescription("TestFlow Manager 主导航侧边栏")
         layout = QVBoxLayout(side)
         layout.setContentsMargins(0, 0, 0, 16)
         layout.setSpacing(0)
@@ -38,16 +40,10 @@ class SidebarComponents:
         nav_container_layout.setContentsMargins(0, 8, 0, 0)
         nav_container_layout.setSpacing(0)
 
-        # 分组1: 项目管理
-        sec1 = QLabel("📁 项目管理")
-        sec1.setObjectName("LimsSidebarSection")
-        nav_container_layout.addWidget(sec1)
+        # 导航列表（分组标题由 NavigationManager 动态插入）
         nav_container_layout.addWidget(self.main_window._nav_list, 1)
         
-        # 占位分组标签（将在 _setup_navigation_pages 中填充）
-        self.main_window._sidebar_sections = {}
-        
-        # 分隔线和更多分组（预留位置给动态导航项）
+        # 分隔线
         separator = self._create_separator()
         nav_container_layout.addWidget(separator)
 

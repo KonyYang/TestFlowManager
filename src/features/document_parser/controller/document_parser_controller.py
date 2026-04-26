@@ -6,8 +6,10 @@
 from typing import Optional
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from src.features.document_parser.service.document_parser_service import DocumentParserService
-from src.features.content_editor.service.body_content_service import BodyContentService
-from src.features.content_editor.utils.document_content_editor import DocumentContentEditor
+from src.features.document_parser.protocols.content_editor_protocol import (
+    DocumentContentEditorProtocol,
+    BodyContentServiceProtocol,
+)
 from src.core.logger import logger
 
 
@@ -17,12 +19,35 @@ class DocumentParserController:
     协调文档解析和处理的各个组件
     """
 
-    def __init__(self, parent_window=None):
-        """初始化文档解析控制器"""
+    def __init__(
+        self,
+        parent_window=None,
+        body_content_service: Optional[BodyContentServiceProtocol] = None,
+        document_content_editor: Optional[DocumentContentEditorProtocol] = None,
+    ):
+        """
+        初始化文档解析控制器
+        
+        Args:
+            parent_window: 父窗口
+            body_content_service: 正文内容服务（可选，默认使用 content_editor 实现）
+            document_content_editor: 文档内容编辑器（可选，默认使用 content_editor 实现）
+        """
         self.parent_window = parent_window
         self.service = DocumentParserService()
-        self.body_content_service = BodyContentService()
-        self.document_content_editor = DocumentContentEditor()
+        
+        # 依赖注入：如果未提供，则延迟导入默认实现
+        if body_content_service is None:
+            from src.features.content_editor.service.body_content_service import BodyContentService
+            self.body_content_service = BodyContentService()
+        else:
+            self.body_content_service = body_content_service
+        
+        if document_content_editor is None:
+            from src.features.content_editor.utils.document_content_editor import DocumentContentEditor
+            self.document_content_editor = DocumentContentEditor()
+        else:
+            self.document_content_editor = document_content_editor
 
     def show_body_content_editor(self, file_path: str):
         """

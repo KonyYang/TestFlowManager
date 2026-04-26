@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QCom
 from src.core.logger import logger
 
 
-class ExportDialog(QDialog):
+class ExportDialog(LimsDialogBase):
     """导出对话框 - View层"""
     
     def __init__(self, parent=None):

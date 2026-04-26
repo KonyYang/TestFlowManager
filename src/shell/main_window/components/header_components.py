@@ -93,6 +93,8 @@ class HeaderComponents:
         """创建现代化顶栏：简洁图标 + DL编号 + 面包屑 + 快捷操作（支持拖拽和双击最大化）"""
         header = QWidget()
         header.setObjectName("LimsAppHeader")
+        header.setAccessibleName("应用顶栏")
+        header.setAccessibleDescription("TestFlow Manager 应用标题栏，包含窗口控制和导航信息")
         header.setMouseTracking(True)
         # 设置顶栏为可拖拽区域
         header.mousePressEvent = self._on_header_mouse_press

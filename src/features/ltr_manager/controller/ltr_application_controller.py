@@ -9,7 +9,6 @@ from src.core.logger import logger
 from src.features.ltr_manager.model.ltr_application_data import LTRApplicationData
 from src.features.ltr_manager.service.ltr_application_service import LTRApplicationService
 from src.features.ltr_manager.view.ltr_application_dialog import LTRApplicationDialog
-from src.features.folder_manager.controller.folder_manager_controller import FolderManagerController
 from src.utils.ltr_data_manager import LTRDataManager
 from src.features.ltr_manager.controller.ltr_application_project_creation_coordinator import LTRApplicationProjectCreationCoordinator
 from src.core.event_dispatcher import event_dispatcher, EventTopics
@@ -21,29 +20,57 @@ class LTRApplicationController:
     处理LTR申请单的业务逻辑和事件
     """
 
-    def __init__(self, parent_view=None):
+    def __init__(self, parent_view=None, folder_manager_factory=None):
         """
         初始化LTR申请单控制器
 
         Args:
             parent_view: 父窗口视图实例
+            folder_manager_factory: 文件夹管理器工厂函数（可选，用于依赖注入）
         """
         self.parent_view = parent_view
         self.service = LTRApplicationService()
         self.application_data = LTRApplicationData()
-        # 添加文件夹管理控制器
-        self.folder_manager = FolderManagerController(parent_view)
+        
+        # 依赖注入：使用工厂函数或延迟导入
+        self._folder_manager_factory = folder_manager_factory
+        self._folder_manager_instance = None
+        
         # 添加LTR数据管理器
         self.ltr_data_manager = LTRDataManager()
-        # 项目创建协调器
-        self._project_creation_coordinator = LTRApplicationProjectCreationCoordinator(
-            self.folder_manager, self.ltr_data_manager
-        )
+        
+        # 项目创建协调器（延迟初始化，需要 folder_manager）
+        self._project_creation_coordinator = None
+        
         # 添加事件订阅（带防重复标志）
         self._event_subscribed = False
         self._subscribe_to_ltr_events()
+        
         # 添加属性来存储选中的文件名
         self.selected_filename = None
+    
+    @property
+    def folder_manager(self):
+        """惰性获取 folder_manager 实例"""
+        if self._folder_manager_instance is None:
+            if self._folder_manager_factory:
+                # 使用注入的工厂函数
+                self._folder_manager_instance = self._folder_manager_factory(self.parent_view)
+            else:
+                # 默认行为：延迟导入并创建
+                from src.features.folder_manager.controller.folder_manager_controller import FolderManagerController
+                self._folder_manager_instance = FolderManagerController(self.parent_view)
+        return self._folder_manager_instance
+    
+    @property
+    def project_creation_coordinator(self):
+        """惰性获取 project_creation_coordinator 实例"""
+        if self._project_creation_coordinator is None:
+            from src.features.ltr_manager.controller.ltr_application_project_creation_coordinator import LTRApplicationProjectCreationCoordinator
+            self._project_creation_coordinator = LTRApplicationProjectCreationCoordinator(
+                self.folder_manager, self.ltr_data_manager
+            )
+        return self._project_creation_coordinator
 
     def _subscribe_to_ltr_events(self):
         """订阅 LTR 事件，避免重复订阅"""
@@ -175,7 +202,7 @@ class LTRApplicationController:
 
                 if reply == QMessageBox.Yes:
                     # 委托给项目创建协调器
-                    creation_result = self._project_creation_coordinator.create_project_folder(
+                    creation_result = self.project_creation_coordinator.create_project_folder(
                         form_data=form_data,
                         ltr_number=result['ltr_number'],
                         selected_filename=self.selected_filename,
@@ -191,7 +218,7 @@ class LTRApplicationController:
             # 只在成功申请LTR编号的情况下（但用户选择不创建项目文件夹）
             elif result.get("success"):
                 # 委托给协调器：通知申请已处理但未创建项目
-                self._project_creation_coordinator.notify_application_processed_without_project(
+                self.project_creation_coordinator.notify_application_processed_without_project(
                     form_data=form_data,
                     ltr_number=result.get('ltr_number', ''),
                     selected_filename=self.selected_filename,
@@ -204,7 +231,7 @@ class LTRApplicationController:
             logger.error(f"处理LTR编号申请时发生错误: {e}", exc_info=True)
             # 委托给协调器：派发失败事件
             dl_number = form_data.get("dl_number", "")
-            self._project_creation_coordinator.dispatch_failure_event(
+            self.project_creation_coordinator.dispatch_failure_event(
                 dl_number=dl_number,
                 error_message=str(e)
             )

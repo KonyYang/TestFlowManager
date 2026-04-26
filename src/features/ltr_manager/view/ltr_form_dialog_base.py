@@ -33,7 +33,7 @@ def _get_english_date_edit_components():
     return EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
 
 
-class LTRFormDialogBase(QDialog):
+class LTRFormDialogBase(LimsDialogBase):
     """
     LTR表单对话框基类
     用于显示和编辑基于字段配置的信息
@@ -89,20 +89,7 @@ class LTRFormDialogBase(QDialog):
         min_width = WindowUtils.get_scaled_size(600)
         self.info_table.setMinimumWidth(min_width)
 
-        self.info_table.horizontalScrollBar().setStyleSheet("""
-            QScrollBar:horizontal {
-                height: 15px;
-                background: #F0F0F0;
-                margin: 0px;
-            }
-            QScrollBar::handle:horizontal {
-                background: #A0A0A0;
-                min-width: 30px;
-            }
-            QScrollBar::handle:horizontal:hover {
-                background: #707070;
-            }
-        """)
+        # 滚动条样式由 LimsDialogBase 统一注入，无需单独设置
 
         scroll_area.setWidget(self.info_table)
         main_layout.addWidget(scroll_area)

@@ -15,7 +15,7 @@ from src.features.ltr_manager.view.components.ltr_field_widgets import LTRTextEd
 from src.common.ui.window_utils import WindowUtils  # 导入窗口工具类
 
 
-class LTREditorDialog(QDialog):
+class LTREditorDialog(LimsDialogBase):
     """
     LTR编辑对话框类
     用于显示和编辑指定DL编号的LTR信息（E到Q列）

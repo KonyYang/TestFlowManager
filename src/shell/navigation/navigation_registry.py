@@ -49,6 +49,7 @@ class NavigationRegistry:
                 subtitle="编辑和管理测试流程矩阵",
                 page=matrix_tab,
                 page_id="matrix.main",
+                group="项目管理",
             ))
         
         # === 项目管理组 ===
@@ -59,6 +60,7 @@ class NavigationRegistry:
             page=placeholder_factory("新建项目", "创建一个新的测试流程项目"),
             action=file_handlers.on_new_file,
             page_id="project.new",
+            group="项目管理",
         ))
         nav_controller.register_entry(NavigationEntry(
             title="📂 打开项目",
@@ -67,6 +69,7 @@ class NavigationRegistry:
             page=placeholder_factory("打开项目", "从本地文件夹加载现有项目"),
             action=file_handlers.on_open_project,
             page_id="project.open",
+            group="项目管理",
         ))
         nav_controller.register_entry(NavigationEntry(
             title="📋 查看LTR",
@@ -75,6 +78,7 @@ class NavigationRegistry:
             page=placeholder_factory("查看LTR", "浏览本地测试报告"),
             action=file_handlers.on_view_ltr,
             page_id="ltr.view",
+            group="项目管理",
         ))
 
         # === 报告管理组 ===
@@ -85,6 +89,7 @@ class NavigationRegistry:
             page=placeholder_factory("创建报告", "使用向导生成新的测试报告"),
             action=report_handlers.on_create_report,
             page_id="report.create",
+            group="报告管理",
         ))
         nav_controller.register_entry(NavigationEntry(
             title="🔄 更新报告",
@@ -93,6 +98,7 @@ class NavigationRegistry:
             page=placeholder_factory("更新报告", "基于最新Matrix更新现有报告"),
             action=report_handlers.on_update_report,
             page_id="report.update",
+            group="报告管理",
         ))
         nav_controller.register_entry(NavigationEntry(
             title="👥 转客户版",
@@ -101,6 +107,7 @@ class NavigationRegistry:
             page=placeholder_factory("转客户版", "生成去除敏感信息的客户版本"),
             action=report_handlers.on_convert_customer_version,
             page_id="report.customer",
+            group="报告管理",
         ))
 
         # === 测试表格组 ===
@@ -111,6 +118,7 @@ class NavigationRegistry:
             page=placeholder_factory("导出窗口矩阵", "将Matrix导出为Excel文件"),
             action=export_handlers.on_export_matrix,
             page_id="export.matrix",
+            group="测试表格",
         ))
         nav_controller.register_entry(NavigationEntry(
             title="📊 LLCR记录表",
@@ -119,6 +127,7 @@ class NavigationRegistry:
             page=placeholder_factory("LLCR记录表", "导出LLCR格式记录表"),
             action=export_handlers.on_export_llcr,
             page_id="export.llcr",
+            group="测试表格",
         ))
         nav_controller.register_entry(NavigationEntry(
             title="📄 CR记录表",
@@ -127,6 +136,7 @@ class NavigationRegistry:
             page=placeholder_factory("CR记录表", "导出CR格式记录表"),
             action=export_handlers.on_export_cr,
             page_id="export.cr",
+            group="测试表格",
         ))
 
         # === 工具箱组 ===
@@ -137,6 +147,7 @@ class NavigationRegistry:
             page=placeholder_factory("正文编辑器", "编辑Word文档正文内容"),
             action=tool_handlers.on_edit_body_content,
             page_id="tool.body_editor",
+            group="工具箱",
         ))
         nav_controller.register_entry(NavigationEntry(
             title="🔐 文件加密",
@@ -145,6 +156,7 @@ class NavigationRegistry:
             page=placeholder_factory("文件加密", "对测试文件进行加密保护"),
             action=tool_handlers.on_encrypt_test_files,
             page_id="tool.encrypt",
+            group="工具箱",
         ))
 
         # === 其他 ===

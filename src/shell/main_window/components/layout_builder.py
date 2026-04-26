@@ -90,6 +90,8 @@ class MainWindowLayoutBuilder:
         """
         main_column = QWidget()
         main_column.setObjectName("LimsMainColumn")
+        main_column.setAccessibleName("主内容区")
+        main_column.setAccessibleDescription("TestFlow Manager 主内容显示区域")
         main_layout = QVBoxLayout(main_column)
         main_layout.setContentsMargins(24, 24, 24, 16)
         main_layout.setSpacing(0)

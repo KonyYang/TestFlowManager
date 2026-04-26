@@ -3,6 +3,7 @@
 提供项目文件夹创建和管理的核心功能
 """
 
+from importlib import import_module
 import os
 import re
 import glob
@@ -10,13 +11,22 @@ import json
 import shutil
 import stat
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Callable, Dict, Any, Optional
 from PyQt5.QtWidgets import QMessageBox, QWidget
 
 from src.core.config_manager import config_manager
 from src.core.logger import logger
 from src.utils.file_utils import ensure_directory_exists
 from src.utils.excel_initializer import initialize_customer_feedback_form, initialize_fee_evaluation_form
+from src.features.folder_manager.protocols.document_parser_protocol import DocumentParserServiceProtocol
+
+
+def _load_default_document_parser() -> DocumentParserServiceProtocol:
+    """Lazily create the default document parser implementation."""
+    module = import_module(
+        "src.features.document_parser.service.document_parser_service"
+    )
+    return module.DocumentParserService()
 
 
 class FolderManagerService:
@@ -25,9 +35,28 @@ class FolderManagerService:
     提供项目文件夹创建和管理的核心功能
     """
 
-    def __init__(self):
-        """初始化项目文件夹管理服务"""
-        pass
+    def __init__(
+        self,
+        document_parser: Optional[DocumentParserServiceProtocol] = None,
+        document_parser_factory: Optional[Callable[[], DocumentParserServiceProtocol]] = None,
+    ):
+        """
+        初始化项目文件夹管理服务
+        
+        Args:
+            document_parser: 文档解析服务（可选，默认使用 document_parser 实现）
+            document_parser_factory: 默认文档解析服务工厂（用于懒加载默认实现）
+        """
+        self._document_parser = document_parser
+        self._document_parser_factory = (
+            document_parser_factory or _load_default_document_parser
+        )
+
+    def _get_document_parser(self) -> DocumentParserServiceProtocol:
+        """Return the injected document parser or lazily create the default one."""
+        if self._document_parser is None:
+            self._document_parser = self._document_parser_factory()
+        return self._document_parser
 
     def sanitize_filename(self, name: str) -> str:
         """
@@ -347,20 +376,23 @@ class FolderManagerService:
 
             # Step 8: 先复制文件到 Submitted Material
             # Step 9: 依据application_data.json找到关键字"selected_filename"的值处理文件
-            from src.features.document_parser.service.document_parser_service import DocumentParserService
-            document_parser = DocumentParserService()
-            document_parser.copy_ltr_application_form(project_data, folder_structure["submitted"], src_dir)
+            document_parser = self._get_document_parser()
+            document_parser.copy_ltr_application_form(
+                project_data,
+                folder_structure["submitted"],
+                src_dir,
+            )
 
             # Step 10: 根据application_data.json信息进行文档的操作更新
             # 查找需要更新的Word文档
             selected_filename = project_data.get('selected_filename', '')
             if selected_filename:
-                word_file_path = os.path.join(folder_structure["submitted"], selected_filename)
-                if os.path.exists(word_file_path):
-                    logger.info(f"更新Word文档: {word_file_path}")
-                    document_parser.update_word_document(word_file_path, project_data)
-                else:
-                    logger.warning(f"要更新的Word文档不存在: {word_file_path}")
+                    word_file_path = os.path.join(folder_structure["submitted"], selected_filename)
+                    if os.path.exists(word_file_path):
+                        logger.info(f"更新Word文档: {word_file_path}")
+                        document_parser.update_word_document(word_file_path, project_data)
+                    else:
+                        logger.warning(f"要更新的Word文档不存在: {word_file_path}")
             else:
                 # 如果没有指定selected_filename，尝试查找目录中的Word文档
                 submitted_files = [f for f in os.listdir(folder_structure["submitted"]) 

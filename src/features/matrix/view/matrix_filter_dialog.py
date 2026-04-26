@@ -3,9 +3,10 @@ from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
                              QLineEdit, QPushButton, QMessageBox)
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtCore import Qt
+from src.shell.main_window.view.lims_dialog_base import LimsDialogBase
 
 
-class MatrixFilterDialog(QDialog):
+class MatrixFilterDialog(LimsDialogBase):
     """Matrix筛选对话框 - 用于导入时筛选特定页码和关键字的表格
     
     注意：当目标文档已在Word/Excel中打开时，系统将以只读方式访问文档内容，
