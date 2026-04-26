@@ -13,6 +13,7 @@ from src.core.logger import logger
 from src.features.ltr_manager.model.ltr_editor_data import LTREditorData
 from src.features.ltr_manager.view.components.ltr_field_widgets import LTRTextEdit, LTRComboBox, LTRTableWidgetItem
 from src.common.ui.window_utils import WindowUtils  # 导入窗口工具类
+from src.shell.main_window.view.lims_dialog_base import LimsDialogBase
 
 
 class LTREditorDialog(LimsDialogBase):
@@ -35,7 +36,7 @@ class LTREditorDialog(LimsDialogBase):
             parent: 父窗口
             update_callback: 更新回调函数，签名为 (dl_number, modified_data) -> bool
         """
-        super().__init__(parent)
+        super().__init__(title=f"编辑 LTR 信息: {dl_data.get('dl_number', '')}", parent=parent)
         self.parent_window = parent
         self.dl_data = dl_data
         self.data_model = LTREditorData()
@@ -63,7 +64,6 @@ class LTREditorDialog(LimsDialogBase):
 
     def _setup_ui(self):
         """设置用户界面"""
-        self.setWindowTitle(f"编辑 LTR 信息: {self.dl_number}")
         self.setModal(True)
 
         # 获取屏幕尺寸并设置窗口大小为屏幕的40%，并根据DPI进行适配
@@ -109,6 +109,7 @@ class LTREditorDialog(LimsDialogBase):
         self.update_button.clicked.connect(self._on_update)
 
         self.cancel_button = QPushButton("取消")
+        self.cancel_button.setObjectName("btn_secondary")
         self.cancel_button.clicked.connect(self.reject)
 
         button_layout.addWidget(self.update_button)

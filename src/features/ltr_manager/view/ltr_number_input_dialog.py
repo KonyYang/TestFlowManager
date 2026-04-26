@@ -17,13 +17,12 @@ class LTRNumberInputDialog(LimsDialogBase):
     """
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(title="输入DL编号", parent=parent)
         self.dl_number = None
         self._setup_ui()
 
     def _setup_ui(self):
         """设置用户界面"""
-        self.setWindowTitle("输入DL编号")
         self.setModal(True)
         global_font = FontUtils.get_scaled_font(9)
         self.setFont(global_font)
@@ -50,6 +49,7 @@ class LTRNumberInputDialog(LimsDialogBase):
         self.skip_button.setFont(FontUtils.get_scaled_font(8))
 
         self.cancel_button = QPushButton("取消")
+        self.cancel_button.setObjectName("btn_secondary")
         self.cancel_button.clicked.connect(self.reject)
         self.cancel_button.setFont(FontUtils.get_scaled_font(8))
 

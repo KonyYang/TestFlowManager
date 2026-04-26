@@ -34,11 +34,10 @@ class BodyContentDialog(LimsDialogBase, DocumentEditorMixin):
             file_path: Word文档路径
             parent: 父窗口
         """
-        super().__init__(parent)
+        super().__init__(title="正文内容编辑", parent=parent)
         self.document_content_service = DocumentContentService()
         self._init_document_editor_components(file_path)  # 初始化混入类组件
         
-        self.setWindowTitle("正文内容编辑")
         self.setGeometry(200, 200, 1200, 800)
         
         # 初始化UI

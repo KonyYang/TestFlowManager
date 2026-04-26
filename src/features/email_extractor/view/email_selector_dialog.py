@@ -30,7 +30,7 @@ class EmailSelectorDialog(LimsDialogBase):
         Args:
             parent: 父窗口
         """
-        super().__init__(parent)
+        super().__init__(title="选择邮件文件", parent=parent)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.selected_msg_file = None
         self.temp_folder = None  # 用于存储临时文件夹路径
@@ -44,7 +44,6 @@ class EmailSelectorDialog(LimsDialogBase):
 
     def _setup_ui(self):
         """设置用户界面"""
-        self.setWindowTitle("选择邮件文件")
         self.setModal(True)
         # 根据DPI调整窗口尺寸，使用更合适的默认尺寸
         width, height = WindowUtils.get_scaled_window_size(800, 600)  # 增加窗口尺寸
@@ -119,6 +118,7 @@ class EmailSelectorDialog(LimsDialogBase):
         self.select_button.setFont(font)
 
         self.cancel_button = QPushButton("取消")
+        self.cancel_button.setObjectName("btn_secondary")
         self.cancel_button.setFont(font)
 
         button_layout.addWidget(self.select_button)

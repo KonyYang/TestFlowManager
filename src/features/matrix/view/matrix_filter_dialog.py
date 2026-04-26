@@ -14,8 +14,7 @@ class MatrixFilterDialog(LimsDialogBase):
     """
     
     def __init__(self, parent=None, page_number=8, keyword="test"):
-        super().__init__(parent)
-        self.setWindowTitle("筛选表格")
+        super().__init__(title="筛选表格", parent=parent)
         self.setModal(True)
         self.resize(300, 150)
         
@@ -52,6 +51,7 @@ class MatrixFilterDialog(LimsDialogBase):
         button_layout = QHBoxLayout()
         self.ok_button = QPushButton("确定")
         self.cancel_button = QPushButton("取消")
+        self.cancel_button.setObjectName("btn_secondary")
         
         self.ok_button.clicked.connect(self._on_ok_clicked)
         self.cancel_button.clicked.connect(self.reject)

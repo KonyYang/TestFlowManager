@@ -1,14 +1,14 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel
 from src.core.logger import logger
+from src.shell.main_window.view.lims_dialog_base import LimsDialogBase
 
 
 class ExportDialog(LimsDialogBase):
     """导出对话框 - View层"""
     
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(title="选择导出类型", parent=parent)
         self.selected_export_type = None
-        self.setWindowTitle("选择导出类型")
         self.setModal(True)
         self.resize(300, 150)
         self._setup_ui()
@@ -37,6 +37,7 @@ class ExportDialog(LimsDialogBase):
         button_layout = QHBoxLayout()
         self.ok_button = QPushButton("确定")
         self.cancel_button = QPushButton("取消")
+        self.cancel_button.setObjectName("btn_secondary")
         self.ok_button.clicked.connect(self._on_ok_clicked)
         self.cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(self.ok_button)

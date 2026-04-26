@@ -242,15 +242,190 @@ class MainWindowController:
             logger.error(f"Failed to initialize MainWindowController: {e}")
             return False
 
-    def handle_view_ltr(self) -> bool:
+    def handle_view_ltr(self) -> dict:
         """
         处理查看LTR文件事件（委托给 LTRFacade）
 
         Returns:
-            是否成功打开LTR文件
+            包含处理结果的字典:
+            - success: 是否成功处理
+            - ltr_data: LTR 数据字典（如果找到）
         """
         logger.debug("Handling view LTR file request (delegated to LTRFacade)")
-        return self.ltr_facade.handle_view_ltr(self.view)
+        result = self.ltr_facade.handle_view_ltr(self.view)
+
+        # 如果成功查找到了 LTR 数据，更新页面
+        if result.get("success") and result.get("ltr_data"):
+            self._update_ltr_page(result["ltr_data"])
+
+        return result
+
+    def _update_ltr_page(self, ltr_data: dict) -> None:
+        """
+        更新 LTR 申请单页面
+
+        Args:
+            ltr_data: 包含 dl_number 和 data 的字典
+        """
+        if not hasattr(self.view, '_nav_controller') or not self.view._nav_controller:
+            return
+
+        try:
+            ltr_page = self.view._nav_controller.get_page_by_page_id("ltr.view")
+            if ltr_page and hasattr(ltr_page, 'update_data'):
+                ltr_page.update_data(ltr_data)
+                logger.debug(f"MainWindowController: Updated LTR page with dl_number={ltr_data.get('dl_number', '')}")
+        except Exception as e:
+            logger.error(f"MainWindowController: Failed to update LTR page: {e}")
+
+    def handle_edit_ltr(self) -> dict:
+        """
+        处理编辑LTR事件（切换到LTR编辑器页面）
+
+        Returns:
+            包含处理结果的字典:
+            - success: 是否成功
+        """
+        logger.debug("Handling edit LTR request (switch to LTR editor page)")
+
+        if not hasattr(self.view, '_nav_controller') or not self.view._nav_controller:
+            logger.warning("Navigation controller not available")
+            return {"success": False}
+
+        try:
+            # 切换到 LTR 编辑器页面
+            entry = self.view._nav_controller.get_entry_by_page_id("ltr.editor")
+            if entry:
+                # 找到对应的列表索引并选中
+                for idx, registered_entry in enumerate(self.view._nav_controller._entries):
+                    if registered_entry.page_id == "ltr.editor":
+                        self.view._nav_controller.select_entry(idx)
+                        break
+                return {"success": True}
+            else:
+                logger.warning("LTR editor page not found in navigation")
+                return {"success": False}
+        except Exception as e:
+            logger.error(f"MainWindowController: Failed to switch to LTR editor page: {e}")
+            return {"success": False}
+
+    def _update_ltr_editor_page(self, ltr_data: dict) -> None:
+        """
+        更新 LTR 编辑器页面
+
+        Args:
+            ltr_data: 包含 dl_number 和 data 的字典
+        """
+        if not hasattr(self.view, '_nav_controller') or not self.view._nav_controller:
+            return
+
+        try:
+            ltr_editor_page = self.view._nav_controller.get_page_by_page_id("ltr.editor")
+            if ltr_editor_page and hasattr(ltr_editor_page, 'update_data'):
+                ltr_editor_page.update_data(ltr_data)
+                logger.debug(f"MainWindowController: Updated LTR editor page with dl_number={ltr_data.get('dl_number', '')}")
+        except Exception as e:
+            logger.error(f"MainWindowController: Failed to update LTR editor page: {e}")
+
+    def handle_edit_project_info(self) -> dict:
+        """
+        处理编辑项目信息事件（切换到项目信息页面）
+
+        Returns:
+            包含处理结果的字典:
+            - success: 是否成功
+        """
+        logger.debug("Handling edit project info request (switch to project info page)")
+
+        if not hasattr(self.view, '_nav_controller') or not self.view._nav_controller:
+            logger.warning("Navigation controller not available")
+            return {"success": False}
+
+        try:
+            # 切换到项目信息页面
+            entry = self.view._nav_controller.get_entry_by_page_id("project.info")
+            if entry:
+                # 找到对应的列表索引并选中
+                for idx, registered_entry in enumerate(self.view._nav_controller._entries):
+                    if registered_entry.page_id == "project.info":
+                        self.view._nav_controller.select_entry(idx)
+                        break
+                return {"success": True}
+            else:
+                logger.warning("Project info page not found in navigation")
+                return {"success": False}
+        except Exception as e:
+            logger.error(f"MainWindowController: Failed to switch to project info page: {e}")
+            return {"success": False}
+
+    def _update_project_info_page(self, project_data: dict, project_data_file_path: str = None) -> None:
+        """
+        更新项目信息页面
+
+        Args:
+            project_data: 项目数据字典
+            project_data_file_path: 项目数据文件路径（可选）
+        """
+        if not hasattr(self.view, '_nav_controller') or not self.view._nav_controller:
+            return
+
+        try:
+            project_info_page = self.view._nav_controller.get_page_by_page_id("project.info")
+            if project_info_page and hasattr(project_info_page, 'update_data'):
+                project_info_page.update_data(project_data, project_data_file_path)
+                logger.debug(f"MainWindowController: Updated project info page")
+        except Exception as e:
+            logger.error(f"MainWindowController: Failed to update project info page: {e}")
+
+    def handle_create_report(self) -> dict:
+        """
+        处理创建报告事件（切换到报告向导页面）
+
+        Returns:
+            包含处理结果的字典:
+            - success: 是否成功
+            - message: 错误信息（如果有）
+        """
+        from PyQt5.QtWidgets import QMessageBox
+
+        logger.debug("Handling create report request (switch to report wizard page)")
+
+        # 检查是否已打开项目
+        if not self.project_context:
+            QMessageBox.warning(
+                self.view,
+                "警告",
+                "请先打开一个项目后再创建报告。\n\n操作步骤：\n1. 点击'文件' -> '打开项目'\n2. 选择项目文件夹\n3. 然后再尝试创建报告"
+            )
+            logger.warning("创建报告失败：项目未打开")
+            return {"success": False, "message": "项目未打开"}
+
+        if not hasattr(self.view, '_nav_controller') or not self.view._nav_controller:
+            logger.warning("Navigation controller not available")
+            return {"success": False, "message": "Navigation controller not available"}
+
+        try:
+            # 配置并切换到报告向导页面
+            report_wizard_page = self.view._nav_controller.get_page_by_page_id("report.create")
+            if report_wizard_page:
+                # 设置项目上下文和 Matrix 控制器
+                if hasattr(report_wizard_page, 'set_project_context'):
+                    report_wizard_page.set_project_context(self.project_context)
+                if hasattr(report_wizard_page, 'set_matrix_controller'):
+                    report_wizard_page.set_matrix_controller(self.get_matrix_controller())
+
+                # 切换到报告向导页面
+                for idx, registered_entry in enumerate(self.view._nav_controller._entries):
+                    if registered_entry.page_id == "report.create":
+                        self.view._nav_controller.select_entry(idx)
+                        break
+                return {"success": True}
+            else:
+                logger.warning("Report wizard page not found in navigation")
+                return {"success": False, "message": "报告向导页面未找到"}
+        except Exception as e:
+            logger.error(f"MainWindowController: Failed to switch to report wizard page: {e}")
+            return {"success": False, "message": str(e)}
 
 
     def handle_open_file(self, file_path: str) -> bool:

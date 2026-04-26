@@ -597,16 +597,14 @@ MainWindow
 
 全项目的重构执行主文档默认是：
 
-- `docs/tasks/project_refactor_execution_guide.md`
+- `docs/REFACTOR_GUIDE.md`
 
 凡涉及以下内容，默认应先参照该文档执行：
 
 - 整体重构顺序
-- Office 双引擎治理
-- 模块边界调整
-- 项目会话收口
-- Matrix / MainWindow 边界恢复
-- Report Updater / Project Creator 等大模块瘦身
+- UI 现代化（U1-U4）
+- 局部大文件收口（B 线）
+- 按需专题（C 线）
 
 ### 19.2 AGENTS 与执行文档的分工
 
@@ -618,16 +616,20 @@ MainWindow
   - 写禁止事项
   - 写默认决策
 
-- `docs/tasks/project_refactor_execution_guide.md`
+- `docs/REFACTOR_GUIDE.md`
   - 写阶段步骤
   - 写迁移顺序
   - 写优先级
   - 写每阶段验收标准
+  - 写当前活跃任务（§三）
 
 - `docs/refactor_task_board.md`
   - 写当前任务状态
   - 写阻塞点
   - 写下一步执行项
+
+- `docs/architecture/refactor_baseline.md`
+  - 写当前架构现状与量化评分
 
 ### 19.3 结构性改动的文档同步规则
 
@@ -642,40 +644,47 @@ MainWindow
 
 默认需要检查：
 
-- `docs/tasks/project_refactor_execution_guide.md`
-- `docs/refactor_baseline.md`
+- `docs/REFACTOR_GUIDE.md`
 - `docs/refactor_task_board.md`
+- `docs/architecture/refactor_baseline.md`
 
 ### 19.4 默认执行主线
 
 如果用户没有指定更具体的下一步，默认按以下主线推进：
 
-1. 文档基线与任务板归一
-2. 项目会话入口收口
-3. Matrix Session Facade 防越界预拆分（允许与第 2 步并行）
-4. Office 基础设施骨架落地
-5. Matrix 导出接入新 Office 管理层
-6. Report Updater 接入新 Office 管理层
-7. Matrix Workspace / Session 边界二次拆分的剩余部分
-8. Project Creator 控制器瘦身
-9. Config / Path 策略统一
-10. 仓库残留清理
+> **已越过以下早期主线（Phase 0-10 已完成）**：
+> 1. ~~文档基线与任务板归一~~ ✅
+> 2. ~~项目会话入口收口~~ ✅
+> 3. ~~Matrix Session Facade 防越界预拆分~~ ✅
+> 4. ~~Office 基础设施骨架落地~~ ✅
+> 5. ~~Matrix 导出接入新 Office 管理层~~ ✅
+> 6. ~~Report Updater 接入新 Office 管理层~~ ✅
+> 7. ~~Matrix Workspace / Session 边界二次拆分的剩余部分~~ ✅
+> 8. ~~Project Creator 控制器瘦身~~ ✅
+> 9. ~~Config / Path 策略统一~~ ✅
+> 10. ~~仓库残留清理~~ ✅
+
+**当前活跃主线（A/B/C 三线并行）**：
+
+- A 线：UI 现代化（U1-U4）
+- B 线：局部大文件收口（>500 行文件）
+- C 线：按需专题（Notification 替换、深色模式等）
 
 ### 19.4.1 文档参考顺序
 
 如果要基于重构文档继续执行，默认按以下顺序参考：
 
 1. `AGENTS.md`
-2. `docs/refactor_task_board.md`
-3. `docs/refactor_baseline.md`
-4. `docs/tasks/project_refactor_execution_guide.md`
+2. `docs/REFACTOR_GUIDE.md`（核心执行参考，含路线图）
+3. `docs/refactor_task_board.md`
+4. `docs/architecture/refactor_baseline.md`
 
 默认含义：
 
 - `AGENTS.md` 提供稳定规则和禁止事项
+- `docs/REFACTOR_GUIDE.md` 提供当前阶段任务、优先级、路线图
 - `docs/refactor_task_board.md` 提供当前活跃任务与阶段编号
-- `docs/refactor_baseline.md` 提供当前架构现状基线
-- `docs/tasks/project_refactor_execution_guide.md` 提供具体执行步骤和验收标准
+- `docs/architecture/refactor_baseline.md` 提供当前架构现状基线
 
 ### 19.5 不应出现的执行错误
 

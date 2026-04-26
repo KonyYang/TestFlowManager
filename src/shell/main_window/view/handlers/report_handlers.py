@@ -16,34 +16,14 @@ class ReportActionHandlers:
         self._main_window = main_window
 
     def on_create_report(self) -> None:
-        """创建报告"""
-        logger.info(
-            f"MainWindow._on_create_report - "
-            f"controller.project_context={self._main_window.controller.project_context is not None}"
-        )
-
-        # 检查是否已打开项目
-        if not self._main_window.controller.project_context:
-            QMessageBox.warning(
-                self._main_window,
-                "警告",
-                "请先打开一个项目后再创建报告。\n\n操作步骤：\n1. 点击'文件' -> '打开项目'\n2. 选择项目文件夹\n3. 然后再尝试创建报告"
-            )
-            logger.warning("创建报告失败：项目未打开")
-            return
-
-        if self._main_window.controller.project_context:
-            logger.info(
-                f"MainWindow._on_create_report - "
-                f"project_context.project_path={self._main_window.controller.project_context.project_path}"
-            )
+        """创建报告（切换到报告向导页面）"""
         logger.debug("Create report action triggered")
 
-        self._main_window._feature_registry.run_create_report(
-            self._main_window.controller.project_context,
-            self._main_window.controller.get_matrix_controller(),
-        )
-        self._update_status()
+        # 使用内嵌页面模式
+        result = self._main_window.controller.handle_create_report()
+        if result and result.get("success"):
+            self._update_status()
+        # 错误消息已在 handle_create_report 中显示
 
     def on_update_report(self) -> None:
         """更新报告"""

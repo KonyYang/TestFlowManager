@@ -455,7 +455,16 @@ class LTRBaseService:
             for i, field_name in enumerate(field_names):
                 column_index = 5 + i  # E列索引为5
                 value = modified_data.get(field_name, "")
-                worksheet.Cells(row, column_index).Value = value
+                cell = worksheet.Cells(row, column_index)
+                cell.Value = value
+                # 清除字体格式（避免红色字体和删除线）
+                try:
+                    cell.Font.ColorIndex = 1  # 黑色
+                    cell.Font.Strikethrough = False  # 无删除线
+                    cell.Font.Bold = False  # 非粗体
+                    cell.Font.Italic = False  # 非斜体
+                except Exception as e:
+                    logger.debug(f"清除单元格格式时出错: {e}")
 
             return True
 

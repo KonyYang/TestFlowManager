@@ -29,14 +29,12 @@ class ReportUpdaterDialog(LimsDialogBase):
             parent: 父窗口
             selected_report: 已选择的报告文件路径
         """
-        super().__init__(parent)
+        window_title = f"报告更新 - {os.path.basename(selected_report) if selected_report else '未选择报告'}"
+        super().__init__(title=window_title, parent=parent)
         self.data_model = data_model
         self.parent = parent
         self.selected_report = selected_report  # 已选择的报告文件
         
-        # 设置窗口属性，将选中的文件名显示在标题中
-        window_title = f"报告更新 - {os.path.basename(self.selected_report) if self.selected_report else '未选择报告'}"
-        self.setWindowTitle(window_title)
         self.setMinimumSize(500, 350)
         self.resize(800, 400)
         

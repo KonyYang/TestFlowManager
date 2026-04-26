@@ -491,12 +491,26 @@ class LTRNumberGenerator:
             raise RuntimeError("未指定有效的工作表")
 
         # 写入DL编号到D列
-        target_worksheet.Cells(row, 4).Value = ltr_number
+        cell_dl = target_worksheet.Cells(row, 4)
+        cell_dl.Value = ltr_number
+        # 清除字体格式
+        try:
+            cell_dl.Font.ColorIndex = 1  # 黑色
+            cell_dl.Font.Strikethrough = False
+        except Exception as e:
+            logger.debug(f"清除单元格格式时出错: {e}")
 
         # 写入其他数据列
         if data_columns:
             for i, value in enumerate(data_columns):
-                target_worksheet.Cells(row, 5 + i).Value = value  # 从E列开始
+                cell = target_worksheet.Cells(row, 5 + i)  # 从E列开始
+                cell.Value = value
+                # 清除字体格式
+                try:
+                    cell.Font.ColorIndex = 1  # 黑色
+                    cell.Font.Strikethrough = False
+                except Exception as e:
+                    logger.debug(f"清除单元格格式时出错: {e}")
 
     def _save_and_close(self):
         """保存并关闭工作簿"""

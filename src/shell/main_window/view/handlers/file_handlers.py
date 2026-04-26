@@ -35,7 +35,22 @@ class FileActionHandlers:
     def on_view_ltr(self) -> None:
         """查看LTR"""
         logger.debug("View LTR action triggered")
-        if self._main_window.controller.handle_view_ltr():
+        result = self._main_window.controller.handle_view_ltr()
+        if result and result.get("success"):
+            self._update_status()
+
+    def on_edit_ltr(self) -> None:
+        """编辑LTR"""
+        logger.debug("Edit LTR action triggered")
+        result = self._main_window.controller.handle_edit_ltr()
+        if result and result.get("success"):
+            self._update_status()
+
+    def on_edit_project_info(self) -> None:
+        """编辑项目信息"""
+        logger.debug("Edit project info action triggered")
+        result = self._main_window.controller.handle_edit_project_info()
+        if result and result.get("success"):
             self._update_status()
 
     def on_about(self) -> None:

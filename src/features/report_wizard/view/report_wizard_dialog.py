@@ -31,8 +31,7 @@ class ReportWizardDialog(LimsDialogBase):
         matrix_controller=None,
         create_report_callback=None,
     ):
-        super().__init__(parent)
-        self.setWindowTitle("报告生成向导")
+        super().__init__(title="报告生成向导", parent=parent)
         self.setGeometry(200, 200, 800, 600)
 
         self.current_page_index = 0
@@ -64,6 +63,7 @@ class ReportWizardDialog(LimsDialogBase):
         self.next_button.clicked.connect(self.go_to_next_page)
 
         self.cancel_button = QPushButton("取消")
+        self.cancel_button.setObjectName("btn_secondary")
         self.cancel_button.clicked.connect(self.reject)
 
         button_layout.addWidget(self.next_button)

@@ -441,6 +441,8 @@ class MainWindow(QMainWindow):
             report_handlers=self._report_handlers,
             tool_handlers=self._tool_handlers,
             placeholder_factory=PageFactory.create_placeholder_page,
+            ltr_page_factory=PageFactory.create_ltr_application_page,
+            ltr_editor_page_factory=PageFactory.create_ltr_editor_page,
         )
 
     def _on_page_visible(self, page_id: str) -> None:

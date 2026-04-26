@@ -136,7 +136,7 @@ class HeaderComponents:
         layout.addWidget(left_widget)
 
         # 中间面包屑
-        self.main_window._breadcrumb_label = QLabel("📁 项目管理 / Matrix 编辑器")
+        self.main_window._breadcrumb_label = QLabel("项目管理 / Matrix 编辑器")
         self.main_window._breadcrumb_label.setObjectName("LimsBreadcrumbLabel")
         self.main_window._breadcrumb_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.main_window._breadcrumb_label, 1)
@@ -151,16 +151,22 @@ class HeaderComponents:
         # 快捷按钮：最大化/还原
         self.main_window._maximize_btn = TitleBarButton("□")
         self.main_window._maximize_btn.setToolTip("最大化窗口")
+        self.main_window._maximize_btn.setAccessibleName("最大化按钮")
+        self.main_window._maximize_btn.setAccessibleDescription("双击顶栏或点击此按钮可最大化/还原窗口")
         self.main_window._maximize_btn.clicked.connect(lambda: QTimer.singleShot(0, self.main_window._toggle_maximize))
 
         # 快捷按钮：关闭（hover 时红色背景）
         close_btn = TitleBarButton("✕", hover_bg="rgba(232, 17, 35, 0.9)")
         close_btn.setToolTip("关闭应用")
+        close_btn.setAccessibleName("关闭按钮")
+        close_btn.setAccessibleDescription("点击关闭 TestFlow Manager 主窗口")
         close_btn.clicked.connect(self.main_window.close)
 
         # 右侧快捷操作区（─ □ ✕）
         minimize_btn = TitleBarButton("─")
         minimize_btn.setToolTip("最小化窗口")
+        minimize_btn.setAccessibleName("最小化按钮")
+        minimize_btn.setAccessibleDescription("点击最小化窗口到任务栏")
         minimize_btn.clicked.connect(lambda: QTimer.singleShot(0, self.main_window.showMinimized))
         actions_layout.addWidget(minimize_btn)
         actions_layout.addWidget(self.main_window._maximize_btn)

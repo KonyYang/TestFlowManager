@@ -250,3 +250,31 @@ class NavigationManager:
             if entry_index >= 0:
                 return self._entries[entry_index]
         return None
+
+    def get_entry_by_page_id(self, page_id: str) -> Optional[NavigationEntry]:
+        """
+        根据 page_id 获取导航条目
+
+        Args:
+            page_id: 页面标识符
+
+        Returns:
+            匹配的导航条目，如果没有找到则返回 None
+        """
+        for entry in self._entries:
+            if entry.page_id == page_id:
+                return entry
+        return None
+
+    def get_page_by_page_id(self, page_id: str) -> Optional[QWidget]:
+        """
+        根据 page_id 获取页面组件
+
+        Args:
+            page_id: 页面标识符
+
+        Returns:
+            页面组件，如果没有找到则返回 None
+        """
+        entry = self.get_entry_by_page_id(page_id)
+        return entry.page if entry else None

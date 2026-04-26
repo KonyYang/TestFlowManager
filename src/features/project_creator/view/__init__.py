@@ -4,5 +4,6 @@
 """
 
 from .project_info_dialog import ProjectInfoDialog
+from .project_info_page import ProjectInfoPage
 
-__all__ = ['ProjectInfoDialog']
+__all__ = ['ProjectInfoDialog', 'ProjectInfoPage']

@@ -1,6 +1,10 @@
 """
 LTR申请单对话框模块
 提供一个对话框用于显示和编辑LTR申请单信息
+
+向后兼容：
+- 保留原有的对话框形式，内部委托到 LTRApplicationPage
+- LTRApplicationPage 可用于内嵌页面模式（NavigationManager）
 """
 
 import logging
@@ -17,6 +21,7 @@ from src.features.ltr_manager.service.ltr_application_service import LTRApplicat
 from src.features.ltr_manager.utils.field_config_loader import LTRFieldConfigLoader
 from src.features.ltr_manager.widgets import EnglishDateEdit, convert_to_english_format, MONTH_ABBREVIATIONS
 from src.features.ltr_manager.view import LTRFormDialogBase
+from src.features.ltr_manager.view.ltr_application_page import LTRApplicationPage
 from src.core.event_dispatcher import event_dispatcher
 from src.common.ui.window_utils import WindowUtils
 
@@ -25,9 +30,14 @@ logger = logging.getLogger(__name__)
 
 
 class LTRApplicationDialog(LTRFormDialogBase):
-    """LTRApplicationDialog
+    """
+    LTRApplicationDialog
     LTR申请单对话框类
     用于显示和编辑LTR申请单信息
+
+    向后兼容：
+    - 保留原有的对话框形式
+    - 内部委托到 LTRApplicationPage 实现
     """
 
     def __init__(self, application_data, parent=None, parent_controller=None, temp_folder_path: Optional[str] = None, extracted_word_data: Optional[Dict[str, Any]] = None):
@@ -56,13 +66,16 @@ class LTRApplicationDialog(LTRFormDialogBase):
         # 初始化服务层和控制器
         self.service = LTRApplicationService()
         self.controller = parent_controller
-        
+
         # 初始化版本标签
         self.version_label = None
 
+        # 页面组件（用于委托）
+        self._page: Optional[LTRApplicationPage] = None
+
         # 调用基类构造函数
         super().__init__(f"LTR申请单: {self.dl_number}" if self.dl_number else "新LTR申请单", self.data_model.to_dict(), parent)
-        
+
         # 添加版本标签
         self._add_version_label()
 
@@ -71,7 +84,7 @@ class LTRApplicationDialog(LTRFormDialogBase):
         # 设置版本信息
         version = self.data_model.to_dict().get("version", "N/A")
         self.version_label = QLabel(f"Application Version: {version}")
-        
+
         # 将版本标签添加到布局的顶部
         layout = self.layout()
         if isinstance(layout, QVBoxLayout):
@@ -96,7 +109,7 @@ class LTRApplicationDialog(LTRFormDialogBase):
                     if field['key'] == key:
                         item = field
                         break
-                        
+
                 if item and item.get('editor_type') == 'multiline':
                     # 仅在需要显示到multiline编辑器时才换行，不影响原始数据
                     data[key] = data[key].replace(';', '\n')
@@ -148,7 +161,7 @@ class LTRApplicationDialog(LTRFormDialogBase):
         else:
             logger.debug("No controller found, closing dialog directly")
             super().accept()
-            
+
     def _delayed_accept(self):
         """延迟接受对话框，确保所有操作完成"""
         logger.debug("_delayed_accept called")
@@ -160,7 +173,7 @@ class LTRApplicationDialog(LTRFormDialogBase):
                 excel_utils.release_excel_app()
             except:
                 pass
-                
+
             # 调用父类的accept方法
             logger.debug("Calling super().accept()")
             super().accept()

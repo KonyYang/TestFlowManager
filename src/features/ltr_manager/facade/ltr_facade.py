@@ -70,7 +70,7 @@ class LTRFacade:
             logger.debug("LTRFacade: LTR controllers initialized")
         return self._ltr_controller, self._ltr_editor_controller
 
-    def handle_view_ltr(self, parent_view: "QWidget") -> bool:
+    def handle_view_ltr(self, parent_view: "QWidget") -> dict:
         """
         处理查看 LTR 文件事件。
 
@@ -83,7 +83,9 @@ class LTRFacade:
             parent_view: 父窗口视图
 
         Returns:
-            是否成功处理 LTR 文件
+            包含处理结果的字典:
+            - success: 是否成功处理
+            - ltr_data: 如果查找到了 LTR 数据，这是包含 dl_number 和 data 的字典（可选）
         """
         try:
             logger.debug("LTRFacade: Handling view LTR file request")
@@ -104,12 +106,13 @@ class LTRFacade:
 
             # 如果用户输入了 DL 编号，则先验证并处理 DL 编号查询逻辑
             if dl_number:
-                return self._handle_dl_number_query(
+                result = self._handle_dl_number_query(
                     ltr_controller, ltr_editor_controller, dl_number, parent_view
                 )
+                return result
             else:
                 # 用户选择跳过，执行默认的 LTR 查看逻辑
-                return self._handle_default_ltr_view(ltr_controller)
+                return {"success": self._handle_default_ltr_view(ltr_controller), "ltr_data": None}
 
         except Exception as e:
             logger.error(f"LTRFacade: Failed to handle view LTR request: {e}")
@@ -122,7 +125,7 @@ class LTRFacade:
         ltr_editor_controller: LTREditorController,
         dl_number: str,
         parent_view: "QWidget",
-    ) -> bool:
+    ) -> dict:
         """
         处理 DL 编号查询流程。
 
@@ -133,7 +136,9 @@ class LTRFacade:
             parent_view: 父窗口视图
 
         Returns:
-            是否成功
+            包含处理结果的字典:
+            - success: 是否成功
+            - ltr_data: LTR 数据字典（如果找到）
         """
         # 调用 LTR 控制器处理 DL 编号查询
         result = ltr_controller.handle_view_dl_number(dl_number)
@@ -157,7 +162,7 @@ class LTRFacade:
 
             self._update_status(f"已定位到 DL 编号: {dl_number}")
             logger.info(f"LTRFacade: Successfully found and positioned to DL number: {dl_number}")
-            return True
+            return {"success": True, "ltr_data": ltr_data}
         else:
             # 查询失败
             self._handle_dl_number_not_found(

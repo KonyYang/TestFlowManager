@@ -13,6 +13,7 @@ from PyQt5.QtCore import Qt, QDate
 from PyQt5.QtWidgets import QDesktopWidget
 
 from src.common.ui.window_utils import WindowUtils
+from src.shell.main_window.view.lims_dialog_base import LimsDialogBase
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ class LTRFormDialogBase(LimsDialogBase):
             data: 包含数据的字典
             parent: 父窗口
         """
-        super().__init__(parent)
+        super().__init__(title=title, parent=parent)
         self.parent_window = parent
         self.data = data
 
@@ -104,6 +105,7 @@ class LTRFormDialogBase(LimsDialogBase):
 
         self.ok_button = QPushButton("确认")
         self.cancel_button = QPushButton("取消")
+        self.cancel_button.setObjectName("btn_secondary")
 
         self.ok_button.clicked.connect(self.accept)
         self.cancel_button.clicked.connect(self.reject)

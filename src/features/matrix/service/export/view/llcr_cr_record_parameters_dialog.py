@@ -85,6 +85,7 @@ class LLCR_CR_RecordParametersDialog(QDialog):
         button_layout.setAlignment(Qt.AlignRight)  # 按钮右对齐
         self.ok_button = QPushButton("确定")
         self.cancel_button = QPushButton("取消")
+        self.cancel_button.setObjectName("btn_secondary")
         self.ok_button.clicked.connect(self._on_ok_clicked)
         self.cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(self.ok_button)
